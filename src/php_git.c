@@ -202,6 +202,16 @@ PHP_MINIT_FUNCTION(git) {
 	return SUCCESS;
 }
 
+
+PHP_MINFO_FUNCTION(git)
+{
+	php_printf("PHP Git Extension\n");
+	php_info_print_table_start();
+	php_info_print_table_row(2,"Version", PHP_GIT_EXTVER " (development)");
+	php_info_print_table_row(2, "Authors", "Shuhei Tanuma 'stanuma@zynga.co.jp' (lead)\n");
+	php_info_print_table_end();
+}
+
 zend_module_entry git_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
@@ -212,7 +222,7 @@ zend_module_entry git_module_entry = {
 	NULL, 	/* MSHUTDOWN */
 	NULL, 	/* RINIT */
 	NULL,	/* RSHUTDOWN */
-	NULL,	/* MINFO */
+	PHP_MINFO(git),	/* MINFO */
 #if ZEND_MODULE_API_NO >= 20010901
 	PHP_GIT_EXTVER,
 #endif
