@@ -2,6 +2,11 @@
 
 PECL_Gitはlibgit2のPHP Bindingプロジェクトです
 
+# The Goals
+
+* PHPでlibgit2のバインディングを完成させること
+* PECL入させる
+
 # How to contribute this project?
 
 * First. you have to register our redmine project.
