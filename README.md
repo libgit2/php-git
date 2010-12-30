@@ -33,7 +33,7 @@ see PECL_Git Wiki: <https://github.com/chobie/PECL_Git/wiki>
 AUTHORS
 =======================================================
 
-* Shuhei Tanuma chobieee@gmail.com
+* Shuhei Tanuma <chobieee@gmail.com>
 
 LICENSE
 =======================================================
@@ -43,5 +43,5 @@ MIT Licence.
 Links
 =======================================================
 
-libgit2: <https://github.com/libgit2/libgit2>
-PECL_Git_Redmine: <http://redmine.chobie.co/projects/pecl-git>
+* libgit2: <https://github.com/libgit2/libgit2>
+* PECL_Git_Redmine: <http://redmine.chobie.co/projects/pecl-git>
