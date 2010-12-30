@@ -385,11 +385,92 @@ PHP_METHOD(git, __construct)
     zend_list_addref(ret);
 }
 
+
+//FIXME: とりあえず動かしてみただけ
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git, walker)
+{
+    zval *object = getThis();
+	git_repository *repository;
+    char * buf;
+    int buf_len = 0;
+    git_oid oid;
+    git_revwalk *walk;
+    git_commit *head, *commit;
+    char * msg;
+    git_signature *author;
+    
+	repository = php_get_git_repository( object TSRMLS_CC);
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	    "s", &buf, &buf_len) == FAILURE){
+		return;
+	}
+
+    git_oid_mkstr(&oid, buf);
+    int r = git_commit_lookup(&head, repository, &oid);
+    if(r != GIT_SUCCESS){
+        // FIXME
+        printf("commit not found\n");
+    }
+    
+    git_revwalk_new(&walk,repository);
+    git_revwalk_sorting(walk, GIT_SORT_TOPOLOGICAL);
+    git_revwalk_push(walk, head);
+    
+    while((commit = git_revwalk_next(walk)) != NULL){
+        msg = git_commit_message_short(commit);
+        author = git_commit_author(commit);
+        printf("%s (%s)\n", msg, author->email);
+    }
+    git_revwalk_free(walk);
+}
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_branch, 0, 0, 1)
+    ZEND_ARG_INFO(0, branch)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git, getBranch)
+{
+    zval *object = getThis();
+    zval *prop;
+	git_repository *repository;
+    char *branch;
+    char buf[255];
+    int branch_len = 0;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	        "s", &branch, &branch_len) == FAILURE){
+		return;
+	}
+
+	repository = php_get_git_repository( object TSRMLS_CC);
+    prop = zend_read_property(git_class_entry,object,"path",4,0 TSRMLS_DC);
+    char *uhi = Z_STRVAL_P(prop);
+    
+    //FIXME: 適当すぎる
+    FILE *fp;
+    sprintf(&buf,"%s/refs/heads/%s",uhi,branch);
+    fp = fopen(&buf,"r");
+    memset(buf,0,sizeof(buf));
+    fread(buf,1,40,fp);
+    fclose(fp);
+    
+    RETVAL_STRINGL(buf,40,1 TSRMLS_DC);
+}
+
+
 // Git
 PHPAPI function_entry php_git_methods[] = {
 	PHP_ME(git, __construct, arginfo_git_construct, ZEND_ACC_PUBLIC)
 	PHP_ME(git, getObject, arginfo_git_get_object, ZEND_ACC_PUBLIC)
     PHP_ME(git, getIndex, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git, getBranch, arginfo_git_get_branch, ZEND_ACC_PUBLIC)
+    PHP_ME(git, walker, arginfo_git_walker, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
