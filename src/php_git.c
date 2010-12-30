@@ -149,9 +149,9 @@ PHP_METHOD(git_index, __construct)
 /**
  * Classのエントリーポイント
  */
-static zend_class_entry *git_class_entry;
+PHPAPI zend_class_entry *git_class_entry;
 
-static function_entry php_git_methods[] = {
+PHPAPI function_entry php_git_methods[] = {
 	{NULL, NULL, NULL}
 };
 
@@ -177,9 +177,9 @@ static function_entry php_git_functions[] = {
 
 
 PHP_MINIT_FUNCTION(git) {
-  zend_class_entry git_ce;
-  INIT_CLASS_ENTRY(git_ce, "Git", php_git_methods);
-  git_class_entry = zend_register_internal_class(&git_ce TSRMLS_CC);
+	zend_class_entry git_ce;
+	INIT_CLASS_ENTRY(git_ce, "Git", php_git_methods);
+	git_class_entry = zend_register_internal_class(&git_ce TSRMLS_CC);
 
 /*
 まだはやいお
@@ -187,7 +187,19 @@ PHP_MINIT_FUNCTION(git) {
   INIT_CLASS_ENTRY(git_index_ce,"GitIndex",php_git_index_methods);
   git_index_class_entry = zend_register_internal_class(&git_index_ce TSRMLS_CC);
 */
-  return SUCCESS;
+	REGISTER_GIT_CONST_LONG("SORT_NONE", 0)
+	REGISTER_GIT_CONST_LONG("SORT_TOPO", 1)
+	REGISTER_GIT_CONST_LONG("SORT_DATE", 2)
+	REGISTER_GIT_CONST_LONG("SORT_REVERSE", 4)
+
+	REGISTER_GIT_CONST_LONG("OBJ_ANY", GIT_OBJ_ANY)
+	REGISTER_GIT_CONST_LONG("OBJ_BAD", GIT_OBJ_BAD)
+	REGISTER_GIT_CONST_LONG("OBJ_COMMIT", GIT_OBJ_COMMIT)
+	REGISTER_GIT_CONST_LONG("OBJ_TREE", GIT_OBJ_TREE)
+	REGISTER_GIT_CONST_LONG("OBJ_BLOB", GIT_OBJ_BLOB)
+	REGISTER_GIT_CONST_LONG("OBJ_TAG", GIT_OBJ_TAG)
+
+	return SUCCESS;
 }
 
 zend_module_entry git_module_entry = {
