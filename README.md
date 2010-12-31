@@ -25,6 +25,13 @@ Alpha development.
 
 you can check our milestone here : <http://redmine.chobie.co/projects/pecl-git/issues/gantt>
 
+DEPENDENCIES
+=======================================================
+
+* libgit2
+* php5
+* pcre
+
 INSTALL
 =======================================================
 
