@@ -30,7 +30,10 @@
 
 PHPAPI zend_class_entry *git_class_entry;
 PHPAPI zend_class_entry *git_index_class_entry;
-PHPAPI zend_object_handlers php_git_object_handlers;
+PHPAPI zend_class_entry *git_walker_class_entry;
+//Todo: そのうち
+//PHPAPI zend_object_handlers php_git_object_handlers;
+
 
 /**
  * Git Resource
@@ -42,8 +45,12 @@ static int le_git;
  */
 static int le_git_index;
 
-// Git index(ファイル分割するのを調べるの時間かかりそうだからとりあえず書くよ)
+/**
+ * GitWalker Resource
+ */
+static int le_git_walker;
 
+// Git index(ファイル分割するのを調べるの時間かかりそうだからとりあえず書くよ)
 static git_index *php_get_git_index(zval *obj TSRMLS_DC) {
     zval **tmp = NULL;
     git_index *index = NULL;
@@ -70,6 +77,19 @@ static git_repository *php_get_git_repository(zval *obj TSRMLS_DC) {
     return repository;
 }
 
+static git_revwalk *php_get_git_walker(zval *obj TSRMLS_DC) {
+    zval **tmp = NULL;
+    git_revwalk *walker= NULL;
+    int id = 0, type = 0;
+    if (zend_hash_find(Z_OBJPROP_P(obj), "walker", strlen("walker") + 1,(void **)&tmp) == FAILURE) {
+        return NULL;
+    }
+
+    id = Z_LVAL_PP(tmp);
+    walker = (git_revwalk *) zend_list_find(id, &type);
+    return walker;
+}
+
 static void free_git_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
     git_repository_free((git_repository *) resource->ptr);
@@ -80,6 +100,110 @@ static void free_git_index_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
     git_index_free((git_index *) resource->ptr);
 }
 
+static void free_git_walker_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
+{
+    git_revwalk_free((git_revwalk*) resource->ptr);
+}
+
+
+
+// Git Walker(ファイル分割するのを調べるの時間かかりそうだからとりあえず書くよ)
+
+PHP_METHOD(git_walker, __construct)
+{
+}
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_hide, 0, 0, 1)
+	ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git_walker, hide)
+{
+    char *hash;
+    int hash_len = 0;
+    git_revwalk *walker;
+    git_commit *commit;
+    git_repository *repository;
+    git_oid oid;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	    "s", &hash, &hash_len) == FAILURE){
+		return;
+	}
+
+    walker = php_get_git_walker(getThis() TSRMLS_DC);
+    repository = git_revwalk_repository(walker);
+    
+    git_oid_mkstr(&oid,hash);
+    git_commit_lookup(&commit,repository,&oid);
+
+    git_revwalk_hide(walker,commit);
+}
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_push, 0, 0, 1)
+	ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git_walker, push)
+{
+    char *hash;
+    int hash_len = 0;
+    git_oid oid;
+    git_commit *head;
+    git_revwalk *walker;
+    git_repository *repository;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	    "s", &hash, &hash_len) == FAILURE){
+		return;
+	}
+
+    walker = php_get_git_walker(getThis() TSRMLS_DC);
+    repository = git_revwalk_repository(walker);
+    
+    git_oid_mkstr(&oid,hash);
+    git_commit_lookup(&head,repository,&oid);
+    
+    git_revwalk_push(walker,head);
+}
+
+PHP_METHOD(git_walker, next)
+{
+    zval *git_commit_object;
+    char *hash;
+    int hash_len = 0;
+    char oid[GIT_OID_HEXSZ];
+    git_commit *commit;
+    git_revwalk *walker;
+    git_signature *signature;
+
+    walker = php_get_git_walker(getThis() TSRMLS_DC);
+    commit = git_revwalk_next(walker);
+    if(commit == NULL){
+        RETURN_FALSE;
+    }
+    /**
+     * git_signature
+     * (char*)->name
+     * (char*)->email
+     * (git_time)->when
+     */
+    signature = git_commit_author(commit);
+
+    //printf("commit:%s\n",signature->email);
+
+	MAKE_STD_ZVAL(git_commit_object);
+	object_init(git_commit_object);
+    git_oid_fmt(&oid,git_commit_id(commit));
+
+    add_property_string_ex(git_commit_object,"oid",4, &oid, 1 TSRMLS_DC);
+    add_property_string_ex(git_commit_object,"message",8, git_commit_message(commit), 1 TSRMLS_DC);
+    add_property_string_ex(git_commit_object,"message_short",14, git_commit_message_short(commit), 1 TSRMLS_DC);
+	//add_property_string_ex(git_commit_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
+    RETURN_ZVAL(git_commit_object,1,0);
+}
 
 // GitIndex implements Iterator
 PHP_METHOD(git_index, current)
@@ -503,8 +627,27 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker, 0, 0, 1)
     ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
 
-PHP_METHOD(git, walker)
+PHP_METHOD(git, getWalker)
 {
+    zval *object = getThis();
+	git_repository *repository;
+    git_index *index;
+    //FIXME: GitWalkerを呼びたいけどコレでいいの？
+    zval *walker_object = emalloc(sizeof(zval));
+    git_revwalk *walk;
+    int ret = 0;
+
+	repository = php_get_git_repository( object TSRMLS_CC);
+    object_init_ex(walker_object, git_walker_class_entry);
+
+    ret = git_revwalk_new(&walk,repository);
+
+    ret = zend_list_insert(walk, le_git_walker);
+    add_property_resource(walker_object, "walker", ret);
+
+    zend_list_addref(ret);
+    RETURN_ZVAL(walker_object,1,0);
+/*
     zval *object = getThis();
 	git_repository *repository;
     char * buf;
@@ -539,6 +682,7 @@ PHP_METHOD(git, walker)
         printf("%s (%s)\n", msg, author->email);
     }
     git_revwalk_free(walk);
+*/
 }
 
 
@@ -582,7 +726,7 @@ PHPAPI function_entry php_git_methods[] = {
 	PHP_ME(git, getObject, arginfo_git_get_object, ZEND_ACC_PUBLIC)
     PHP_ME(git, getIndex, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git, getBranch, arginfo_git_get_branch, ZEND_ACC_PUBLIC)
-    PHP_ME(git, walker, arginfo_git_walker, ZEND_ACC_PUBLIC)
+    PHP_ME(git, getWalker, arginfo_git_walker, ZEND_ACC_PUBLIC) // FIXME
 	{NULL, NULL, NULL}
 };
 
@@ -602,6 +746,15 @@ PHPAPI function_entry php_git_index_methods[] = {
     PHP_ME(git_index, rewind, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_index, valid, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
+};
+
+// GitWalker
+PHPAPI function_entry php_git_walker_methods[] = {
+    PHP_ME(git_walker, __construct, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, push, arginfo_git_walker_push, ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, next, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, hide, arginfo_git_walker_hide, ZEND_ACC_PUBLIC)
+    {NULL, NULL, NULL}
 };
 
 // Git Global Functions
@@ -624,11 +777,17 @@ PHP_MINIT_FUNCTION(git) {
 	git_index_class_entry = zend_register_internal_class(&git_index_ce TSRMLS_CC);
     zend_class_implements(git_index_class_entry TSRMLS_CC, 2, spl_ce_Countable, spl_ce_Iterator);
 
+
+    zend_class_entry git_walker_ce;
+    INIT_CLASS_ENTRY(git_walker_ce,"GitWalker",php_git_walker_methods);
+    git_walker_class_entry = zend_register_internal_class(&git_walker_ce TSRMLS_CC);
+    
 	/**
 	 * Resources
 	 */
 	le_git = zend_register_list_destructors_ex(free_git_resource, NULL, "Git", module_number);
 	le_git_index = zend_register_list_destructors_ex(free_git_index_resource, NULL, "GitIndex", module_number);
+    le_git_walker = zend_register_list_destructors_ex(free_git_walker_resource, NULL, "GitWalker", module_number);
 
 	/**
 	 * Git::Constants
