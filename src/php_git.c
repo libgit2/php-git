@@ -32,6 +32,8 @@ PHPAPI zend_class_entry *git_class_entry;
 PHPAPI zend_class_entry *git_index_class_entry;
 PHPAPI zend_class_entry *git_walker_class_entry;
 PHPAPI zend_class_entry *git_tree_class_entry;
+PHPAPI zend_class_entry *git_commit_class_entry;
+PHPAPI zend_class_entry *git_signature_class_entry;
 //Todo: そのうち
 //PHPAPI zend_object_handlers php_git_object_handlers;
 
@@ -714,6 +716,33 @@ PHP_METHOD(git, getBranch)
 }
 
 
+//GitSignature
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_signature__construct, 0, 0, 3)
+    ZEND_ARG_INFO(0, name)
+    ZEND_ARG_INFO(0, email)
+    ZEND_ARG_INFO(0, when)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git_signature, __construct)
+{
+    char *name;
+    int name_len = 0;
+    char *email;
+    int email_len = 0;
+    int time = 0;
+    
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	    "ssl", &name, &name_len, &email, &email_len, &time) == FAILURE){
+		return;
+	}
+
+	add_property_string_ex(getThis(),"name", 5, name, 1 TSRMLS_CC);
+	add_property_string_ex(getThis(),"email",6, email, 1 TSRMLS_CC);
+	add_property_long(getThis(),"time",time);
+}
+
+
+
 // Git
 PHPAPI function_entry php_git_methods[] = {
 	PHP_ME(git, __construct, arginfo_git_construct, ZEND_ACC_PUBLIC)
@@ -757,6 +786,14 @@ PHPAPI function_entry php_git_tree_methods[] = {
     {NULL, NULL, NULL}
 };
 
+PHPAPI function_entry php_git_commit_methods[] = {
+    {NULL, NULL, NULL}
+};
+PHPAPI function_entry php_git_signature_methods[] = {
+    PHP_ME(git_signature, __construct, arginfo_git_signature__construct, ZEND_ACC_PUBLIC)
+    {NULL, NULL, NULL}
+};
+
 
 
 // Git Global Functions
@@ -787,6 +824,14 @@ PHP_MINIT_FUNCTION(git) {
     zend_class_entry git_tree_ce;
     INIT_CLASS_ENTRY(git_tree_ce, "GitTree", php_git_tree_methods);
     git_tree_class_entry = zend_register_internal_class(&git_tree_ce TSRMLS_CC);
+
+    zend_class_entry git_commit_ce;
+    INIT_CLASS_ENTRY(git_commit_ce, "GitCommit", php_git_commit_methods);
+    git_commit_class_entry = zend_register_internal_class(&git_commit_ce TSRMLS_CC);
+
+    zend_class_entry git_signature_ce;
+    INIT_CLASS_ENTRY(git_signature_ce, "GitSignature", php_git_signature_methods);
+    git_signature_class_entry = zend_register_internal_class(&git_signature_ce TSRMLS_CC);
 
     /**
 	 * Resources
