@@ -23,6 +23,7 @@
  */
 
 #include "php_git.h"
+#include <spl/spl_array.h>
 #include <string.h>
 #include <time.h>
 
@@ -76,6 +77,18 @@ static void free_git_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 static void free_git_index_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
     git_index_free((git_index *) resource->ptr);
+}
+
+PHP_METHOD(git_index, count)
+{
+    git_index *index;
+    zval *entry_count;
+	index  = php_get_git_index( getThis() TSRMLS_CC);
+    entry_count = zend_read_property(git_index_class_entry,getThis(),"entry_count",11,0 TSRMLS_DC);
+
+    long *count = Z_LVAL_P(entry_count);
+
+    RETVAL_LONG(count);
 }
 
 
@@ -481,6 +494,8 @@ PHPAPI function_entry php_git_index_methods[] = {
 	PHP_ME(git_index, getEntry, arginfo_git_index_get_entry, ZEND_ACC_PUBLIC)
 	PHP_ME(git_index, refresh, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_index, find, arginfo_git_index_find, ZEND_ACC_PUBLIC)
+    // Countable
+    PHP_ME(git_index, count, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -502,6 +517,7 @@ PHP_MINIT_FUNCTION(git) {
 	zend_class_entry git_index_ce;
 	INIT_CLASS_ENTRY(git_index_ce,"GitIndex",php_git_index_methods);
 	git_index_class_entry = zend_register_internal_class(&git_index_ce TSRMLS_CC);
+    zend_class_implements(git_index_class_entry TSRMLS_CC, 1, spl_ce_Countable);
 
 	/**
 	 * Resources
