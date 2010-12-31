@@ -31,6 +31,7 @@
 PHPAPI zend_class_entry *git_class_entry;
 PHPAPI zend_class_entry *git_index_class_entry;
 PHPAPI zend_class_entry *git_walker_class_entry;
+PHPAPI zend_class_entry *git_tree_class_entry;
 //Todo: そのうち
 //PHPAPI zend_object_handlers php_git_object_handlers;
 
@@ -90,6 +91,7 @@ static git_revwalk *php_get_git_walker(zval *obj TSRMLS_DC) {
     return walker;
 }
 
+
 static void free_git_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
     git_repository_free((git_repository *) resource->ptr);
@@ -104,8 +106,6 @@ static void free_git_walker_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
     git_revwalk_free((git_revwalk*) resource->ptr);
 }
-
-
 
 // Git Walker(ファイル分割するのを調べるの時間かかりそうだからとりあえず書くよ)
 
@@ -621,8 +621,38 @@ PHP_METHOD(git, __construct)
     zend_list_addref(ret);
 }
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_tree, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
 
-//FIXME: とりあえず動かしてみただけ
+PHP_METHOD(git, getTree)
+{
+    zval *object = getThis();
+	git_repository *repository;
+    git_tree *tree;
+    git_oid oid;
+    char *hash;
+    int hash_len = 0;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	    "s", &hash, &hash_len) == FAILURE){
+		return;
+	}
+    git_oid_mkstr(&oid, hash);
+    
+	repository = php_get_git_repository( object TSRMLS_CC);
+    int ret = git_tree_lookup(&tree, repository, &oid);
+    if(ret != GIT_SUCCESS){
+        //FIXME
+        printf("not found");
+        RETURN_FALSE;
+    }
+    
+    printf("entry_count:%d\n",git_tree_entrycount(tree));
+}
+
+
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker, 0, 0, 1)
     ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
@@ -647,42 +677,6 @@ PHP_METHOD(git, getWalker)
 
     zend_list_addref(ret);
     RETURN_ZVAL(walker_object,1,0);
-/*
-    zval *object = getThis();
-	git_repository *repository;
-    char * buf;
-    int buf_len = 0;
-    git_oid oid;
-    git_revwalk *walk;
-    git_commit *head, *commit;
-    char * msg;
-    git_signature *author;
-    
-	repository = php_get_git_repository( object TSRMLS_CC);
-
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "s", &buf, &buf_len) == FAILURE){
-		return;
-	}
-
-    git_oid_mkstr(&oid, buf);
-    int r = git_commit_lookup(&head, repository, &oid);
-    if(r != GIT_SUCCESS){
-        // FIXME
-        printf("commit not found\n");
-    }
-    
-    git_revwalk_new(&walk,repository);
-    git_revwalk_sorting(walk, GIT_SORT_TOPOLOGICAL);
-    git_revwalk_push(walk, head);
-    
-    while((commit = git_revwalk_next(walk)) != NULL){
-        msg = git_commit_message_short(commit);
-        author = git_commit_author(commit);
-        printf("%s (%s)\n", msg, author->email);
-    }
-    git_revwalk_free(walk);
-*/
 }
 
 
@@ -727,6 +721,7 @@ PHPAPI function_entry php_git_methods[] = {
     PHP_ME(git, getIndex, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git, getBranch, arginfo_git_get_branch, ZEND_ACC_PUBLIC)
     PHP_ME(git, getWalker, arginfo_git_walker, ZEND_ACC_PUBLIC) // FIXME
+    PHP_ME(git, getTree, arginfo_git_get_tree, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -757,6 +752,13 @@ PHPAPI function_entry php_git_walker_methods[] = {
     {NULL, NULL, NULL}
 };
 
+PHPAPI function_entry php_git_tree_methods[] = {
+    PHP_ME(git_walker, __construct, NULL, ZEND_ACC_PUBLIC)
+    {NULL, NULL, NULL}
+};
+
+
+
 // Git Global Functions
 PHPAPI function_entry php_git_functions[] = {
 	PHP_FE(git_hex_to_raw, arginfo_git_index_construct)
@@ -782,7 +784,11 @@ PHP_MINIT_FUNCTION(git) {
     INIT_CLASS_ENTRY(git_walker_ce,"GitWalker",php_git_walker_methods);
     git_walker_class_entry = zend_register_internal_class(&git_walker_ce TSRMLS_CC);
     
-	/**
+    zend_class_entry git_tree_ce;
+    INIT_CLASS_ENTRY(git_tree_ce, "GitTree", php_git_tree_methods);
+    git_tree_class_entry = zend_register_internal_class(&git_tree_ce TSRMLS_CC);
+
+    /**
 	 * Resources
 	 */
 	le_git = zend_register_list_destructors_ex(free_git_resource, NULL, "Git", module_number);
