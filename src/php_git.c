@@ -38,6 +38,7 @@ PHPAPI zend_class_entry *git_signature_class_entry;
 //PHPAPI zend_object_handlers php_git_object_handlers;
 
 
+// Todo: Resouce使うのはやめたい（見栄え悪いから）
 /**
  * Git Resource
  */
@@ -52,6 +53,11 @@ static int le_git_index;
  * GitWalker Resource
  */
 static int le_git_walker;
+
+/**
+ * GitCommit Resource
+ */
+static int le_git_commit;
 
 // Git index(ファイル分割するのを調べるの時間かかりそうだからとりあえず書くよ)
 static git_index *php_get_git_index(zval *obj TSRMLS_DC) {
@@ -93,6 +99,18 @@ static git_revwalk *php_get_git_walker(zval *obj TSRMLS_DC) {
     return walker;
 }
 
+static git_commit *php_get_git_commit(zval *obj TSRMLS_DC) {
+    zval **tmp = NULL;
+    int id = 0, type = 0;
+    if (zend_hash_find(Z_OBJPROP_P(obj), "commit", strlen("commit") + 1,(void **)&tmp) == FAILURE) {
+        return NULL;
+    }
+
+    id = Z_LVAL_PP(tmp);
+    return (git_commit *) zend_list_find(id, &type);
+}
+
+
 
 static void free_git_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
@@ -108,6 +126,12 @@ static void free_git_walker_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
     git_revwalk_free((git_revwalk*) resource->ptr);
 }
+
+static void free_git_commit_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
+{
+    free((git_commit*) resource->ptr);
+}
+
 
 // Git Walker(ファイル分割するのを調べるの時間かかりそうだからとりあえず書くよ)
 
@@ -715,6 +739,71 @@ PHP_METHOD(git, getBranch)
     RETVAL_STRINGL(buf,40,1 TSRMLS_DC);
 }
 
+//GitCommit
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit__construct, 0, 0, 1)
+    ZEND_ARG_INFO(0, repository)
+ZEND_END_ARG_INFO()
+PHP_METHOD(git_commit, __construct)
+{
+    /*
+        $commit = new GitCommit($repo);
+        $repo->Commit();
+    */
+    zval *z_repository;
+    git_commit *commit;
+    git_repository *repository;
+    zval *object = getThis();
+    int ret;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	    "z", &z_repository) == FAILURE){
+		return;
+	}
+    repository = (git_repository *)php_get_git_repository(z_repository TSRMLS_DC);
+    git_repository_newobject(&commit, repository, GIT_OBJ_COMMIT);
+    object_init_ex(object, git_commit_class_entry);
+
+    ret = zend_list_insert(commit, le_git_commit);
+
+    add_property_resource(object, "commit", ret);
+    zend_list_addref(ret);
+}
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_author, 0, 0, 1)
+    ZEND_ARG_INFO(0, author)
+ZEND_END_ARG_INFO()
+PHP_METHOD(git_commit, setAuthor)
+{
+    zval *z_signature;
+    git_signature *signature;
+    git_repository *repository;
+    git_commit *commit;
+    zval *object = getThis();
+    int ret;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	    "z", &z_signature) == FAILURE){
+		return;
+	}
+
+    commit = php_get_git_commit(getThis() TSRMLS_CC);
+    signature = git_signature_new(
+        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"name",4, 0 TSRMLS_CC)),
+        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"email",5, 0 TSRMLS_CC)),
+        Z_LVAL_P(zend_read_property(git_signature_class_entry, z_signature,"time",4, 0 TSRMLS_CC)),
+        0
+    );
+    git_commit_set_author(commit, signature);
+    add_property_zval_ex(object,"author",7,z_signature);
+}
+
+PHP_METHOD(git_commit, getAuthor)
+{
+    zval *object = getThis();
+    zval *signature = zend_read_property(git_commit_class_entry, object,"author",6, 0 TSRMLS_CC);
+    RETURN_ZVAL(signature,0, 0);
+}
+
 
 //GitSignature
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_signature__construct, 0, 0, 3)
@@ -781,14 +870,21 @@ PHPAPI function_entry php_git_walker_methods[] = {
     {NULL, NULL, NULL}
 };
 
+// GitTree
 PHPAPI function_entry php_git_tree_methods[] = {
     PHP_ME(git_walker, __construct, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
+// GitCommit
 PHPAPI function_entry php_git_commit_methods[] = {
+    PHP_ME(git_commit, __construct,  arginfo_git_commit__construct, ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, setAuthor,  arginfo_git_commit_set_author, ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, getAuthor, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
+
+// GitSignature
 PHPAPI function_entry php_git_signature_methods[] = {
     PHP_ME(git_signature, __construct, arginfo_git_signature__construct, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
@@ -839,6 +935,7 @@ PHP_MINIT_FUNCTION(git) {
 	le_git = zend_register_list_destructors_ex(free_git_resource, NULL, "Git", module_number);
 	le_git_index = zend_register_list_destructors_ex(free_git_index_resource, NULL, "GitIndex", module_number);
     le_git_walker = zend_register_list_destructors_ex(free_git_walker_resource, NULL, "GitWalker", module_number);
+    le_git_commit = zend_register_list_destructors_ex(free_git_commit_resource, NULL, "GitCommit", module_number);
 
 	/**
 	 * Git::Constants
