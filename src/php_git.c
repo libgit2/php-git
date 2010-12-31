@@ -769,6 +769,42 @@ PHP_METHOD(git_commit, __construct)
     zend_list_addref(ret);
 }
 
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_commiter, 0, 0, 1)
+    ZEND_ARG_INFO(0, author)
+ZEND_END_ARG_INFO()
+PHP_METHOD(git_commit, setCommiter)
+{
+    zval *z_signature;
+    git_signature *signature;
+    git_repository *repository;
+    git_commit *commit;
+    zval *object = getThis();
+    int ret;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+	    "z", &z_signature) == FAILURE){
+		return;
+	}
+
+    commit = php_get_git_commit(getThis() TSRMLS_CC);
+    signature = git_signature_new(
+        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"name",4, 0 TSRMLS_CC)),
+        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"email",5, 0 TSRMLS_CC)),
+        Z_LVAL_P(zend_read_property(git_signature_class_entry, z_signature,"time",4, 0 TSRMLS_CC)),
+        0
+    );
+    git_commit_set_author(commit, signature);
+    add_property_zval_ex(object,"commiter",9,z_signature);
+}
+PHP_METHOD(git_commit, getCommiter)
+{
+    zval *object = getThis();
+    zval *signature = zend_read_property(git_commit_class_entry, object,"commiter",8, 0 TSRMLS_CC);
+    RETURN_ZVAL(signature,0, 0);
+}
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_author, 0, 0, 1)
     ZEND_ARG_INFO(0, author)
 ZEND_END_ARG_INFO()
@@ -881,6 +917,7 @@ PHPAPI function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, __construct,  arginfo_git_commit__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setAuthor,  arginfo_git_commit_set_author, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getAuthor, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, setCommiter,  arginfo_git_commit_set_commiter, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
