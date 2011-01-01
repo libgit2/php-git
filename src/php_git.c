@@ -28,52 +28,27 @@
 #include <string.h>
 #include <time.h>
 
-PHPAPI zend_class_entry *git_class_entry;
-PHPAPI zend_class_entry *git_index_class_entry;
-PHPAPI zend_class_entry *git_walker_class_entry;
-PHPAPI zend_class_entry *git_tree_class_entry;
-PHPAPI zend_class_entry *git_commit_class_entry;
-PHPAPI zend_class_entry *git_signature_class_entry;
 //Todo: そのうち
 //PHPAPI zend_object_handlers php_git_object_handlers;
 
 
-// Todo: Resouce使うのはやめたい（見栄え悪いから）
+// Todo: Resouce使うのはやめたい
 /**
  * Git Resource
  */
 static int le_git;
-	
-/**
- * GitIndex Resource
- */
-static int le_git_index;
+int le_git_walker;
+int le_git_commit;
+int le_git_index;
 
-/**
- * GitWalker Resource
- */
-static int le_git_walker;
 
-/**
- * GitCommit Resource
- */
-static int le_git_commit;
+git_index *php_get_git_index(zval *obj TSRMLS_DC);
+void free_git_index_resource(zend_rsrc_list_entry *resource TSRMLS_DC);
+void git_index_init(TSRMLS_D);
+git_revwalk *php_get_git_walker(zval *obj TSRMLS_DC);
 
-// Git index(ファイル分割するのを調べるの時間かかりそうだからとりあえず書くよ)
-static git_index *php_get_git_index(zval *obj TSRMLS_DC) {
-    zval **tmp = NULL;
-    git_index *index = NULL;
-    int id = 0, type = 0;
-    if (zend_hash_find(Z_OBJPROP_P(obj), "entries", strlen("entries") + 1,(void **)&tmp) == FAILURE) {
-        return NULL;
-    }
 
-    id = Z_LVAL_PP(tmp);
-    index = (git_index *) zend_list_find(id, &type);
-    return index;
-}
-
-static git_repository *php_get_git_repository(zval *obj TSRMLS_DC) {
+git_repository *php_get_git_repository(zval *obj TSRMLS_DC) {
     zval **tmp = NULL;
     git_repository *repository = NULL;
     int id = 0, type = 0;
@@ -86,40 +61,10 @@ static git_repository *php_get_git_repository(zval *obj TSRMLS_DC) {
     return repository;
 }
 
-static git_revwalk *php_get_git_walker(zval *obj TSRMLS_DC) {
-    zval **tmp = NULL;
-    git_revwalk *walker= NULL;
-    int id = 0, type = 0;
-    if (zend_hash_find(Z_OBJPROP_P(obj), "walker", strlen("walker") + 1,(void **)&tmp) == FAILURE) {
-        return NULL;
-    }
-
-    id = Z_LVAL_PP(tmp);
-    walker = (git_revwalk *) zend_list_find(id, &type);
-    return walker;
-}
-
-static git_commit *php_get_git_commit(zval *obj TSRMLS_DC) {
-    zval **tmp = NULL;
-    int id = 0, type = 0;
-    if (zend_hash_find(Z_OBJPROP_P(obj), "commit", strlen("commit") + 1,(void **)&tmp) == FAILURE) {
-        return NULL;
-    }
-
-    id = Z_LVAL_PP(tmp);
-    return (git_commit *) zend_list_find(id, &type);
-}
-
-
 
 static void free_git_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
     git_repository_free((git_repository *) resource->ptr);
-}
-
-static void free_git_index_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
-{
-    git_index_free((git_index *) resource->ptr);
 }
 
 static void free_git_walker_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
@@ -131,327 +76,6 @@ static void free_git_commit_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
     free((git_commit*) resource->ptr);
 }
-
-
-// Git Walker(ファイル分割するのを調べるの時間かかりそうだからとりあえず書くよ)
-
-PHP_METHOD(git_walker, __construct)
-{
-}
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_hide, 0, 0, 1)
-	ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
-
-PHP_METHOD(git_walker, hide)
-{
-    char *hash;
-    int hash_len = 0;
-    git_revwalk *walker;
-    git_commit *commit;
-    git_repository *repository;
-    git_oid oid;
-
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "s", &hash, &hash_len) == FAILURE){
-		return;
-	}
-
-    walker = php_get_git_walker(getThis() TSRMLS_DC);
-    repository = git_revwalk_repository(walker);
-    
-    git_oid_mkstr(&oid,hash);
-    git_commit_lookup(&commit,repository,&oid);
-
-    git_revwalk_hide(walker,commit);
-}
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_push, 0, 0, 1)
-	ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
-
-PHP_METHOD(git_walker, push)
-{
-    char *hash;
-    int hash_len = 0;
-    git_oid oid;
-    git_commit *head;
-    git_revwalk *walker;
-    git_repository *repository;
-
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "s", &hash, &hash_len) == FAILURE){
-		return;
-	}
-
-    walker = php_get_git_walker(getThis() TSRMLS_DC);
-    repository = git_revwalk_repository(walker);
-    
-    git_oid_mkstr(&oid,hash);
-    git_commit_lookup(&head,repository,&oid);
-    
-    git_revwalk_push(walker,head);
-}
-
-PHP_METHOD(git_walker, next)
-{
-    zval *git_commit_object;
-    char *hash;
-    int hash_len = 0;
-    char oid[GIT_OID_HEXSZ];
-    git_commit *commit;
-    git_revwalk *walker;
-    git_signature *signature;
-
-    walker = php_get_git_walker(getThis() TSRMLS_DC);
-    commit = git_revwalk_next(walker);
-    if(commit == NULL){
-        RETURN_FALSE;
-    }
-    /**
-     * git_signature
-     * (char*)->name
-     * (char*)->email
-     * (git_time)->when
-     */
-    signature = git_commit_author(commit);
-
-    //printf("commit:%s\n",signature->email);
-
-	MAKE_STD_ZVAL(git_commit_object);
-	object_init(git_commit_object);
-    git_oid_fmt(&oid,git_commit_id(commit));
-
-    add_property_string_ex(git_commit_object,"oid",4, &oid, 1 TSRMLS_DC);
-    add_property_string_ex(git_commit_object,"message",8, git_commit_message(commit), 1 TSRMLS_DC);
-    add_property_string_ex(git_commit_object,"message_short",14, git_commit_message_short(commit), 1 TSRMLS_DC);
-	//add_property_string_ex(git_commit_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
-    RETURN_ZVAL(git_commit_object,1,0);
-}
-
-// GitIndex implements Iterator
-PHP_METHOD(git_index, current)
-{
-    git_index *index;
-    zval *entry_count;
-	index  = php_get_git_index( getThis() TSRMLS_CC);
-    zval *offset;
-    //FIXME: ほぼGit::getIndexのコピペ。
-    long *z_offset;
-	git_index_entry *entry;
-	zval *git_index_entry;
-	char oid[GIT_OID_HEXSZ];
-
-    offset = zend_read_property(git_index_class_entry,getThis(),"offset",6,0 TSRMLS_DC);
-    z_offset = Z_LVAL_P(offset);
-	entry = git_index_get(index,z_offset);
-    if(entry == NULL){
-        return;
-    }
-
-    git_oid_fmt(oid,&entry->oid);
-	MAKE_STD_ZVAL(git_index_entry);
-	object_init(git_index_entry);
-
-	add_property_string_ex(git_index_entry,"path", 5, entry->path, 1 TSRMLS_CC);
-	add_property_string_ex(git_index_entry,"oid",4,oid, 1 TSRMLS_CC);
-	add_property_long(git_index_entry,"dev",entry->dev);
-	add_property_long(git_index_entry,"ino",entry->ino);
-	add_property_long(git_index_entry,"mode",entry->mode);
-	add_property_long(git_index_entry,"uid",entry->uid);
-	add_property_long(git_index_entry,"gid",entry->gid);
-	add_property_long(git_index_entry,"file_size",entry->file_size);
-	add_property_long(git_index_entry,"flags",entry->flags);
-	add_property_long(git_index_entry,"flags_extended",entry->flags_extended);
-	add_property_long(git_index_entry,"ctime",time(&entry->ctime.seconds));
-	add_property_long(git_index_entry,"mtime",time(&entry->mtime.seconds));
-	
-    RETURN_ZVAL(git_index_entry,1, 0);
-
-}
-
-PHP_METHOD(git_index, key)
-{
-    git_index *index;
-	git_index_entry *entry;
-    zval *entry_count;
-    zval *offset;
-
-	char oid[GIT_OID_HEXSZ];
-	index  = php_get_git_index( getThis() TSRMLS_CC);
-    offset = zend_read_property(git_index_class_entry,getThis(),"offset",6,0 TSRMLS_DC);
-	entry = git_index_get(index,Z_LVAL_P(offset));
-    if(entry == NULL){
-        return;
-    }
-    git_oid_fmt(oid,&entry->oid);
-    
-    RETVAL_STRINGL(&oid,GIT_OID_HEXSZ,1);
-}
-
-PHP_METHOD(git_index, next)
-{
-    zval *offset;
-    offset = zend_read_property(git_index_class_entry,getThis(),"offset",6,0 TSRMLS_DC);
-    zend_update_property_long(git_index_class_entry, getThis(), "offset",6, Z_LVAL_P(offset)+1 TSRMLS_DC);
-
-    RETURN_TRUE;
-}
-
-PHP_METHOD(git_index, rewind)
-{
-    add_property_long(getThis(), "offset", 0);
-}
-
-PHP_METHOD(git_index, valid)
-{
-    zval *entry_count;
-    zval *offset;
-    long *z_entry_count;
-    long *z_offset;
-
-    entry_count = zend_read_property(git_index_class_entry,getThis(),"entry_count",11,0 TSRMLS_DC);
-    offset = zend_read_property(git_index_class_entry,getThis(),"offset",6,0 TSRMLS_DC);
-    z_entry_count = Z_LVAL_P(entry_count);
-    z_offset = Z_LVAL_P(offset);
-    
-    if(z_offset < z_entry_count && z_offset >= 0){
-        RETURN_TRUE;
-    }else{
-        RETURN_FALSE;
-    }
-}
-
-
-// GitIndex implements Countable
-PHP_METHOD(git_index, count)
-{
-    git_index *index;
-    zval *entry_count;
-	index  = php_get_git_index( getThis() TSRMLS_CC);
-    entry_count = zend_read_property(git_index_class_entry,getThis(),"entry_count",11,0 TSRMLS_DC);
-
-    long *count = Z_LVAL_P(entry_count);
-
-    RETVAL_LONG(count);
-}
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_index_find, 0, 0, 1)
-	ZEND_ARG_INFO(0, path)
-ZEND_END_ARG_INFO()
-
-PHP_METHOD(git_index, find)
-{
-	int offset = 0;
-    char *path;
-    int path_len = 0;
-	git_index *index = NULL;
-
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "s", &path, &path_len) == FAILURE){
-		return;
-	}
-
-	index  = php_get_git_index( getThis() TSRMLS_CC);
-    offset = git_index_find(index,path);
-
-    if(offset >= 0){
-        RETURN_LONG(offset);
-    }
-}
-
-PHP_METHOD(git_index, refresh)
-{
-	git_index *index = NULL;
-	index = php_get_git_index( getThis() TSRMLS_CC);
-	git_index_read(index);
-}
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_index_get_entry, 0, 0, 1)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-PHP_METHOD(git_index, getEntry)
-{
-	int offset = 0;
-	git_index *index = NULL;
-	git_index_entry *entry;
-	zval *git_index_entry;
-	char oid[GIT_OID_HEXSZ];
-
-	index = php_get_git_index( getThis() TSRMLS_CC);
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-			"l", &offset) == FAILURE){
-		return;
-	}
-
-	entry = git_index_get(index,offset);
-
-    git_oid_fmt(oid,&entry->oid);
-
-	MAKE_STD_ZVAL(git_index_entry);
-	object_init(git_index_entry);
-
-	add_property_string_ex(git_index_entry,"path", 5, entry->path, 1 TSRMLS_CC);
-	add_property_string_ex(git_index_entry,"oid",4,oid, 1 TSRMLS_CC);
-	add_property_long(git_index_entry,"dev",entry->dev);
-	add_property_long(git_index_entry,"ino",entry->ino);
-	add_property_long(git_index_entry,"mode",entry->mode);
-	add_property_long(git_index_entry,"uid",entry->uid);
-	add_property_long(git_index_entry,"gid",entry->gid);
-	add_property_long(git_index_entry,"file_size",entry->file_size);
-	add_property_long(git_index_entry,"flags",entry->flags);
-	add_property_long(git_index_entry,"flags_extended",entry->flags_extended);
-	add_property_long(git_index_entry,"ctime",time(&entry->ctime.seconds));
-	add_property_long(git_index_entry,"mtime",time(&entry->mtime.seconds));
-	
-    RETURN_ZVAL(git_index_entry,1, 0);
-}
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_index_construct, 0, 0, 1)
-  ZEND_ARG_INFO(0, repository_path)
-ZEND_END_ARG_INFO()
-
-PHP_METHOD(git_index, __construct)
-{
-	const char *repository_path = NULL;
-	int ret = 0;
-	int arg_len = 0;
-	git_index *index;
-	zval *object = getThis();
-    object_init_ex(object, git_index_class_entry);
-
-	if(!object){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-			"Constructor called statically!");
-		RETURN_FALSE;
-	}
-
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-							"s", &repository_path, &arg_len) == FAILURE){
-		return;
-	}
-
-    ret = git_index_open_bare(&index,repository_path);
-    if(ret != GIT_SUCCESS){
-    	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git repository not found.");
-    	RETURN_FALSE;
-    }
-    git_index_read(index);
-
-    ret = zend_list_insert(index, le_git_index);
-
-    add_property_long(object, "offset", 0);
-    add_property_resource(object, "entries", ret);
-	add_property_string_ex(object, "path",5,repository_path, 1 TSRMLS_CC);
-	add_property_long(object, "entry_count",git_index_entrycount(index));
-    zend_list_addref(ret);
-}
-
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_string_to_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, string_type)
@@ -677,8 +301,6 @@ PHP_METHOD(git, getTree)
     printf("entry_count:%d\n",git_tree_entrycount(tree));
 }
 
-
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker, 0, 0, 1)
     ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
@@ -739,135 +361,6 @@ PHP_METHOD(git, getBranch)
     RETVAL_STRINGL(buf,40,1 TSRMLS_DC);
 }
 
-//GitCommit
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit__construct, 0, 0, 1)
-    ZEND_ARG_INFO(0, repository)
-ZEND_END_ARG_INFO()
-PHP_METHOD(git_commit, __construct)
-{
-    /*
-        $commit = new GitCommit($repo);
-        $repo->Commit();
-    */
-    zval *z_repository;
-    git_commit *commit;
-    git_repository *repository;
-    zval *object = getThis();
-    int ret;
-
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "z", &z_repository) == FAILURE){
-		return;
-	}
-    repository = (git_repository *)php_get_git_repository(z_repository TSRMLS_DC);
-    git_repository_newobject(&commit, repository, GIT_OBJ_COMMIT);
-    object_init_ex(object, git_commit_class_entry);
-
-    ret = zend_list_insert(commit, le_git_commit);
-
-    add_property_resource(object, "commit", ret);
-    zend_list_addref(ret);
-}
-
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_commiter, 0, 0, 1)
-    ZEND_ARG_INFO(0, author)
-ZEND_END_ARG_INFO()
-PHP_METHOD(git_commit, setCommiter)
-{
-    zval *z_signature;
-    git_signature *signature;
-    git_repository *repository;
-    git_commit *commit;
-    zval *object = getThis();
-    int ret;
-
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "z", &z_signature) == FAILURE){
-		return;
-	}
-
-    commit = php_get_git_commit(getThis() TSRMLS_CC);
-    signature = git_signature_new(
-        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"name",4, 0 TSRMLS_CC)),
-        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"email",5, 0 TSRMLS_CC)),
-        Z_LVAL_P(zend_read_property(git_signature_class_entry, z_signature,"time",4, 0 TSRMLS_CC)),
-        0
-    );
-    git_commit_set_author(commit, signature);
-    add_property_zval_ex(object,"commiter",9,z_signature);
-}
-PHP_METHOD(git_commit, getCommiter)
-{
-    zval *object = getThis();
-    zval *signature = zend_read_property(git_commit_class_entry, object,"commiter",8, 0 TSRMLS_CC);
-    RETURN_ZVAL(signature,0, 0);
-}
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_author, 0, 0, 1)
-    ZEND_ARG_INFO(0, author)
-ZEND_END_ARG_INFO()
-PHP_METHOD(git_commit, setAuthor)
-{
-    zval *z_signature;
-    git_signature *signature;
-    git_repository *repository;
-    git_commit *commit;
-    zval *object = getThis();
-    int ret;
-
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "z", &z_signature) == FAILURE){
-		return;
-	}
-
-    commit = php_get_git_commit(getThis() TSRMLS_CC);
-    signature = git_signature_new(
-        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"name",4, 0 TSRMLS_CC)),
-        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"email",5, 0 TSRMLS_CC)),
-        Z_LVAL_P(zend_read_property(git_signature_class_entry, z_signature,"time",4, 0 TSRMLS_CC)),
-        0
-    );
-    git_commit_set_author(commit, signature);
-    add_property_zval_ex(object,"author",7,z_signature);
-}
-
-PHP_METHOD(git_commit, getAuthor)
-{
-    zval *object = getThis();
-    zval *signature = zend_read_property(git_commit_class_entry, object,"author",6, 0 TSRMLS_CC);
-    RETURN_ZVAL(signature,0, 0);
-}
-
-
-//GitSignature
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_signature__construct, 0, 0, 3)
-    ZEND_ARG_INFO(0, name)
-    ZEND_ARG_INFO(0, email)
-    ZEND_ARG_INFO(0, when)
-ZEND_END_ARG_INFO()
-
-PHP_METHOD(git_signature, __construct)
-{
-    char *name;
-    int name_len = 0;
-    char *email;
-    int email_len = 0;
-    int time = 0;
-    
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "ssl", &name, &name_len, &email, &email_len, &time) == FAILURE){
-		return;
-	}
-
-	add_property_string_ex(getThis(),"name", 5, name, 1 TSRMLS_CC);
-	add_property_string_ex(getThis(),"email",6, email, 1 TSRMLS_CC);
-	add_property_long(getThis(),"time",time);
-}
-
-
-
 // Git
 PHPAPI function_entry php_git_methods[] = {
 	PHP_ME(git, __construct, arginfo_git_construct, ZEND_ACC_PUBLIC)
@@ -879,104 +372,21 @@ PHPAPI function_entry php_git_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-
-// GitIndex
-PHPAPI function_entry php_git_index_methods[] = {
-	PHP_ME(git_index, __construct, arginfo_git_index_construct, ZEND_ACC_PUBLIC)
-	PHP_ME(git_index, getEntry, arginfo_git_index_get_entry, ZEND_ACC_PUBLIC)
-	PHP_ME(git_index, refresh, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_index, find, arginfo_git_index_find, ZEND_ACC_PUBLIC)
-    // Countable
-    PHP_ME(git_index, count, NULL, ZEND_ACC_PUBLIC)
-    // Iterator
-    PHP_ME(git_index, current, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_index, key, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_index, next, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_index, rewind, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_index, valid, NULL, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
-};
-
-// GitWalker
-PHPAPI function_entry php_git_walker_methods[] = {
-    PHP_ME(git_walker, __construct, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_walker, push, arginfo_git_walker_push, ZEND_ACC_PUBLIC)
-    PHP_ME(git_walker, next, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_walker, hide, arginfo_git_walker_hide, ZEND_ACC_PUBLIC)
-    {NULL, NULL, NULL}
-};
-
-// GitTree
-PHPAPI function_entry php_git_tree_methods[] = {
-    PHP_ME(git_walker, __construct, NULL, ZEND_ACC_PUBLIC)
-    {NULL, NULL, NULL}
-};
-
-// GitCommit
-PHPAPI function_entry php_git_commit_methods[] = {
-    PHP_ME(git_commit, __construct,  arginfo_git_commit__construct, ZEND_ACC_PUBLIC)
-    PHP_ME(git_commit, setAuthor,  arginfo_git_commit_set_author, ZEND_ACC_PUBLIC)
-    PHP_ME(git_commit, getAuthor, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_commit, setCommiter,  arginfo_git_commit_set_commiter, ZEND_ACC_PUBLIC)
-    {NULL, NULL, NULL}
-};
-
-// GitSignature
-PHPAPI function_entry php_git_signature_methods[] = {
-    PHP_ME(git_signature, __construct, arginfo_git_signature__construct, ZEND_ACC_PUBLIC)
-    {NULL, NULL, NULL}
-};
-
-
-
 // Git Global Functions
 PHPAPI function_entry php_git_functions[] = {
-	PHP_FE(git_hex_to_raw, arginfo_git_index_construct)
+	PHP_FE(git_hex_to_raw, arginfo_git_hex_to_raw)
 	PHP_FE(git_raw_to_hex, arginfo_git_raw_to_hex)
 	PHP_FE(git_type_to_string, arginfo_git_type_to_string)
 	PHP_FE(git_string_to_type, arginfo_git_string_to_type)
 	{NULL, NULL, NULL}
 };
 
-
-PHP_MINIT_FUNCTION(git) {
+void git_init(TSRMLS_D)
+{
 	zend_class_entry git_ce;
 	INIT_CLASS_ENTRY(git_ce, "Git", php_git_methods);
 	git_class_entry = zend_register_internal_class(&git_ce TSRMLS_CC);
 
-	zend_class_entry git_index_ce;
-	INIT_CLASS_ENTRY(git_index_ce,"GitIndex",php_git_index_methods);
-	git_index_class_entry = zend_register_internal_class(&git_index_ce TSRMLS_CC);
-    zend_class_implements(git_index_class_entry TSRMLS_CC, 2, spl_ce_Countable, spl_ce_Iterator);
-
-
-    zend_class_entry git_walker_ce;
-    INIT_CLASS_ENTRY(git_walker_ce,"GitWalker",php_git_walker_methods);
-    git_walker_class_entry = zend_register_internal_class(&git_walker_ce TSRMLS_CC);
-    
-    zend_class_entry git_tree_ce;
-    INIT_CLASS_ENTRY(git_tree_ce, "GitTree", php_git_tree_methods);
-    git_tree_class_entry = zend_register_internal_class(&git_tree_ce TSRMLS_CC);
-
-    zend_class_entry git_commit_ce;
-    INIT_CLASS_ENTRY(git_commit_ce, "GitCommit", php_git_commit_methods);
-    git_commit_class_entry = zend_register_internal_class(&git_commit_ce TSRMLS_CC);
-
-    zend_class_entry git_signature_ce;
-    INIT_CLASS_ENTRY(git_signature_ce, "GitSignature", php_git_signature_methods);
-    git_signature_class_entry = zend_register_internal_class(&git_signature_ce TSRMLS_CC);
-
-    /**
-	 * Resources
-	 */
-	le_git = zend_register_list_destructors_ex(free_git_resource, NULL, "Git", module_number);
-	le_git_index = zend_register_list_destructors_ex(free_git_index_resource, NULL, "GitIndex", module_number);
-    le_git_walker = zend_register_list_destructors_ex(free_git_walker_resource, NULL, "GitWalker", module_number);
-    le_git_commit = zend_register_list_destructors_ex(free_git_commit_resource, NULL, "GitCommit", module_number);
-
-	/**
-	 * Git::Constants
-	 */
 	REGISTER_GIT_CONST_LONG("SORT_NONE", 0)
 	REGISTER_GIT_CONST_LONG("SORT_TOPO", 1)
 	REGISTER_GIT_CONST_LONG("SORT_DATE", 2)
@@ -988,6 +398,23 @@ PHP_MINIT_FUNCTION(git) {
 	REGISTER_GIT_CONST_LONG("OBJ_TREE", GIT_OBJ_TREE)
 	REGISTER_GIT_CONST_LONG("OBJ_BLOB", GIT_OBJ_BLOB)
 	REGISTER_GIT_CONST_LONG("OBJ_TAG", GIT_OBJ_TAG)
+}
+
+PHP_MINIT_FUNCTION(git) {
+    git_init(TSRMLS_C);
+    git_index_init(TSRMLS_C);
+    git_init_signature(TSRMLS_C);
+    git_init_walker(TSRMLS_C);
+    git_init_tree(TSRMLS_C);
+    git_init_commit(TSRMLS_C);
+
+    /**
+	 * Resources
+	 */
+	le_git = zend_register_list_destructors_ex(free_git_resource, NULL, "Git", module_number);
+    le_git_walker = zend_register_list_destructors_ex(free_git_walker_resource, NULL, "GitWalker", module_number);
+    le_git_commit = zend_register_list_destructors_ex(free_git_commit_resource, NULL, "GitCommit", module_number);
+	le_git_index = zend_register_list_destructors_ex(free_git_index_resource, NULL, "GitIndex", module_number);
 
 	return SUCCESS;
 }

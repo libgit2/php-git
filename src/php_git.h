@@ -24,9 +24,11 @@ extern zend_module_entry git_module_entry;
 		zend_declare_class_constant_long(*git_class_entry, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);	\
 }	\
 
-
-
-PHP_METHOD(git, __construct);
-PHP_METHOD(git, hello);
+PHPAPI zend_class_entry *git_class_entry;
+PHPAPI zend_class_entry *git_index_class_entry;
+PHPAPI zend_class_entry *git_walker_class_entry;
+PHPAPI zend_class_entry *git_tree_class_entry;
+PHPAPI zend_class_entry *git_commit_class_entry;
+PHPAPI zend_class_entry *git_signature_class_entry;
 
 #endif /* PHP_GIT_H */
