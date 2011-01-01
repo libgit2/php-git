@@ -84,6 +84,44 @@ static void free_git_tree_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 }
 
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 1)
+    ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO()
+PHP_METHOD(git, init)
+{
+    //FIXME: 実装したけど動いてないお。
+    git_repository *repository;
+    char *path = NULL;
+    int path_len = 0;
+    int ret;
+    zval *obj;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,"s",
+        &path, &path_len) == FAILURE){
+        return;
+    }
+
+    int suc = git_repository_init(&repository,path,0);
+
+    if(suc != 0){
+        //FIXME
+        php_printf("can't create repository\n");
+        return;
+    }
+    
+    ret = zend_list_insert(repository, le_git);
+    
+    MAKE_STD_ZVAL(obj);
+    object_init_ex(obj, git_class_entry);
+    add_property_resource(obj, "repository", ret);
+    add_property_string_ex(obj, "path",5,path, 1 TSRMLS_CC);
+    zend_list_addref(ret);
+
+    RETURN_ZVAL(obj, 1, 0);
+}
+
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_string_to_type, 0, 0, 1)
     ZEND_ARG_INFO(0, string_type)
 ZEND_END_ARG_INFO()
@@ -413,6 +451,7 @@ PHPAPI function_entry php_git_methods[] = {
     PHP_ME(git, getBranch, arginfo_git_get_branch, ZEND_ACC_PUBLIC)
     PHP_ME(git, getWalker, arginfo_git_walker, ZEND_ACC_PUBLIC) // FIXME
     PHP_ME(git, getTree, arginfo_git_get_tree, ZEND_ACC_PUBLIC)
+    PHP_ME(git, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     {NULL, NULL, NULL}
 };
 
