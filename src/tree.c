@@ -28,8 +28,20 @@
 #include <string.h>
 #include <time.h>
 
+PHP_METHOD(git_tree, count)
+{
+	long cnt = 0;
+    zval *entries;
+
+    entries = zend_read_property(git_tree_entry_class_entry,getThis(),"entries",7,0 TSRMLS_DC);
+	cnt = zend_hash_num_elements(Z_ARRVAL_P(entries));
+
+    RETURN_LONG(cnt);
+}
+
 // GitTree
 PHPAPI function_entry php_git_tree_methods[] = {
+    PHP_ME(git_tree, count, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
@@ -38,4 +50,5 @@ void git_init_tree(TSRMLS_D)
     zend_class_entry git_tree_ce;
     INIT_CLASS_ENTRY(git_tree_ce, "GitTree", php_git_tree_methods);
     git_tree_class_entry = zend_register_internal_class(&git_tree_ce TSRMLS_CC);
+    zend_class_implements(git_tree_class_entry TSRMLS_CC, 1, spl_ce_Countable);
 }

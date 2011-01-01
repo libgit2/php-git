@@ -51,8 +51,6 @@ git_index *php_get_git_index(zval *obj TSRMLS_DC) {
     return index;
 }
 
-
-
 // GitIndex implements Iterator
 PHP_METHOD(git_index, current)
 {

@@ -22,38 +22,21 @@
  * THE SOFTWARE.
  */
 
-#ifndef PHP_GIT_H
+#include "php_git.h"
+#include <spl/spl_array.h>
+#include <zend_interfaces.h>
+#include <string.h>
+#include <time.h>
 
-#define PHP_GIT_H
 
-#define PHP_GIT_EXTNAME "git"
-#define PHP_GIT_EXTVER "0.1"
+// GitTree
+PHPAPI function_entry php_git_tree_entry_methods[] = {
+    {NULL, NULL, NULL}
+};
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "php.h"
-#include <git2.h>
-
-/* Define the entry point symbol
- * Zend will use when loading this module
- */
-extern zend_module_entry git_module_entry;
-#define phpext_git_ptr &git_module_entry;
-
-#define REGISTER_GIT_CONST_LONG(const_name, value) { \
-    zend_class_entry **git_class_entry;	\
-    if (zend_hash_find(CG(class_table), "git", sizeof("git"), (void **) &git_class_entry) != FAILURE)	\
-        zend_declare_class_constant_long(*git_class_entry, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);	\
-}	\
-
-PHPAPI zend_class_entry *git_class_entry;
-PHPAPI zend_class_entry *git_index_class_entry;
-PHPAPI zend_class_entry *git_walker_class_entry;
-PHPAPI zend_class_entry *git_tree_class_entry;
-PHPAPI zend_class_entry *git_tree_entry_class_entry;
-PHPAPI zend_class_entry *git_commit_class_entry;
-PHPAPI zend_class_entry *git_signature_class_entry;
-
-#endif /* PHP_GIT_H */
+void git_init_tree_entry(TSRMLS_D)
+{
+    zend_class_entry git_tree_entry_ce;
+    INIT_CLASS_ENTRY(git_tree_entry_ce, "GitTreeEntry", php_git_tree_entry_methods);
+    git_tree_entry_class_entry = zend_register_internal_class(&git_tree_entry_ce TSRMLS_CC);
+}

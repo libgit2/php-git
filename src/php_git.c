@@ -40,7 +40,7 @@ static int le_git;
 int le_git_walker;
 int le_git_commit;
 int le_git_index;
-
+int le_git_tree;
 
 git_index *php_get_git_index(zval *obj TSRMLS_DC);
 void free_git_index_resource(zend_rsrc_list_entry *resource TSRMLS_DC);
@@ -76,6 +76,13 @@ static void free_git_commit_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
     free((git_commit*) resource->ptr);
 }
+
+static void free_git_tree_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
+{
+    //Fixme:Resourceで使い回せるようにとりあえず定義してるだけ。
+    //git_object_free((git_tree *) resource->ptr);
+}
+
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_string_to_type, 0, 0, 1)
     ZEND_ARG_INFO(0, string_type)
@@ -280,25 +287,62 @@ PHP_METHOD(git, getTree)
     zval *object = getThis();
     git_repository *repository;
     git_tree *tree;
-    git_oid oid;
+    zval *git_tree;
+    zval *entries;
+
+    git_oid *oid;
     char *hash;
     int hash_len = 0;
+    int ret = 0;
+    git_tree_entry *entry;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &hash, &hash_len) == FAILURE){
         return;
     }
+
     git_oid_mkstr(&oid, hash);
-    
     repository = php_get_git_repository( object TSRMLS_CC);
-    int ret = git_tree_lookup(&tree, repository, &oid);
+    ret = git_tree_lookup(&tree, repository, &oid);
     if(ret != GIT_SUCCESS){
         //FIXME
         printf("not found");
         RETURN_FALSE;
     }
     
-    printf("entry_count:%d\n",git_tree_entrycount(tree));
+    MAKE_STD_ZVAL(git_tree);
+    MAKE_STD_ZVAL(entries);
+    array_init(entries);
+    object_init_ex(git_tree, git_tree_class_entry);
+
+    int r = git_tree_entrycount(tree);
+    int i = 0;
+    char buf[40];
+    char *offset;
+    zval *array_ptr;
+
+    for(i; i < r; i++){
+        entry = git_tree_entry_byindex(tree,i);
+        oid = git_tree_entry_id(entry);
+        git_oid_fmt(buf,oid);
+
+        MAKE_STD_ZVAL(array_ptr);
+        object_init_ex(array_ptr, git_tree_entry_class_entry);
+
+        add_property_string(array_ptr, "name", git_tree_entry_name(entry), 1);
+        add_property_string(array_ptr, "oid", buf, 1);
+        add_property_long(array_ptr, "attr", git_tree_entry_attributes(entry));
+
+        add_next_index_zval(entries,  array_ptr);
+    }
+
+    ret = zend_list_insert(git_tree, le_git_tree);
+    add_property_resource(git_tree, "tree", ret);
+    //add_property_long(git_tree, "entry", git_tree_entrycount(tree));
+    add_property_zval(git_tree,"entries", entries);
+    zend_list_addref(ret);
+
+    RETURN_ZVAL(git_tree,1,0);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker, 0, 0, 1)
@@ -407,14 +451,17 @@ PHP_MINIT_FUNCTION(git) {
     git_init_walker(TSRMLS_C);
     git_init_tree(TSRMLS_C);
     git_init_commit(TSRMLS_C);
+    git_init_tree_entry(TSRMLS_C);
 
     /**
      * Resources
+     * とりまわしが分からないからとりあえずResourceにしてるだけ。変えたい
      */
     le_git = zend_register_list_destructors_ex(free_git_resource, NULL, "Git", module_number);
     le_git_walker = zend_register_list_destructors_ex(free_git_walker_resource, NULL, "GitWalker", module_number);
     le_git_commit = zend_register_list_destructors_ex(free_git_commit_resource, NULL, "GitCommit", module_number);
     le_git_index = zend_register_list_destructors_ex(free_git_index_resource, NULL, "GitIndex", module_number);
+    le_git_tree = zend_register_list_destructors_ex(free_git_tree_resource, NULL, "GitTree", module_number);
 
     return SUCCESS;
 }
