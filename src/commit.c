@@ -60,9 +60,9 @@ PHP_METHOD(git_commit, __construct)
     int ret;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "z", &z_repository) == FAILURE){
-		return;
-	}
+        "z", &z_repository) == FAILURE){
+        return;
+    }
     repository = (git_repository *)php_get_git_repository(z_repository TSRMLS_DC);
     git_repository_newobject(&commit, repository, GIT_OBJ_COMMIT);
     object_init_ex(object, git_commit_class_entry);
@@ -88,9 +88,9 @@ PHP_METHOD(git_commit, setCommiter)
     int ret;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "z", &z_signature) == FAILURE){
-		return;
-	}
+        "z", &z_signature) == FAILURE){
+        return;
+    }
 
     commit = php_get_git_commit(getThis() TSRMLS_CC);
     signature = git_signature_new(
@@ -122,9 +122,9 @@ PHP_METHOD(git_commit, setAuthor)
     int ret;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "z", &z_signature) == FAILURE){
-		return;
-	}
+        "z", &z_signature) == FAILURE){
+        return;
+    }
 
     commit = php_get_git_commit(getThis() TSRMLS_CC);
     signature = git_signature_new(

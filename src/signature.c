@@ -44,14 +44,14 @@ PHP_METHOD(git_signature, __construct)
     int email_len = 0;
     int time = 0;
     
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-	    "ssl", &name, &name_len, &email, &email_len, &time) == FAILURE){
-		return;
-	}
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "ssl", &name, &name_len, &email, &email_len, &time) == FAILURE){
+        return;
+    }
 
-	add_property_string_ex(getThis(),"name", 5, name, 1 TSRMLS_CC);
-	add_property_string_ex(getThis(),"email",6, email, 1 TSRMLS_CC);
-	add_property_long(getThis(),"time",time);
+    add_property_string_ex(getThis(),"name", 5, name, 1 TSRMLS_CC);
+    add_property_string_ex(getThis(),"email",6, email, 1 TSRMLS_CC);
+    add_property_long(getThis(),"time",time);
 }
 
 // GitSignature
