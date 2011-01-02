@@ -53,6 +53,7 @@ PHP_METHOD(git_commit, __construct)
         $commit = new GitCommit($repo);
         $repo->Commit();
     */
+/*
     zval *z_repository;
     git_commit *commit;
     git_repository *repository;
@@ -71,6 +72,7 @@ PHP_METHOD(git_commit, __construct)
 
     add_property_resource(object, "commit", ret);
     zend_list_addref(ret);
+*/
 }
 
 
