@@ -18,8 +18,9 @@
     <exec executable="make" dir="src" />
   </target>
 
-  <target name="install" depends="config, build">
-    <exec executable="make" dir="src">
+  <target name="install" depends="build">
+    <exec executable="sudo" dir="src">
+        <arg value="make" />
         <arg value="install" />
     </exec>
   </target>
