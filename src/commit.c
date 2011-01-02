@@ -77,10 +77,10 @@ PHP_METHOD(git_commit, __construct)
 
 
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_commiter, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_committer, 0, 0, 1)
     ZEND_ARG_INFO(0, author)
 ZEND_END_ARG_INFO()
-PHP_METHOD(git_commit, setCommiter)
+PHP_METHOD(git_commit, setCommitter)
 {
     zval *z_signature;
     git_signature *signature;
@@ -94,6 +94,7 @@ PHP_METHOD(git_commit, setCommiter)
         return;
     }
 
+    /*
     commit = php_get_git_commit(getThis() TSRMLS_CC);
     signature = git_signature_new(
         Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"name",4, 0 TSRMLS_CC)),
@@ -101,8 +102,9 @@ PHP_METHOD(git_commit, setCommiter)
         Z_LVAL_P(zend_read_property(git_signature_class_entry, z_signature,"time",4, 0 TSRMLS_CC)),
         0
     );
-    git_commit_set_author(commit, signature);
-    add_property_zval_ex(object,"commiter",9,z_signature);
+    git_commit_set_committer(commit, signature);
+    */
+    add_property_zval_ex(object,"committer",10,z_signature);
 }
 PHP_METHOD(git_commit, getCommiter)
 {
@@ -128,6 +130,7 @@ PHP_METHOD(git_commit, setAuthor)
         return;
     }
 
+    /*
     commit = php_get_git_commit(getThis() TSRMLS_CC);
     signature = git_signature_new(
         Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"name",4, 0 TSRMLS_CC)),
@@ -135,7 +138,8 @@ PHP_METHOD(git_commit, setAuthor)
         Z_LVAL_P(zend_read_property(git_signature_class_entry, z_signature,"time",4, 0 TSRMLS_CC)),
         0
     );
-    git_commit_set_author(commit, signature);
+    */
+    //git_commit_set_author(commit, signature);
     add_property_zval_ex(object,"author",7,z_signature);
 }
 
@@ -150,7 +154,7 @@ PHPAPI function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, __construct,  arginfo_git_commit__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setAuthor,  arginfo_git_commit_set_author, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getAuthor, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_commit, setCommiter,  arginfo_git_commit_set_commiter, ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, setCommitter,  arginfo_git_commit_set_committer, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
@@ -159,4 +163,6 @@ void git_init_commit(TSRMLS_C)
     zend_class_entry git_commit_ce;
     INIT_CLASS_ENTRY(git_commit_ce, "GitCommit", php_git_commit_methods);
     git_commit_class_entry = zend_register_internal_class(&git_commit_ce TSRMLS_CC);
+    zend_declare_property_null(git_commit_class_entry, "author",sizeof("author")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_commit_class_entry, "committer",sizeof("committer")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 }
