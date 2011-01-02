@@ -1,7 +1,7 @@
 PECL_Git
 =======================================================
 
-PECL_Git is a set of PHP 5.2+ bindings to the libgit2 linkable C Git library.
+PECL_Git is a set of PHP 5.3+ bindings to the libgit2 linkable C Git library.
 
 * I just named `PECL_Git` but `PECL_Git` is not `PECL` library yet.
 
