@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="PECL_Git" basedir="." default="build">
+  <target name="clean">
+    <exec executable="phpize" dir="src">
+        <arg value="--clean" />
+    </exec>
+  </target>
+
+  <target name="config">
+    <exec executable="phpize" dir="src" />
+    <exec executable="./configure" dir="src" />
+  </target>
+
+  <target name="build">
+    <exec executable="make" dir="src" />
+  </target>
+
+  <target name="install">
+    <exec executable="make" dir="src">
+        <arg value="install" />
+    </exec>
+  </target>
+
+  <target name="test">
+    <exec executable="phpunit" />
+  </target>
+</project>

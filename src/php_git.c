@@ -36,7 +36,7 @@
 /**
  * Git Resource
  */
-static int le_git;
+int le_git;
 int le_git_walker;
 int le_git_commit;
 int le_git_index;
@@ -267,7 +267,7 @@ PHP_METHOD(git, getObject)
         
         if(ret == GIT_SUCCESS){
             MAKE_STD_ZVAL(git_raw_object);
-            object_init(git_raw_object);
+            object_init_ex(git_raw_object, git_blob_class_entry);
 
             add_property_string_ex(git_raw_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
             RETURN_ZVAL(git_raw_object,1,0);
@@ -275,7 +275,122 @@ PHP_METHOD(git, getObject)
             RETURN_FALSE;
         }
     }
+}
 
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_commit, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git, getCommit)
+{
+    zval *object = getThis();
+    zval *git_raw_object;
+    git_repository *repository;
+    git_odb *odb;
+    git_object *blob;
+    git_oid oid;
+    char out[40];
+    char *hash;
+    int hash_len = 0;
+    int ret = 0;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &hash, &hash_len) == FAILURE){
+        return;
+    }
+    
+    git_oid_mkstr(&oid, hash);
+    
+    repository = php_get_git_repository( object TSRMLS_CC);
+    odb = git_repository_database(repository);
+    
+    if(git_odb_exists(odb,hash)){
+        RETURN_FALSE;
+    }else{
+        ret = git_repository_lookup(&blob, repository,&oid , GIT_OBJ_COMMIT);
+        
+        if(ret == GIT_SUCCESS){
+            git_signature *sig;
+            zval *committer;
+            zval *author;
+            MAKE_STD_ZVAL(author);
+            char *name;
+            object_init_ex(author,git_signature_class_entry);
+            sig = git_commit_author(blob);
+            add_property_string(author,"name",sig->name,1 TSRMLS_CC);
+            add_property_string(author,"email",sig->email,1 TSRMLS_CC);
+            add_property_long(author,"time",sig->when.time);
+
+            MAKE_STD_ZVAL(committer);
+            object_init_ex(committer,git_signature_class_entry);
+
+            sig = git_commit_committer(blob);
+            add_property_string(committer,"name",sig->name,1 TSRMLS_CC);
+            add_property_string(committer,"email",sig->email,1 TSRMLS_CC);
+            add_property_long(committer,"time",sig->when.time);
+
+
+
+            MAKE_STD_ZVAL(git_raw_object);
+            object_init_ex(git_raw_object,git_commit_class_entry);
+
+            sig = git_commit_author(blob);
+            git_tree *tree = git_commit_tree(blob);
+            git_oid *tree_oid;
+            tree_oid = git_tree_id(tree);
+            git_oid_to_string(&out,41,tree_oid);
+            add_property_string(git_raw_object,"tree", out,1);
+
+            add_property_zval(git_raw_object,"author", author);
+            add_property_zval(git_raw_object,"committer", committer);
+
+
+            //コピペ
+            zval *git_tree;
+            zval *entries;
+            git_tree_entry *entry;
+            MAKE_STD_ZVAL(git_tree);
+            MAKE_STD_ZVAL(entries);
+            array_init(entries);
+            object_init_ex(git_tree, git_tree_class_entry);
+
+            int r = git_tree_entrycount(tree);
+            int i = 0;
+            char mbuf[40];
+            char *offset;
+            git_oid *moid;
+            zval *array_ptr;
+
+            for(i; i < r; i++){
+                entry = git_tree_entry_byindex(tree,i);
+                moid = git_tree_entry_id(entry);
+                git_oid_to_string(mbuf,41,moid);
+
+                MAKE_STD_ZVAL(array_ptr);
+                object_init_ex(array_ptr, git_tree_entry_class_entry);
+
+                add_property_string(array_ptr, "name", git_tree_entry_name(entry), 1);
+                add_property_string(array_ptr, "oid", mbuf, 1);
+                add_property_long(array_ptr, "attr", git_tree_entry_attributes(entry));
+
+                add_next_index_zval(entries,  array_ptr);
+            }
+
+            //add_property_long(git_tree, "entry", git_tree_entrycount(tree));
+            ret = zend_list_insert(tree, le_git_tree);
+            add_property_resource(git_tree, "tree", ret);
+            add_property_zval(git_tree,"entries", entries);
+            add_property_zval(git_raw_object,"tree",git_tree);
+            //
+
+
+            RETURN_ZVAL(git_raw_object,1,0);
+        }else{
+            RETURN_FALSE;
+        }
+    }
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_construct, 0, 0, 1)
@@ -443,15 +558,60 @@ PHP_METHOD(git, getBranch)
     RETVAL_STRINGL(buf,40,1 TSRMLS_DC);
 }
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_write_object, 0, 0, 1)
+    ZEND_ARG_INFO(0, blob)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git, writeObject)
+{
+    zval *object = getThis();
+    git_repository *repository;
+    git_odb *odb;
+    git_blob *blob;
+    git_oid *oid;
+    zval *data;
+    zval *z_git_blob;
+    char *content;
+    int content_len = 0;
+    int ret = 0;
+    char out[40];
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "z", &z_git_blob) == FAILURE){
+        return;
+    }
+    
+    repository = php_get_git_repository( object TSRMLS_CC);
+    data = zend_read_property(git_blob_class_entry,z_git_blob,"data",4,0 TSRMLS_CC);
+    printf("%s\n",Z_STRVAL_P(data));
+
+    git_blob_new(&blob, repository);
+    git_blob_set_rawcontent(blob, Z_STRVAL_P(data), strlen(Z_STRVAL_P(data)));
+    
+    ret = git_object_write((git_object *)blob);
+    if(ret != GIT_SUCCESS){
+        php_printf("can't write object");
+    }
+    
+    oid = git_object_id((git_object *)blob);
+    git_oid_to_string(&out,41,oid);
+    
+    RETVAL_STRING(&out, 1);
+}
+
+
 // Git
 PHPAPI function_entry php_git_methods[] = {
     PHP_ME(git, __construct, arginfo_git_construct, ZEND_ACC_PUBLIC)
+    PHP_ME(git, getCommit, arginfo_git_get_commit, ZEND_ACC_PUBLIC)
     PHP_ME(git, getObject, arginfo_git_get_object, ZEND_ACC_PUBLIC)
+    PHP_ME(git, writeObject, arginfo_git_write_object, ZEND_ACC_PUBLIC)
     PHP_ME(git, getIndex, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git, getBranch, arginfo_git_get_branch, ZEND_ACC_PUBLIC)
     PHP_ME(git, getWalker, arginfo_git_walker, ZEND_ACC_PUBLIC) // FIXME
     PHP_ME(git, getTree, arginfo_git_get_tree, ZEND_ACC_PUBLIC)
-    PHP_ME(git, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    PHP_ME(git, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC) // FIXME
     {NULL, NULL, NULL}
 };
 
@@ -493,6 +653,8 @@ PHP_MINIT_FUNCTION(git) {
     git_init_tree_entry(TSRMLS_C);
     git_init_rawobject(TSRMLS_C);
     git_init_tag(TSRMLS_C);
+    git_init_object(TSRMLS_C);
+    git_init_blob(TSRMLS_C);
 
     /**
      * Resources

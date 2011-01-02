@@ -28,6 +28,21 @@
 #include <string.h>
 #include <time.h>
 
+git_tree *php_get_git_tree(zval *obj TSRMLS_DC) {
+    zval **tmp = NULL;
+    git_tree *tree = NULL;
+    int id = 0, type = 0;
+    if (zend_hash_find(Z_OBJPROP_P(obj), "tree", strlen("tree") + 1,(void **)&tmp) == FAILURE) {
+        return NULL;
+    }
+
+    id = Z_LVAL_PP(tmp);
+    tree = (git_tree *) zend_list_find(id, &type);
+    return tree;
+}
+
+
+
 PHP_METHOD(git_tree, count)
 {
 	long cnt = 0;
@@ -39,9 +54,77 @@ PHP_METHOD(git_tree, count)
     RETURN_LONG(cnt);
 }
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_path, 0, 0, 1)
+    ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git_tree, path)
+{
+    zval *object = getThis();
+    char *path;
+    int path_len= 0;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &path, &path_len) == FAILURE){
+        return;
+    }
+}
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_add, 0, 0, 1)
+    ZEND_ARG_INFO(0, entry)
+ZEND_END_ARG_INFO()
+PHP_METHOD(git_tree, add)
+{
+    zval *object = getThis();
+    zval *entry;
+    char *filename;
+    git_oid oid;
+    git_tree *tree;
+    int attr;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "z", &entry) == FAILURE){
+        return;
+    }
+    
+    tree = php_get_git_tree(object TSRMLS_CC);
+    git_oid_mkstr(&oid, Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,0 TSRMLS_CC)));
+    filename = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"name",4,0 TSRMLS_CC));
+    attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"attr",4,0 TSRMLS_CC));
+    //git_tree_add_entry (git_tree *tree, const git_oid *id, const char *filename, int attributes)
+
+    char uhi[40];
+    git_oid *mo;
+    git_oid_to_string(uhi,41,&oid);
+    printf("oid: %s\n",uhi);
+    printf("path: %s\n",filename);
+    mo = git_tree_id(tree);
+    git_oid_to_string(&uhi,41,mo);
+    printf("tree-oid: %s\n",uhi);
+    
+    
+    git_tree_add_entry(tree, &oid, filename, attr);
+
+    int ret = git_object_write((git_object *)tree);
+    if(ret != GIT_SUCCESS){
+        php_printf("can't write object");
+    }
+    
+    char out[40];
+    git_oid *om;
+    om = git_object_id((git_object *)tree);
+    git_oid_to_string(&out,41,om);
+    
+    RETVAL_STRING(&out, 1);
+}
+
+
 // GitTree
 PHPAPI function_entry php_git_tree_methods[] = {
     PHP_ME(git_tree, count, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, path, arginfo_git_tree_path, ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, add, arginfo_git_tree_add, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 

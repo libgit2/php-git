@@ -28,14 +28,21 @@
 #include <string.h>
 #include <time.h>
 
-// GitTree
-PHPAPI function_entry php_git_tree_entry_methods[] = {
+PHPAPI function_entry php_git_blob_methods[] = {
     {NULL, NULL, NULL}
 };
 
-void git_init_tree_entry(TSRMLS_D)
+void git_init_blob(TSRMLS_D)
 {
-    zend_class_entry git_tree_entry_ce;
-    INIT_CLASS_ENTRY(git_tree_entry_ce, "GitTreeEntry", php_git_tree_entry_methods);
-    git_tree_entry_class_entry = zend_register_internal_class(&git_tree_entry_ce TSRMLS_CC);
+/*
+    struct git_object {
+	git_oid id;
+	git_repository *repo;
+	git_odb_source source;
+	int in_memory:1, modified:1;
+};
+*/
+    zend_class_entry ce;
+    INIT_CLASS_ENTRY(ce, "GitBlob", php_git_blob_methods);
+    git_blob_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 }

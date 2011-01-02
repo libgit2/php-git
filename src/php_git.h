@@ -57,5 +57,7 @@ PHPAPI zend_class_entry *git_commit_class_entry;
 PHPAPI zend_class_entry *git_signature_class_entry;
 PHPAPI zend_class_entry *git_rawobject_class_entry;
 PHPAPI zend_class_entry *git_tag_class_entry;
+PHPAPI zend_class_entry *git_object_class_entry;
+PHPAPI zend_class_entry *git_blob_class_entry;
 
 #endif /* PHP_GIT_H */

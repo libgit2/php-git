@@ -28,6 +28,10 @@
 #include <string.h>
 #include <time.h>
 
+PHP_METHOD(git_rawobject, write)
+{
+}
+
 PHPAPI function_entry php_git_rawobject_methods[] = {
     {NULL, NULL, NULL}
 };
