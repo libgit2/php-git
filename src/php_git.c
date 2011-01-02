@@ -491,6 +491,7 @@ PHP_MINIT_FUNCTION(git) {
     git_init_tree(TSRMLS_C);
     git_init_commit(TSRMLS_C);
     git_init_tree_entry(TSRMLS_C);
+    git_init_rawobject(TSRMLS_C);
 
     /**
      * Resources
