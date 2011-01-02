@@ -23,18 +23,20 @@
      {
          $commit = new GitCommit();
          $commit->setAuthor(new GitSignature("Someone Else","someone@example.com",1293956764));
-         $this->assertEquals("Someone Else",$commit->author->name);
-         $this->assertEquals("someone@example.com",$commit->author->email);
-         $this->assertEquals(1293956764,$commit->author->time);
+         $author = $commit->getAuthor();
+         $this->assertEquals("Someone Else",$author->name);
+         $this->assertEquals("someone@example.com",$author->email);
+         $this->assertEquals(1293956764,$author->time);
      }
 
      public function testGitCommitCommitterSignature()
      {
          $commit = new GitCommit();
          $commit->setCommitter(new GitSignature("Someone Else","someone@example.com",1293956764));
-         $this->assertEquals("Someone Else",$commit->committer->name);
-         $this->assertEquals("someone@example.com",$commit->committer->email);
-         $this->assertEquals(1293956764,$commit->committer->time);
+         $committer = $commit->getCommitter();
+         $this->assertEquals("Someone Else",$committer->name);
+         $this->assertEquals("someone@example.com",$committer->email);
+         $this->assertEquals(1293956764,$committer->time);
      }
 
  }

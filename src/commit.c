@@ -110,7 +110,7 @@ PHP_METHOD(git_commit, setCommitter)
 PHP_METHOD(git_commit, getCommitter)
 {
     zval *object = getThis();
-    zval *signature = zend_read_property(git_commit_class_entry, object,"commiter",8, 0 TSRMLS_CC);
+    zval *signature = zend_read_property(git_commit_class_entry, object,"committer",9, 0 TSRMLS_CC);
     RETURN_ZVAL(signature,0, 0);
 }
 
