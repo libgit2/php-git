@@ -106,7 +106,8 @@ PHP_METHOD(git_commit, setCommitter)
     */
     add_property_zval_ex(object,"committer",10,z_signature);
 }
-PHP_METHOD(git_commit, getCommiter)
+
+PHP_METHOD(git_commit, getCommitter)
 {
     zval *object = getThis();
     zval *signature = zend_read_property(git_commit_class_entry, object,"commiter",8, 0 TSRMLS_CC);
@@ -155,6 +156,7 @@ PHPAPI function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, setAuthor,  arginfo_git_commit_set_author, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getAuthor, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setCommitter,  arginfo_git_commit_set_committer, ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, getCommitter,  NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
