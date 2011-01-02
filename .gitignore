@@ -1,5 +1,8 @@
 *.o
 
+# ignore your phpunit xml file.
+phpunit.xml
+
 # ignore phpized files
 src/Makefile.global
 src/acinclude.m4
