@@ -273,6 +273,58 @@ PHP_METHOD(git_index, __construct)
 }
 
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_index_add, 0, 0, 1)
+    ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git_index, add)
+{
+    int offset = 0;
+    char *path;
+    int path_len = 0;
+    git_index *index = NULL;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &path, &path_len) == FAILURE){
+        return;
+    }
+
+    index  = php_get_git_index( getThis() TSRMLS_CC);
+    //FIXME: stage の値の意味を調べる
+    // 0 => new file
+    // 1 => deleted ?
+    // 2 => ?
+    int success = git_index_add(index,path,0);
+    if(success != GIT_SUCCESS){
+        //FIXME
+        php_printf("can't add index.\n");
+        RETURN_FALSE;
+    }
+
+    git_index_read(index);
+    RETURN_TRUE;
+}
+
+
+PHP_METHOD(git_index, write)
+{
+    git_index *index = NULL;
+
+    index  = php_get_git_index( getThis() TSRMLS_CC);
+    int success = git_index_write(index);
+    if(success != GIT_SUCCESS){
+        //FIXME
+        php_printf("can't write index.\n");
+        RETURN_FALSE;
+    }
+
+    git_index_read(index);
+    RETURN_TRUE;
+}
+
+
+
+
 
 // GitIndex
 PHPAPI function_entry php_git_index_methods[] = {
@@ -280,6 +332,8 @@ PHPAPI function_entry php_git_index_methods[] = {
     PHP_ME(git_index, getEntry, arginfo_git_index_get_entry, ZEND_ACC_PUBLIC)
     PHP_ME(git_index, refresh, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_index, find, arginfo_git_index_find, ZEND_ACC_PUBLIC)
+    PHP_ME(git_index, add, arginfo_git_index_add, ZEND_ACC_PUBLIC)
+    PHP_ME(git_index, write, NULL, ZEND_ACC_PUBLIC)
     // Countable
     PHP_ME(git_index, count, NULL, ZEND_ACC_PUBLIC)
     // Iterator
