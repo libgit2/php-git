@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="PECL_Git" basedir="." default="build">
+<project name="PECL_Git" basedir="." default="all">
+
+  <target name="all" depends="clean,config,build" />
+
   <target name="clean">
     <exec executable="phpize" dir="src">
         <arg value="--clean" />
@@ -11,11 +14,11 @@
     <exec executable="./configure" dir="src" />
   </target>
 
-  <target name="build">
+  <target name="build" depends="config">
     <exec executable="make" dir="src" />
   </target>
 
-  <target name="install">
+  <target name="install" depends="config, build">
     <exec executable="make" dir="src">
         <arg value="install" />
     </exec>
