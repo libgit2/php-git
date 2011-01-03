@@ -65,11 +65,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit__construct, 0, 0, 1)
 ZEND_END_ARG_INFO()
 PHP_METHOD(git_commit, __construct)
 {
-    /*
-        $commit = new GitCommit($repo);
-        $repo->Commit();
-    */
-
     zval *z_repository;
     git_commit *commit;
     git_repository *repository;
@@ -80,13 +75,11 @@ PHP_METHOD(git_commit, __construct)
         "z", &z_repository) == FAILURE){
         return;
     }
-    repository = (git_repository *)php_get_git_repository(z_repository TSRMLS_DC);
+    object_init_ex(object, git_commit_class_entry);
+    php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(object TSRMLS_CC);
     php_git_t *myobj = (php_git_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
 
-    object_init_ex(object, git_commit_class_entry);
-
-    php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(object TSRMLS_CC);
-    cobj->repository = repository;
+    cobj->repository = myobj->repository;
     //git_repository_newobject(&commit, repository, GIT_OBJ_COMMIT);
 }
 

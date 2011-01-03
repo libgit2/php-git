@@ -21,28 +21,22 @@
      
      public function testGitCommitAuthorSignature()
      {
-/*
-        //passed
-         $commit = new GitCommit();
+         $commit = new GitCommit(new Git(PHP_GIT_FIXTURE_DIR . "/fixture.git"));
          $commit->setAuthor(new GitSignature("Someone Else","someone@example.com",1293956764));
          $author = $commit->getAuthor();
          $this->assertEquals("Someone Else",$author->name);
          $this->assertEquals("someone@example.com",$author->email);
          $this->assertEquals(1293956764,$author->time);
-*/
      }
 
      public function testGitCommitCommitterSignature()
      {
-/*
-        //passed
-         $commit = new GitCommit();
+         $commit = new GitCommit(new Git(PHP_GIT_FIXTURE_DIR . "/fixture.git"));
          $commit->setCommitter(new GitSignature("Someone Else","someone@example.com",1293956764));
          $committer = $commit->getCommitter();
          $this->assertEquals("Someone Else",$committer->name);
          $this->assertEquals("someone@example.com",$committer->email);
          $this->assertEquals(1293956764,$committer->time);
-*/
      }
 
  }

@@ -22,16 +22,15 @@
      public function testConstruct()
      {
          try{
-            $git = new Git("/home/chobie/src/git-tutorial/.git");
+             $git = new Git(PHP_GIT_FIXTURE_DIR . "/fixture.git");
          }catch(\Exception $e){
              $this->fail();
          }
-         unset($git);
      }
      
      public function testGetIndex()
      {
-         $git = new Git("/home/chobie/src/git-tutorial/.git");
+         $git = new Git(PHP_GIT_FIXTURE_DIR . "/nonbare/.git");
          $index = $git->getIndex();
          if($index instanceof GitIndex){
              return true;

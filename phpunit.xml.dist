@@ -10,6 +10,9 @@
          stopOnFailure="false"
          syntaxCheck="true"
 >
+    <php>
+      <const name="PHP_GIT_FIXTURE_DIR" value="./tests/fixtures/" />
+    </php>
     <testsuites>
         <testsuite name="PECL Git Test Suite">
             <directory>./tests/</directory>
