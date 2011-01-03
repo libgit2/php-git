@@ -1,18 +1,16 @@
-PECL_Git
+php-git
 =======================================================
 
-PECL_Git is a set of PHP 5.3+ bindings to the libgit2 linkable C Git library.
-
-* I just named `PECL_Git` but `PECL_Git` is not `PECL` library yet.
+php-git is a set of PHP 5.3+ bindings to the libgit2 linkable C Git library.
 
 How Can I Contribute?
 =======================================================
 
 * First. you have to register our redmine project.
-PECL_Git_Redmine <http://redmine.chobie.co/projects/pecl-git>
+php-git_Redmine <http://redmine.chobie.co/projects/pecl-git>
 
 * Second, Tell `http://twitter.com/chobi_e` to your Github Account.
-i'll add you to PECL_Git collaborator soon.
+i'll add you to php-git collaborator soon.
 
 * Third, `Accept redmine ticket` and `do it`.
 
@@ -35,7 +33,7 @@ DEPENDENCIES
 INSTALL
 =======================================================
 
-see PECL_Git Wiki: <https://github.com/chobie/PECL_Git/wiki>
+see php-git Wiki: <https://github.com/chobie/php-git/wiki>
 
 AUTHORS
 =======================================================
@@ -51,4 +49,4 @@ Links
 =======================================================
 
 * libgit2: <https://github.com/libgit2/libgit2>
-* PECL_Git_Redmine: <http://redmine.chobie.co/projects/pecl-git>
+* php-git_Redmine: <http://redmine.chobie.co/projects/pecl-git>
