@@ -32,10 +32,8 @@ static void php_git_blob_free_storage(php_git_blob_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     
-    if(obj->blob){
-        git_object_free(obj->blob);
-    }
-    
+    //git_repositoryがfreeしてくれる
+    obj->blob = NULL;
     obj->repository = NULL;
     efree(obj);
 }
@@ -70,7 +68,23 @@ PHP_METHOD(git_blob, write)
     RETVAL_LONG(ret);
 }
 
+PHP_METHOD(git_blob, getId)
+{
+    zval *this = getThis();
+    php_git_blob_t *blob_t;
+    git_oid *oid;
+    char out[GIT_OID_HEXSZ];
+    int ret = 0;
+    blob_t = (php_git_blob_t *)zend_object_store_get_object(this TSRMLS_CC);
+    
+    oid = git_object_id((git_object *)blob_t->blob);
+    git_oid_to_string(out, GIT_OID_HEXSZ+1, oid);
+    RETURN_STRING(out, 1);
+}
+
+
 PHPAPI function_entry php_git_blob_methods[] = {
+    PHP_ME(git_blob, getId, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_blob, write, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
