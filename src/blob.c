@@ -28,7 +28,50 @@
 #include <string.h>
 #include <time.h>
 
+static void php_git_blob_free_storage(php_git_blob_t *obj TSRMLS_DC)
+{
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    
+    if(obj->blob){
+        git_object_free(obj->blob);
+    }
+    
+    obj->repository = NULL;
+    efree(obj);
+}
+
+zend_object_value php_git_blob_new(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_object_value retval;
+	php_git_t *obj;
+	zval *tmp;
+
+	obj = ecalloc(1, sizeof(*obj));
+	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	retval.handle = zend_objects_store_put(obj, 
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,
+        (zend_objects_free_object_storage_t)php_git_blob_free_storage,
+        NULL TSRMLS_CC);
+	retval.handlers = zend_get_std_object_handlers();
+
+	return retval;
+}
+
+PHP_METHOD(git_blob, write)
+{
+    zval *this = getThis();
+    php_git_blob_t *blob_t;
+    int ret = 0;
+    blob_t = (php_git_blob_t *)zend_object_store_get_object(this TSRMLS_CC);
+    
+    ret = git_object_write((git_object *)blob_t->blob);
+    RETVAL_LONG(ret);
+}
+
 PHPAPI function_entry php_git_blob_methods[] = {
+    PHP_ME(git_blob, write, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
@@ -45,4 +88,6 @@ void git_init_blob(TSRMLS_D)
     zend_class_entry ce;
     INIT_CLASS_ENTRY(ce, "GitBlob", php_git_blob_methods);
     git_blob_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	git_blob_class_entry->create_object = php_git_blob_new;
+
 }

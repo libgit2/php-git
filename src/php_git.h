@@ -91,4 +91,10 @@ typedef struct{
     git_revwalk *walker;
 } php_git_walker_t;
 
+typedef struct{
+    zend_object zo;
+    git_repository *repository;
+    git_blob *blob;
+} php_git_blob_t;
+
 #endif /* PHP_GIT_H */
