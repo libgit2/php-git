@@ -33,7 +33,8 @@ static void php_git_index_free_storage(php_git_index_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     if(obj->index){
-        git_index_free(obj->index);
+        //なぜかセグフォる
+        //git_index_free(obj->index);
     }
     obj->repository = NULL;
     efree(obj);
