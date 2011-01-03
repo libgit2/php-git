@@ -28,12 +28,6 @@
 #include <string.h>
 #include <time.h>
 
-//Todo: そのうち
-//PHPAPI zend_object_handlers php_git_object_handlers;
-
-
-
-
 static void php_git_free_storage(php_git_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
@@ -62,59 +56,6 @@ zend_object_value php_git_repository_new(zend_class_entry *ce TSRMLS_DC)
 
 	return retval;
 }
-
-// Todo: Resouce使うのはやめたい
-/**
- * Git Resource
- */
-//int le_git;
-int le_git_walker;
-int le_git_commit;
-//int le_git_index;
-int le_git_tree;
-
-git_index *php_get_git_index(zval *obj TSRMLS_DC);
-void free_git_index_resource(zend_rsrc_list_entry *resource TSRMLS_DC);
-void git_index_init(TSRMLS_D);
-git_revwalk *php_get_git_walker(zval *obj TSRMLS_DC);
-
-
-git_repository *php_get_git_repository(zval *obj TSRMLS_DC) {
-    zval **tmp = NULL;
-    git_repository *repository = NULL;
-    int id = 0, type = 0;
-    if (zend_hash_find(Z_OBJPROP_P(obj), "repository", strlen("repository") + 1,(void **)&tmp) == FAILURE) {
-        return NULL;
-    }
-
-    id = Z_LVAL_PP(tmp);
-    repository = (git_repository *) zend_list_find(id, &type);
-    return repository;
-}
-
-
-static void free_git_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
-{
-    //git_repository_free((git_repository *) resource->ptr);
-}
-
-static void free_git_walker_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
-{
-    git_revwalk_free((git_revwalk*) resource->ptr);
-}
-
-static void free_git_commit_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
-{
-    free((git_commit*) resource->ptr);
-}
-
-static void free_git_tree_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
-{
-    //Fixme:Resourceで使い回せるようにとりあえず定義してるだけ。
-    //git_object_free((git_tree *) resource->ptr);
-}
-
-
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 1)
     ZEND_ARG_INFO(0, path)
@@ -559,13 +500,11 @@ PHP_METHOD(git, getWalker)
     repository = myobj->repository;
 
     object_init_ex(walker_object, git_walker_class_entry);
-
     ret = git_revwalk_new(&walk,repository);
+    php_git_walker_t *wobj = (php_git_walker_t *) zend_object_store_get_object(walker_object TSRMLS_CC);
+    wobj->walker = walk;
+    wobj->repository = repository;
 
-    ret = zend_list_insert(walk, le_git_walker);
-    add_property_resource(walker_object, "walker", ret);
-
-    zend_list_addref(ret);
     RETURN_ZVAL(walker_object,1,0);
 }
 
@@ -706,16 +645,6 @@ PHP_MINIT_FUNCTION(git) {
     git_init_tag(TSRMLS_C);
     git_init_object(TSRMLS_C);
     git_init_blob(TSRMLS_C);
-
-    /**
-     * Resources
-     * とりまわしが分からないからとりあえずResourceにしてるだけ。変えたい
-     */
-    //le_git = zend_register_list_destructors_ex(free_git_resource, NULL, "Git", module_number);
-    le_git_walker = zend_register_list_destructors_ex(free_git_walker_resource, NULL, "GitWalker", module_number);
-    le_git_commit = zend_register_list_destructors_ex(free_git_commit_resource, NULL, "GitCommit", module_number);
-    //le_git_index = zend_register_list_destructors_ex(free_git_index_resource, NULL, "GitIndex", module_number);
-    //le_git_tree = zend_register_list_destructors_ex(free_git_tree_resource, NULL, "GitTree", module_number);
 
     return SUCCESS;
 }

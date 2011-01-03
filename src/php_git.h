@@ -85,4 +85,10 @@ typedef struct{
     git_commit *commit;
 } php_git_commit_t;
 
+typedef struct{
+    zend_object zo;
+    git_repository *repository;
+    git_revwalk *walker;
+} php_git_walker_t;
+
 #endif /* PHP_GIT_H */

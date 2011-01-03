@@ -29,20 +29,32 @@
 #include <time.h>
 
 
-git_revwalk *php_get_git_walker(zval *obj TSRMLS_DC) {
-    zval **tmp = NULL;
-    git_revwalk *walker= NULL;
-    int id = 0, type = 0;
-    if (zend_hash_find(Z_OBJPROP_P(obj), "walker", strlen("walker") + 1,(void **)&tmp) == FAILURE) {
-        return NULL;
-    }
-
-    id = Z_LVAL_PP(tmp);
-    walker = (git_revwalk *) zend_list_find(id, &type);
-    return walker;
+static void php_git_walker_free_storage(php_git_walker_t *obj TSRMLS_DC)
+{
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    //git_repositoryでFreeされる
+    obj->walker = NULL;
+    obj->repository = NULL;
+    efree(obj);
 }
 
+zend_object_value php_git_walker_new(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_object_value retval;
+	php_git_walker_t *obj;
+	zval *tmp;
 
+	obj = ecalloc(1, sizeof(*obj));
+	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	retval.handle = zend_objects_store_put(obj, 
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,
+        (zend_objects_free_object_storage_t)php_git_walker_free_storage,
+        NULL TSRMLS_CC);
+	retval.handlers = zend_get_std_object_handlers();
+	return retval;
+}
 
 PHP_METHOD(git_walker, __construct)
 {
@@ -67,7 +79,9 @@ PHP_METHOD(git_walker, hide)
         return;
     }
 
-    walker = php_get_git_walker(getThis() TSRMLS_DC);
+    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    walker = myobj->walker;
+
     repository = git_revwalk_repository(walker);
     
     git_oid_mkstr(&oid,hash);
@@ -95,7 +109,9 @@ PHP_METHOD(git_walker, push)
         return;
     }
 
-    walker = php_get_git_walker(getThis() TSRMLS_DC);
+    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    walker = myobj->walker;
+    
     repository = git_revwalk_repository(walker);
     
     git_oid_mkstr(&oid,hash);
@@ -114,7 +130,9 @@ PHP_METHOD(git_walker, next)
     git_revwalk *walker;
     git_signature *signature;
 
-    walker = php_get_git_walker(getThis() TSRMLS_DC);
+    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    walker = myobj->walker;
+
     commit = git_revwalk_next(walker);
     if(commit == NULL){
         RETURN_FALSE;
@@ -157,4 +175,5 @@ void git_init_walker(TSRMLS_D)
     zend_class_entry git_walker_ce;
     INIT_CLASS_ENTRY(git_walker_ce,"GitWalker",php_git_walker_methods);
     git_walker_class_entry = zend_register_internal_class(&git_walker_ce TSRMLS_CC);
+	git_walker_class_entry->create_object = php_git_walker_new;
 }
