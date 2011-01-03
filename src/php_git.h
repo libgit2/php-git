@@ -73,5 +73,16 @@ typedef struct{
     git_repository *repository;
 } php_git_t;
 
+typedef struct{
+    zend_object zo;
+    git_repository *repository;
+    git_tree *tree;
+} php_git_tree_t;
+
+typedef struct{
+    zend_object zo;
+    git_repository *repository;
+    git_commit *commit;
+} php_git_commit_t;
 
 #endif /* PHP_GIT_H */

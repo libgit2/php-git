@@ -28,17 +28,32 @@
 #include <string.h>
 #include <time.h>
 
-git_tree *php_get_git_tree(zval *obj TSRMLS_DC) {
-    zval **tmp = NULL;
-    git_tree *tree = NULL;
-    int id = 0, type = 0;
-    if (zend_hash_find(Z_OBJPROP_P(obj), "tree", strlen("tree") + 1,(void **)&tmp) == FAILURE) {
-        return NULL;
-    }
+static void php_git_tree_free_storage(php_git_tree_t *obj TSRMLS_DC)
+{
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    
+    //RepositoryでFreeされるよ
+    obj->tree = NULL;
+    obj->repository = NULL;
+    efree(obj);
+}
 
-    id = Z_LVAL_PP(tmp);
-    tree = (git_tree *) zend_list_find(id, &type);
-    return tree;
+zend_object_value php_git_tree_new(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_object_value retval;
+	php_git_tree_t *obj;
+	zval *tmp;
+
+	obj = ecalloc(1, sizeof(*obj));
+	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	retval.handle = zend_objects_store_put(obj, 
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,
+        (zend_objects_free_object_storage_t)php_git_tree_free_storage,
+        NULL TSRMLS_CC);
+	retval.handlers = zend_get_std_object_handlers();
+	return retval;
 }
 
 
@@ -88,7 +103,9 @@ PHP_METHOD(git_tree, add)
         return;
     }
     
-    tree = php_get_git_tree(object TSRMLS_CC);
+    php_git_tree_t *myobj = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    tree = myobj->tree;
+
     git_oid_mkstr(&oid, Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,0 TSRMLS_CC)));
     filename = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"name",4,0 TSRMLS_CC));
     attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"attr",4,0 TSRMLS_CC));
@@ -133,5 +150,6 @@ void git_init_tree(TSRMLS_D)
     zend_class_entry git_tree_ce;
     INIT_CLASS_ENTRY(git_tree_ce, "GitTree", php_git_tree_methods);
     git_tree_class_entry = zend_register_internal_class(&git_tree_ce TSRMLS_CC);
+	git_tree_class_entry->create_object = php_git_tree_new;
     zend_class_implements(git_tree_class_entry TSRMLS_CC, 1, spl_ce_Countable);
 }

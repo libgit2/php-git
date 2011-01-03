@@ -28,22 +28,36 @@
 #include <string.h>
 #include <time.h>
 
-extern int le_git;
-extern int le_git_tree;
-extern int le_git_commit;
-extern git_repository *php_get_git_repository(zval *obj TSRMLS_DC);
+extern zend_object_value php_git_repository_new(zend_class_entry *ce TSRMLS_DC);
 
-static git_commit *php_get_git_commit(zval *obj TSRMLS_DC) {
-    zval **tmp = NULL;
-    int id = 0, type = 0;
-    if (zend_hash_find(Z_OBJPROP_P(obj), "commit", strlen("commit") + 1,(void **)&tmp) == FAILURE) {
-        return NULL;
-    }
 
-    id = Z_LVAL_PP(tmp);
-    return (git_commit *) zend_list_find(id, &type);
+static void php_git_commit_free_storage(php_git_commit_t *obj TSRMLS_DC)
+{
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    
+    //RepositoryでFreeされるよ
+    obj->commit = NULL;
+    obj->repository = NULL;
+    efree(obj);
 }
 
+zend_object_value php_git_commit_new(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_object_value retval;
+	php_git_commit_t *obj;
+	zval *tmp;
+
+	obj = ecalloc(1, sizeof(*obj));
+	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	retval.handle = zend_objects_store_put(obj, 
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,
+        (zend_objects_free_object_storage_t)php_git_commit_free_storage,
+        NULL TSRMLS_CC);
+	retval.handlers = zend_get_std_object_handlers();
+	return retval;
+}
 
 //GitCommit
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit__construct, 0, 0, 1)
@@ -67,9 +81,13 @@ PHP_METHOD(git_commit, __construct)
         return;
     }
     repository = (git_repository *)php_get_git_repository(z_repository TSRMLS_DC);
-    //git_repository_newobject(&commit, repository, GIT_OBJ_COMMIT);
+    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
+
     object_init_ex(object, git_commit_class_entry);
-    add_property_zval(object, "repository", z_repository);
+
+    php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(object TSRMLS_CC);
+    cobj->repository = repository;
+    //git_repository_newobject(&commit, repository, GIT_OBJ_COMMIT);
 }
 
 
@@ -148,7 +166,9 @@ PHP_METHOD(git_commit, write)
     git_commit *commit;
 
     zval *repo = zend_read_property(git_commit_class_entry,this,"repository",sizeof("repository")-1,0 TSRMLS_CC);
-    repository = php_get_git_repository(repo TSRMLS_CC);
+
+    php_git_commit_t *myobj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
+    repository = myobj->repository;
 
     git_commit_new(&commit,repository);
     zval *author = zend_read_property(git_commit_class_entry,this,"author",sizeof("author")-1,0 TSRMLS_CC);
@@ -174,7 +194,9 @@ PHP_METHOD(git_commit, setTree)
         return;
     }
     zval *repo = zend_read_property(git_commit_class_entry,object,"repository",sizeof("repository")-1,0 TSRMLS_CC);
-    repository = php_get_git_repository(repo TSRMLS_CC);
+    php_git_commit_t *myobj = (php_git_commit_t *) zend_object_store_get_object(object TSRMLS_CC);
+    repository = myobj->repository;
+
     git_oid_mkstr(&oid, hash);
     git_repository_lookup (&tree, repository, &oid, GIT_OBJ_TREE);
     if(tree){
@@ -210,8 +232,6 @@ PHP_METHOD(git_commit, setTree)
         }
 
         //add_property_long(git_tree, "entry", git_tree_entrycount(tree));
-        int ret = zend_list_insert(tree, le_git_tree);
-        add_property_resource(git_tree, "tree", ret);
         add_property_zval(git_tree,"entries", entries);
         add_property_zval(object,"tree",git_tree);
         //
@@ -245,6 +265,7 @@ void git_init_commit(TSRMLS_C)
     zend_class_entry git_commit_ce;
     INIT_CLASS_ENTRY(git_commit_ce, "GitCommit", php_git_commit_methods);
     git_commit_class_entry = zend_register_internal_class(&git_commit_ce TSRMLS_CC);
+	git_tree_class_entry->create_object = php_git_commit_new;
     zend_declare_property_null(git_commit_class_entry, "author",sizeof("author")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(git_commit_class_entry, "committer",sizeof("committer")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 }

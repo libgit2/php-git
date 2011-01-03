@@ -418,8 +418,8 @@ PHP_METHOD(git, getCommit)
             }
 
             //add_property_long(git_tree, "entry", git_tree_entrycount(tree));
-            ret = zend_list_insert(tree, le_git_tree);
-            add_property_resource(git_tree, "tree", ret);
+            //ret = zend_list_insert(tree, le_git_tree);
+            //add_property_resource(git_tree, "tree", ret);
             add_property_zval(git_tree,"entries", entries);
             add_property_zval(git_raw_object,"tree",git_tree);
             //
@@ -528,11 +528,15 @@ PHP_METHOD(git, getTree)
         add_next_index_zval(entries,  array_ptr);
     }
 
-    ret = zend_list_insert(git_tree, le_git_tree);
-    add_property_resource(git_tree, "tree", ret);
+    php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
+    tobj->repository = repository;
+    tobj->tree = tree;
+
+    //ret = zend_list_insert(git_tree, le_git_tree);
+    //add_property_resource(git_tree, "tree", ret);
     //add_property_long(git_tree, "entry", git_tree_entrycount(tree));
     add_property_zval(git_tree,"entries", entries);
-    zend_list_addref(ret);
+    //zend_list_addref(ret);
 
     RETURN_ZVAL(git_tree,1,0);
 }
@@ -711,7 +715,7 @@ PHP_MINIT_FUNCTION(git) {
     le_git_walker = zend_register_list_destructors_ex(free_git_walker_resource, NULL, "GitWalker", module_number);
     le_git_commit = zend_register_list_destructors_ex(free_git_commit_resource, NULL, "GitCommit", module_number);
     //le_git_index = zend_register_list_destructors_ex(free_git_index_resource, NULL, "GitIndex", module_number);
-    le_git_tree = zend_register_list_destructors_ex(free_git_tree_resource, NULL, "GitTree", module_number);
+    //le_git_tree = zend_register_list_destructors_ex(free_git_tree_resource, NULL, "GitTree", module_number);
 
     return SUCCESS;
 }
