@@ -322,7 +322,7 @@ PHP_METHOD(git, getCommit)
             git_oid *tree_oid;
             tree_oid = git_tree_id(tree);
             git_oid_to_string(&out,41,tree_oid);
-            add_property_string(git_raw_object,"tree", out,1);
+            //add_property_string(git_raw_object,"tree", out,1);
 
             add_property_zval(git_raw_object,"author", author);
             add_property_zval(git_raw_object,"committer", committer);
@@ -331,7 +331,9 @@ PHP_METHOD(git, getCommit)
             //コピペ
             zval *git_tree;
             zval *entries;
+            git_oid *moid;
             git_tree_entry *entry;
+
             MAKE_STD_ZVAL(git_tree);
             MAKE_STD_ZVAL(entries);
             array_init(entries);
@@ -339,34 +341,32 @@ PHP_METHOD(git, getCommit)
 
             int r = git_tree_entrycount(tree);
             int i = 0;
-            char mbuf[40];
+            char buf[40];
             char *offset;
-            git_oid *moid;
             zval *array_ptr;
 
             for(i; i < r; i++){
                 entry = git_tree_entry_byindex(tree,i);
                 moid = git_tree_entry_id(entry);
-                git_oid_to_string(mbuf,41,moid);
+                git_oid_fmt(buf,moid);
 
                 MAKE_STD_ZVAL(array_ptr);
                 object_init_ex(array_ptr, git_tree_entry_class_entry);
 
                 add_property_string(array_ptr, "name", git_tree_entry_name(entry), 1);
-                add_property_string(array_ptr, "oid", mbuf, 1);
+                add_property_string(array_ptr, "oid", buf, 1);
                 add_property_long(array_ptr, "attr", git_tree_entry_attributes(entry));
 
                 add_next_index_zval(entries,  array_ptr);
             }
 
-            //add_property_long(git_tree, "entry", git_tree_entrycount(tree));
-            //ret = zend_list_insert(tree, le_git_tree);
-            //add_property_resource(git_tree, "tree", ret);
+            php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
+            tobj->repository = repository;
+            tobj->tree = tree;
+
             add_property_zval(git_tree,"entries", entries);
-            add_property_zval(git_raw_object,"tree",git_tree);
-            //
-
-
+            add_property_zval(git_raw_object,"tree", git_tree);
+            
             RETURN_ZVAL(git_raw_object,1,0);
         }else{
             RETURN_FALSE;
@@ -423,7 +423,7 @@ PHP_METHOD(git, getTree)
     zval *git_tree;
     zval *entries;
 
-    git_oid *oid;
+    git_oid oid;
     char *hash;
     int hash_len = 0;
     int ret = 0;
@@ -440,7 +440,7 @@ PHP_METHOD(git, getTree)
     ret = git_tree_lookup(&tree, repository, &oid);
     if(ret != GIT_SUCCESS){
         //FIXME
-        printf("not found");
+        printf("target not found");
         RETURN_FALSE;
     }
     
@@ -453,12 +453,13 @@ PHP_METHOD(git, getTree)
     int i = 0;
     char buf[40];
     char *offset;
+    git_oid *moid;
     zval *array_ptr;
 
     for(i; i < r; i++){
         entry = git_tree_entry_byindex(tree,i);
-        oid = git_tree_entry_id(entry);
-        git_oid_fmt(buf,oid);
+        moid = git_tree_entry_id(entry);
+        git_oid_to_string(buf,41,moid);
 
         MAKE_STD_ZVAL(array_ptr);
         object_init_ex(array_ptr, git_tree_entry_class_entry);
@@ -474,11 +475,7 @@ PHP_METHOD(git, getTree)
     tobj->repository = repository;
     tobj->tree = tree;
 
-    //ret = zend_list_insert(git_tree, le_git_tree);
-    //add_property_resource(git_tree, "tree", ret);
-    //add_property_long(git_tree, "entry", git_tree_entrycount(tree));
     add_property_zval(git_tree,"entries", entries);
-    //zend_list_addref(ret);
 
     RETURN_ZVAL(git_tree,1,0);
 }

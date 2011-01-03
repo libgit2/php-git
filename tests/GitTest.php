@@ -19,6 +19,13 @@
          // currentry nothing to do.
      }
      
+     public function testGetTree()
+     {
+        $git = new Git(".git");
+        $tree= $git->getTree("c40b970eb68bd1c8980f1f97b57396f4c7ae107f");
+        $this->assertEquals("c40b970eb68bd1c8980f1f97b57396f4c7ae107f",$tree->getId());
+     }
+     
      public function testConstruct()
      {
          try{

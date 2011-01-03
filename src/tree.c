@@ -75,6 +75,7 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_tree, path)
 {
+    //TODO
     zval *object = getThis();
     char *path;
     int path_len= 0;
@@ -83,6 +84,19 @@ PHP_METHOD(git_tree, path)
         "s", &path, &path_len) == FAILURE){
         return;
     }
+}
+
+
+PHP_METHOD(git_tree, getId)
+{
+    zval *object = getThis();
+    git_oid *oid;
+    char out[40];
+    php_git_tree_t *git_tree = (php_git_tree_t *) zend_object_store_get_object(object TSRMLS_CC);
+    
+    oid = git_tree_id(git_tree->tree);
+    git_oid_to_string(out,41,oid);
+    RETVAL_STRING(out,1);
 }
 
 
@@ -141,7 +155,8 @@ PHP_METHOD(git_tree, add)
 PHPAPI function_entry php_git_tree_methods[] = {
     PHP_ME(git_tree, count, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, path, arginfo_git_tree_path, ZEND_ACC_PUBLIC)
-    PHP_ME(git_tree, add, arginfo_git_tree_add, ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, add,  arginfo_git_tree_add, ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, getId,NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
