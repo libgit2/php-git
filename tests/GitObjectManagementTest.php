@@ -10,14 +10,14 @@
  /*
 Git revision object management routines
 
- []git_object_write
- []git_object_id
+ [*]git_object_write(Implemented at GitBlob)
+ [*]git_object_id(Implemented at GitBlob)
  []git_object_type
  []git_object_owner
- []git_object_free
- [*]git_object_type2string
- [*]git_object_string2type
- []git_object_typeisloose
+ [-]git_object_free
+ [*]git_object_type2string (git_type_to_string)
+ [*]git_object_string2type (git_string_to_type)
+ [-]git_object_typeisloose
  */
 class GitObjectManagementTest extends \PHPUnit_Framework_TestCase
 {
@@ -29,6 +29,14 @@ class GitObjectManagementTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
         // currentry nothing to do.
+    }
+    
+    public function testObjectGetId()
+    {
+        $git = new Git(".git");
+        $obj = $git->getObject("6c4a06776164f960307341033a7e5271c0b2c669");
+        
+        $this->assertEquals("6c4a06776164f960307341033a7e5271c0b2c669", $obj->getId());
     }
      
     /**
