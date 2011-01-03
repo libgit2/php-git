@@ -60,4 +60,18 @@ PHPAPI zend_class_entry *git_tag_class_entry;
 PHPAPI zend_class_entry *git_object_class_entry;
 PHPAPI zend_class_entry *git_blob_class_entry;
 
+
+//これ外部に公開したくないんだけどやり方分からんので調べる
+typedef struct{
+    zend_object zo;
+    git_repository *repository;
+    git_index *index;
+} php_git_index_t;
+
+typedef struct{
+    zend_object zo;
+    git_repository *repository;
+} php_git_t;
+
+
 #endif /* PHP_GIT_H */

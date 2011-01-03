@@ -31,10 +31,8 @@
 //Todo: そのうち
 //PHPAPI zend_object_handlers php_git_object_handlers;
 
-typedef struct{
-    zend_object zo;
-    git_repository *repository;
-} php_git_t;
+
+
 
 static void php_git_free_storage(php_git_t *obj TSRMLS_DC)
 {
@@ -42,8 +40,8 @@ static void php_git_free_storage(php_git_t *obj TSRMLS_DC)
     if(obj->repository){
         git_repository_free(obj->repository);
     }
-    //obj->repository = NULL;
-    //efree(obj);
+    obj->repository = NULL;
+    efree(obj);
 }
 
 zend_object_value php_git_repository_new(zend_class_entry *ce TSRMLS_DC)
@@ -69,10 +67,10 @@ zend_object_value php_git_repository_new(zend_class_entry *ce TSRMLS_DC)
 /**
  * Git Resource
  */
-int le_git;
+//int le_git;
 int le_git_walker;
 int le_git_commit;
-int le_git_index;
+//int le_git_index;
 int le_git_tree;
 
 git_index *php_get_git_index(zval *obj TSRMLS_DC);
@@ -124,6 +122,7 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(git, init)
 {
     //FIXME: 実装したけど動いてないお。
+    //Todo: Resourceなし版の実装
     git_repository *repository;
     char *path = NULL;
     int path_len = 0;
@@ -143,13 +142,13 @@ PHP_METHOD(git, init)
         return;
     }
     
-    ret = zend_list_insert(repository, le_git);
+    //ret = zend_list_insert(repository, le_git);
     
     MAKE_STD_ZVAL(obj);
     object_init_ex(obj, git_class_entry);
-    add_property_resource(obj, "repository", ret);
+    //add_property_resource(obj, "repository", ret);
     add_property_string_ex(obj, "path",5,path, 1 TSRMLS_CC);
-    zend_list_addref(ret);
+    //zend_list_addref(ret);
 
     RETURN_ZVAL(obj, 1, 0);
 }
@@ -244,19 +243,23 @@ PHP_METHOD(git, getIndex)
     zval *index_object = emalloc(sizeof(zval));
     int ret = 0;
 
-    repository = php_get_git_repository( object TSRMLS_CC);
+    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(object TSRMLS_CC);
+    assert(repository);
+
     object_init_ex(index_object, git_index_class_entry);
 
-    ret = git_index_open_inrepo(&index, repository);
+    ret = git_index_open_inrepo(&index, myobj->repository);
     if(ret != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git repository not found.");
         RETURN_FALSE;
     }
+    php_git_index_t *iobj = (php_git_index_t *) zend_object_store_get_object(index_object TSRMLS_CC);
+
+    iobj->index = index;
+    iobj->repository = repository;
+
     git_index_read(index);
 
-    ret = zend_list_insert(index, le_git_index);
-
-    add_property_resource(index_object, "entries", ret);
     //Todo: Read from Git object.
     //add_property_string_ex(index_object, "path",5,index->index_file_path, 1 TSRMLS_CC);
     add_property_long(index_object, "offset", 0);
@@ -290,7 +293,9 @@ PHP_METHOD(git, getObject)
     
     git_oid_mkstr(&oid, hash);
     
-    repository = php_get_git_repository( object TSRMLS_CC);
+    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(object TSRMLS_CC);
+    repository = myobj->repository;
+    
     odb = git_repository_database(repository);
     
     if(git_odb_exists(odb,hash)){
@@ -336,7 +341,8 @@ PHP_METHOD(git, getCommit)
     
     git_oid_mkstr(&oid, hash);
     
-    repository = php_get_git_repository( object TSRMLS_CC);
+    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(object TSRMLS_CC);
+    repository = myobj->repository;
     odb = git_repository_database(repository);
     
     if(git_odb_exists(odb,hash)){
@@ -487,7 +493,8 @@ PHP_METHOD(git, getTree)
     }
 
     git_oid_mkstr(&oid, hash);
-    repository = php_get_git_repository( object TSRMLS_CC);
+    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(object TSRMLS_CC);
+    repository = myobj->repository;
     ret = git_tree_lookup(&tree, repository, &oid);
     if(ret != GIT_SUCCESS){
         //FIXME
@@ -544,7 +551,9 @@ PHP_METHOD(git, getWalker)
     git_revwalk *walk;
     int ret = 0;
 
-    repository = php_get_git_repository( object TSRMLS_CC);
+    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(object TSRMLS_CC);
+    repository = myobj->repository;
+
     object_init_ex(walker_object, git_walker_class_entry);
 
     ret = git_revwalk_new(&walk,repository);
@@ -575,7 +584,9 @@ PHP_METHOD(git, getBranch)
         return;
     }
 
-    repository = php_get_git_repository( object TSRMLS_CC);
+    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(object TSRMLS_CC);
+    repository = myobj->repository;
+
     prop = zend_read_property(git_class_entry,object,"path",4,0 TSRMLS_DC);
     char *uhi = Z_STRVAL_P(prop);
     
@@ -614,7 +625,9 @@ PHP_METHOD(git, writeObject)
         return;
     }
     
-    repository = php_get_git_repository( object TSRMLS_CC);
+    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(object TSRMLS_CC);
+    repository = myobj->repository;
+
     data = zend_read_property(git_blob_class_entry,z_git_blob,"data",4,0 TSRMLS_CC);
     printf("%s\n",Z_STRVAL_P(data));
 
@@ -694,10 +707,10 @@ PHP_MINIT_FUNCTION(git) {
      * Resources
      * とりまわしが分からないからとりあえずResourceにしてるだけ。変えたい
      */
-    le_git = zend_register_list_destructors_ex(free_git_resource, NULL, "Git", module_number);
+    //le_git = zend_register_list_destructors_ex(free_git_resource, NULL, "Git", module_number);
     le_git_walker = zend_register_list_destructors_ex(free_git_walker_resource, NULL, "GitWalker", module_number);
     le_git_commit = zend_register_list_destructors_ex(free_git_commit_resource, NULL, "GitCommit", module_number);
-    le_git_index = zend_register_list_destructors_ex(free_git_index_resource, NULL, "GitIndex", module_number);
+    //le_git_index = zend_register_list_destructors_ex(free_git_index_resource, NULL, "GitIndex", module_number);
     le_git_tree = zend_register_list_destructors_ex(free_git_tree_resource, NULL, "GitTree", module_number);
 
     return SUCCESS;

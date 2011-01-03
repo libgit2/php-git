@@ -28,27 +28,33 @@
 #include <string.h>
 #include <time.h>
 
-extern int le_git_index;
 
-git_index *php_get_git_index(zval *obj TSRMLS_DC);
-void free_git_index_resource(zend_rsrc_list_entry *resource TSRMLS_DC);
-
-void free_git_index_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
+static void php_git_index_free_storage(php_git_index_t *obj TSRMLS_DC)
 {
-    git_index_free((git_index *) resource->ptr);
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    if(obj->index){
+        git_index_free(obj->index);
+    }
+    obj->repository = NULL;
+    efree(obj);
 }
 
-git_index *php_get_git_index(zval *obj TSRMLS_DC) {
-    zval **tmp = NULL;
-    git_index *index = NULL;
-    int id = 0, type = 0;
-    if (zend_hash_find(Z_OBJPROP_P(obj), "entries", strlen("entries") + 1,(void **)&tmp) == FAILURE) {
-        return NULL;
-    }
+zend_object_value php_git_index_new(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_object_value retval;
+	php_git_index_t *obj;
+	zval *tmp;
 
-    id = Z_LVAL_PP(tmp);
-    index = (git_index *) zend_list_find(id, &type);
-    return index;
+	obj = ecalloc(1, sizeof(*obj));
+	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	retval.handle = zend_objects_store_put(obj, 
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,
+        (zend_objects_free_object_storage_t)php_git_index_free_storage,
+        NULL TSRMLS_CC);
+	retval.handlers = zend_get_std_object_handlers();
+	return retval;
 }
 
 // GitIndex implements Iterator
@@ -56,7 +62,9 @@ PHP_METHOD(git_index, current)
 {
     git_index *index;
     zval *entry_count;
-    index  = php_get_git_index( getThis() TSRMLS_CC);
+    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    index = myobj->index;
+
     zval *offset;
     //FIXME: ほぼGit::getIndexのコピペ。
     long *z_offset;
@@ -100,7 +108,9 @@ PHP_METHOD(git_index, key)
     zval *offset;
 
     char oid[GIT_OID_HEXSZ];
-    index  = php_get_git_index( getThis() TSRMLS_CC);
+    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    index = myobj->index;
+
     offset = zend_read_property(git_index_class_entry,getThis(),"offset",6,0 TSRMLS_DC);
     entry = git_index_get(index,Z_LVAL_P(offset));
     if(entry == NULL){
@@ -150,7 +160,9 @@ PHP_METHOD(git_index, count)
 {
     git_index *index;
     zval *entry_count;
-    index  = php_get_git_index( getThis() TSRMLS_CC);
+    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    index = myobj->index;
+
     entry_count = zend_read_property(git_index_class_entry,getThis(),"entry_count",11,0 TSRMLS_DC);
 
     long *count = Z_LVAL_P(entry_count);
@@ -175,7 +187,9 @@ PHP_METHOD(git_index, find)
         return;
     }
 
-    index  = php_get_git_index( getThis() TSRMLS_CC);
+    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    index = myobj->index;
+
     offset = git_index_find(index,path);
 
     if(offset >= 0){
@@ -186,7 +200,9 @@ PHP_METHOD(git_index, find)
 PHP_METHOD(git_index, refresh)
 {
     git_index *index = NULL;
-    index = php_get_git_index( getThis() TSRMLS_CC);
+    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    index = myobj->index;
+
     git_index_read(index);
 }
 
@@ -203,7 +219,9 @@ PHP_METHOD(git_index, getEntry)
     zval *git_index_entry;
     char oid[GIT_OID_HEXSZ];
 
-    index = php_get_git_index( getThis() TSRMLS_CC);
+    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    index = myobj->index;
+    
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
             "l", &offset) == FAILURE){
         return;
@@ -263,13 +281,12 @@ PHP_METHOD(git_index, __construct)
     }
     git_index_read(index);
 
-    ret = zend_list_insert(index, le_git_index);
+    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(object TSRMLS_CC);
+    myobj->index = index;
 
     add_property_long(object, "offset", 0);
-    add_property_resource(object, "entries", ret);
     add_property_string_ex(object, "path",5,repository_path, 1 TSRMLS_CC);
     add_property_long(object, "entry_count",git_index_entrycount(index));
-    zend_list_addref(ret);
 }
 
 
@@ -289,7 +306,9 @@ PHP_METHOD(git_index, add)
         return;
     }
 
-    index  = php_get_git_index( getThis() TSRMLS_CC);
+    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    index = myobj->index;
+
     //FIXME: stage の値の意味を調べる
     // 0 => new file
     // 1 => deleted ?
@@ -310,7 +329,9 @@ PHP_METHOD(git_index, write)
 {
     git_index *index = NULL;
 
-    index  = php_get_git_index( getThis() TSRMLS_CC);
+    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    index = myobj->index;
+
     int success = git_index_write(index);
     if(success != GIT_SUCCESS){
         //FIXME
@@ -350,6 +371,8 @@ void git_index_init(TSRMLS_D)
     zend_class_entry git_index_ce;
     INIT_CLASS_ENTRY(git_index_ce,"GitIndex",php_git_index_methods);
     git_index_class_entry = zend_register_internal_class(&git_index_ce TSRMLS_CC);
+	git_index_class_entry->create_object = php_git_index_new;
     zend_class_implements(git_index_class_entry TSRMLS_CC, 2, spl_ce_Countable, spl_ce_Iterator);
+
     //zend_declare_property_null(classentry, "name", sizeof("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 }

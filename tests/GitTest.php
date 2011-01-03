@@ -19,6 +19,27 @@
          // currentry nothing to do.
      }
      
+     public function testConstruct()
+     {
+         try{
+            $git = new Git("/home/chobie/src/git-tutorial/.git");
+         }catch(\Exception $e){
+             $this->fail();
+         }
+         unset($git);
+     }
+     
+     public function testGetIndex()
+     {
+         $git = new Git("/home/chobie/src/git-tutorial/.git");
+         $index = $git->getIndex();
+         if($index instanceof GitIndex){
+             return true;
+         }else{
+             return false;
+         }
+     }
+     
      public function testHexToRaw()
      {
          $hex = "599955586da1c3ad514f3e65f1081d2012ec862d";
