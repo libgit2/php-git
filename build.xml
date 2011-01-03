@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="PECL_Git" basedir="." default="all">
+<project name="php-git" basedir="." default="all">
 
   <target name="all" depends="clean,config,build" />
 
