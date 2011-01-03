@@ -249,7 +249,7 @@ PHP_METHOD(git, getObject)
             blobobj->blob = blob;
 
             add_property_string_ex(git_raw_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
-            RETURN_ZVAL(git_raw_object,1,0);
+            RETURN_ZVAL(git_raw_object,0,0);
         }else{
             RETURN_FALSE;
         }
