@@ -31,6 +31,39 @@
 //Todo: そのうち
 //PHPAPI zend_object_handlers php_git_object_handlers;
 
+typedef struct{
+    zend_object zo;
+    git_repository *repository;
+} php_git_t;
+
+static void php_git_free_storage(php_git_t *obj TSRMLS_DC)
+{
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    if(obj->repository){
+        git_repository_free(obj->repository);
+    }
+    //obj->repository = NULL;
+    //efree(obj);
+}
+
+zend_object_value php_git_repository_new(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_object_value retval;
+	php_git_t *obj;
+	zval *tmp;
+
+	obj = ecalloc(1, sizeof(*obj));
+	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	retval.handle = zend_objects_store_put(obj, 
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,
+        (zend_objects_free_object_storage_t)php_git_free_storage,
+        NULL TSRMLS_CC);
+	retval.handlers = zend_get_std_object_handlers();
+
+	return retval;
+}
 
 // Todo: Resouce使うのはやめたい
 /**
@@ -64,7 +97,7 @@ git_repository *php_get_git_repository(zval *obj TSRMLS_DC) {
 
 static void free_git_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
-    git_repository_free((git_repository *) resource->ptr);
+    //git_repository_free((git_repository *) resource->ptr);
 }
 
 static void free_git_walker_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
@@ -418,17 +451,16 @@ PHP_METHOD(git, __construct)
         return;
     }
 
+    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(object TSRMLS_CC);
+
     ret = git_repository_open(&repository,repository_path);
     if(ret != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git repository not found.");
         RETURN_FALSE;
     }
+    myobj->repository = repository;
 
-    ret = zend_list_insert(repository, le_git);
-
-    add_property_resource(object, "repository", ret);
     add_property_string_ex(object, "path",5,repository_path, 1 TSRMLS_CC);
-    zend_list_addref(ret);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_tree, 0, 0, 1)
@@ -629,6 +661,8 @@ void git_init(TSRMLS_D)
     zend_class_entry git_ce;
     INIT_CLASS_ENTRY(git_ce, "Git", php_git_methods);
     git_class_entry = zend_register_internal_class(&git_ce TSRMLS_CC);
+	git_class_entry->create_object = php_git_repository_new;
+
 
     REGISTER_GIT_CONST_LONG("SORT_NONE", 0)
     REGISTER_GIT_CONST_LONG("SORT_TOPO", 1)
