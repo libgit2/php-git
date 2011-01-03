@@ -10,14 +10,14 @@
  /*
  Git repository management routines
 
- [x]git_repository_open
- []git_repository_open2(not support)
+ [*]git_repository_open
+ []git_repository_open2 (そのうち)
  []git_repository_lookup (そのうち)
  []git_repository_database (そのうち)
- [x]git_repository_index
+ [*]git_repository_index
  []git_repository_newobject(そのうち)
- []git_repository_free(内部的に実装)
- []git_repository_init(確認とれん)
+ [*]git_repository_free (internal)
+ [*]git_repository_init
  */
  
  class GitTest extends \PHPUnit_Framework_TestCase
