@@ -21,7 +21,7 @@
      
      public function testGetTree()
      {
-        $git = new Git(".git");
+        $git = new Git("./.git");
         $tree= $git->getTree("c40b970eb68bd1c8980f1f97b57396f4c7ae107f");
         $this->assertInstanceof("GitTree",$tree);
         $this->assertEquals("c40b970eb68bd1c8980f1f97b57396f4c7ae107f",$tree->getId());
@@ -30,7 +30,7 @@
      public function testConstruct()
      {
          try{
-             $git = new Git(PHP_GIT_FIXTURE_DIR . "/fixture.git");
+             $git = new Git("./.git");
          }catch(\Exception $e){
              $this->fail();
          }
