@@ -7,6 +7,19 @@
  * file that was distributed with this source code.
  */
  
+ /*
+ Git repository management routines
+
+ [x]git_repository_open
+ []git_repository_open2(not support)
+ []git_repository_lookup (そのうち)
+ []git_repository_database (そのうち)
+ [x]git_repository_index
+ []git_repository_newobject(そのうち)
+ []git_repository_free(内部的に実装)
+ []git_repository_init(確認とれん)
+ */
+ 
  class GitTest extends \PHPUnit_Framework_TestCase
  {
      protected function setUp()
@@ -27,6 +40,12 @@
         $this->assertEquals("c40b970eb68bd1c8980f1f97b57396f4c7ae107f",$tree->getId());
      }
      
+     public function testRepositoryInit()
+     {
+         $repo = Git::init("/tmp/uhi",1);
+         $this->assertInstanceof("Git",$repo);
+     }
+
      public function testConstruct()
      {
          try{

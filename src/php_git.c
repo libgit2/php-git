@@ -57,40 +57,37 @@ zend_object_value php_git_repository_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 2)
     ZEND_ARG_INFO(0, path)
+    ZEND_ARG_INFO(0, is_bare)
 ZEND_END_ARG_INFO()
 PHP_METHOD(git, init)
 {
-    //FIXME: 実装したけど動いてないお。
-    //Todo: Resourceなし版の実装
     git_repository *repository;
     char *path = NULL;
     int path_len = 0;
+    int is_bare = 0;
     int ret;
     zval *obj;
 
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,"s",
-        &path, &path_len) == FAILURE){
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,"sl",
+        &path, &path_len, &is_bare) == FAILURE){
         return;
     }
 
-    int suc = git_repository_init(&repository,path,0);
+    int suc = git_repository_init(&repository,"/tmp/uhi",is_bare);
 
     if(suc != 0){
-        //FIXME
         php_printf("can't create repository\n");
         return;
     }
     
-    //ret = zend_list_insert(repository, le_git);
-    
     MAKE_STD_ZVAL(obj);
     object_init_ex(obj, git_class_entry);
-    //add_property_resource(obj, "repository", ret);
-    add_property_string_ex(obj, "path",5,path, 1 TSRMLS_CC);
-    //zend_list_addref(ret);
+    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(obj TSRMLS_CC);
+    myobj->repository = repository;
 
+    add_property_string_ex(obj, "path",5,path, 1 TSRMLS_CC);
     RETURN_ZVAL(obj, 1, 0);
 }
 
@@ -596,7 +593,7 @@ PHPAPI function_entry php_git_methods[] = {
     PHP_ME(git, getBranch, arginfo_git_get_branch, ZEND_ACC_PUBLIC)
     PHP_ME(git, getWalker, arginfo_git_walker, ZEND_ACC_PUBLIC) // FIXME
     PHP_ME(git, getTree, arginfo_git_get_tree, ZEND_ACC_PUBLIC)
-    PHP_ME(git, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC) // FIXME
+    PHP_ME(git, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     {NULL, NULL, NULL}
 };
 
