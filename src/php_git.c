@@ -189,11 +189,12 @@ PHP_METHOD(git, getIndex)
 
     object_init_ex(index_object, git_index_class_entry);
 
-    ret = git_index_open_inrepo(&index, myobj->repository);
+    ret = git_index_open_inrepo(&index,myobj->repository);
     if(ret != GIT_SUCCESS){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git repository not found.");
+        php_printf("Git Repository not found");
         RETURN_FALSE;
     }
+    
     php_git_index_t *iobj = (php_git_index_t *) zend_object_store_get_object(index_object TSRMLS_CC);
 
     iobj->index = index;
