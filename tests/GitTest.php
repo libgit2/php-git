@@ -37,15 +37,16 @@
      
      public function testGetIndex()
      {
-/*
-         $git = new Git(PHP_GIT_FIXTURE_DIR . "/fixture.git");
+
+//        $this->markTestIncomplete("testGetIndex not implemented yet");
+
+         $git = new Git("./.git");
          $index = $git->getIndex();
          if($index instanceof GitIndex){
              return true;
          }else{
              return false;
          }
-*/
      }
      
      public function testHexToRaw()
@@ -84,9 +85,9 @@
      {
          $array = array();
          $array[] = array(Git::OBJ_COMMIT,"commit","commit type id");
-         $array[] = array(Git::OBJ_BLOB,"blob","blob type id");
-         $array[] = array(Git::OBJ_TREE,"tree","tree type id");
-         $array[] = array(Git::OBJ_TAG,"tag","tag type id");
+         $array[] = array(Git::OBJ_BLOB,  "blob",  "blob type id");
+         $array[] = array(Git::OBJ_TREE,  "tree",  "tree type id");
+         $array[] = array(Git::OBJ_TAG,   "tag",   "tag type id");
 
          return $array;
      }
@@ -103,9 +104,9 @@
      {
          $array = array();
          $array[] = array("commit",Git::OBJ_COMMIT,"commit type string");
-         $array[] = array("blob",Git::OBJ_BLOB,"blob type string");
-         $array[] = array("tree",Git::OBJ_TREE,"tree type string");
-         $array[] = array("tag",Git::OBJ_TAG,"tag type string");
+         $array[] = array("blob",  Git::OBJ_BLOB,  "blob type string");
+         $array[] = array("tree",  Git::OBJ_TREE,  "tree type string");
+         $array[] = array("tag",   Git::OBJ_TAG,   "tag type string");
 
          return $array;
      }
