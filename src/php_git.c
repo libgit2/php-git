@@ -242,6 +242,7 @@ PHP_METHOD(git, getObject)
         ret = git_blob_lookup(&blob, repository,&oid);
         
         if(ret == GIT_SUCCESS){
+            //FIXME: これでやるとPHPが異常終了しちゃう
             MAKE_STD_ZVAL(git_raw_object);
             object_init_ex(git_raw_object, git_blob_class_entry);
             php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
