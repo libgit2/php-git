@@ -35,7 +35,7 @@
 
 #include "php.h"
 #include <git2.h>
-#include <git2/odb.h>
+#include <git2/odb_backend.h>
 
 /* Define the entry point symbol
  * Zend will use when loading this module
@@ -97,5 +97,10 @@ typedef struct{
     git_repository *repository;
     git_blob *blob;
 } php_git_blob_t;
+
+typedef struct{
+    zend_object zo;
+    git_odb_backend *backend;
+} php_git_backend_t;
 
 #endif /* PHP_GIT_H */

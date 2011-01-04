@@ -507,6 +507,31 @@ PHP_METHOD(git, getWalker)
 }
 
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_add_backend, 0, 0, 1)
+    ZEND_ARG_INFO(0, backend)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git, addBackend)
+{
+    zval *backend;
+    php_git_t *php_git;
+    git_odb_backend *odb_backend;
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &backend) == FAILURE){
+        return;
+    }
+    
+    //FIXME
+    if(!instanceof_function(Z_OBJCE_P(backend), git_backend_class_entry TSRMLS_CC)){
+        php_error_docref(NULL TSRMLS_CC, E_WARNING,"backend must extends GitBackend");
+
+        RETURN_FALSE;
+    }
+    
+    //php_git = (php_git_t *) zend_object_store_get_object(object TSRMLS_CC);
+    //git_odb_add_backend(git_repository_database(php_git->repository),(git_odb_backend *)backend);
+}
+
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_branch, 0, 0, 1)
     ZEND_ARG_INFO(0, branch)
 ZEND_END_ARG_INFO()
@@ -552,6 +577,7 @@ PHPAPI function_entry php_git_methods[] = {
     PHP_ME(git, getWalker, arginfo_git_walker, ZEND_ACC_PUBLIC) // FIXME
     PHP_ME(git, getTree, arginfo_git_get_tree, ZEND_ACC_PUBLIC)
     PHP_ME(git, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    PHP_ME(git, addBackend, arginfo_git_add_backend, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 

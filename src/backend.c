@@ -48,6 +48,36 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_write, 0, 0, 1)
     ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
+// FIXME
+
+static void php_git_backend_free_storage(php_git_backend_t *obj TSRMLS_DC)
+{
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    obj->backend = NULL;
+    efree(obj);
+}
+
+zend_object_value php_git_backend_new(zend_class_entry *ce TSRMLS_DC)
+{
+    zend_object_value retval;
+    php_git_backend_t *obj;
+    git_odb_backend *backend;
+    zval *tmp;
+
+    obj = ecalloc(1, sizeof(*obj));
+    zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+    retval.handle = zend_objects_store_put(obj, 
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,
+        (zend_objects_free_object_storage_t)php_git_backend_free_storage,
+        NULL TSRMLS_CC);
+    retval.handlers = zend_get_std_object_handlers();
+
+    backend = obj->backend;
+
+    return retval;
+}
 
 PHPAPI function_entry php_git_backend_methods[] = {
     PHP_ABSTRACT_ME(git_backend, __construct, arginfo_git_backend__construct)
@@ -63,5 +93,6 @@ void git_init_backend(TSRMLS_D)
     zend_class_entry ce;
     INIT_CLASS_ENTRY(ce, "GitBackend", php_git_backend_methods);
     git_backend_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-    git_backend_class_entry->ce_flags |= ZEND_ACC_INTERFACE;
+    git_backend_class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
+	git_backend_class_entry->create_object = php_git_backend_new;
 }
