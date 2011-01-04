@@ -597,6 +597,7 @@ PHP_MINIT_FUNCTION(git) {
     git_init_tag(TSRMLS_C);
     git_init_object(TSRMLS_C);
     git_init_blob(TSRMLS_C);
+    git_init_backend(TSRMLS_C);
 
     return SUCCESS;
 }
@@ -606,7 +607,7 @@ PHP_MINFO_FUNCTION(git)
 {
     php_printf("PHP Git Extension\n");
     php_info_print_table_start();
-    php_info_print_table_row(2,"Version", PHP_GIT_EXTVER " (development)");
+    php_info_print_table_row(2,"Version", PHP_GIT_EXTVER " (alpha development)");
     php_info_print_table_row(2, "Authors", "Shuhei Tanuma 'stanuma@zynga.co.jp' (lead)\n");
     php_info_print_table_end();
 }

@@ -35,6 +35,7 @@
 
 #include "php.h"
 #include <git2.h>
+#include <git2/odb.h>
 
 /* Define the entry point symbol
  * Zend will use when loading this module
@@ -59,7 +60,7 @@ PHPAPI zend_class_entry *git_rawobject_class_entry;
 PHPAPI zend_class_entry *git_tag_class_entry;
 PHPAPI zend_class_entry *git_object_class_entry;
 PHPAPI zend_class_entry *git_blob_class_entry;
-
+PHPAPI zend_class_entry *git_backend_class_entry;
 
 //これ外部に公開したくないんだけどやり方分からんので調べる
 typedef struct{
