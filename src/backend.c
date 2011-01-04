@@ -28,7 +28,33 @@
 #include <string.h>
 #include <time.h>
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend__construct, 0, 0, 1)
+    ZEND_ARG_INFO(0, priority)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_read, 0, 0, 1)
+    ZEND_ARG_INFO(0, oid)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_read_header, 0, 0, 1)
+    ZEND_ARG_INFO(0, oid)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_exists, 0, 0, 1)
+    ZEND_ARG_INFO(0, oid)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_write, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+
 PHPAPI function_entry php_git_backend_methods[] = {
+    PHP_ABSTRACT_ME(git_backend, __construct, arginfo_git_backend__construct)
+    PHP_ABSTRACT_ME(git_backend, read, arginfo_git_backend_read)
+    PHP_ABSTRACT_ME(git_backend, read_header, arginfo_git_backend_read_header)
+    PHP_ABSTRACT_ME(git_backend, exists, arginfo_git_backend_exists)
+    PHP_ABSTRACT_ME(git_backend, write, arginfo_git_backend_write)
     {NULL, NULL, NULL}
 };
 
@@ -37,4 +63,5 @@ void git_init_backend(TSRMLS_D)
     zend_class_entry ce;
     INIT_CLASS_ENTRY(ce, "GitBackend", php_git_backend_methods);
     git_backend_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+    git_backend_class_entry->ce_flags |= ZEND_ACC_INTERFACE;
 }
