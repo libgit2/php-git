@@ -249,7 +249,7 @@ PHP_METHOD(git, getObject)
             blobobj->blob = blob;
 
             add_property_string_ex(git_raw_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
-            RETURN_ZVAL(git_raw_object,0,0);
+            RETURN_ZVAL(git_raw_object,1,0);
         }else{
             RETURN_FALSE;
         }
@@ -541,57 +541,11 @@ PHP_METHOD(git, getBranch)
     RETVAL_STRINGL(buf,40,1 TSRMLS_DC);
 }
 
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_write_object, 0, 0, 1)
-    ZEND_ARG_INFO(0, blob)
-ZEND_END_ARG_INFO()
-
-PHP_METHOD(git, writeObject)
-{
-    zval *object = getThis();
-    git_repository *repository;
-    git_odb *odb;
-    git_blob *blob;
-    git_oid *oid;
-    zval *data;
-    zval *z_git_blob;
-    char *content;
-    int content_len = 0;
-    int ret = 0;
-    char out[40];
-
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "z", &z_git_blob) == FAILURE){
-        return;
-    }
-    
-    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(object TSRMLS_CC);
-    repository = myobj->repository;
-
-    data = zend_read_property(git_blob_class_entry,z_git_blob,"data",4,0 TSRMLS_CC);
-    printf("%s\n",Z_STRVAL_P(data));
-
-    git_blob_new(&blob, repository);
-    git_blob_set_rawcontent(blob, Z_STRVAL_P(data), strlen(Z_STRVAL_P(data)));
-    
-    ret = git_object_write((git_object *)blob);
-    if(ret != GIT_SUCCESS){
-        php_printf("can't write object");
-    }
-    
-    oid = git_object_id((git_object *)blob);
-    git_oid_to_string(&out,41,oid);
-    
-    RETVAL_STRING(&out, 1);
-}
-
-
 // Git
 PHPAPI function_entry php_git_methods[] = {
     PHP_ME(git, __construct, arginfo_git_construct, ZEND_ACC_PUBLIC)
     PHP_ME(git, getCommit, arginfo_git_get_commit, ZEND_ACC_PUBLIC)
     PHP_ME(git, getObject, arginfo_git_get_object, ZEND_ACC_PUBLIC)
-    PHP_ME(git, writeObject, arginfo_git_write_object, ZEND_ACC_PUBLIC)
     PHP_ME(git, getIndex, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git, getBranch, arginfo_git_get_branch, ZEND_ACC_PUBLIC)
     PHP_ME(git, getWalker, arginfo_git_walker, ZEND_ACC_PUBLIC) // FIXME
