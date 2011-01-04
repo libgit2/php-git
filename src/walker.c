@@ -159,12 +159,43 @@ PHP_METHOD(git_walker, next)
 }
 
 
+PHP_METHOD(git_walker, reset)
+{
+    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_revwalk_free(myobj->walker);
+    RETURN_TRUE;
+}
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_sort, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git_walker, sort)
+{
+    int mode = 0;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "l", &mode) == FAILURE){
+        return;
+    }
+
+    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_revwalk_sorting(myobj->walker, mode);
+    RETURN_TRUE;
+}
+
+
+
+
 // GitWalker
 PHPAPI function_entry php_git_walker_methods[] = {
     PHP_ME(git_walker, __construct, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_walker, push, arginfo_git_walker_push, ZEND_ACC_PUBLIC)
     PHP_ME(git_walker, next, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_walker, hide, arginfo_git_walker_hide, ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, reset, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, sort, arginfo_git_walker_sort, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
