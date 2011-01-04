@@ -100,7 +100,7 @@ typedef struct{
 
 typedef struct{
     zend_object zo;
-    git_odb_backend *backend;
+    git_odb_backend parent;
 } php_git_backend_t;
 
 #endif /* PHP_GIT_H */
