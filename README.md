@@ -18,8 +18,18 @@ i'll add you to php-git collaborator soon.
 Current Development Status
 =======================================================
 
-Alpha development.
-(just started now 2010-12-30)
+*Alpha development*.
+(just started 2010-12-30)
+
+i'll release first alpha development release in 2nd week of January.
+*notice* do not use this extenstion on any production server. this extension not fully tested.
+
+*alpha development release:
+just work on php. not fully tested. classes and methods may changed.
+
+*beta development release:
+classes and methods are fixed. many test include and bug fix.
+
 
 you can check our milestone here : <http://redmine.chobie.co/projects/pecl-git/issues/gantt>
 
