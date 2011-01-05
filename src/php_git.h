@@ -103,4 +103,9 @@ typedef struct{
     git_odb_backend parent;
 } php_git_backend_t;
 
+typedef struct{
+    zend_object zo;
+    git_signature *signature;
+} php_git_signature_t;
+
 #endif /* PHP_GIT_H */
