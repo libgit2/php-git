@@ -183,14 +183,25 @@ PHP_METHOD(git_commit, write)
     zval *this = getThis();
     git_repository *repository;
     git_commit *commit;
+    git_oid *oid;
+    char out[40];
+    int ret = 0;
 
     php_git_commit_t *myobj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
-    repository = myobj->repository;
 
-    git_commit_new(&commit,repository);
-    zval *author = zend_read_property(git_commit_class_entry,this,"author",sizeof("author")-1,0 TSRMLS_CC);
-    
-    
+
+    ret = git_object_write((git_object *)myobj->commit);
+    if(ret == GIT_SUCCESS){
+        oid = git_object_id((git_object *)myobj->commit);
+        git_oid_to_string(&out,41,oid);
+        
+        RETVAL_STRINGL(out,40,1 TSRMLS_DC);
+    }else{
+        //FIXME: error時の対応を詳細にする
+        php_printf("failer: %d\n",ret);
+        RETURN_FALSE;
+    }
+
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_tree, 0, 0, 1)
