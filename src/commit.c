@@ -188,6 +188,8 @@ PHP_METHOD(git_commit, setTree)
 
     git_oid_mkstr(&oid, hash);
     git_repository_lookup (&tree, repository, &oid, GIT_OBJ_TREE);
+    git_commit_set_tree(myobj->commit,tree);
+
     if(tree){
         //コピペ
         zval *git_tree;
