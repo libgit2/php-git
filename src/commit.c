@@ -123,6 +123,36 @@ PHP_METHOD(git_commit, getCommitter)
     RETURN_ZVAL(signature,0, 0);
 }
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_parent, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+PHP_METHOD(git_commit, setParent)
+{
+    zval *this = getThis();
+    php_git_commit_t *c_obj;
+    php_git_signature_t *s_obj;
+    git_commit *commit;
+    git_oid oid;
+    char *hash;
+    int hash_len = 0;
+    int ret;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &hash, &hash_len) == FAILURE){
+        return;
+    }
+
+    git_oid_mkstr(&oid, hash);
+
+    c_obj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
+
+    git_commit_lookup(&commit,c_obj->repository,&oid);
+    git_commit_add_parent(c_obj->commit, commit);
+    //FIXME: not parent. parents.
+    add_property_string_ex(this,"parent",7,hash, 1 TSRMLS_CC);
+}
+
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_author, 0, 0, 1)
     ZEND_ARG_INFO(0, author)
 ZEND_END_ARG_INFO()
@@ -248,6 +278,7 @@ PHPAPI function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, setCommitter,  arginfo_git_commit_set_committer, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getCommitter,  NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, write, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, setParent, arginfo_git_commit_set_parent, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
