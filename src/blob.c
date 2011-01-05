@@ -63,9 +63,13 @@ PHP_METHOD(git_blob, write)
     php_git_blob_t *blob_t;
     git_oid *oid;
     char out[40];
+    char *content;
     int ret = 0;
     blob_t = (php_git_blob_t *)zend_object_store_get_object(this TSRMLS_CC);
+
+    content = Z_STRVAL_P(zend_read_property(git_blob_class_entry,this,"data",4,0 TSRMLS_CC));
     
+    git_blob_set_rawcontent(blob_t->blob, content, strlen(content));
     ret = git_object_write((git_object *)blob_t->blob);
     if(ret == GIT_SUCCESS){
         oid = git_object_id((git_object *)blob_t->blob);
