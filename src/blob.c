@@ -61,11 +61,20 @@ PHP_METHOD(git_blob, write)
 {
     zval *this = getThis();
     php_git_blob_t *blob_t;
+    git_oid *oid;
+    char out[40];
     int ret = 0;
     blob_t = (php_git_blob_t *)zend_object_store_get_object(this TSRMLS_CC);
     
     ret = git_object_write((git_object *)blob_t->blob);
-    RETVAL_LONG(ret);
+    if(ret == GIT_SUCCESS){
+        oid = git_object_id((git_object *)blob_t->blob);
+        git_oid_to_string(&out,41,oid);
+        
+        RETVAL_STRINGL(out,40,1 TSRMLS_DC);
+    }else{
+        RETURN_FALSE;
+    }
 }
 
 PHP_METHOD(git_blob, getId)
