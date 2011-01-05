@@ -158,8 +158,6 @@ PHP_METHOD(git_commit, write)
     git_repository *repository;
     git_commit *commit;
 
-    zval *repo = zend_read_property(git_commit_class_entry,this,"repository",sizeof("repository")-1,0 TSRMLS_CC);
-
     php_git_commit_t *myobj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
     repository = myobj->repository;
 
