@@ -79,8 +79,14 @@ PHP_METHOD(git_commit, __construct)
     php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(object TSRMLS_CC);
     php_git_t *myobj = (php_git_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
 
+    
+    ret = git_commit_new(&commit,myobj->repository);
+    if(ret != GIT_SUCCESS){
+        //FIXME
+        RETURN_FALSE;
+    }
     cobj->repository = myobj->repository;
-    //git_repository_newobject(&commit, repository, GIT_OBJ_COMMIT);
+    cobj->commit = commit;
 }
 
 
@@ -163,6 +169,8 @@ PHP_METHOD(git_commit, write)
 
     git_commit_new(&commit,repository);
     zval *author = zend_read_property(git_commit_class_entry,this,"author",sizeof("author")-1,0 TSRMLS_CC);
+    
+    
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_tree, 0, 0, 1)
