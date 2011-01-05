@@ -128,11 +128,11 @@ PHP_METHOD(git_tree, add)
     char uhi[40];
     git_oid *mo;
     git_oid_to_string(uhi,41,&oid);
-    printf("oid: %s\n",uhi);
-    printf("path: %s\n",filename);
+    //printf("oid: %s\n",uhi);
+    //printf("path: %s\n",filename);
     mo = git_tree_id(tree);
     git_oid_to_string(&uhi,41,mo);
-    printf("tree-oid: %s\n",uhi);
+    //printf("tree-oid: %s\n",uhi);
     
     
     git_tree_add_entry(tree, &oid, filename, attr);
