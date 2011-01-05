@@ -119,10 +119,10 @@ PHP_METHOD(git_tree, add)
     
     php_git_tree_t *myobj = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     tree = myobj->tree;
-
-    git_oid_mkstr(&oid, Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,0 TSRMLS_CC)));
-    filename = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"name",4,0 TSRMLS_CC));
-    attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"attr",4,0 TSRMLS_CC));
+    //php_printf("tree-oid: %s\n",Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,1 TSRMLS_CC)));
+    git_oid_mkstr(&oid, Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,1 TSRMLS_CC)));
+    filename = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"name",4,1 TSRMLS_CC));
+    attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"attr",4,1 TSRMLS_CC));
     //git_tree_add_entry (git_tree *tree, const git_oid *id, const char *filename, int attributes)
 
     char uhi[40];
@@ -134,7 +134,7 @@ PHP_METHOD(git_tree, add)
     git_oid_to_string(&uhi,41,mo);
     //printf("tree-oid: %s\n",uhi);
     
-    
+    git_tree_remove_entry_byname(tree, filename);
     git_tree_add_entry(tree, &oid, filename, attr);
 
     int ret = git_object_write((git_object *)tree);
@@ -150,6 +150,25 @@ PHP_METHOD(git_tree, add)
     RETVAL_STRING(&out, 1);
 }
 
+PHP_METHOD(git_tree, write)
+{
+    zval *this = getThis();
+    php_git_tree_t *tree_t;
+    git_oid *oid;
+    char out[40];
+    int ret = 0;
+    tree_t = (php_git_tree_t *)zend_object_store_get_object(this TSRMLS_CC);
+    
+    ret = git_object_write((git_object *)tree_t->tree);
+    if(ret == GIT_SUCCESS){
+        oid = git_object_id((git_object *)tree_t->tree);
+        git_oid_to_string(&out,41,oid);
+        
+        RETVAL_STRINGL(out,40,1 TSRMLS_DC);
+    }else{
+        RETURN_FALSE;
+    }
+}
 
 // GitTree
 PHPAPI function_entry php_git_tree_methods[] = {
@@ -157,6 +176,7 @@ PHPAPI function_entry php_git_tree_methods[] = {
     PHP_ME(git_tree, path, arginfo_git_tree_path, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, add,  arginfo_git_tree_add, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, getId,NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, write, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
