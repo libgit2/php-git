@@ -186,7 +186,7 @@ PHP_METHOD(git_commit, setTree)
         "s", &hash, &hash_len) == FAILURE){
         return;
     }
-    zval *repo = zend_read_property(git_commit_class_entry,object,"repository",sizeof("repository")-1,0 TSRMLS_CC);
+
     php_git_commit_t *myobj = (php_git_commit_t *) zend_object_store_get_object(object TSRMLS_CC);
     repository = myobj->repository;
 
