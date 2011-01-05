@@ -96,9 +96,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_committer, 0, 0, 1)
 ZEND_END_ARG_INFO()
 PHP_METHOD(git_commit, setCommitter)
 {
+    zval *this = getThis();
     zval *z_signature;
     git_signature *signature;
-    git_repository *repository;
+    php_git_commit_t *c_obj;
+    php_git_signature_t *s_obj;
     git_commit *commit;
     zval *object = getThis();
     int ret;
@@ -108,16 +110,9 @@ PHP_METHOD(git_commit, setCommitter)
         return;
     }
 
-    /*
-    commit = php_get_git_commit(getThis() TSRMLS_CC);
-    signature = git_signature_new(
-        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"name",4, 0 TSRMLS_CC)),
-        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"email",5, 0 TSRMLS_CC)),
-        Z_LVAL_P(zend_read_property(git_signature_class_entry, z_signature,"time",4, 0 TSRMLS_CC)),
-        0
-    );
-    git_commit_set_committer(commit, signature);
-    */
+    c_obj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
+    s_obj = (php_git_signature_t *) zend_object_store_get_object(z_signature TSRMLS_CC);
+    git_commit_set_author(c_obj->commit, s_obj->signature);
     add_property_zval_ex(object,"committer",10,z_signature);
 }
 
@@ -133,9 +128,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_author, 0, 0, 1)
 ZEND_END_ARG_INFO()
 PHP_METHOD(git_commit, setAuthor)
 {
+    zval *this = getThis();
     zval *z_signature;
     git_signature *signature;
-    git_repository *repository;
+    php_git_commit_t *c_obj;
+    php_git_signature_t *s_obj;
     git_commit *commit;
     zval *object = getThis();
     int ret;
@@ -145,16 +142,9 @@ PHP_METHOD(git_commit, setAuthor)
         return;
     }
 
-    /*
-    commit = php_get_git_commit(getThis() TSRMLS_CC);
-    signature = git_signature_new(
-        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"name",4, 0 TSRMLS_CC)),
-        Z_STRVAL_P(zend_read_property(git_signature_class_entry, z_signature,"email",5, 0 TSRMLS_CC)),
-        Z_LVAL_P(zend_read_property(git_signature_class_entry, z_signature,"time",4, 0 TSRMLS_CC)),
-        0
-    );
-    */
-    //git_commit_set_author(commit, signature);
+    c_obj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
+    s_obj = (php_git_signature_t *) zend_object_store_get_object(z_signature TSRMLS_CC);
+    git_commit_set_committer(c_obj->commit, s_obj->signature);
     add_property_zval_ex(object,"author",7,z_signature);
 }
 
