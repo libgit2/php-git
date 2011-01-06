@@ -267,6 +267,7 @@ PHP_METHOD(git, getCommit)
 {
     zval *object = getThis();
     zval *git_raw_object;
+    php_git_tree_entry_t *entry_obj;
     git_repository *repository;
     git_odb *odb;
     git_object *blob;
@@ -348,10 +349,12 @@ PHP_METHOD(git, getCommit)
             for(i; i < r; i++){
                 entry = git_tree_entry_byindex(tree,i);
                 moid = git_tree_entry_id(entry);
-                git_oid_fmt(buf,moid);
+                git_oid_to_string(&buf,41,moid);
 
                 MAKE_STD_ZVAL(array_ptr);
                 object_init_ex(array_ptr, git_tree_entry_class_entry);
+                entry_obj = (php_git_tree_entry_t *) zend_object_store_get_object(array_ptr TSRMLS_CC);
+                entry_obj->entry = entry;
 
                 add_property_string(array_ptr, "name", git_tree_entry_name(entry), 1);
                 add_property_string(array_ptr, "oid", buf, 1);
