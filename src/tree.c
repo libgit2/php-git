@@ -28,7 +28,7 @@
 #include <string.h>
 #include <time.h>
 
-static void php_git_tree_free_storage(php_git_tree_t *obj TSRMLS_DC)
+static void php_git_repository_tree_free_storage(php_git_tree_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     
@@ -38,7 +38,7 @@ static void php_git_tree_free_storage(php_git_tree_t *obj TSRMLS_DC)
     efree(obj);
 }
 
-zend_object_value php_git_tree_new(zend_class_entry *ce TSRMLS_DC)
+zend_object_value php_git_repository_tree_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
 	php_git_tree_t *obj;
@@ -50,7 +50,7 @@ zend_object_value php_git_tree_new(zend_class_entry *ce TSRMLS_DC)
 
 	retval.handle = zend_objects_store_put(obj, 
         (zend_objects_store_dtor_t)zend_objects_destroy_object,
-        (zend_objects_free_object_storage_t)php_git_tree_free_storage,
+        (zend_objects_free_object_storage_t)php_git_repository_tree_free_storage,
         NULL TSRMLS_CC);
 	retval.handlers = zend_get_std_object_handlers();
 	return retval;
@@ -171,7 +171,7 @@ PHP_METHOD(git_tree, write)
 }
 
 // GitTree
-PHPAPI function_entry php_git_tree_methods[] = {
+PHPAPI function_entry php_git_repository_tree_methods[] = {
     PHP_ME(git_tree, count, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, path, arginfo_git_tree_path, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, add,  arginfo_git_tree_add, ZEND_ACC_PUBLIC)
@@ -183,8 +183,8 @@ PHPAPI function_entry php_git_tree_methods[] = {
 void git_init_tree(TSRMLS_D)
 {
     zend_class_entry git_tree_ce;
-    INIT_CLASS_ENTRY(git_tree_ce, "GitTree", php_git_tree_methods);
+    INIT_CLASS_ENTRY(git_tree_ce, "GitTree", php_git_repository_tree_methods);
     git_tree_class_entry = zend_register_internal_class(&git_tree_ce TSRMLS_CC);
-	git_tree_class_entry->create_object = php_git_tree_new;
+	git_tree_class_entry->create_object = php_git_repository_tree_new;
     zend_class_implements(git_tree_class_entry TSRMLS_CC, 1, spl_ce_Countable);
 }

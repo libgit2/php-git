@@ -22,7 +22,7 @@
      public function testConstruct()
      {
          try{
-            $git = new Git(PHP_GIT_FIXTURE_DIR . "/fixture.git");
+            $git = new GitRepository(PHP_GIT_FIXTURE_DIR . "/fixture.git");
             $commit = $git->getCommit("7caa5b63e5fe4596543378e47b5225b6a1fa2dee");
          }catch(\Exception $e){
              $this->fail();

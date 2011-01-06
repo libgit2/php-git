@@ -34,7 +34,7 @@
      
      public function testGetTree()
      {
-        $git = new Git("./.git");
+        $git = new GitRepository("./.git");
         $tree= $git->getTree("c40b970eb68bd1c8980f1f97b57396f4c7ae107f");
         $this->assertInstanceof("GitTree",$tree);
         $this->assertEquals("c40b970eb68bd1c8980f1f97b57396f4c7ae107f",$tree->getId());
@@ -42,14 +42,14 @@
      
      public function testRepositoryInit()
      {
-         $repo = Git::init("/tmp/uhi",1);
+         $repo = GitRepository::init("/tmp/uhi",1);
          $this->assertInstanceof("Git",$repo);
      }
 
      public function testConstruct()
      {
          try{
-             $git = new Git("./.git");
+             $git = new GitRepository("./.git");
          }catch(\Exception $e){
              $this->fail();
          }
@@ -60,7 +60,7 @@
 
 //        $this->markTestIncomplete("testGetIndex not implemented yet");
 
-         $git = new Git("./.git");
+         $git = new GitRepository("./.git");
          $index = $git->getIndex();
          if($index instanceof GitIndex){
              return true;

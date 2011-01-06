@@ -76,7 +76,7 @@ PHP_METHOD(git_commit, __construct)
     }
     object_init_ex(object, git_commit_class_entry);
     php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(object TSRMLS_CC);
-    php_git_t *myobj = (php_git_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
+    php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
 
     
     ret = git_commit_new(&commit,myobj->repository);

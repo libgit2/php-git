@@ -32,7 +32,7 @@ class GitRevwalkTest extends \PHPUnit_Framework_TestCase
     
     public function testGetWalker()
     {
-        $git = new Git(".git");
+        $git = new GitRepository(".git");
         $walker = $git->getWalker();
         $this->assertInstanceOf("GitWalker",$walker);
         unset($git);
@@ -40,7 +40,7 @@ class GitRevwalkTest extends \PHPUnit_Framework_TestCase
     
     public function testPush()
     {
-        $git = new Git(".git");
+        $git = new GitRepository(".git");
         $walker = $git->getWalker();
         $walker->push("1def80657903dcf8d9d87a5e4edfaca92ddcff38");
         $commit = $walker->next();
@@ -50,7 +50,7 @@ class GitRevwalkTest extends \PHPUnit_Framework_TestCase
     
     public function testRest()
     {
-        $git = new Git(".git");
+        $git = new GitRepository(".git");
         $walker = $git->getWalker();
         $walker->push("1def80657903dcf8d9d87a5e4edfaca92ddcff38");
         $walker->reset();
@@ -65,7 +65,7 @@ class GitRevwalkTest extends \PHPUnit_Framework_TestCase
             Git::SORT_REVERSE
             先にPHPのarrayにしてuserspaceでの対応にするか悩む
         */
-        $git = new Git(".git");
+        $git = new GitRepository(".git");
         $walker = $git->getWalker();
         $walker->sort(Git::SORT_NONE);
         $walker->push("1def80657903dcf8d9d87a5e4edfaca92ddcff38");

@@ -50,6 +50,7 @@ extern zend_module_entry git_module_entry;
 }	\
 
 PHPAPI zend_class_entry *git_class_entry;
+PHPAPI zend_class_entry *git_repository_class_entry;
 PHPAPI zend_class_entry *git_index_class_entry;
 PHPAPI zend_class_entry *git_walker_class_entry;
 PHPAPI zend_class_entry *git_tree_class_entry;
@@ -72,7 +73,7 @@ typedef struct{
 typedef struct{
     zend_object zo;
     git_repository *repository;
-} php_git_t;
+} php_git_repository_t;
 
 typedef struct{
     zend_object zo;
