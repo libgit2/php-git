@@ -59,7 +59,6 @@ zend_object_value php_git_commit_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
-//GitCommit
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, repository)
 ZEND_END_ARG_INFO()
@@ -274,6 +273,46 @@ PHP_METHOD(git_commit, setTree)
 }
 
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_message, 0, 0, 1)
+    ZEND_ARG_INFO(0, message)
+ZEND_END_ARG_INFO()
+PHP_METHOD(git_commit, setMessage)
+{
+    php_git_commit_t *this;
+    char *message;
+    int message_len = 0;
+    int ret;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &message, &message_len) == FAILURE){
+        return;
+    }
+    this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_commit_set_message(this->commit,message);
+
+    RETURN_TRUE;
+}
+
+
+PHP_METHOD(git_commit, getMessage)
+{
+    php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    char *message;
+    
+    message = git_commit_message(this->commit);
+    RETURN_STRING(message,1 TSRMLS_C);
+}
+
+PHP_METHOD(git_commit, getShortMessage)
+{
+    php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    char *message;
+    
+    message = git_commit_message_short(this->commit);
+    RETURN_STRING(message,1 TSRMLS_C);
+}
+
 PHP_METHOD(git_commit, getAuthor)
 {
     zval *object = getThis();
@@ -288,6 +327,9 @@ PHPAPI function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, getAuthor, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setCommitter,  arginfo_git_commit_set_committer, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getCommitter,  NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, setMessage,  arginfo_git_commit_set_message, ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, getMessage,  arginfo_git_commit_set_message, ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, getShortMessage,  arginfo_git_commit_set_message, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, write, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setParent, arginfo_git_commit_set_parent, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
