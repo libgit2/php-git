@@ -75,7 +75,7 @@ PHP_METHOD(git_repository, init)
         return;
     }
 
-    int suc = git_repository_init(&repository,"/tmp/uhi",is_bare);
+    int suc = git_repository_init(&repository,path,is_bare);
 
     if(suc != 0){
         php_printf("can't create repository\n");
@@ -83,12 +83,12 @@ PHP_METHOD(git_repository, init)
     }
     
     MAKE_STD_ZVAL(obj);
-    object_init_ex(obj, git_class_entry);
+    object_init_ex(obj, git_repository_class_entry);
     php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(obj TSRMLS_CC);
     myobj->repository = repository;
 
     add_property_string_ex(obj, "path",5,path, 1 TSRMLS_CC);
-    RETURN_ZVAL(obj, 1, 0);
+    RETURN_ZVAL(obj, 1, 1);
 }
 
 PHP_METHOD(git_repository, getIndex)
@@ -339,6 +339,7 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_repository, getTree)
 {
+    //FIXME
     zval *object = getThis();
     git_repository *repository;
     git_tree *tree;

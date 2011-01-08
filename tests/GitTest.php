@@ -43,7 +43,8 @@
      public function testRepositoryInit()
      {
          $repo = GitRepository::init("/tmp/uhi",1);
-         $this->assertInstanceof("Git",$repo);
+         $this->assertEquals("/tmp/uhi",file_exists("/tmp/uhi"));
+         $this->assertInstanceof("GitRepository",$repo);
      }
 
      public function testConstruct()
