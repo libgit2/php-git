@@ -39,6 +39,7 @@ PHPAPI function_entry php_git_rawobject_methods[] = {
 void git_init_rawobject(TSRMLS_D)
 {
     zend_class_entry git_rawobject_ce;
-    INIT_CLASS_ENTRY(git_rawobject_ce, "GitRawObject", php_git_rawobject_methods);
+    INIT_NS_CLASS_ENTRY(git_rawobject_ce, PHP_GIT_NS,"RawObject", php_git_rawobject_methods);
+
     git_rawobject_class_entry = zend_register_internal_class(&git_rawobject_ce TSRMLS_CC);
 }

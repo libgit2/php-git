@@ -21,7 +21,7 @@
      
      public function testSignatureConstruct()
      {
-         $signature = new GitSignature("Name","sample@example.com",1294147094);
+         $signature = new Git\Signature("Name","sample@example.com",1294147094);
          
          $this->assertEquals("Name",$signature->name);
          $this->assertEquals("sample@example.com",$signature->email);

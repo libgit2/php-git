@@ -44,6 +44,7 @@ void git_init_object(TSRMLS_D)
 };
 */
     zend_class_entry git_object_ce;
-    INIT_CLASS_ENTRY(git_object_ce, "GitObject", php_git_object_methods);
+    INIT_NS_CLASS_ENTRY(git_object_ce, PHP_GIT_NS,"Object", php_git_object_methods);
+
     git_object_class_entry = zend_register_internal_class(&git_object_ce TSRMLS_CC);
 }

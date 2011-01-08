@@ -506,7 +506,8 @@ PHPAPI function_entry php_git_repository_methods[] = {
 void php_git_repository_init(TSRMLS_D)
 {
     zend_class_entry ce;
-    INIT_CLASS_ENTRY(ce, "GitRepository", php_git_repository_methods);
+    INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Repository", php_git_repository_methods);
+
     git_repository_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	git_repository_class_entry->create_object = php_git_repository_new;
 }

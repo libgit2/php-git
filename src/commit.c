@@ -338,7 +338,8 @@ PHPAPI function_entry php_git_commit_methods[] = {
 void git_init_commit(TSRMLS_C)
 {
     zend_class_entry git_commit_ce;
-    INIT_CLASS_ENTRY(git_commit_ce, "GitCommit", php_git_commit_methods);
+    INIT_NS_CLASS_ENTRY(git_commit_ce, PHP_GIT_NS,"Commit", php_git_commit_methods);
+
     git_commit_class_entry = zend_register_internal_class(&git_commit_ce TSRMLS_CC);
 	git_commit_class_entry->create_object = php_git_commit_new;
     zend_declare_property_null(git_commit_class_entry, "author",sizeof("author")-1, ZEND_ACC_PUBLIC TSRMLS_CC);

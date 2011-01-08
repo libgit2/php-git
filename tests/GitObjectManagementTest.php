@@ -33,7 +33,7 @@ class GitObjectManagementTest extends \PHPUnit_Framework_TestCase
     
     public function testObjectGetId()
     {
-        $git = new GitRepository(".git");
+        $git = new Git\Repository(".git");
         $this->markTestIncomplete("getObjectで問題が発生している");
         /*
         $obj = $git->getObject("6c4a06776164f960307341033a7e5271c0b2c669");
@@ -52,10 +52,10 @@ class GitObjectManagementTest extends \PHPUnit_Framework_TestCase
     public function getStringToTypeSpecifications()
     {
         $array = array();
-        $array[] = array(Git::OBJ_COMMIT,"commit","commit type id");
-        $array[] = array(Git::OBJ_BLOB,  "blob",  "blob type id");
-        $array[] = array(Git::OBJ_TREE,  "tree",  "tree type id");
-        $array[] = array(Git::OBJ_TAG,   "tag",   "tag type id");
+        $array[] = array(Git\Object\Commit,"commit","commit type id");
+        $array[] = array(Git\Object\Blob,  "blob",  "blob type id");
+        $array[] = array(Git\Object\Tree,  "tree",  "tree type id");
+        $array[] = array(Git\Object\Tag,   "tag",   "tag type id");
 
         return $array;
     }
@@ -71,10 +71,10 @@ class GitObjectManagementTest extends \PHPUnit_Framework_TestCase
     public function getTypeToStringSpecifications()
     {
         $array = array();
-        $array[] = array("commit",Git::OBJ_COMMIT,"commit type string");
-        $array[] = array("blob",  Git::OBJ_BLOB,  "blob type string");
-        $array[] = array("tree",  Git::OBJ_TREE,  "tree type string");
-        $array[] = array("tag",   Git::OBJ_TAG,   "tag type string");
+        $array[] = array("commit",Git\Object\Commit,"commit type string");
+        $array[] = array("blob",  Git\Object\Blob,  "blob type string");
+        $array[] = array("tree",  Git\Object\Tree,  "tree type string");
+        $array[] = array("tag",   Git\Object\Tag,   "tag type string");
         return $array;
     }
 

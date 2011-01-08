@@ -370,7 +370,8 @@ PHPAPI function_entry php_git_index_methods[] = {
 void git_index_init(TSRMLS_D)
 {
     zend_class_entry git_index_ce;
-    INIT_CLASS_ENTRY(git_index_ce,"GitIndex",php_git_index_methods);
+    INIT_NS_CLASS_ENTRY(git_index_ce, PHP_GIT_NS,"Index", php_git_index_methods);
+
     git_index_class_entry = zend_register_internal_class(&git_index_ce TSRMLS_CC);
 	git_index_class_entry->create_object = php_git_index_new;
     zend_class_implements(git_index_class_entry TSRMLS_CC, 2, spl_ce_Countable, spl_ce_Iterator);

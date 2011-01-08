@@ -183,7 +183,7 @@ PHPAPI function_entry php_git_tree_methods[] = {
 void git_init_tree(TSRMLS_D)
 {
     zend_class_entry git_tree_ce;
-    INIT_CLASS_ENTRY(git_tree_ce, "GitTree", php_git_tree_methods);
+    INIT_NS_CLASS_ENTRY(git_tree_ce, PHP_GIT_NS,"Tree", php_git_tree_methods);
     git_tree_class_entry = zend_register_internal_class(&git_tree_ce TSRMLS_CC);
 	git_tree_class_entry->create_object = php_git_tree_new;
     zend_class_implements(git_tree_class_entry TSRMLS_CC, 1, spl_ce_Countable);

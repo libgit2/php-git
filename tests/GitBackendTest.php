@@ -19,7 +19,7 @@ class GitBackendTest extends \PHPUnit_Framework_TestCase
     
     public function testReadMethodExists()
     {
-        $reflection = new \ReflectionClass("GitBackend");
+        $reflection = new \ReflectionClass("Git\\Backend");
         $method = $reflection->getMethod("read");
         $this->assertEquals(true,$method->isPublic());
 
@@ -31,7 +31,7 @@ class GitBackendTest extends \PHPUnit_Framework_TestCase
 
     public function testWriteMethodExists()
     {
-        $reflection = new \ReflectionClass("GitBackend");
+        $reflection = new \ReflectionClass("Git\\Backend");
         $method = $reflection->getMethod("write");
         $this->assertEquals(true,$method->isPublic());
 
@@ -43,7 +43,7 @@ class GitBackendTest extends \PHPUnit_Framework_TestCase
 
     public function testExistsMethodExists()
     {
-        $reflection = new \ReflectionClass("GitBackend");
+        $reflection = new \ReflectionClass("Git\\Backend");
         $method = $reflection->getMethod("exists");
         $this->assertEquals(true,$method->isPublic());
 
@@ -55,7 +55,7 @@ class GitBackendTest extends \PHPUnit_Framework_TestCase
 
     public function testReadHeaderMethodExists()
     {
-        $reflection = new \ReflectionClass("GitBackend");
+        $reflection = new \ReflectionClass("Git\\Backend");
         $method = $reflection->getMethod("read_header");
         $this->assertEquals(true,$method->isPublic());
 
@@ -67,7 +67,7 @@ class GitBackendTest extends \PHPUnit_Framework_TestCase
 
     public function testConstructMethodExists()
     {
-        $reflection = new \ReflectionClass("GitBackend");
+        $reflection = new \ReflectionClass("Git\\Backend");
         $method = $reflection->getMethod("__construct");
         $this->assertEquals(true,$method->isPublic());
 

@@ -204,7 +204,7 @@ PHPAPI function_entry php_git_walker_methods[] = {
 void git_init_walker(TSRMLS_D)
 {
     zend_class_entry git_walker_ce;
-    INIT_CLASS_ENTRY(git_walker_ce,"GitWalker",php_git_walker_methods);
+    INIT_NS_CLASS_ENTRY(git_walker_ce, PHP_GIT_NS,"Revwalk", php_git_walker_methods);
     git_walker_class_entry = zend_register_internal_class(&git_walker_ce TSRMLS_CC);
 	git_walker_class_entry->create_object = php_git_walker_new;
 }

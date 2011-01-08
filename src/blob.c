@@ -113,7 +113,8 @@ void git_init_blob(TSRMLS_D)
 };
 */
     zend_class_entry ce;
-    INIT_CLASS_ENTRY(ce, "GitBlob", php_git_blob_methods);
+    INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Blob", php_git_blob_methods);
+
     git_blob_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	git_blob_class_entry->create_object = php_git_blob_new;
 

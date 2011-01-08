@@ -98,7 +98,8 @@ PHPAPI function_entry php_git_signature_methods[] = {
 void git_init_signature(TSRMLS_D)
 {
     zend_class_entry git_signature_ce;
-    INIT_CLASS_ENTRY(git_signature_ce, "GitSignature", php_git_signature_methods);
+    INIT_NS_CLASS_ENTRY(git_signature_ce, PHP_GIT_NS,"Signature", php_git_signature_methods);
+
     git_signature_class_entry = zend_register_internal_class(&git_signature_ce TSRMLS_CC);
     git_signature_class_entry->create_object = php_git_signature_new;
 }
