@@ -493,6 +493,44 @@ PHP_METHOD(git_repository, getBranch)
     RETVAL_STRINGL(buf,40,1 TSRMLS_DC);
 }
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_update, 0, 0, 2)
+    ZEND_ARG_INFO(0, branch)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git_repository, update)
+{
+    zval *object = getThis();
+    zval *prop;
+    git_repository *repository;
+    char *branch;
+    char *hash;
+    int hash_len = 0;
+    int branch_len = 0;
+    char buf[255];
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "ss", &branch, &branch_len, &hash, &hash_len) == FAILURE){
+        return;
+    }
+
+    php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
+    repository = myobj->repository;
+
+    prop = zend_read_property(git_class_entry,object,"path",4,0 TSRMLS_DC);
+    char *uhi = Z_STRVAL_P(prop);
+    
+    FILE *fp;
+    sprintf(&buf,"%s/refs/heads/%s",uhi,branch);
+    if((fp = fopen(&buf,"w")) == NULL){
+        php_error_docref(NULL TSRMLS_CC, E_WARNING,"specified branch name not found");
+        return;
+    }
+    fputs(hash,fp);
+    fclose(fp);
+}
+
 PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, __construct, arginfo_git_construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getCommit, arginfo_git_get_commit, ZEND_ACC_PUBLIC)
@@ -502,6 +540,7 @@ PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, getWalker, arginfo_git_walker, ZEND_ACC_PUBLIC) // FIXME
     PHP_ME(git_repository, getTree, arginfo_git_get_tree, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    PHP_ME(git_repository, update, arginfo_git_update, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, addBackend, arginfo_git_add_backend, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
