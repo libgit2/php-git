@@ -28,14 +28,14 @@
 #include <string.h>
 #include <time.h>
 
-PHPAPI function_entry php_git_repository_tag_methods[] = {
+PHPAPI function_entry php_git_tag_methods[] = {
     {NULL, NULL, NULL}
 };
 
 void git_init_tag(TSRMLS_D)
 {
     zend_class_entry git_tag_ce;
-    INIT_CLASS_ENTRY(git_tag_ce, "GitTag", php_git_repository_tag_methods);
+    INIT_CLASS_ENTRY(git_tag_ce, "GitTag", php_git_tag_methods);
     git_tag_class_entry = zend_register_internal_class(&git_tag_ce TSRMLS_CC);
     zend_declare_property_null(git_tag_class_entry, "name",sizeof("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(git_tag_class_entry, "tagger",sizeof("tagger")-1, ZEND_ACC_PUBLIC TSRMLS_CC);

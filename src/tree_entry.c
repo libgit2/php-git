@@ -28,7 +28,7 @@
 #include <string.h>
 #include <time.h>
 
-static void php_git_repository_tree_entry_free_storage(php_git_tree_entry_t *obj TSRMLS_DC)
+static void php_git_tree_entry_free_storage(php_git_tree_entry_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     
@@ -36,7 +36,7 @@ static void php_git_repository_tree_entry_free_storage(php_git_tree_entry_t *obj
     efree(obj);
 }
 
-zend_object_value php_git_repository_tree_entry_new(zend_class_entry *ce TSRMLS_DC)
+zend_object_value php_git_tree_entry_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
 	php_git_tree_entry_t *obj;
@@ -48,7 +48,7 @@ zend_object_value php_git_repository_tree_entry_new(zend_class_entry *ce TSRMLS_
 
 	retval.handle = zend_objects_store_put(obj, 
         (zend_objects_store_dtor_t)zend_objects_destroy_object,
-        (zend_objects_free_object_storage_t)php_git_repository_tree_entry_free_storage,
+        (zend_objects_free_object_storage_t)php_git_tree_entry_free_storage,
         NULL TSRMLS_CC);
 	retval.handlers = zend_get_std_object_handlers();
 	return retval;
@@ -84,7 +84,7 @@ PHP_METHOD(git_tree_entry, setId)
 }
 
 
-PHPAPI function_entry php_git_repository_tree_entry_methods[] = {
+PHPAPI function_entry php_git_tree_entry_methods[] = {
     PHP_ME(git_tree_entry, setId, arginfo_git_tree_entry_set_id, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
@@ -92,7 +92,7 @@ PHPAPI function_entry php_git_repository_tree_entry_methods[] = {
 void git_init_tree_entry(TSRMLS_D)
 {
     zend_class_entry git_tree_entry_ce;
-    INIT_CLASS_ENTRY(git_tree_entry_ce, "GitTreeEntry", php_git_repository_tree_entry_methods);
+    INIT_CLASS_ENTRY(git_tree_entry_ce, "GitTreeEntry", php_git_tree_entry_methods);
     git_tree_entry_class_entry = zend_register_internal_class(&git_tree_entry_ce TSRMLS_CC);
-	git_tree_entry_class_entry->create_object = php_git_repository_tree_entry_new;
+	git_tree_entry_class_entry->create_object = php_git_tree_entry_new;
 }
