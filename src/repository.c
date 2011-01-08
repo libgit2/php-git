@@ -479,10 +479,13 @@ PHP_METHOD(git_repository, getBranch)
     prop = zend_read_property(git_class_entry,object,"path",4,0 TSRMLS_DC);
     char *uhi = Z_STRVAL_P(prop);
     
-    //FIXME: 適当すぎる
+    //FIXME
     FILE *fp;
     sprintf(&buf,"%s/refs/heads/%s",uhi,branch);
-    fp = fopen(&buf,"r");
+    if((fp = fopen(&buf,"r")) == NULL){
+        php_error_docref(NULL TSRMLS_CC, E_WARNING,"specified branch name not found");
+        return;
+    }
     memset(buf,0,sizeof(buf));
     fread(buf,1,40,fp);
     fclose(fp);
