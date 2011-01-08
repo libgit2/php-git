@@ -148,10 +148,45 @@ PHP_METHOD(git_walker, next)
     //printf("commit:%s\n",signature->email);
 
     MAKE_STD_ZVAL(git_commit_object);
-    object_init(git_commit_object);
+    object_init_ex(git_commit_object,git_commit_class_entry);
     git_oid_fmt(&oid,git_commit_id(commit));
 
-    add_property_string_ex(git_commit_object,"oid",4, &oid, 1 TSRMLS_DC);
+
+            //コピペ
+            git_signature *sig;
+            zval *committer;
+            zval *author;
+            MAKE_STD_ZVAL(author);
+            char *name;
+            char out[40];
+            object_init_ex(author,git_signature_class_entry);
+            sig = git_commit_author(commit);
+            add_property_string(author,"name",sig->name,1 TSRMLS_CC);
+            add_property_string(author,"email",sig->email,1 TSRMLS_CC);
+            add_property_long(author,"time",sig->when.time);
+
+            MAKE_STD_ZVAL(committer);
+            object_init_ex(committer,git_signature_class_entry);
+
+            sig = git_commit_committer(commit);
+            add_property_string(committer,"name",sig->name,1 TSRMLS_CC);
+            add_property_string(committer,"email",sig->email,1 TSRMLS_CC);
+            add_property_long(committer,"time",sig->when.time);
+
+
+            sig = git_commit_author(commit);
+            git_tree *tree = git_commit_tree(commit);
+            git_oid *tree_oid;
+            tree_oid = git_tree_id(tree);
+            git_oid_to_string(&out,41,tree_oid);
+            //add_property_string(git_raw_object,"tree", out,1);
+
+            add_property_zval(git_commit_object,"author", author);
+            add_property_zval(git_commit_object,"committer", committer);
+            //Endコピペ
+
+
+    add_property_string_ex(git_commit_object,"oid",4, &out, 1 TSRMLS_DC);
     add_property_string_ex(git_commit_object,"message",8, git_commit_message(commit), 1 TSRMLS_DC);
     add_property_string_ex(git_commit_object,"message_short",14, git_commit_message_short(commit), 1 TSRMLS_DC);
     //add_property_string_ex(git_commit_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
