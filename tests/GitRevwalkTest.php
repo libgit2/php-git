@@ -44,7 +44,7 @@ class GitRevwalkTest extends \PHPUnit_Framework_TestCase
         $walker = $git->getWalker();
         $walker->push("1def80657903dcf8d9d87a5e4edfaca92ddcff38");
         $commit = $walker->next();
-        $this->assertInstanceof("stdClass",$commit);
+        $this->assertInstanceof("Git\\Commit",$commit);
         unset($git);
     }
     
@@ -69,6 +69,6 @@ class GitRevwalkTest extends \PHPUnit_Framework_TestCase
         $walker = $git->getWalker();
         $walker->sort(Git\Revwalk\SORT_NONE);
         $walker->push("1def80657903dcf8d9d87a5e4edfaca92ddcff38");
-        $this->assertInstanceof("stdClass",$walker->next());
+        $this->assertInstanceof("Git\\Commit",$walker->next());
     }
 }
