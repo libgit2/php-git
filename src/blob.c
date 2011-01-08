@@ -96,7 +96,35 @@ PHP_METHOD(git_blob, getId)
 }
 
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blob__construct, 0, 0, 1)
+    ZEND_ARG_INFO(0, repository)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git_blob, __construct)
+{
+    zval *z_repository;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "z", &z_repository) == FAILURE){
+        return;
+    }
+
+    php_git_repository_t *git = (php_git_repository_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
+    php_git_blob_t *obj = (php_git_blob_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    
+    int ret = git_blob_new(&obj->blob,git->repository);
+
+    if(ret != GIT_SUCCESS){
+        php_printf("can't create new blob");
+    }
+}
+
+
+
+
 PHPAPI function_entry php_git_blob_methods[] = {
+    PHP_ME(git_blob, __construct, arginfo_git_blob__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_blob, getId, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_blob, write, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}

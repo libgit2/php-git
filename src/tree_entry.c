@@ -76,12 +76,13 @@ PHP_METHOD(git_tree_entry, setId)
 
     char out[40];
     git_oid_to_string(&out,41,git_tree_entry_id(this->entry));
-    printf(">oid<: %s\n",out);
     
     add_property_string(getThis(), "oid", hash, 1 TSRMLS_C);
     
     RETVAL_STRING(hash, 1);
 }
+
+
 
 
 PHPAPI function_entry php_git_tree_entry_methods[] = {
@@ -95,4 +96,9 @@ void git_init_tree_entry(TSRMLS_D)
     INIT_NS_CLASS_ENTRY(git_tree_entry_ce, ZEND_NS_NAME(PHP_GIT_NS,"Tree"),"Entry", php_git_tree_entry_methods);
     git_tree_entry_class_entry = zend_register_internal_class(&git_tree_entry_ce TSRMLS_CC);
 	git_tree_entry_class_entry->create_object = php_git_tree_entry_new;
+
+    zend_declare_property_null(git_tree_entry_class_entry, "name",sizeof("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_tree_entry_class_entry, "oid",sizeof("oid")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_tree_entry_class_entry, "attr",sizeof("attr")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+
 }

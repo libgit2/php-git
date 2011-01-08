@@ -118,25 +118,14 @@ PHP_METHOD(git_tree, add)
     }
     
     php_git_tree_t *myobj = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    tree = myobj->tree;
     //php_printf("tree-oid: %s\n",Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,1 TSRMLS_CC)));
     git_oid_mkstr(&oid, Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,1 TSRMLS_CC)));
     filename = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"name",4,1 TSRMLS_CC));
     attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"attr",4,1 TSRMLS_CC));
-    //git_tree_add_entry (git_tree *tree, const git_oid *id, const char *filename, int attributes)
-
-    char uhi[40];
-    git_oid *mo;
-    git_oid_to_string(uhi,41,&oid);
-    //printf("oid: %s\n",uhi);
-    //printf("path: %s\n",filename);
-    mo = git_tree_id(tree);
-    git_oid_to_string(&uhi,41,mo);
-    //printf("tree-oid: %s\n",uhi);
     
-    git_tree_remove_entry_byname(tree, filename);
-    git_tree_add_entry(tree, &oid, filename, attr);
-
+    git_tree_add_entry(myobj->tree, &oid, filename, attr);
+    
+/*
     int ret = git_object_write((git_object *)tree);
     if(ret != GIT_SUCCESS){
         php_printf("can't write object");
@@ -148,6 +137,7 @@ PHP_METHOD(git_tree, add)
     git_oid_to_string(&out,41,om);
     
     RETVAL_STRING(&out, 1);
+*/
 }
 
 PHP_METHOD(git_tree, write)
@@ -170,8 +160,33 @@ PHP_METHOD(git_tree, write)
     }
 }
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree__construct, 0, 0, 1)
+    ZEND_ARG_INFO(0, repository)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git_tree, __construct)
+{
+    zval *z_repository;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "z", &z_repository) == FAILURE){
+        return;
+    }
+
+    php_git_repository_t *git = (php_git_repository_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
+    php_git_tree_t *obj = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    
+    int ret = git_tree_new(&obj->tree,git->repository);
+
+    if(ret != GIT_SUCCESS){
+        php_printf("can't create new tree");
+    }
+}
+
 // GitTree
 PHPAPI function_entry php_git_tree_methods[] = {
+    PHP_ME(git_tree, __construct, arginfo_git_tree__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, count, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, path, arginfo_git_tree_path, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, add,  arginfo_git_tree_add, ZEND_ACC_PUBLIC)
