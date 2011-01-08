@@ -24,6 +24,7 @@
 
 #include "php_git.h"
 #include <spl/spl_array.h>
+#include <date/php_date.h>
 #include <zend_interfaces.h>
 #include <string.h>
 #include <time.h>
@@ -71,21 +72,47 @@ PHP_METHOD(git_signature, __construct)
     int name_len = 0;
     char *email;
     int email_len = 0;
-    int time = 0;
+    zval *time;
     php_git_signature_t *myobj;
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "ssl", &name, &name_len, &email, &email_len, &time) == FAILURE){
+        "ssz", &name, &name_len, &email, &email_len, &time) == FAILURE){
         return;
     }
 
+    if(!instanceof_function(Z_OBJCE_P(time), php_date_get_date_ce() TSRMLS_CC)){
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git\\Signature third parameter must be DateTime instance.");
+        return;
+    }
     myobj = (php_git_signature_t *) zend_object_store_get_object(this TSRMLS_CC);
     //Todo: timeはDateTime型にしたい
-    myobj->signature = git_signature_new(name,email,ctime(name),0);
+
+	zval *retval;
+    zval *offset;
+    zval func;
+    zval func2;
+    ZVAL_STRING(&func,"getTimestamp", 1);
+
+	MAKE_STD_ZVAL(retval);
+	ZVAL_NULL(retval);
+	MAKE_STD_ZVAL(offset);
+	ZVAL_NULL(offset);
+
+    call_user_function(EG(function_table),&time,&func,retval,0,NULL TSRMLS_CC);
+    
+    ZVAL_STRING(&func2,"getOffset", 1);
+    call_user_function(EG(function_table),&time,&func2,offset,0,NULL TSRMLS_CC);
+
+    myobj->signature = git_signature_new(name,email,Z_LVAL_P(retval),Z_LVAL_P(offset)/60);
 
     add_property_string_ex(this,"name", 5, name, 1 TSRMLS_CC);
     add_property_string_ex(this,"email",6, email, 1 TSRMLS_CC);
-    add_property_long(this,"time",time);
+    add_property_long(this,"time",Z_LVAL_P(retval));
+
+	zval_ptr_dtor(&retval);
+    zval_dtor(&func);
+	zval_ptr_dtor(&offset);
+    zval_dtor(&func2);
 }
 
 // GitSignature
