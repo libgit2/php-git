@@ -437,7 +437,7 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(git_repository, addBackend)
 {
     zval *backend;
-    php_git_repository_t *php_git;
+    php_git_repository_t *this = (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_odb_backend *odb_backend;
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &backend) == FAILURE){
         return;
@@ -446,12 +446,16 @@ PHP_METHOD(git_repository, addBackend)
     //FIXME
     if(!instanceof_function(Z_OBJCE_P(backend), git_backend_class_entry TSRMLS_CC)){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"backend must extends GitBackend");
-
         RETURN_FALSE;
     }
+    php_git_backend_t *b = (php_git_backend_t *) zend_object_store_get_object(backend TSRMLS_CC);
     
-    //php_git = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
-    //git_odb_add_backend(git_repository_database(php_git->repository),(git_odb_backend *)backend);
+    printf("[%d]\n",((git_odb_backend *)b)->odb);
+    int ret = git_odb_add_backend(git_repository_database(this->repository),(git_odb_backend *)b);
+
+    if(ret != GIT_SUCCESS){
+        php_error_docref(NULL TSRMLS_CC, E_WARNING,"can't add backend");
+    }
 }
 
 
