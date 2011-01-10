@@ -1,5 +1,11 @@
 *.o
 
+# ignore build documents.
+
+docs/_build/*
+docs/_static/*
+docs/_templates/*
+
 # ignore your phpunit xml file.
 phpunit.xml
 
