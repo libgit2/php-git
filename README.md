@@ -45,6 +45,17 @@ INSTALL
 
 see php-git Wiki: <https://github.com/chobie/php-git/wiki>
 
+
+Documents
+=======================================================
+
+see php-git Documents: <http://php-git.chobie.co/>
+
+you can build with sphinx.
+
+  cd docs
+  make html
+
 AUTHORS
 =======================================================
 
@@ -55,8 +66,10 @@ LICENSE
 
 MIT Licence.
 
+
 Links
 =======================================================
 
 * libgit2: <https://github.com/libgit2/libgit2>
 * php-git_Redmine: <http://redmine.chobie.co/projects/pecl-git>
+* php-git documents: <http://php-git.chobie.co>
