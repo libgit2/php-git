@@ -100,8 +100,13 @@ typedef struct{
 } php_git_blob_t;
 
 typedef struct{
-    zend_object zo;
     git_odb_backend parent;
+    zval *self;
+} php_git_backend_internal;
+
+typedef struct{
+    zend_object zo;
+    php_git_backend_internal *backend;
 } php_git_backend_t;
 
 typedef struct{

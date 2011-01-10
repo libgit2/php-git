@@ -155,11 +155,11 @@ PHP_METHOD(git_repository, getObject)
     
     odb = git_repository_database(repository);
     
-    if(git_odb_exists(odb,hash)){
+    if(!git_odb_exists(odb,&oid)){
         RETURN_FALSE;
     }else{
         ret = git_blob_lookup(&blob, repository,&oid);
-        
+
         if(ret == GIT_SUCCESS){
             //FIXME: これでやるとPHPが異常終了しちゃう
             MAKE_STD_ZVAL(git_raw_object);
@@ -448,10 +448,9 @@ PHP_METHOD(git_repository, addBackend)
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"backend must extends GitBackend");
         RETURN_FALSE;
     }
+
     php_git_backend_t *b = (php_git_backend_t *) zend_object_store_get_object(backend TSRMLS_CC);
-    
-    printf("[%d]\n",((git_odb_backend *)b)->odb);
-    int ret = git_odb_add_backend(git_repository_database(this->repository),(git_odb_backend *)b);
+    int ret = git_odb_add_backend(git_repository_database(this->repository),(git_odb_backend *)b->backend);
 
     if(ret != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"can't add backend");
