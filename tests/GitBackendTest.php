@@ -26,7 +26,7 @@ class GitBackendTest extends \PHPUnit_Framework_TestCase
         $parameters = $method->getParameters();
 
         $this->assertEquals(1,count($parameters));
-        $this->assertEquals("oid",$parameters[0]->getname());
+        $this->assertEquals("key",$parameters[0]->getname());
     }
 
     public function testWriteMethodExists()
@@ -37,8 +37,9 @@ class GitBackendTest extends \PHPUnit_Framework_TestCase
 
         $parameters = $method->getParameters();
 
-        $this->assertEquals(1,count($parameters));
-        $this->assertEquals("object",$parameters[0]->getname());
+        $this->assertEquals(2,count($parameters));
+        $this->assertEquals("key",$parameters[0]->getname());
+        $this->assertEquals("object",$parameters[1]->getname());
     }
 
     public function testExistsMethodExists()
@@ -50,7 +51,7 @@ class GitBackendTest extends \PHPUnit_Framework_TestCase
         $parameters = $method->getParameters();
 
         $this->assertEquals(1,count($parameters));
-        $this->assertEquals("oid",$parameters[0]->getname());
+        $this->assertEquals("key",$parameters[0]->getname());
     }
 
     public function testReadHeaderMethodExists()
@@ -62,7 +63,7 @@ class GitBackendTest extends \PHPUnit_Framework_TestCase
         $parameters = $method->getParameters();
 
         $this->assertEquals(1,count($parameters));
-        $this->assertEquals("oid",$parameters[0]->getname());
+        $this->assertEquals("key",$parameters[0]->getname());
     }
 
     public function testConstructMethodExists()
