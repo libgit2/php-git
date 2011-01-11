@@ -40,6 +40,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tag_set_name, 0, 0, 1)
     ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tag_set_target, 0, 0, 1)
+    ZEND_ARG_INFO(0, target)
+ZEND_END_ARG_INFO()
+
 
 static void php_git_tag_free_storage(php_git_tag_t *obj TSRMLS_DC)
 {
@@ -98,6 +102,34 @@ PHP_METHOD(git_tag, getType)
     zval *type = zend_read_property(git_tag_class_entry, getThis(),"type",4, 0 TSRMLS_CC);
     RETVAL_LONG(type);
 }
+
+PHP_METHOD(git_tag, setTarget)
+{
+/*
+    This method must depends Git\Object
+
+    php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    zval *target;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "z", &target) == FAILURE){
+        return;
+    }
+
+    if(!instanceof_function(Z_OBJCE_P(target), git_object_class_entry TSRMLS_CC)){
+        // FIXME
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git\\Tag::setTarget only allow Git\\Object.");
+        return;
+    }
+    php_git_object_t *obj = (php_git_object_t *) zend_object_store_get_object(target TSRMLS_CC);
+    
+    git_tag_set_target(this->tag, obj->object);
+    // FIXME
+    //add_property_string_ex(getThis() ,"message",7,message, 1 TSRMLS_CC);
+*/
+}
+
+
 
 PHP_METHOD(git_tag, setMessage)
 {
@@ -161,6 +193,7 @@ PHPAPI function_entry php_git_tag_methods[] = {
 
     PHP_ME(git_tag, setMessage, arginfo_git_tag_set_message, ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, setName,    arginfo_git_tag_set_name,    ZEND_ACC_PUBLIC)
+    PHP_ME(git_tag, setTarget,  arginfo_git_tag_set_target,  ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
