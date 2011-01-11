@@ -36,6 +36,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tag_set_message, 0, 0, 1)
     ZEND_ARG_INFO(0, message)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tag_set_name, 0, 0, 1)
+    ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
 
 static void php_git_tag_free_storage(php_git_tag_t *obj TSRMLS_DC)
 {
@@ -85,7 +89,6 @@ PHP_METHOD(git_tag, getType)
 PHP_METHOD(git_tag, setMessage)
 {
     php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    php_git_repository_t *r_obj;
     zval *message;
     int message_len = 0;
     
@@ -97,6 +100,22 @@ PHP_METHOD(git_tag, setMessage)
     git_tag_set_message(this->tag, Z_STRVAL_P(message));
     add_property_string_ex(getThis() ,"message",7,message, 1 TSRMLS_CC);
 }
+
+PHP_METHOD(git_tag, setName)
+{
+    php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    zval *name;
+    int name_len = 0;
+    
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &name, &name_len) == FAILURE){
+        return;
+    }
+
+    git_tag_set_name(this->tag, Z_STRVAL_P(name));
+    add_property_string_ex(getThis() ,"name",4,name, 1 TSRMLS_CC);
+}
+
 
 
 PHP_METHOD(git_tag, __construct)
@@ -126,7 +145,8 @@ PHPAPI function_entry php_git_tag_methods[] = {
     PHP_ME(git_tag, getName,     NULL,                       ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getType,     NULL,                       ZEND_ACC_PUBLIC)
     
-    PHP_ME(git_tag, setMessage, arginfo_git_tag_set_message,ZEND_ACC_PUBLIC)
+    PHP_ME(git_tag, setMessage, arginfo_git_tag_set_message, ZEND_ACC_PUBLIC)
+    PHP_ME(git_tag, setName,    arginfo_git_tag_set_name,    ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
