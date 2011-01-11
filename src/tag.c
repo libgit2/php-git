@@ -72,6 +72,13 @@ PHP_METHOD(git_tag, getName)
     RETVAL_STRING(name,0);
 }
 
+PHP_METHOD(git_tag, getType)
+{
+    zval *type = zend_read_property(git_tag_class_entry, getThis(),"type",4, 0 TSRMLS_CC);
+    RETVAL_LONG(type);
+}
+
+
 
 PHP_METHOD(git_tag, __construct)
 {
@@ -98,6 +105,7 @@ PHPAPI function_entry php_git_tag_methods[] = {
     PHP_ME(git_tag, __construct, arginfo_git_tag__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getMessage,  NULL,                       ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getName,     NULL,                       ZEND_ACC_PUBLIC)
+    PHP_ME(git_tag, getType,     NULL,                       ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
