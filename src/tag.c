@@ -68,6 +68,19 @@ zend_object_value php_git_tag_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
+PHP_METHOD(git_tag, getId)
+{
+    php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_oid *oid;
+    char out[40];
+    
+    oid = git_tag_id(this->tag);
+    git_oid_to_string(out,GIT_OID_HEXSZ,oid);
+    
+    RETVAL_STRING(out,1);
+}
+
+
 PHP_METHOD(git_tag, getMessage)
 {
     zval *message = zend_read_property(git_tag_class_entry, getThis(),"message",7, 0 TSRMLS_CC);
@@ -144,7 +157,8 @@ PHPAPI function_entry php_git_tag_methods[] = {
     PHP_ME(git_tag, getMessage,  NULL,                       ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getName,     NULL,                       ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getType,     NULL,                       ZEND_ACC_PUBLIC)
-    
+    PHP_ME(git_tag, getId,       NULL,                       ZEND_ACC_PUBLIC)
+
     PHP_ME(git_tag, setMessage, arginfo_git_tag_set_message, ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, setName,    arginfo_git_tag_set_name,    ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
