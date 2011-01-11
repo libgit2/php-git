@@ -48,9 +48,11 @@ ZEND_END_ARG_INFO()
 static void php_git_tag_free_storage(php_git_tag_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
+
     if(obj->tag){
         obj->tag = NULL;
     }
+
     efree(obj);
 }
 
@@ -87,20 +89,20 @@ PHP_METHOD(git_tag, getId)
 
 PHP_METHOD(git_tag, getMessage)
 {
-    zval *message = zend_read_property(git_tag_class_entry, getThis(),"message",7, 0 TSRMLS_CC);
-    RETVAL_STRING(message,0);
+    zval *message = zend_read_property(git_tag_class_entry, getThis(),"message",sizeof("message"), 0 TSRMLS_CC);
+    RETURN_ZVAL(message,1,0);
 }
 
 PHP_METHOD(git_tag, getName)
 {
-    zval *name = zend_read_property(git_tag_class_entry, getThis(),"name",4, 0 TSRMLS_CC);
-    RETVAL_STRING(name,0);
+    zval *name = zend_read_property(git_tag_class_entry, getThis(),"name",sizeof("name"), 0 TSRMLS_CC);
+    RETVAL_ZVAL(name,1,0);
 }
 
 PHP_METHOD(git_tag, getType)
 {
-    zval *type = zend_read_property(git_tag_class_entry, getThis(),"type",4, 0 TSRMLS_CC);
-    RETVAL_LONG(type);
+    zval *type = zend_read_property(git_tag_class_entry, getThis(),"type",sizeof("type"), 0 TSRMLS_CC);
+    RETVAL_LONG(Z_LVAL_P(type));
 }
 
 PHP_METHOD(git_tag, setTarget)
@@ -134,22 +136,22 @@ PHP_METHOD(git_tag, setTarget)
 PHP_METHOD(git_tag, setMessage)
 {
     php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    zval *message;
+    char *message;
     int message_len = 0;
-    
+
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &message, &message_len) == FAILURE){
         return;
     }
 
-    git_tag_set_message(this->tag, Z_STRVAL_P(message));
-    add_property_string_ex(getThis() ,"message",7,message, 1 TSRMLS_CC);
+    git_tag_set_message(this->tag, message);
+    add_property_string_ex(getThis() ,"message",sizeof("message")+1,message,1 TSRMLS_CC);
 }
 
 PHP_METHOD(git_tag, setName)
 {
     php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    zval *name;
+    char *name;
     int name_len = 0;
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -157,8 +159,8 @@ PHP_METHOD(git_tag, setName)
         return;
     }
 
-    git_tag_set_name(this->tag, Z_STRVAL_P(name));
-    add_property_string_ex(getThis() ,"name",4,name, 1 TSRMLS_CC);
+    git_tag_set_name(this->tag, name);
+    add_property_string_ex(getThis() ,"name",sizeof("name")+1,name, 1 TSRMLS_CC);
 }
 
 
@@ -174,13 +176,19 @@ PHP_METHOD(git_tag, __construct)
         return;
     }
 
+
     if(!instanceof_function(Z_OBJCE_P(repository), git_repository_class_entry TSRMLS_CC)){
         // FIXME
         php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git\\Tag parameter only allow Git\\Repository.");
         return;
     }
     r_obj = (php_git_repository_t *) zend_object_store_get_object(repository TSRMLS_CC);
-    git_tag_new(this->tag,r_obj->repository);
+
+    int ret = git_tag_new(&this->tag,r_obj->repository);
+
+    if(ret != GIT_SUCCESS){
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't create Git\Tag.");
+    }
 }
 
 
