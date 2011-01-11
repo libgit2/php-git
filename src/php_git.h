@@ -114,4 +114,10 @@ typedef struct{
     git_signature *signature;
 } php_git_signature_t;
 
+typedef struct{
+    zend_object zo;
+    git_tag *tag;
+} php_git_tag_t;
+
+
 #endif /* PHP_GIT_H */
