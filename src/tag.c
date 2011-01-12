@@ -89,9 +89,6 @@ PHP_METHOD(git_tag, getName)
 
 PHP_METHOD(git_tag, setTarget)
 {
-/*
-    This method must depends Git\Object
-
     php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     zval *target;
 
@@ -108,11 +105,7 @@ PHP_METHOD(git_tag, setTarget)
     php_git_object_t *obj = (php_git_object_t *) zend_object_store_get_object(target TSRMLS_CC);
     
     git_tag_set_target(this->object, obj->object);
-    // FIXME
-    //add_property_string_ex(getThis() ,"message",7,message, 1 TSRMLS_CC);
-*/
 }
-
 
 
 PHP_METHOD(git_tag, setMessage)
