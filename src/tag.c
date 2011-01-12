@@ -86,6 +86,18 @@ PHP_METHOD(git_tag, getName)
     RETVAL_ZVAL(name,1,0);
 }
 
+PHP_METHOD(git_tag, getTarget)
+{
+    php_git_tag_t *tag = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_object *object;
+    git_otype type;
+    
+    object = git_tag_target(tag->object);
+    type = git_object_type(object);
+    // must return GIT_OBJ_TAG
+    //FIXME
+    
+}
 
 PHP_METHOD(git_tag, setTarget)
 {
@@ -171,6 +183,7 @@ PHPAPI function_entry php_git_tag_methods[] = {
     PHP_ME(git_tag, __construct, arginfo_git_tag__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getMessage,  NULL,                       ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getName,     NULL,                       ZEND_ACC_PUBLIC)
+    PHP_ME(git_tag, getTarget,   NULL,                       ZEND_ACC_PUBLIC)
 
     PHP_ME(git_tag, setMessage, arginfo_git_tag_set_message, ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, setName,    arginfo_git_tag_set_name,    ZEND_ACC_PUBLIC)
