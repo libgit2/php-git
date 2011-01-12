@@ -65,7 +65,7 @@ PHP_METHOD(git_object, getId)
     char out[40];
 
     oid = git_object_id((git_object *)this->object);
-    git_oid_to_string(out,GIT_OID_HEXSZ,oid);
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
     
     RETVAL_STRING(out,1);
 }
@@ -95,7 +95,7 @@ PHP_METHOD(git_object, write)
     }
 
     oid = git_object_id((git_object *)this->object);
-    git_oid_to_string(out,40,oid);
+    git_oid_to_string(out,41,oid);
     
     RETVAL_STRING(out,1);
 }

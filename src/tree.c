@@ -86,20 +86,6 @@ PHP_METHOD(git_tree, path)
     }
 }
 
-
-PHP_METHOD(git_tree, getId)
-{
-    zval *object = getThis();
-    git_oid *oid;
-    char out[40];
-    php_git_tree_t *git_tree = (php_git_tree_t *) zend_object_store_get_object(object TSRMLS_CC);
-    
-    oid = git_tree_id(git_tree->object);
-    git_oid_to_string(out,41,oid);
-    RETVAL_STRING(out,1);
-}
-
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_add, 0, 0, 1)
     ZEND_ARG_INFO(0, entry)
 ZEND_END_ARG_INFO()
@@ -140,26 +126,6 @@ PHP_METHOD(git_tree, add)
 */
 }
 
-PHP_METHOD(git_tree, write)
-{
-    zval *this = getThis();
-    php_git_tree_t *tree_t;
-    git_oid *oid;
-    char out[40];
-    int ret = 0;
-    tree_t = (php_git_tree_t *)zend_object_store_get_object(this TSRMLS_CC);
-    
-    ret = git_object_write((git_object *)tree_t->object);
-    if(ret == GIT_SUCCESS){
-        oid = git_object_id((git_object *)tree_t->object);
-        git_oid_to_string(&out,41,oid);
-        
-        RETVAL_STRINGL(out,40,1 TSRMLS_DC);
-    }else{
-        RETURN_FALSE;
-    }
-}
-
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, repository)
@@ -190,8 +156,6 @@ PHPAPI function_entry php_git_tree_methods[] = {
     PHP_ME(git_tree, count, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, path, arginfo_git_tree_path, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, add,  arginfo_git_tree_add, ZEND_ACC_PUBLIC)
-    PHP_ME(git_tree, getId,NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_tree, write, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
@@ -199,7 +163,7 @@ void git_init_tree(TSRMLS_D)
 {
     zend_class_entry git_tree_ce;
     INIT_NS_CLASS_ENTRY(git_tree_ce, PHP_GIT_NS,"Tree", php_git_tree_methods);
-    git_tree_class_entry = zend_register_internal_class(&git_tree_ce TSRMLS_CC);
+    git_tree_class_entry = zend_register_internal_class_ex(&git_tree_ce, git_object_class_entry, NULL TSRMLS_CC);
 	git_tree_class_entry->create_object = php_git_tree_new;
     zend_class_implements(git_tree_class_entry TSRMLS_CC, 1, spl_ce_Countable);
 }
