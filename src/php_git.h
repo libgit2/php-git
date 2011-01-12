@@ -46,6 +46,7 @@ extern zend_module_entry git_module_entry;
 
 PHPAPI zend_class_entry *git_class_entry;
 PHPAPI zend_class_entry *git_repository_class_entry;
+PHPAPI zend_class_entry *git_object_class_entry;
 PHPAPI zend_class_entry *git_index_class_entry;
 PHPAPI zend_class_entry *git_walker_class_entry;
 PHPAPI zend_class_entry *git_tree_class_entry;
@@ -54,9 +55,9 @@ PHPAPI zend_class_entry *git_commit_class_entry;
 PHPAPI zend_class_entry *git_signature_class_entry;
 PHPAPI zend_class_entry *git_rawobject_class_entry;
 PHPAPI zend_class_entry *git_tag_class_entry;
-PHPAPI zend_class_entry *git_object_class_entry;
 PHPAPI zend_class_entry *git_blob_class_entry;
 PHPAPI zend_class_entry *git_backend_class_entry;
+
 
 //これ外部に公開したくないんだけどやり方分からんので調べる
 typedef struct{
@@ -72,32 +73,15 @@ typedef struct{
 
 typedef struct{
     zend_object zo;
-    git_repository *repository;
-    git_tree *tree;
-} php_git_tree_t;
-
-typedef struct{
-    zend_object zo;
     git_tree_entry *entry;
 } php_git_tree_entry_t;
 
-typedef struct{
-    zend_object zo;
-    git_repository *repository;
-    git_commit *commit;
-} php_git_commit_t;
 
 typedef struct{
     zend_object zo;
     git_repository *repository;
     git_revwalk *walker;
 } php_git_walker_t;
-
-typedef struct{
-    zend_object zo;
-    git_repository *repository;
-    git_blob *blob;
-} php_git_blob_t;
 
 typedef struct{
     git_odb_backend parent;
@@ -114,10 +98,36 @@ typedef struct{
     git_signature *signature;
 } php_git_signature_t;
 
+
 typedef struct{
     zend_object zo;
-    git_tag *tag;
+    git_object *object;
+} php_git_object_t;
+
+// extends git_object
+typedef struct{
+    zend_object zo;
+    git_commit *object;
+    git_repository *repository;
+} php_git_commit_t;
+
+typedef struct{
+    zend_object zo;
+    git_tree *object;
+    git_repository *repository;
+} php_git_tree_t;
+
+typedef struct{
+    zend_object zo;
+    git_tag *object;
 } php_git_tag_t;
+
+
+typedef struct{
+    zend_object zo;
+    git_blob *object;
+    git_repository *repository;
+} php_git_blob_t;
 
 
 #endif /* PHP_GIT_H */

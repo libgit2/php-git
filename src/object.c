@@ -28,23 +28,93 @@
 #include <string.h>
 #include <time.h>
 
-//使わないかもしれない
+static void php_git_object_free_storage(php_git_object_t *obj TSRMLS_DC)
+{
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
+
+    if(obj->object){
+        obj->object = NULL;
+    }
+
+    efree(obj);
+}
+
+zend_object_value php_git_object_new(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_object_value retval;
+	php_git_object_t *obj;
+	zval *tmp;
+
+	obj = ecalloc(1, sizeof(*obj));
+	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	retval.handle = zend_objects_store_put(obj, 
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,
+        (zend_objects_free_object_storage_t)php_git_object_free_storage,
+        NULL TSRMLS_CC);
+	retval.handlers = zend_get_std_object_handlers();
+	return retval;
+}
+
+
+PHP_METHOD(git_object, getId)
+{
+    php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_oid *oid;
+    char out[40];
+
+    oid = git_object_id((git_object *)this->object);
+    git_oid_to_string(out,GIT_OID_HEXSZ,oid);
+    
+    RETVAL_STRING(out,1);
+}
+
+PHP_METHOD(git_object, getType)
+{
+    php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_otype type;
+
+    type = git_object_type((git_object *)this->object);
+    
+    RETVAL_LONG(type);
+}
+
+PHP_METHOD(git_object, write)
+{
+    php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_oid *oid;
+    char out[40];
+    int ret = 0;
+
+    ret = git_object_write((git_object *)this->object);
+    if(ret != GIT_SUCCESS){
+        php_error_docref(NULL TSRMLS_CC, E_WARNING,
+            "Can't write object");
+        RETURN_FALSE;
+    }
+
+    oid = git_object_id((git_object *)this->object);
+    git_oid_to_string(out,40,oid);
+    
+    RETVAL_STRING(out,1);
+}
+
+
+
 PHPAPI function_entry php_git_object_methods[] = {
+    PHP_ME(git_object, getId,   NULL,ZEND_ACC_PUBLIC)
+    PHP_ME(git_object, getType, NULL,ZEND_ACC_PUBLIC)
+    PHP_ME(git_object, write,   NULL,ZEND_ACC_PUBLIC)
+    //PHP_ME(git_object, getOwner,NULL,ZEND_ACC_PUBLIC)
+
     {NULL, NULL, NULL}
 };
 
 void git_init_object(TSRMLS_D)
 {
-/*
-    struct git_object {
-	git_oid id;
-	git_repository *repo;
-	git_odb_source source;
-	int in_memory:1, modified:1;
-};
-*/
     zend_class_entry git_object_ce;
     INIT_NS_CLASS_ENTRY(git_object_ce, PHP_GIT_NS,"Object", php_git_object_methods);
-
     git_object_class_entry = zend_register_internal_class(&git_object_ce TSRMLS_CC);
+    git_object_class_entry->create_object = php_git_object_new;
 }

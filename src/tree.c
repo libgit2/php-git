@@ -33,7 +33,7 @@ static void php_git_tree_free_storage(php_git_tree_t *obj TSRMLS_DC)
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     
     //RepositoryでFreeされるよ
-    obj->tree = NULL;
+    obj->object = NULL;
     obj->repository = NULL;
     efree(obj);
 }
@@ -94,7 +94,7 @@ PHP_METHOD(git_tree, getId)
     char out[40];
     php_git_tree_t *git_tree = (php_git_tree_t *) zend_object_store_get_object(object TSRMLS_CC);
     
-    oid = git_tree_id(git_tree->tree);
+    oid = git_tree_id(git_tree->object);
     git_oid_to_string(out,41,oid);
     RETVAL_STRING(out,1);
 }
@@ -123,7 +123,7 @@ PHP_METHOD(git_tree, add)
     filename = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"name",4,1 TSRMLS_CC));
     attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"attr",4,1 TSRMLS_CC));
     
-    git_tree_add_entry(myobj->tree, &oid, filename, attr);
+    git_tree_add_entry(myobj->object, &oid, filename, attr);
     
 /*
     int ret = git_object_write((git_object *)tree);
@@ -149,9 +149,9 @@ PHP_METHOD(git_tree, write)
     int ret = 0;
     tree_t = (php_git_tree_t *)zend_object_store_get_object(this TSRMLS_CC);
     
-    ret = git_object_write((git_object *)tree_t->tree);
+    ret = git_object_write((git_object *)tree_t->object);
     if(ret == GIT_SUCCESS){
-        oid = git_object_id((git_object *)tree_t->tree);
+        oid = git_object_id((git_object *)tree_t->object);
         git_oid_to_string(&out,41,oid);
         
         RETVAL_STRINGL(out,40,1 TSRMLS_DC);
@@ -177,7 +177,7 @@ PHP_METHOD(git_tree, __construct)
     php_git_repository_t *git = (php_git_repository_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
     php_git_tree_t *obj = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     
-    int ret = git_tree_new(&obj->tree,git->repository);
+    int ret = git_tree_new(&obj->object,git->repository);
 
     if(ret != GIT_SUCCESS){
         php_printf("can't create new tree");

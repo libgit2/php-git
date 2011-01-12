@@ -130,6 +130,7 @@ void git_init(TSRMLS_D)
 
 PHP_MINIT_FUNCTION(git) {
     git_init(TSRMLS_C);
+    git_init_object(TSRMLS_C);
     php_git_repository_init(TSRMLS_C);
     git_index_init(TSRMLS_C);
     git_init_signature(TSRMLS_C);
@@ -139,7 +140,6 @@ PHP_MINIT_FUNCTION(git) {
     git_init_tree_entry(TSRMLS_C);
     git_init_rawobject(TSRMLS_C);
     git_init_tag(TSRMLS_C);
-    git_init_object(TSRMLS_C);
     git_init_blob(TSRMLS_C);
     git_init_backend(TSRMLS_C);
 

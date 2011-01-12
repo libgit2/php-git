@@ -33,7 +33,7 @@ static void php_git_blob_free_storage(php_git_blob_t *obj TSRMLS_DC)
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     
     //git_repositoryがfreeしてくれる
-    obj->blob = NULL;
+    obj->object = NULL;
     obj->repository = NULL;
     efree(obj);
 }
@@ -57,46 +57,6 @@ zend_object_value php_git_blob_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
-PHP_METHOD(git_blob, write)
-{
-    zval *this = getThis();
-    php_git_blob_t *blob_t;
-    git_oid *oid;
-    char out[40];
-    char *content;
-    int ret = 0;
-    blob_t = (php_git_blob_t *)zend_object_store_get_object(this TSRMLS_CC);
-
-    content = Z_STRVAL_P(zend_read_property(git_blob_class_entry,this,"data",4,0 TSRMLS_CC));
-    
-    git_blob_set_rawcontent(blob_t->blob, content, strlen(content));
-    ret = git_object_write((git_object *)blob_t->blob);
-    if(ret == GIT_SUCCESS){
-        oid = git_object_id((git_object *)blob_t->blob);
-        git_oid_to_string(&out,41,oid);
-        
-        RETVAL_STRINGL(out,40,1 TSRMLS_DC);
-    }else{
-        RETURN_FALSE;
-    }
-}
-
-PHP_METHOD(git_blob, getId)
-{
-    zval *this = getThis();
-    php_git_blob_t *blob_t;
-    git_oid *oid;
-    char out[GIT_OID_HEXSZ];
-    int ret = 0;
-    blob_t = (php_git_blob_t *)zend_object_store_get_object(this TSRMLS_CC);
-    
-    oid = git_object_id((git_object *)blob_t->blob);
-    git_oid_to_string(out, GIT_OID_HEXSZ+1, oid);
-    RETURN_STRING(out, 1);
-}
-
-
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blob__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, repository)
 ZEND_END_ARG_INFO()
@@ -113,7 +73,7 @@ PHP_METHOD(git_blob, __construct)
     php_git_repository_t *git = (php_git_repository_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
     php_git_blob_t *obj = (php_git_blob_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     
-    int ret = git_blob_new(&obj->blob,git->repository);
+    int ret = git_blob_new(&obj->object,git->repository);
 
     if(ret != GIT_SUCCESS){
         php_printf("can't create new blob");
@@ -125,8 +85,6 @@ PHP_METHOD(git_blob, __construct)
 
 PHPAPI function_entry php_git_blob_methods[] = {
     PHP_ME(git_blob, __construct, arginfo_git_blob__construct, ZEND_ACC_PUBLIC)
-    PHP_ME(git_blob, getId, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_blob, write, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
@@ -143,7 +101,7 @@ void git_init_blob(TSRMLS_D)
     zend_class_entry ce;
     INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Blob", php_git_blob_methods);
 
-    git_blob_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+    git_blob_class_entry = zend_register_internal_class_ex(&ce, git_object_class_entry, NULL TSRMLS_CC);
 	git_blob_class_entry->create_object = php_git_blob_new;
 
 }

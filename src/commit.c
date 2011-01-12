@@ -36,7 +36,7 @@ static void php_git_commit_free_storage(php_git_commit_t *obj TSRMLS_DC)
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     
     //RepositoryでFreeされるよ
-    obj->commit = NULL;
+    obj->object = NULL;
     obj->repository = NULL;
     efree(obj);
 }
@@ -85,7 +85,7 @@ PHP_METHOD(git_commit, __construct)
         RETURN_FALSE;
     }
     cobj->repository = myobj->repository;
-    cobj->commit = commit;
+    cobj->object = commit;
 }
 
 
@@ -111,7 +111,7 @@ PHP_METHOD(git_commit, setCommitter)
 
     c_obj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
     s_obj = (php_git_signature_t *) zend_object_store_get_object(z_signature TSRMLS_CC);
-    git_commit_set_author(c_obj->commit, s_obj->signature);
+    git_commit_set_author(c_obj->object, s_obj->signature);
     add_property_zval_ex(object,"committer",10,z_signature);
 }
 
@@ -146,7 +146,7 @@ PHP_METHOD(git_commit, setParent)
     c_obj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
 
     git_commit_lookup(&commit,c_obj->repository,&oid);
-    git_commit_add_parent(c_obj->commit, commit);
+    git_commit_add_parent(c_obj->object, commit);
     //FIXME: not parent. parents.
     add_property_string_ex(this,"parent",7,hash, 1 TSRMLS_CC);
 }
@@ -173,34 +173,8 @@ PHP_METHOD(git_commit, setAuthor)
 
     c_obj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
     s_obj = (php_git_signature_t *) zend_object_store_get_object(z_signature TSRMLS_CC);
-    git_commit_set_committer(c_obj->commit, s_obj->signature);
+    git_commit_set_committer(c_obj->object, s_obj->signature);
     add_property_zval_ex(object,"author",7,z_signature);
-}
-
-PHP_METHOD(git_commit, write)
-{
-    zval *this = getThis();
-    git_repository *repository;
-    git_commit *commit;
-    git_oid *oid;
-    char out[40];
-    int ret = 0;
-
-    php_git_commit_t *myobj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
-
-
-    ret = git_object_write((git_object *)myobj->commit);
-    if(ret == GIT_SUCCESS){
-        oid = git_object_id((git_object *)myobj->commit);
-        git_oid_to_string(&out,41,oid);
-        
-        RETVAL_STRINGL(out,40,1 TSRMLS_DC);
-    }else{
-        //FIXME: error時の対応を詳細にする
-        php_printf("failer: %d\n",ret);
-        RETURN_FALSE;
-    }
-
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_tree, 0, 0, 1)
@@ -228,7 +202,7 @@ PHP_METHOD(git_commit, setTree)
 
     git_oid_mkstr(&oid, hash);
     git_repository_lookup (&tree, repository, &oid, GIT_OBJ_TREE);
-    git_commit_set_tree(myobj->commit,tree);
+    git_commit_set_tree(myobj->object,tree);
 
     if(tree){
         //コピペ
@@ -289,7 +263,7 @@ PHP_METHOD(git_commit, setMessage)
         return;
     }
     this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    git_commit_set_message(this->commit,message);
+    git_commit_set_message(this->object,message);
 
     RETURN_TRUE;
 }
@@ -300,7 +274,7 @@ PHP_METHOD(git_commit, getMessage)
     php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     char *message;
     
-    message = git_commit_message(this->commit);
+    message = git_commit_message(this->object);
     RETURN_STRING(message,1 TSRMLS_C);
 }
 
@@ -309,7 +283,7 @@ PHP_METHOD(git_commit, getShortMessage)
     php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     char *message;
     
-    message = git_commit_message_short(this->commit);
+    message = git_commit_message_short(this->object);
     RETURN_STRING(message,1 TSRMLS_C);
 }
 
@@ -330,7 +304,6 @@ PHPAPI function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, setMessage,  arginfo_git_commit_set_message, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getMessage,  arginfo_git_commit_set_message, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getShortMessage,  arginfo_git_commit_set_message, ZEND_ACC_PUBLIC)
-    PHP_ME(git_commit, write, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setParent, arginfo_git_commit_set_parent, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
@@ -340,7 +313,7 @@ void git_init_commit(TSRMLS_C)
     zend_class_entry git_commit_ce;
     INIT_NS_CLASS_ENTRY(git_commit_ce, PHP_GIT_NS,"Commit", php_git_commit_methods);
 
-    git_commit_class_entry = zend_register_internal_class(&git_commit_ce TSRMLS_CC);
+    git_commit_class_entry = zend_register_internal_class_ex(&git_commit_ce,git_object_class_entry,NULL TSRMLS_CC);
 	git_commit_class_entry->create_object = php_git_commit_new;
     zend_declare_property_null(git_commit_class_entry, "author",sizeof("author")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(git_commit_class_entry, "committer",sizeof("committer")-1, ZEND_ACC_PUBLIC TSRMLS_CC);

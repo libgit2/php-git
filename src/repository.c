@@ -236,7 +236,9 @@ PHP_METHOD(git_repository, getCommit)
 
             MAKE_STD_ZVAL(git_raw_object);
             object_init_ex(git_raw_object,git_commit_class_entry);
-
+            php_git_commit_t *c_obj = (php_git_commit_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
+            c_obj->object = blob;
+            
             sig = git_commit_author(blob);
             git_tree *tree = git_commit_tree(blob);
             git_oid *tree_oid;
@@ -284,7 +286,7 @@ PHP_METHOD(git_repository, getCommit)
 
             php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
             tobj->repository = repository;
-            tobj->tree = tree;
+            tobj->object = tree;
 
             add_property_zval(git_tree,"entries", entries);
             add_property_zval(git_raw_object,"tree", git_tree);
@@ -396,7 +398,7 @@ PHP_METHOD(git_repository, getTree)
 
     php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
     tobj->repository = repository;
-    tobj->tree = tree;
+    tobj->object = tree;
 
     add_property_zval(git_tree,"entries", entries);
 
