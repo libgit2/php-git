@@ -9,6 +9,7 @@
          processIsolation="false"
          stopOnFailure="false"
          syntaxCheck="true"
+         verbose="true"
 >
     <php>
       <const name="PHP_GIT_FIXTURE_DIR" value="./tests/fixtures/" />
