@@ -56,6 +56,7 @@ PHPAPI zend_class_entry *git_signature_class_entry;
 PHPAPI zend_class_entry *git_rawobject_class_entry;
 PHPAPI zend_class_entry *git_tag_class_entry;
 PHPAPI zend_class_entry *git_blob_class_entry;
+PHPAPI zend_class_entry *git_odb_class_entry;
 PHPAPI zend_class_entry *git_backend_class_entry;
 
 
@@ -97,6 +98,12 @@ typedef struct{
     zend_object zo;
     git_signature *signature;
 } php_git_signature_t;
+
+typedef struct{
+    zend_object zo;
+    git_odb *odb;
+} php_git_odb_t;
+
 
 
 typedef struct{

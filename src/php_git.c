@@ -141,6 +141,7 @@ PHP_MINIT_FUNCTION(git) {
     git_init_rawobject(TSRMLS_C);
     git_init_tag(TSRMLS_C);
     git_init_blob(TSRMLS_C);
+    git_init_odb(TSRMLS_C);
     git_init_backend(TSRMLS_C);
 
     REGISTER_NS_LONG_CONSTANT(ZEND_NS_NAME(PHP_GIT_NS,"Revwalk"), "SORT_NONE",    0, CONST_CS | CONST_PERSISTENT);
