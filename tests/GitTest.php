@@ -51,6 +51,15 @@
      {
          try{
              $git = new Git\Repository("./.git");
+             $this->assertInstanceof("Git\\Repository",$git);
+             unset($git);
+         }catch(\Exception $e){
+             $this->fail();
+         }
+
+         try{
+             $git = new Git\Repository("./.git");
+             $this->assertInstanceof("Git\\Repository",$git,"Git\\Repository::__construct allowed null parameter. refs #127");
          }catch(\Exception $e){
              $this->fail();
          }

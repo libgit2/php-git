@@ -41,7 +41,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_commit, 0, 0, 1)
     ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_construct, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_construct, 0, 0, 0)
     ZEND_ARG_INFO(0, repository_path)
 ZEND_END_ARG_INFO()
 
@@ -340,20 +340,23 @@ PHP_METHOD(git_repository, __construct)
     }
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                            "s", &repository_path, &arg_len) == FAILURE){
+        "|s", &repository_path, &arg_len) == FAILURE){
         return;
     }
 
     php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
 
-    ret = git_repository_open(&repository,repository_path);
-    if(ret != GIT_SUCCESS){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git repository not found.");
-        RETURN_FALSE;
+    if(arg_len > 0){
+        ret = git_repository_open(&repository,repository_path);
+        if(ret != GIT_SUCCESS){
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git repository not found.");
+            RETURN_FALSE;
+        }
+        myobj->repository = repository;
+       add_property_string_ex(object, "path",5,repository_path, 1 TSRMLS_CC);
+    }else{
+        myobj->repository = NULL;
     }
-    myobj->repository = repository;
-
-    add_property_string_ex(object, "path",5,repository_path, 1 TSRMLS_CC);
 }
 
 
