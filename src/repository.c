@@ -231,7 +231,7 @@ PHP_METHOD(git_repository, getCommit)
     repository = myobj->repository;
     odb = git_repository_database(repository);
     
-    if(git_odb_exists(odb,hash)){
+    if(git_odb_exists(odb,&oid)){
         RETURN_FALSE;
     }else{
         ret = git_repository_lookup(&blob, repository,&oid , GIT_OBJ_COMMIT);
