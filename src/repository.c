@@ -599,6 +599,7 @@ PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     PHP_ME(git_repository, update, arginfo_git_update, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, addBackend, arginfo_git_add_backend, ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, open3, arginfo_git_open3, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
