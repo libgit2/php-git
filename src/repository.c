@@ -28,6 +28,40 @@
 #include <string.h>
 #include <time.h>
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 2)
+    ZEND_ARG_INFO(0, path)
+    ZEND_ARG_INFO(0, is_bare)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_object, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_commit, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_construct, 0, 0, 1)
+    ZEND_ARG_INFO(0, repository_path)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_tree, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_branch, 0, 0, 1)
+    ZEND_ARG_INFO(0, branch)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_update, 0, 0, 2)
+    ZEND_ARG_INFO(0, branch)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
 static void php_git_repository_free_storage(php_git_repository_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
@@ -57,10 +91,6 @@ zend_object_value php_git_repository_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 2)
-    ZEND_ARG_INFO(0, path)
-    ZEND_ARG_INFO(0, is_bare)
-ZEND_END_ARG_INFO()
 PHP_METHOD(git_repository, init)
 {
     git_repository *repository;
@@ -126,9 +156,6 @@ PHP_METHOD(git_repository, getIndex)
     RETURN_ZVAL(index_object,1,0);
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_object, 0, 0, 1)
-    ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_repository, getObject)
 {
@@ -166,7 +193,7 @@ PHP_METHOD(git_repository, getObject)
             object_init_ex(git_raw_object, git_blob_class_entry);
             php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
             blobobj->repository = repository;
-            blobobj->blob = blob;
+            blobobj->object = blob;
 
             add_property_string_ex(git_raw_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
             RETURN_ZVAL(git_raw_object,1,0);
@@ -178,9 +205,6 @@ PHP_METHOD(git_repository, getObject)
 
 
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_commit, 0, 0, 1)
-    ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_repository, getCommit)
 {
@@ -298,9 +322,6 @@ PHP_METHOD(git_repository, getCommit)
     }
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_construct, 0, 0, 1)
-    ZEND_ARG_INFO(0, repository_path)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_repository, __construct)
 {
@@ -335,9 +356,6 @@ PHP_METHOD(git_repository, __construct)
     add_property_string_ex(object, "path",5,repository_path, 1 TSRMLS_CC);
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_tree, 0, 0, 1)
-    ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_repository, getTree)
 {
@@ -405,9 +423,6 @@ PHP_METHOD(git_repository, getTree)
     RETURN_ZVAL(git_tree,1,0);
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker, 0, 0, 1)
-    ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_repository, getWalker)
 {
@@ -460,9 +475,6 @@ PHP_METHOD(git_repository, addBackend)
 }
 
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_branch, 0, 0, 1)
-    ZEND_ARG_INFO(0, branch)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_repository, getBranch)
 {
@@ -499,10 +511,6 @@ PHP_METHOD(git_repository, getBranch)
 }
 
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_update, 0, 0, 2)
-    ZEND_ARG_INFO(0, branch)
-    ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_repository, update)
 {
