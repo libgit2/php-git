@@ -6,7 +6,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-require_once __DIR__ . "/lib/MemcachedBackend.php";
 
 class GitODBTest extends \PHPUnit_Framework_TestCase
 {
@@ -20,12 +19,24 @@ class GitODBTest extends \PHPUnit_Framework_TestCase
         // currentry nothing to do.
     }
     
+    public function testCheckMemcachedModule()
+    {
+        $this->assertEquals(true,extension_loaded("memcached"));
+        require_once __DIR__ . "/lib/MemcachedBackend.php";
+    }
+    
+    /**
+     * @depends testCheckMemcachedModule
+     */
     public function testConstruct()
     {
         $odb = new Git\ODB();
         $this->assertInstanceof("Git\\ODB",$odb);
     }
 
+    /**
+     * @depends testCheckMemcachedModule
+     */
     public function testAddBackend()
     {
         $odb = new Git\ODB();
