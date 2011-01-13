@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+require_once __DIR__ . "/lib/MemoryBackend.php";
+
 class GitODBTest extends \PHPUnit_Framework_TestCase
 {
     protected function setUp()
@@ -42,6 +44,15 @@ class GitODBTest extends \PHPUnit_Framework_TestCase
         $odb = new Git\ODB();
         $memcached = new Git\Backend\Memcached(5);
         $odb->addBackend($memcached);
+        $this->assertInstanceof("Git\\ODB",$odb);
+    }
+
+    public function testMemoryBackend()
+    {
+
+        $odb = new Git\ODB();
+        $memory = new Git\Backend\Memory(5);
+        $odb->addBackend($memory);
         $this->assertInstanceof("Git\\ODB",$odb);
     }
 
