@@ -59,7 +59,7 @@ static void php_git_tag_free_storage(php_git_tag_t *obj TSRMLS_DC)
 zend_object_value php_git_tag_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
-	php_git_signature_t *obj;
+	php_git_tag_t *obj;
 	zval *tmp;
 
 	obj = ecalloc(1, sizeof(*obj));
