@@ -28,6 +28,8 @@
 #include <string.h>
 #include <time.h>
 
+extern int php_git_odb_add_backend(git_odb **odb, zval *backend);
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 2)
     ZEND_ARG_INFO(0, path)
     ZEND_ARG_INFO(0, is_bare)
@@ -61,6 +63,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_update, 0, 0, 2)
     ZEND_ARG_INFO(0, branch)
     ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_open3, 0, 0, 1)
+    ZEND_ARG_INFO(0, git_dir)
+    ZEND_ARG_INFO(0, odb)
+    ZEND_ARG_INFO(0, index)
+    ZEND_ARG_INFO(0, tree)
+ZEND_END_ARG_INFO()
+
 
 static void php_git_repository_free_storage(php_git_repository_t *obj TSRMLS_DC)
 {
@@ -456,25 +466,17 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_repository, addBackend)
 {
-    zval *backend;
     php_git_repository_t *this = (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    zval *backend;
+    git_odb *odb;
     git_odb_backend *odb_backend;
+
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &backend) == FAILURE){
         return;
     }
     
-    //FIXME
-    if(!instanceof_function(Z_OBJCE_P(backend), git_backend_class_entry TSRMLS_CC)){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING,"backend must extends GitBackend");
-        RETURN_FALSE;
-    }
-
-    php_git_backend_t *b = (php_git_backend_t *) zend_object_store_get_object(backend TSRMLS_CC);
-    int ret = git_odb_add_backend(git_repository_database(this->repository),(git_odb_backend *)b->backend);
-
-    if(ret != GIT_SUCCESS){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING,"can't add backend");
-    }
+    odb = git_repository_database(this->repository);
+    int ret = php_git_odb_add_backend(&odb, backend);
 }
 
 
@@ -545,6 +547,45 @@ PHP_METHOD(git_repository, update)
     }
     fputs(hash,fp);
     fclose(fp);
+}
+
+PHP_METHOD(git_repository, open3)
+{
+
+    php_git_repository_t *this= (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+    char *git_dir;
+    int git_dir_len = 0;
+    zval *z_odb;
+    char *index = NULL;
+    int index_len = 0;
+    char *tree = NULL;
+    int tree_len = 0;
+    int ret = 0;
+    php_git_odb_t *odbt = NULL;
+    
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s|zss", &git_dir, &git_dir_len, &z_odb, &index, &index_len, &tree, &tree_len) == FAILURE){
+        return;
+    }
+ 
+    if(this->repository != NULL){
+        php_error_docref(NULL TSRMLS_CC, E_ERROR,"repository busy.");
+        return;
+    }
+    if(z_odb){
+        if(instanceof_function(Z_OBJCE_P(z_odb), git_odb_class_entry TSRMLS_CC)){
+            odbt = (php_git_odb_t *) zend_object_store_get_object(z_odb TSRMLS_CC);
+        }else{
+            php_error_docref(NULL TSRMLS_CC, E_ERROR,"specified parameter isn't Git\\Odb");
+        }
+    }
+
+    ret = git_repository_open3(&this->repository,git_dir,odbt->odb,index,tree);
+
+    if(ret != GIT_SUCCESS){
+        php_error_docref(NULL TSRMLS_CC, E_WARNING,"can't open specified repository & odb");
+    }
 }
 
 PHPAPI function_entry php_git_repository_methods[] = {
