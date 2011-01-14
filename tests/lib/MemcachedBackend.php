@@ -99,13 +99,14 @@ class Memcached extends \Git\Backend
      *
      * you have to write key,data,type your storage engine.
      *
-     * @param string $key  sha1 hash.
      * @param Git\RawObject $object.
-     * @return boolean
+     * @return string rawobject hash.
      */
-    public function write($key, $object){
+    public function write($object){
+        $key = $object->getid();
         $this->set($key, $object);
-        return true;
+
+        return $key;
     }
 
     public function free()

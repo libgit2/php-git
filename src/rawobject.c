@@ -28,11 +28,63 @@
 #include <string.h>
 #include <time.h>
 
-PHP_METHOD(git_rawobject, write)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_rawobject_set_content, 0, 0, 1)
+    ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_rawobject__construct, 0, 0, 2)
+    ZEND_ARG_INFO(0, type)
+    ZEND_ARG_INFO(0, data)
+    ZEND_ARG_INFO(0, len)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(git_raw_object, __construct)
 {
+    char *data;
+    int data_len = 0;
+    int type = 0;
+    int len = 0;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "lsl", &type, &data, &data_len, &len) == FAILURE){
+        return;
+    }
+
+    add_property_string_ex(getThis(), "data",sizeof("data"),data ,1 TSRMLS_CC);
+    add_property_long(getThis(), "type",type);
+    add_property_long(getThis(), "len",len);
 }
 
+PHP_METHOD(git_raw_object, getId)
+{
+    git_rawobj obj;
+    //php_git_rawobject_t *this = (php_git_rawobject_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_oid oid;
+    char out[40];
+
+    zval *data = zend_read_property(git_rawobject_class_entry,getThis(),"data",4,0 TSRMLS_CC);
+    zval *type = zend_read_property(git_rawobject_class_entry,getThis(),"type",4,0 TSRMLS_CC);
+    zval *len = zend_read_property(git_rawobject_class_entry,getThis(),"len",3,0 TSRMLS_CC);
+
+    obj.data = NULL;
+    obj.type = Z_LVAL_P(type);
+    obj.len = Z_LVAL_P(len);
+    if(Z_STRVAL_P(data)){
+        obj.data = malloc(obj.len);
+        memcpy(obj.data,Z_STRVAL_P(data),obj.len);
+    }
+    git_rawobj_hash(&oid,&obj);
+
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,&oid);
+    git_rawobj_close(&obj);
+
+    RETVAL_STRING(out,1);
+}
+
+
 PHPAPI function_entry php_git_rawobject_methods[] = {
+    PHP_ME(git_raw_object, __construct, arginfo_git_rawobject__construct, ZEND_ACC_PUBLIC)
+    PHP_ME(git_raw_object, getId, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 

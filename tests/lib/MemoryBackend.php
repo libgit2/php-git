@@ -10,10 +10,15 @@ namespace Git\Backend;
 class Memory extends \Git\Backend
 {
     protected $memory = array();
-    
-    protected function get($key){
+    /**
+     * for debug
+     */
+    public function get($key){
        if(isset($this->memory[$key])){
-           return $this->memory[$key];
+           $obj = $this->memory[$key];
+           $x = new \Git\RawObject($obj->type,$obj->data,$obj->len);
+           
+           return $x;
        }else{
            return false;
        }
@@ -29,13 +34,9 @@ class Memory extends \Git\Backend
      *       so this method does not call anytime.
      */
     public function read($key){
-       if(isset($this->memory[$key])){
-           $raw = new \Git\RawObject();
-           $raw->data = $this->memory[$key]->data;
-           $raw->type = $this->memory[$key]->type;
+       if($this->exists($key)){
+           $object = $this->get($key);
        }
-       
-       return $raw;
     }
 
     /**
@@ -47,12 +48,8 @@ class Memory extends \Git\Backend
      */
     public function read_header($key){
        if(isset($this->memory[$key])){
-           $raw = new \Git\RawObject();
-           $raw->data = null;
-           $raw->type = $this->memory[$key]->type;
+           return $this->memory[$key];
        }
-       
-       return $raw;
     }
 
     /**
@@ -77,11 +74,12 @@ class Memory extends \Git\Backend
      *
      * @param string $key  sha1 hash.
      * @param Git\RawObject $object.
-     * @return boolean
+     * @return hash
      */
-    public function write($key, $object){
+    public function write($object){
+        $key = $object->getId();
         $this->memory[$key] = $object;
-        return true;
+        return $key;
     }
 
     public function free()

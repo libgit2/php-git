@@ -45,7 +45,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_exists, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_write, 0, 0, 2)
-    ZEND_ARG_INFO(0, key)
     ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
@@ -91,33 +90,38 @@ int php_git_backend__exists(git_odb_backend *_backend, const git_oid *oid)
 int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *obj)
 {
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
-    char out[40];
-    git_oid_to_string(out,41,id);
-
+    int ret = 0;
 	zval *retval;
-	zval *params[2];
+	zval *params[1];
     zval func;
+    char *data = NULL;
 
 	MAKE_STD_ZVAL(retval);
 	ZVAL_NULL(retval);
-
     ZVAL_STRING(&func,"write", 1);
 
-    MAKE_STD_ZVAL(params[0]);
-    ZVAL_STRING(params[0],out, 1);
 
-    MAKE_STD_ZVAL(params[1]);
-    object_init_ex(params[1],git_rawobject_class_entry);
-    add_property_string(params[1],"data",obj->data,1 TSRMLS_CC);
-    add_property_long(params[1],"type",obj->type TSRMLS_CC);
+    MAKE_STD_ZVAL(params[0]);
+    object_init_ex(params[0],git_rawobject_class_entry);
+    add_property_string(params[0],"data",obj->data,1 TSRMLS_CC);
+    add_property_long(params[0],"type",obj->type TSRMLS_CC);
+    add_property_long(params[0],"len",obj->len TSRMLS_CC);
 
     call_user_function(EG(function_table),&object->self,&func,retval,2,params TSRMLS_CC);
+    if(strlen(Z_STRVAL_P(retval)) == 40){
+        git_oid_mkstr(id,Z_STRVAL_P(retval));
+        ret = GIT_SUCCESS;
+    }else{
+        ret = GIT_ERROR;
+    }
 
 	zval_ptr_dtor(&retval);
 	zval_ptr_dtor(&params[0]);
     zval_ptr_dtor(&params[1]);
     zval_dtor(&func);
-    return 0;
+    efree(data);
+
+    return ret;
 }
 int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_oid *oid)
 {
@@ -160,8 +164,8 @@ int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_
 }
 int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, const git_oid *oid)
 {
+    char out[40] ;
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
-    char out[40];
     git_oid_to_string(out,41,oid);
 
 	zval *retval;

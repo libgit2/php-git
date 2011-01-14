@@ -90,7 +90,7 @@ PHP_METHOD(git_object, write)
     ret = git_object_write((git_object *)this->object);
     if(ret != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,
-            "Can't write object");
+            "Can't write object:%d:",ret);
         RETURN_FALSE;
     }
 
