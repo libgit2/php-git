@@ -133,7 +133,6 @@ typedef struct{
 typedef struct{
     zend_object zo;
     git_blob *object;
-    git_repository *repository;
 } php_git_blob_t;
 
 

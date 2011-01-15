@@ -198,15 +198,14 @@ PHP_METHOD(git_repository, getObject)
         ret = git_blob_lookup(&blob, repository,&oid);
 
         if(ret == GIT_SUCCESS){
-            //FIXME: これでやるとPHPが異常終了しちゃう
             MAKE_STD_ZVAL(git_raw_object);
             object_init_ex(git_raw_object, git_blob_class_entry);
             php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
-            blobobj->repository = repository;
             blobobj->object = blob;
 
             add_property_string_ex(git_raw_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
             RETURN_ZVAL(git_raw_object,1,0);
+            zend_object_std_dtor(git_raw_object TSRMLS_CC);
         }else{
             RETURN_FALSE;
         }
