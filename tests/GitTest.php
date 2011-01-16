@@ -84,6 +84,7 @@ class GitTest extends \PHPUnit_Framework_TestCase
     {
         require_once __DIR__ . "/lib/MemoryBackend.php";
         require_once __DIR__ . "/lib/MemcachedBackend.php";
+
         if(!is_dir(__DIR__ . "/git_init_test")){
             mkdir(__DIR__ . "/git_init_test",0755);
         }
@@ -91,17 +92,49 @@ class GitTest extends \PHPUnit_Framework_TestCase
     
         $backend = new Git\Backend\Memory(5);
         $repository = Git\Repository::init(__DIR__ . "/git_init_test",true);
-        $repository->addBackend($backend);
+        //$repository->addBackend($backend);
 
         $blob = new Git\Blob($repository);
         $blob->setContent("First Object1");
         $hash = $blob->write();
+        
         $this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $hash,"First Object1 write correctly");
         $this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $blob->getid(),"rawobject and blob hash are same.");
-        $this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $backend->get($hash)->getId(),"Backend return same rawobject");
-        //$tree = new Git\Tree($repository);
-    
+        //$this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $backend->get($hash)->getId(),"Backend return same rawobject");
         
+        $tree = new Git\Tree($repository);
+        $entry = new Git\Tree\Entry();
+        $entry->name = "README";
+        $entry->mode = 0644;
+        $entry->oid = $hash;
+        $tree->add($entry);
+        $tree_hash = $tree->write();
+        
+        $this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$tree_hash, "tree writing");
+        
+        $commit = new Git\Commit($repository);
+        $commit->setAuthor(new Git\Signature("Someone","someone@example.com", new DateTime("@1295103057")));
+        $commit->setCommitter(new Git\Signature("Someone","someone@example.com", new DateTime("@1295103057")));
+        $commit->setTree($tree->getId());
+        $commit->setParent(""); // first commit;
+        $commit->setMessage("initial import");
+        
+        $master_hash = $commit->write();
+        $this->assertEquals("0d02e26cb684486889ea71168df7721a098bee80",$master_hash,"commit writing");
         unset($repository);
+
+        $rmdir = function($dir) use(&$rmdir){
+           if (is_dir($dir)) { 
+             $objects = scandir($dir); 
+             foreach ($objects as $object) { 
+               if ($object != "." && $object != "..") { 
+                 if (filetype($dir."/".$object) == "dir") $rmdir($dir."/".$object); else unlink($dir."/".$object); 
+               } 
+             } 
+             reset($objects); 
+             rmdir($dir); 
+           } 
+        };
+        $rmdir(__DIR__ . "/git_init_test");
     }
 }
