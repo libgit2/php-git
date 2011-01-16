@@ -28,6 +28,33 @@
 #include <string.h>
 #include <time.h>
 
+static void php_git_rawobject_free_storage(php_git_rawobject_t *obj TSRMLS_DC)
+{
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    
+    //obj->object = NULL;
+    efree(obj);
+}
+
+zend_object_value php_git_rawobject_new(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_object_value retval;
+	php_git_rawobject_t *obj;
+	zval *tmp;
+
+	obj = ecalloc(1, sizeof(*obj));
+	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	retval.handle = zend_objects_store_put(obj, 
+        (zend_objects_store_dtor_t)zend_objects_destroy_object,
+        (zend_objects_free_object_storage_t)php_git_rawobject_free_storage,
+        NULL TSRMLS_CC);
+	retval.handlers = zend_get_std_object_handlers();
+	return retval;
+}
+
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_rawobject_set_content, 0, 0, 1)
     ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
@@ -58,10 +85,11 @@ PHP_METHOD(git_raw_object, __construct)
 PHP_METHOD(git_raw_object, getId)
 {
     git_rawobj obj;
-    //php_git_rawobject_t *this = (php_git_rawobject_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    php_git_rawobject_t *this = (php_git_rawobject_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_oid oid;
     char out[40];
 
+/*
     zval *data = zend_read_property(git_rawobject_class_entry,getThis(),"data",4,0 TSRMLS_CC);
     zval *type = zend_read_property(git_rawobject_class_entry,getThis(),"type",4,0 TSRMLS_CC);
     zval *len = zend_read_property(git_rawobject_class_entry,getThis(),"len",3,0 TSRMLS_CC);
@@ -73,7 +101,8 @@ PHP_METHOD(git_raw_object, getId)
         obj.data = malloc(obj.len);
         memcpy(obj.data,Z_STRVAL_P(data),obj.len);
     }
-    git_rawobj_hash(&oid,&obj);
+*/
+    git_rawobj_hash(&oid,this->object);
 
     git_oid_to_string(out,GIT_OID_HEXSZ+1,&oid);
     git_rawobj_close(&obj);

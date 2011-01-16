@@ -103,9 +103,15 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
 
     MAKE_STD_ZVAL(params[0]);
     object_init_ex(params[0],git_rawobject_class_entry);
+
     add_property_string(params[0],"data",obj->data,1 TSRMLS_CC);
     add_property_long(params[0],"type",obj->type TSRMLS_CC);
     add_property_long(params[0],"len",obj->len TSRMLS_CC);
+
+    php_git_rawobject_t *this = (php_git_rawobject_t *) zend_object_store_get_object(params[0] TSRMLS_CC);
+    this->object = emalloc(sizeof(obj));
+    memcpy(this->object,obj,sizeof(obj));
+
 
     call_user_function(EG(function_table),&object->self,&func,retval,2,params TSRMLS_CC);
     if(strlen(Z_STRVAL_P(retval)) == 40){
