@@ -34,7 +34,6 @@ static void php_git_tree_free_storage(php_git_tree_t *obj TSRMLS_DC)
     
     //RepositoryでFreeされるよ
     obj->object = NULL;
-    obj->repository = NULL;
     efree(obj);
 }
 
@@ -107,23 +106,9 @@ PHP_METHOD(git_tree, add)
     //php_printf("tree-oid: %s\n",Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,1 TSRMLS_CC)));
     git_oid_mkstr(&oid, Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,1 TSRMLS_CC)));
     filename = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"name",4,1 TSRMLS_CC));
-    attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"attr",4,1 TSRMLS_CC));
-    
+    attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"mode",4,1 TSRMLS_CC));
+
     git_tree_add_entry(myobj->object, &oid, filename, attr);
-    
-/*
-    int ret = git_object_write((git_object *)tree);
-    if(ret != GIT_SUCCESS){
-        php_printf("can't write object");
-    }
-    
-    char out[40];
-    git_oid *om;
-    om = git_object_id((git_object *)tree);
-    git_oid_to_string(&out,41,om);
-    
-    RETVAL_STRING(&out, 1);
-*/
 }
 
 

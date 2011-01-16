@@ -318,7 +318,6 @@ PHP_METHOD(git_repository, getCommit)
             }
 
             php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
-            tobj->repository = repository;
             tobj->object = tree;
 
             add_property_zval(git_tree,"entries", entries);
@@ -427,7 +426,6 @@ PHP_METHOD(git_repository, getTree)
     }
 
     php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
-    tobj->repository = repository;
     tobj->object = tree;
 
     add_property_zval(git_tree,"entries", entries);
