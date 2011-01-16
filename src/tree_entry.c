@@ -99,6 +99,6 @@ void git_init_tree_entry(TSRMLS_D)
 
     zend_declare_property_null(git_tree_entry_class_entry, "name",sizeof("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(git_tree_entry_class_entry, "oid",sizeof("oid")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_tree_entry_class_entry, "attr",sizeof("attr")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_tree_entry_class_entry, "mode",sizeof("mode")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 
 }
