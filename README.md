@@ -18,16 +18,18 @@ i'll add you to php-git collaborator soon.
 Current Development Status
 =======================================================
 
-*Alpha development*.
-(just started 2010-12-30)
+*first Alpha development*.
+(development started at 2010-12-30)
 
-i'll release first alpha development release in 2nd week of January.
 *notice* do not use this extenstion on any production server. this extension not fully tested.
 
-*alpha development release:
+*1st alpha development release: (2011/1/17)
 just work on php. not fully tested. classes and methods may changed.
 
-*beta development release:
+*2nd alpha development release: (2011/2)
+added some unit test. libgit2 feature fully support.
+
+*beta development release: (2011/3)
 classes and methods are fixed. many test include and bug fix.
 
 
