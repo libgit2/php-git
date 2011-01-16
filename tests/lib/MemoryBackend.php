@@ -16,9 +16,8 @@ class Memory extends \Git\Backend
     public function get($key){
        if(isset($this->memory[$key])){
            $obj = $this->memory[$key];
-           $x = new \Git\RawObject($obj->type,$obj->data,$obj->len);
-           
-           return $x;
+
+           return new \Git\RawObject($obj->type,$obj->data,$obj->len);
        }else{
            return false;
        }
@@ -48,7 +47,7 @@ class Memory extends \Git\Backend
      */
     public function read_header($key){
        if(isset($this->memory[$key])){
-           return $this->memory[$key];
+           return new \Git\RawObject($obj->type,"",$obj->len);
        }
     }
 
