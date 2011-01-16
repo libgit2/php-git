@@ -72,12 +72,12 @@ typedef struct{
     git_repository *repository;
 } php_git_repository_t;
 
-/*
+
 typedef struct{
     zend_object zo;
     git_tree_entry *entry;
 } php_git_tree_entry_t;
-*/
+
 
 typedef struct{
     zend_object zo;
