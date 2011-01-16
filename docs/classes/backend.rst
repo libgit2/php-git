@@ -3,6 +3,13 @@ Git\\Backend Class
 libgit2 can use custom backend.you can create custom backend with Git\\Backend
 
 
+Attention
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+this feature does not work on first alpha development release.
+please wait next alpha release.
+
+
 Methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

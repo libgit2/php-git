@@ -1,4 +1,4 @@
-Git\\Tree Class
+Git\\Tree Class extends Git\\Object
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 representation of git tree.
 
