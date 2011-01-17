@@ -53,5 +53,14 @@
          $this->assertEquals("Shuhei Tanuma",$committer->name);
          $this->assertEquals("shuhei.tanuma@gmail.com",$committer->email);
          $this->assertEquals("1f27eed71970a0dbc0ca758f449e4b68c4c91bd8", $commit->getId());
+         
+         $tree = $commit->getTree();
+         $entry1 = $tree->entries[0];
+         $this->assertEquals("EXPERIMENTAL",$entry1->name);
+         $this->assertEquals("35a136e7e190505e46367a04f730e827062b13cc",$entry1->oid);
+
+         $entry2 = $tree->entries[1];
+         $this->assertEquals("README.md",$entry2->name);
+         $this->assertEquals("a1a07d27e9d8a78e3bc6fb8a6d8308d358ff9b07",$entry2->oid);
      }
  }

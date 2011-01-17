@@ -280,37 +280,6 @@ PHP_METHOD(git_repository, getCommit)
             add_property_zval(git_commit_object,"author", author);
             add_property_zval(git_commit_object,"committer", committer);
 
-            // set tree to commit.
-            /*
-            git_tree *tree = git_commit_tree(blob);
-            git_oid *tree_oid;
-
-            tree_oid = git_tree_id(tree);
-            git_oid_to_string(&out,GIT_OID_HEXSZ+1,tree_oid);
-
-            //make tree and tree entries.
-            zval *git_tree;
-            zval *entries;
-            zval *entry;
-
-            MAKE_STD_ZVAL(git_tree);
-            MAKE_STD_ZVAL(entries);
-            array_init(entries);
-            object_init_ex(git_tree, git_tree_class_entry);
-            php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
-            tobj->object = tree;
-
-            int r = git_tree_entrycount(tree);
-            int i = 0;
-            
-            for(i; i < r; i++){
-                create_tree_entry_from_entry(&entry,git_tree_entry_byindex(tree,i));
-                add_next_index_zval(entries, entry);
-            }
-
-            add_property_zval(git_tree,"entries", entries);
-            add_property_zval(git_commit_object,"tree", git_tree);
-            */
             RETURN_ZVAL(git_commit_object,1,0);
             efree(git_commit_object);
             efree(author);

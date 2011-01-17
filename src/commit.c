@@ -27,9 +27,8 @@
 #include <zend_interfaces.h>
 #include <string.h>
 #include <time.h>
-
+extern void create_tree_entry_from_entry(zval **object, git_tree_entry *entry);
 extern zend_object_value php_git_repository_new(zend_class_entry *ce TSRMLS_DC);
-
 
 static void php_git_commit_free_storage(php_git_commit_t *obj TSRMLS_DC)
 {
@@ -287,6 +286,37 @@ PHP_METHOD(git_commit, getShortMessage)
     RETURN_STRING(message,1 TSRMLS_C);
 }
 
+PHP_METHOD(git_commit, getTree)
+{
+    php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_tree *tree = git_commit_tree(this->object);
+
+    git_oid *tree_oid;
+    zval *git_tree;
+    zval *entries;
+    zval *entry;
+
+    MAKE_STD_ZVAL(git_tree);
+    MAKE_STD_ZVAL(entries);
+    array_init(entries);
+    object_init_ex(git_tree, git_tree_class_entry);
+    php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
+    tobj->object = tree;
+
+    int r = git_tree_entrycount(tree);
+    int i = 0;
+    
+    for(i; i < r; i++){
+        create_tree_entry_from_entry(&entry,git_tree_entry_byindex(tree,i));
+        add_next_index_zval(entries, entry);
+    }
+
+    add_property_zval(git_tree,"entries", entries);
+
+    RETURN_ZVAL(git_tree,0,0);
+}
+
+
 PHP_METHOD(git_commit, getAuthor)
 {
     zval *object = getThis();
@@ -297,6 +327,7 @@ PHP_METHOD(git_commit, getAuthor)
 PHPAPI function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, __construct,  arginfo_git_commit__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setTree,  arginfo_git_commit_set_tree, ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, getTree,  NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setAuthor,  arginfo_git_commit_set_author, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getAuthor, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setCommitter,  arginfo_git_commit_set_committer, ZEND_ACC_PUBLIC)
