@@ -231,7 +231,7 @@ PHP_METHOD(git_commit, setTree)
 
             add_property_string(array_ptr, "name", git_tree_entry_name(entry), 1);
             add_property_string(array_ptr, "oid", mbuf, 1);
-            add_property_long(array_ptr, "attr", git_tree_entry_attributes(entry));
+            add_property_long(array_ptr, "mode", git_tree_entry_attributes(entry));
 
             add_next_index_zval(entries,  array_ptr);
         }
