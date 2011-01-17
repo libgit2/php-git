@@ -113,16 +113,17 @@ class GitTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$tree_hash, "tree writing");
         
         $commit = new Git\Commit($repository);
-        $commit->setAuthor(new Git\Signature("Someone","someone@example.com", new DateTime("@1295103057")));
-        $commit->setCommitter(new Git\Signature("Someone","someone@example.com", new DateTime("@1295103057")));
+        $commit->setAuthor(new Git\Signature("Someone","someone@example.com", new DateTime("2011-01-01 00:00:00",new DateTimezone("Asia/Tokyo"))));
+        $commit->setCommitter(new Git\Signature("Someone","someone@example.com", new DateTime("2011-01-01 00:00:00",new DateTimezone("Asia/Tokyo"))));
         $commit->setTree($tree->getId());
-        $commit->setParent(""); // first commit;
+        // when first commit. you dont call setParent.
+        //$commit->setParent(""); 
         $commit->setMessage("initial import");
         
         $master_hash = $commit->write();
-        
-        $this->markTestIncomplete("this test does not implemente yet.");
-        $this->assertEquals("0d02e26cb684486889ea71168df7721a098bee80",$master_hash,"commit writing");
+
+        //$this->markTestIncomplete("this test does not implemente yet.");
+        $this->assertEquals("69b3d7402ff73e3a85f8eedbf06860481cbb72b2",$master_hash,"commit writing");
         unset($repository);
 
         $rmdir = function($dir) use(&$rmdir){
