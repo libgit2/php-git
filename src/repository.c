@@ -28,7 +28,9 @@
 #include <string.h>
 #include <time.h>
 
+extern void create_signature_from_commit(zval *signature, git_signature *sig);
 extern int php_git_odb_add_backend(git_odb **odb, zval *backend);
+
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 2)
     ZEND_ARG_INFO(0, path)
@@ -213,12 +215,29 @@ PHP_METHOD(git_repository, getObject)
 }
 
 
+void create_tree_entry_from_entry(zval **object, git_tree_entry *entry)
+{
+    char buf[40];
+    git_oid *oid;
+    MAKE_STD_ZVAL(*object);
+    object_init_ex(*object, git_tree_entry_class_entry);
+    php_git_tree_entry_t *entry_obj = (php_git_tree_entry_t *) zend_object_store_get_object(*object TSRMLS_CC);
+
+    entry_obj->entry = entry;
+    oid = git_tree_entry_id(entry);
+    git_oid_to_string(&buf,41,oid);
+    
+    add_property_string(*object, "name", git_tree_entry_name(entry), 1);
+    add_property_string(*object, "oid", buf, 1);
+    add_property_long(*object, "mode", git_tree_entry_attributes(entry));
+}
+
 
 
 PHP_METHOD(git_repository, getCommit)
 {
     zval *object = getThis();
-    zval *git_raw_object;
+    zval *git_commit_object;
     php_git_tree_entry_t *entry_obj;
     git_repository *repository;
     git_odb *odb;
@@ -240,90 +259,62 @@ PHP_METHOD(git_repository, getCommit)
     repository = myobj->repository;
     odb = git_repository_database(repository);
     
-    if(git_odb_exists(odb,&oid)){
+    if(!git_odb_exists(odb,&oid)){
         RETURN_FALSE;
     }else{
         ret = git_repository_lookup(&blob, repository,&oid , GIT_OBJ_COMMIT);
         
         if(ret == GIT_SUCCESS){
-            git_signature *sig;
-            zval *committer;
             zval *author;
-            MAKE_STD_ZVAL(author);
-            char *name;
-            object_init_ex(author,git_signature_class_entry);
-            sig = git_commit_author(blob);
-            add_property_string(author,"name",sig->name,1 TSRMLS_CC);
-            add_property_string(author,"email",sig->email,1 TSRMLS_CC);
-            add_property_long(author,"time",sig->when.time);
+            zval *committer;
 
-            MAKE_STD_ZVAL(committer);
-            object_init_ex(committer,git_signature_class_entry);
-
-            sig = git_commit_committer(blob);
-            add_property_string(committer,"name",sig->name,1 TSRMLS_CC);
-            add_property_string(committer,"email",sig->email,1 TSRMLS_CC);
-            add_property_long(committer,"time",sig->when.time);
-
-
-
-            MAKE_STD_ZVAL(git_raw_object);
-            object_init_ex(git_raw_object,git_commit_class_entry);
-            php_git_commit_t *c_obj = (php_git_commit_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
-            c_obj->object = blob;
+            create_signature_from_commit(&author, git_commit_author(blob));
+            create_signature_from_commit(&committer, git_commit_committer(blob));
             
-            sig = git_commit_author(blob);
+            MAKE_STD_ZVAL(git_commit_object);
+            object_init_ex(git_commit_object,git_commit_class_entry);
+
+            php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(git_commit_object TSRMLS_CC);
+            cobj->object = blob;
+
+            add_property_zval(git_commit_object,"author", author);
+            add_property_zval(git_commit_object,"committer", committer);
+
+            // set tree to commit.
+            /*
             git_tree *tree = git_commit_tree(blob);
             git_oid *tree_oid;
+
             tree_oid = git_tree_id(tree);
-            git_oid_to_string(&out,41,tree_oid);
-            //add_property_string(git_raw_object,"tree", out,1);
+            git_oid_to_string(&out,GIT_OID_HEXSZ+1,tree_oid);
 
-            add_property_zval(git_raw_object,"author", author);
-            add_property_zval(git_raw_object,"committer", committer);
-
-
-            //コピペ
+            //make tree and tree entries.
             zval *git_tree;
             zval *entries;
-            git_oid *moid;
-            git_tree_entry *entry;
+            zval *entry;
 
             MAKE_STD_ZVAL(git_tree);
             MAKE_STD_ZVAL(entries);
             array_init(entries);
             object_init_ex(git_tree, git_tree_class_entry);
-
-            int r = git_tree_entrycount(tree);
-            int i = 0;
-            char buf[40];
-            char *offset;
-            zval *array_ptr;
-
-            for(i; i < r; i++){
-                entry = git_tree_entry_byindex(tree,i);
-                moid = git_tree_entry_id(entry);
-                git_oid_to_string(&buf,41,moid);
-
-                MAKE_STD_ZVAL(array_ptr);
-                object_init_ex(array_ptr, git_tree_entry_class_entry);
-                entry_obj = (php_git_tree_entry_t *) zend_object_store_get_object(array_ptr TSRMLS_CC);
-                entry_obj->entry = entry;
-
-                add_property_string(array_ptr, "name", git_tree_entry_name(entry), 1);
-                add_property_string(array_ptr, "oid", buf, 1);
-                add_property_long(array_ptr, "attr", git_tree_entry_attributes(entry));
-
-                add_next_index_zval(entries,  array_ptr);
-            }
-
             php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
             tobj->object = tree;
 
-            add_property_zval(git_tree,"entries", entries);
-            add_property_zval(git_raw_object,"tree", git_tree);
+            int r = git_tree_entrycount(tree);
+            int i = 0;
             
-            RETURN_ZVAL(git_raw_object,1,0);
+            for(i; i < r; i++){
+                create_tree_entry_from_entry(&entry,git_tree_entry_byindex(tree,i));
+                add_next_index_zval(entries, entry);
+            }
+
+            add_property_zval(git_tree,"entries", entries);
+            add_property_zval(git_commit_object,"tree", git_tree);
+            */
+            RETURN_ZVAL(git_commit_object,1,0);
+            efree(git_commit_object);
+            efree(author);
+            efree(committer);
         }else{
             RETURN_FALSE;
         }

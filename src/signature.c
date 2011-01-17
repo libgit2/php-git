@@ -30,12 +30,27 @@
 #include <time.h>
 
 
+void create_signature_from_commit(zval **signature, git_signature *sig)
+{
+    char *name;
+    MAKE_STD_ZVAL(*signature);
+    object_init_ex(*signature,git_signature_class_entry);
+    php_git_signature_t *object = (php_git_signature_t *) zend_object_store_get_object(*signature TSRMLS_CC);
+    object->signature = sig;
+    
+    add_property_string(*signature,"name",sig->name,1 TSRMLS_CC);
+    add_property_string(*signature,"email",sig->email,1 TSRMLS_CC);
+    add_property_long(*signature,"time",sig->when.time);
+}
+
+
 static void php_git_signature_free_storage(php_git_signature_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     
     if(obj->signature){
-        git_signature_free(obj->signature);
+        // do not free.
+        //git_signature_free(obj->signature);
     }
     obj->signature = NULL;
     efree(obj);

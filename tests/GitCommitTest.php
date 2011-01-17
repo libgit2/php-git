@@ -19,6 +19,7 @@
          // currentry nothing to do.
      }
      
+     
      public function testGitCommitAuthorSignature()
      {
          $commit = new Git\Commit(new Git\Repository(PHP_GIT_FIXTURE_DIR . "/fixture.git"));
@@ -39,4 +40,18 @@
          $this->assertEquals(1293956764,$committer->time);
      }
 
+     public function testGitGetCommitFlomRepository()
+     {
+         $repository = new Git\Repository(".git");
+         $commit = $repository->getCommit("1f27eed71970a0dbc0ca758f449e4b68c4c91bd8");
+         $author = $commit->getAuthor();
+         
+         $this->assertEquals("Shuhei Tanuma",$author->name);
+         $this->assertEquals("shuhei.tanuma@gmail.com",$author->email);
+         
+         $committer = $commit->getCommitter();
+         $this->assertEquals("Shuhei Tanuma",$committer->name);
+         $this->assertEquals("shuhei.tanuma@gmail.com",$committer->email);
+         $this->assertEquals("1f27eed71970a0dbc0ca758f449e4b68c4c91bd8", $commit->getId());
+     }
  }
