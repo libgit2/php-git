@@ -44,7 +44,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_exists, 0, 0, 1)
     ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_write, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_write, 0, 0, 1)
     ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
@@ -109,7 +109,7 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
     php_git_rawobject_t *raw = (php_git_rawobject_t *) zend_object_store_get_object(params[0] TSRMLS_CC);
     raw->object = obj;
 
-    call_user_function(EG(function_table),&object->self,&func,retval,1,params TSRMLS_CC);
+    call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC);
     if(strlen(Z_STRVAL_P(retval)) == 40){
         git_oid_mkstr(id,Z_STRVAL_P(retval));
         ret = GIT_SUCCESS;
