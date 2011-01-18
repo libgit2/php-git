@@ -89,28 +89,12 @@ PHP_METHOD(git_raw_object, __construct)
 
 PHP_METHOD(git_raw_object, getId)
 {
-    git_rawobj obj;
     php_git_rawobject_t *this = (php_git_rawobject_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_oid oid;
     char out[40];
 
-/*
-    zval *data = zend_read_property(git_rawobject_class_entry,getThis(),"data",4,0 TSRMLS_CC);
-    zval *type = zend_read_property(git_rawobject_class_entry,getThis(),"type",4,0 TSRMLS_CC);
-    zval *len = zend_read_property(git_rawobject_class_entry,getThis(),"len",3,0 TSRMLS_CC);
-
-    obj.data = NULL;
-    obj.type = Z_LVAL_P(type);
-    obj.len = Z_LVAL_P(len);
-    if(Z_STRVAL_P(data)){
-        obj.data = malloc(obj.len);
-        memcpy(obj.data,Z_STRVAL_P(data),obj.len);
-    }
-*/
     git_rawobj_hash(&oid,this->object);
-
     git_oid_to_string(out,GIT_OID_HEXSZ+1,&oid);
-    git_rawobj_close(&obj);
 
     RETVAL_STRING(out,1);
 }
