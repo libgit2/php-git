@@ -108,10 +108,8 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
     add_property_long(params[0],"type",obj->type TSRMLS_CC);
     add_property_long(params[0],"len",obj->len TSRMLS_CC);
 
-    php_git_rawobject_t *this = (php_git_rawobject_t *) zend_object_store_get_object(params[0] TSRMLS_CC);
-    this->object = emalloc(sizeof(obj));
-    memcpy(this->object,obj,sizeof(obj));
-
+    php_git_rawobject_t *raw = (php_git_rawobject_t *) zend_object_store_get_object(params[0] TSRMLS_CC);
+    raw->object = obj;
 
     call_user_function(EG(function_table),&object->self,&func,retval,2,params TSRMLS_CC);
     if(strlen(Z_STRVAL_P(retval)) == 40){
@@ -120,12 +118,11 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
     }else{
         ret = GIT_ERROR;
     }
-
-	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&params[0]);
-    zval_ptr_dtor(&params[1]);
+    
+    raw->object = NULL;
+    zval_ptr_dtor(&retval);
+    zval_ptr_dtor(&params[0]);
     zval_dtor(&func);
-    efree(data);
 
     return ret;
 }
@@ -162,8 +159,8 @@ int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_
     obj->type = GIT_OBJ_BLOB;
     memcpy(obj->data, Z_STRVAL_P(str),obj->len);
     
-	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&params[0]);
+    zval_ptr_dtor(&retval);
+    zval_ptr_dtor(&params[0]);
     zval_dtor(&func);
     
     return GIT_SUCCESS;
@@ -261,29 +258,6 @@ PHP_METHOD(git_backend, __construct)
 
     this->backend = internal;
 }
-
-/*
-PHP_METHOD(git_backend, moe)
-{
-	zval *retval;
-    zval func;
-    zval *this = getThis();
-    ZVAL_STRING(&func,"uhi", 1);
-	MAKE_STD_ZVAL(retval);
-	ZVAL_NULL(retval);
-
-    //php_git_backend_t *obj = (php_git_backend_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	//error = call_user_function(EG(function_table), NULL, func, retval, 2, argv TSRMLS_CC);
-    //call_user_function(EG(function_table), NULL, type->map->to_xml, return_value, 1, &data TSRMLS_CC) == FAILURE
-    //call_user_function_ex(EG(function_table), &object, callback, &retval_ptr, n_params, params, 0, NULL TSRMLS_CC)
-    call_user_function(EG(function_table),&this ,&func,retval,0,NULL TSRMLS_CC);
-	zval_ptr_dtor(&retval);
-    zval_dtor(&func);
-	//zval_ptr_dtor(retval);
-    //efree(func);
-}
-*/
 
 PHPAPI function_entry php_git_backend_methods[] = {
     PHP_ME(git_backend, __construct, arginfo_git_backend__construct, ZEND_ACC_PUBLIC)

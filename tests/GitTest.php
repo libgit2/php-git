@@ -92,7 +92,7 @@ class GitTest extends \PHPUnit_Framework_TestCase
     
         $backend = new Git\Backend\Memory(5);
         $repository = Git\Repository::init(__DIR__ . "/git_init_test",true);
-        //$repository->addBackend($backend);
+        $repository->addBackend($backend);
 
         $blob = new Git\Blob($repository);
         $blob->setContent("First Object1");
@@ -100,7 +100,9 @@ class GitTest extends \PHPUnit_Framework_TestCase
         
         $this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $hash,"First Object1 write correctly");
         $this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $blob->getid(),"rawobject and blob hash are same.");
-        //$this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $backend->get($hash)->getId(),"Backend return same rawobject");
+        $data = $backend->read($hash);
+        
+        $this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $backend->read($hash)->getId(),"Backend return same rawobject");
         
         $tree = new Git\Tree($repository);
         $entry = new Git\Tree\Entry();
@@ -111,6 +113,9 @@ class GitTest extends \PHPUnit_Framework_TestCase
         $tree_hash = $tree->write();
         
         $this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$tree_hash, "tree writing");
+        
+        $data = $backend->read("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70");
+        //$this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$data, "Backend return same tree raw");
         
         $commit = new Git\Commit($repository);
         $commit->setAuthor(new Git\Signature("Someone","someone@example.com", new DateTime("2011-01-01 00:00:00",new DateTimezone("Asia/Tokyo"))));

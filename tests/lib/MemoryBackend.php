@@ -10,6 +10,7 @@ namespace Git\Backend;
 class Memory extends \Git\Backend
 {
     protected $memory = array();
+
     /**
      * for debug
      */
@@ -35,6 +36,8 @@ class Memory extends \Git\Backend
     public function read($key){
        if($this->exists($key)){
            $object = $this->get($key);
+
+           return $object;
        }
     }
 
@@ -77,7 +80,11 @@ class Memory extends \Git\Backend
      */
     public function write($object){
         $key = $object->getId();
-        $this->memory[$key] = $object;
+        $std = new \Stdclass();
+        $std->data = $object->data;
+        $std->type = $object->type;
+        $std->len = $object->len;
+        $this->memory[$key] = $std;
         return $key;
     }
 

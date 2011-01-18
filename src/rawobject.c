@@ -31,8 +31,6 @@
 static void php_git_rawobject_free_storage(php_git_rawobject_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
-    
-    //obj->object = NULL;
     efree(obj);
 }
 
@@ -45,7 +43,7 @@ zend_object_value php_git_rawobject_new(zend_class_entry *ce TSRMLS_DC)
 	obj = ecalloc(1, sizeof(*obj));
 	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
 	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-
+    
 	retval.handle = zend_objects_store_put(obj, 
         (zend_objects_store_dtor_t)zend_objects_destroy_object,
         (zend_objects_free_object_storage_t)php_git_rawobject_free_storage,
@@ -76,6 +74,12 @@ PHP_METHOD(git_raw_object, __construct)
         "lsl", &type, &data, &data_len, &len) == FAILURE){
         return;
     }
+    php_git_rawobject_t *this= (php_git_rawobject_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    this->object = malloc(sizeof(git_rawobj));
+    this->object->data = NULL;
+    this->object->type = type;
+    this->object->len = len;
+    this->object->data = estrdup(data);
 
     add_property_string_ex(getThis(), "data",sizeof("data"),data ,1 TSRMLS_CC);
     add_property_long(getThis(), "type",type);
@@ -123,4 +127,6 @@ void git_init_rawobject(TSRMLS_D)
     INIT_NS_CLASS_ENTRY(git_rawobject_ce, PHP_GIT_NS,"RawObject", php_git_rawobject_methods);
 
     git_rawobject_class_entry = zend_register_internal_class(&git_rawobject_ce TSRMLS_CC);
+	git_rawobject_class_entry->create_object = php_git_rawobject_new;
+
 }
