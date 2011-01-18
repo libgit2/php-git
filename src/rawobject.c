@@ -79,9 +79,10 @@ PHP_METHOD(git_raw_object, __construct)
     this->object->data = NULL;
     this->object->type = type;
     this->object->len = len;
-    this->object->data = estrdup(data);
+    this->object->data = malloc(len);
+    memcpy(this->object->data,data,len);
 
-    add_property_string_ex(getThis(), "data",sizeof("data"),data ,1 TSRMLS_CC);
+    add_property_stringl_ex(getThis(), "data",sizeof("data"),data,len,1 TSRMLS_CC);
     add_property_long(getThis(), "type",type);
     add_property_long(getThis(), "len",len);
 }

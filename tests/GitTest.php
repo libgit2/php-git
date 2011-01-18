@@ -111,11 +111,10 @@ class GitTest extends \PHPUnit_Framework_TestCase
         $entry->oid = $hash;
         $tree->add($entry);
         $tree_hash = $tree->write();
-        
         $this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$tree_hash, "tree writing");
         
         $data = $backend->read("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70");
-        //$this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$data, "Backend return same tree raw");
+        $this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$data->getId(), "Backend return same tree raw");
         
         $commit = new Git\Commit($repository);
         $commit->setAuthor(new Git\Signature("Someone","someone@example.com", new DateTime("2011-01-01 00:00:00",new DateTimezone("Asia/Tokyo"))));

@@ -94,8 +94,7 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
 	zval *retval;
 	zval *params[1];
     zval func;
-    char *data = NULL;
-
+    unsigned char *data = NULL;
 	MAKE_STD_ZVAL(retval);
 	ZVAL_NULL(retval);
     ZVAL_STRING(&func,"write", 1);
@@ -103,8 +102,8 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
 
     MAKE_STD_ZVAL(params[0]);
     object_init_ex(params[0],git_rawobject_class_entry);
-
-    add_property_string(params[0],"data",obj->data,1 TSRMLS_CC);
+    
+    add_property_stringl_ex(params[0],"data",sizeof("data"),obj->data,obj->len,1 TSRMLS_CC);
     add_property_long(params[0],"type",obj->type TSRMLS_CC);
     add_property_long(params[0],"len",obj->len TSRMLS_CC);
 
