@@ -94,7 +94,6 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
 	zval *retval;
 	zval *params[1];
     zval func;
-    unsigned char *data = NULL;
 	MAKE_STD_ZVAL(retval);
 	ZVAL_NULL(retval);
     ZVAL_STRING(&func,"write", 1);
@@ -110,7 +109,7 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
     php_git_rawobject_t *raw = (php_git_rawobject_t *) zend_object_store_get_object(params[0] TSRMLS_CC);
     raw->object = obj;
 
-    call_user_function(EG(function_table),&object->self,&func,retval,2,params TSRMLS_CC);
+    call_user_function(EG(function_table),&object->self,&func,retval,1,params TSRMLS_CC);
     if(strlen(Z_STRVAL_P(retval)) == 40){
         git_oid_mkstr(id,Z_STRVAL_P(retval));
         ret = GIT_SUCCESS;
