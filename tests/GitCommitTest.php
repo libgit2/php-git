@@ -7,60 +7,62 @@
  * file that was distributed with this source code.
  */
  
- class GitCommitTest extends \PHPUnit_Framework_TestCase
- {
-     protected function setUp()
-     {
-         // currentry nothing to do.
-     }
-     
-     protected function tearDown()
-     {
-         // currentry nothing to do.
-     }
-     
-     
-     public function testGitCommitAuthorSignature()
-     {
-         $commit = new Git\Commit(new Git\Repository(PHP_GIT_FIXTURE_DIR . "/fixture.git"));
-         $commit->setAuthor(new Git\Signature("Someone Else","someone@example.com",new DateTime("@1293956764")));
-         $author = $commit->getAuthor();
-         $this->assertEquals("Someone Else",$author->name);
-         $this->assertEquals("someone@example.com",$author->email);
-         $this->assertEquals(1293956764,$author->time);
-     }
+class GitCommitTest extends \PHPUnit_Framework_TestCase
+{
+    protected function setUp()
+    {
+        // currentry nothing to do.
+    }
+    
+    protected function tearDown()
+    {
+        // currentry nothing to do.
+    }
+    
+    
+    public function testGitCommitAuthorSignature()
+    {
+        $commit = new Git\Commit(new Git\Repository(PHP_GIT_FIXTURE_DIR . "/fixture.git"));
+        $commit->setAuthor(new Git\Signature("Someone Else","someone@example.com",new DateTime("@1293956764")));
+        $author = $commit->getAuthor();
+        $this->assertEquals("Someone Else",$author->name);
+        $this->assertEquals("someone@example.com",$author->email);
+        $this->assertEquals(1293956764,$author->time);
+    }
 
-     public function testGitCommitCommitterSignature()
-     {
-         $commit = new Git\Commit(new Git\Repository(PHP_GIT_FIXTURE_DIR . "/fixture.git"));
-         $commit->setCommitter(new Git\Signature("Someone Else","someone@example.com",new DateTime("@1293956764")));
-         $committer = $commit->getCommitter();
-         $this->assertEquals("Someone Else",$committer->name);
-         $this->assertEquals("someone@example.com",$committer->email);
-         $this->assertEquals(1293956764,$committer->time);
-     }
+    public function testGitCommitCommitterSignature()
+    {
+        $commit = new Git\Commit(new Git\Repository(PHP_GIT_FIXTURE_DIR . "/fixture.git"));
+        $commit->setCommitter(new Git\Signature("Someone Else","someone@example.com",new DateTime("@1293956764")));
+        $committer = $commit->getCommitter();
+        $this->assertEquals("Someone Else",$committer->name);
+        $this->assertEquals("someone@example.com",$committer->email);
+        $this->assertEquals(1293956764,$committer->time);
+    }
 
-     public function testGitGetCommitFlomRepository()
-     {
-         $repository = new Git\Repository(".git");
-         $commit = $repository->getCommit("1f27eed71970a0dbc0ca758f449e4b68c4c91bd8");
-         $author = $commit->getAuthor();
-         
-         $this->assertEquals("Shuhei Tanuma",$author->name);
-         $this->assertEquals("shuhei.tanuma@gmail.com",$author->email);
-         
-         $committer = $commit->getCommitter();
-         $this->assertEquals("Shuhei Tanuma",$committer->name);
-         $this->assertEquals("shuhei.tanuma@gmail.com",$committer->email);
-         $this->assertEquals("1f27eed71970a0dbc0ca758f449e4b68c4c91bd8", $commit->getId());
-         
-         $tree = $commit->getTree();
-         $entry1 = $tree->entries[0];
-         $this->assertEquals("EXPERIMENTAL",$entry1->name);
-         $this->assertEquals("35a136e7e190505e46367a04f730e827062b13cc",$entry1->oid);
+    public function testGitGetCommitFlomRepository()
+    {
+        $repository = new Git\Repository(".git");
+        $commit = $repository->getCommit("1f27eed71970a0dbc0ca758f449e4b68c4c91bd8");
+ 
+        $author = $commit->getAuthor();
 
-         $entry2 = $tree->entries[1];
-         $this->assertEquals("README.md",$entry2->name);
-         $this->assertEquals("a1a07d27e9d8a78e3bc6fb8a6d8308d358ff9b07",$entry2->oid);
-     }
- }
+        $this->assertEquals("Shuhei Tanuma",$author->name);
+        $this->assertEquals("shuhei.tanuma@gmail.com",$author->email);
+
+        
+        $committer = $commit->getCommitter();
+        $this->assertEquals("Shuhei Tanuma",$committer->name);
+        $this->assertEquals("shuhei.tanuma@gmail.com",$committer->email);
+        $this->assertEquals("1f27eed71970a0dbc0ca758f449e4b68c4c91bd8", $commit->getId());
+        
+        $tree = $commit->getTree();
+        $entry1 = $tree->entries[0];
+        $this->assertEquals("EXPERIMENTAL",$entry1->name);
+        $this->assertEquals("35a136e7e190505e46367a04f730e827062b13cc",$entry1->oid);
+
+        $entry2 = $tree->entries[1];
+        $this->assertEquals("README.md",$entry2->name);
+        $this->assertEquals("a1a07d27e9d8a78e3bc6fb8a6d8308d358ff9b07",$entry2->oid);
+    }
+}

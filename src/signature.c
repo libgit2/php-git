@@ -29,6 +29,67 @@
 #include <string.h>
 #include <time.h>
 
+PHPAPI zend_class_entry *git_signature_class_entry;
+
+void create_signature_from_commit(zval **signature, git_signature *sig);
+static void php_git_signature_free_storage(php_git_signature_t *obj TSRMLS_DC);
+zend_object_value php_git_signature_new(zend_class_entry *ce TSRMLS_DC);
+int php_git_signature_create(zval *object, char *name, int name_len, char *email, int email_len, zval *time);
+void git_init_signature(TSRMLS_D);
+
+/**
+ * Git\Signature PHP Extension register code block
+ */
+
+PHP_METHOD(git_signature, __construct);
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_signature__construct, 0, 0, 3)
+    ZEND_ARG_INFO(0, name)
+    ZEND_ARG_INFO(0, email)
+    ZEND_ARG_INFO(0, when)
+ZEND_END_ARG_INFO()
+
+PHPAPI function_entry php_git_signature_methods[] = {
+    PHP_ME(git_signature, __construct, arginfo_git_signature__construct, ZEND_ACC_PUBLIC)
+    {NULL, NULL, NULL}
+};
+
+PHP_METHOD(git_signature, __construct)
+{
+    char *name;
+    char *email;
+    int name_len  = 0;
+    int email_len = 0;
+    zval *time;
+    
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "ssz", &name, &name_len, &email, &email_len, &time) == FAILURE){
+        return;
+    }
+
+    if(!instanceof_function(Z_OBJCE_P(time), php_date_get_date_ce() TSRMLS_CC)){
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git\\Signature third parameter must be DateTime instance.");
+        return;
+    }
+
+    int ret = php_git_signature_create(getThis(), name, name_len, email, email_len, time);
+    if (ret != GIT_SUCCESS) {
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git\\Signature internal error");
+    }
+}
+
+/**
+ * Git\Signature PHP Extension implementation.
+ */
+
+void git_init_signature(TSRMLS_D)
+{
+    zend_class_entry git_signature_ce;
+    INIT_NS_CLASS_ENTRY(git_signature_ce, PHP_GIT_NS,"Signature", php_git_signature_methods);
+
+    git_signature_class_entry = zend_register_internal_class(&git_signature_ce TSRMLS_CC);
+    git_signature_class_entry->create_object = php_git_signature_new;
+}
 
 void create_signature_from_commit(zval **signature, git_signature *sig)
 {
@@ -38,21 +99,23 @@ void create_signature_from_commit(zval **signature, git_signature *sig)
     php_git_signature_t *object = (php_git_signature_t *) zend_object_store_get_object(*signature TSRMLS_CC);
     object->signature = sig;
     
-    add_property_string(*signature,"name",sig->name,1 TSRMLS_CC);
+    add_property_string(*signature,"name", sig->name,1 TSRMLS_CC);
     add_property_string(*signature,"email",sig->email,1 TSRMLS_CC);
-    add_property_long(*signature,"time",sig->when.time);
+    add_property_long(*signature,  "time", sig->when.time);
 }
-
 
 static void php_git_signature_free_storage(php_git_signature_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     
     if(obj->signature){
-        // do not free.
+        // do not call git_signature_free.
+        // i'll fix this issue on next release.
+
         //git_signature_free(obj->signature);
+        //obj->signature = NULL;
     }
-    obj->signature = NULL;
+
     efree(obj);
 }
 
@@ -74,74 +137,36 @@ zend_object_value php_git_signature_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_signature__construct, 0, 0, 3)
-    ZEND_ARG_INFO(0, name)
-    ZEND_ARG_INFO(0, email)
-    ZEND_ARG_INFO(0, when)
-ZEND_END_ARG_INFO()
-
-PHP_METHOD(git_signature, __construct)
+int php_git_signature_create(zval *object, char *name, int name_len, char *email, int email_len, zval *time)
 {
-    zval *this = getThis();
-    char *name;
-    int name_len = 0;
-    char *email;
-    int email_len = 0;
-    zval *time;
-    php_git_signature_t *myobj;
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "ssz", &name, &name_len, &email, &email_len, &time) == FAILURE){
-        return;
-    }
-
-    if(!instanceof_function(Z_OBJCE_P(time), php_date_get_date_ce() TSRMLS_CC)){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git\\Signature third parameter must be DateTime instance.");
-        return;
-    }
-    myobj = (php_git_signature_t *) zend_object_store_get_object(this TSRMLS_CC);
-    //Todo: timeはDateTime型にしたい
+    php_git_signature_t *this = (php_git_signature_t *) zend_object_store_get_object(object TSRMLS_CC);
+    int ret = 0;
+    // Todo: should use `zend_fcall*` instead of `call_user-function` for performance improvement.
 
 	zval *retval;
     zval *offset;
     zval func;
     zval func2;
     ZVAL_STRING(&func,"getTimestamp", 1);
-
 	MAKE_STD_ZVAL(retval);
 	ZVAL_NULL(retval);
+    call_user_function(NULL,&time,&func,retval,0,NULL TSRMLS_CC);
+    
 	MAKE_STD_ZVAL(offset);
 	ZVAL_NULL(offset);
-
-    call_user_function(EG(function_table),&time,&func,retval,0,NULL TSRMLS_CC);
-    
     ZVAL_STRING(&func2,"getOffset", 1);
-    call_user_function(EG(function_table),&time,&func2,offset,0,NULL TSRMLS_CC);
+    call_user_function(NULL,&time,&func2,offset,0,NULL TSRMLS_CC);
+    this->signature = git_signature_new(name,email,Z_LVAL_P(retval),Z_LVAL_P(offset)/60);
 
-    myobj->signature = git_signature_new(name,email,Z_LVAL_P(retval),Z_LVAL_P(offset)/60);
-
-    add_property_string_ex(this,"name", 5, name, 1 TSRMLS_CC);
-    add_property_string_ex(this,"email",6, email, 1 TSRMLS_CC);
-    add_property_long(this,"time",Z_LVAL_P(retval));
+    add_property_string_ex(object,"name", sizeof("name"),  name,  1 TSRMLS_CC);
+    add_property_string_ex(object,"email",sizeof("email"), email, 1 TSRMLS_CC);
+    add_property_long(object,     "time", Z_LVAL_P(retval));
 
 	zval_ptr_dtor(&retval);
     zval_dtor(&func);
 	zval_ptr_dtor(&offset);
     zval_dtor(&func2);
+
+    return ret;
 }
 
-// GitSignature
-PHPAPI function_entry php_git_signature_methods[] = {
-    PHP_ME(git_signature, __construct, arginfo_git_signature__construct, ZEND_ACC_PUBLIC)
-    {NULL, NULL, NULL}
-};
-
-
-void git_init_signature(TSRMLS_D)
-{
-    zend_class_entry git_signature_ce;
-    INIT_NS_CLASS_ENTRY(git_signature_ce, PHP_GIT_NS,"Signature", php_git_signature_methods);
-
-    git_signature_class_entry = zend_register_internal_class(&git_signature_ce TSRMLS_CC);
-    git_signature_class_entry->create_object = php_git_signature_new;
-}
