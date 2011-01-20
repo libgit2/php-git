@@ -83,10 +83,76 @@ PHP_METHOD(git_tree_entry, setId)
 }
 
 
+PHP_METHOD(git_tree_entry, toObject)
+{
+    php_git_tree_entry_t *this = (php_git_tree_entry_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_object *object;
+    git_otype type;
 
+    int ret = git_tree_entry_2object(&object, this->entry);
+
+    if(ret == GIT_SUCCESS){
+        type = git_object_type(object);
+        if (type == GIT_OBJ_BLOB) {
+
+            zval *git_raw_object;
+            MAKE_STD_ZVAL(git_raw_object);
+            object_init_ex(git_raw_object, git_blob_class_entry);
+            php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
+            blobobj->object = object;
+
+            add_property_string_ex(git_raw_object,"data", 5, git_blob_rawcontent((git_blob *)object), 1 TSRMLS_CC);
+            RETURN_ZVAL(git_raw_object,1,0);
+        } else if(type == GIT_OBJ_TREE) {
+            git_tree *tree = (git_tree *)object;
+            zval *git_tree;
+            zval *entries;
+            git_tree_entry *entry;
+            MAKE_STD_ZVAL(git_tree);
+            MAKE_STD_ZVAL(entries);
+            array_init(entries);
+            object_init_ex(git_tree, git_tree_class_entry);
+
+            int r = git_tree_entrycount(tree);
+            int i = 0;
+            char buf[40];
+            char *offset;
+            git_oid *moid;
+            zval *array_ptr;
+
+            for(i; i < r; i++){
+                entry = git_tree_entry_byindex(tree,i);
+                moid = git_tree_entry_id(entry);
+                git_oid_to_string(buf,41,moid);
+
+                MAKE_STD_ZVAL(array_ptr);
+                object_init_ex(array_ptr, git_tree_entry_class_entry);
+
+                add_property_string(array_ptr, "name", git_tree_entry_name(entry), 1);
+                add_property_string(array_ptr, "oid", buf, 1);
+                add_property_long(array_ptr, "mode", git_tree_entry_attributes(entry));
+
+                add_next_index_zval(entries,  array_ptr);
+            }
+
+            php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
+            tobj->object = tree;
+
+            add_property_zval(git_tree,"entries", entries);
+
+            RETURN_ZVAL(git_tree,1,0);
+        } else{
+            php_error_docref(NULL TSRMLS_CC, E_ERROR,
+                "unexpected git_otype found.");
+            RETURN_FALSE;
+        }
+    }
+
+}
 
 PHPAPI function_entry php_git_tree_entry_methods[] = {
-    PHP_ME(git_tree_entry, setId, arginfo_git_tree_entry_set_id, ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree_entry, setId,    arginfo_git_tree_entry_set_id, ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree_entry, toObject, NULL,                          ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 

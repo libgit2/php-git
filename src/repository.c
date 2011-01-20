@@ -342,6 +342,7 @@ PHP_METHOD(git_repository, getTree)
     int hash_len = 0;
     int ret = 0;
     git_tree_entry *entry;
+    php_git_tree_entry_t *te;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &hash, &hash_len) == FAILURE){
@@ -371,17 +372,7 @@ PHP_METHOD(git_repository, getTree)
     zval *array_ptr;
 
     for(i; i < r; i++){
-        entry = git_tree_entry_byindex(tree,i);
-        moid = git_tree_entry_id(entry);
-        git_oid_to_string(buf,41,moid);
-
-        MAKE_STD_ZVAL(array_ptr);
-        object_init_ex(array_ptr, git_tree_entry_class_entry);
-
-        add_property_string(array_ptr, "name", git_tree_entry_name(entry), 1);
-        add_property_string(array_ptr, "oid", buf, 1);
-        add_property_long(array_ptr, "attr", git_tree_entry_attributes(entry));
-
+        create_tree_entry_from_entry(&array_ptr, git_tree_entry_byindex(tree,i));
         add_next_index_zval(entries,  array_ptr);
     }
 
