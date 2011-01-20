@@ -74,6 +74,9 @@ class GitTest extends \PHPUnit_Framework_TestCase
         $git = new Git\Repository("./.git");
         $index = $git->getIndex();
         if($index instanceof Git\Index){
+            foreach($index as $entry){
+                $this->assertInstanceof("Git\\Index\\Entry",$entry);
+            }
             return true;
         }else{
             return false;

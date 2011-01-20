@@ -28,6 +28,7 @@
 #include <string.h>
 #include <time.h>
 
+PHPAPI zend_class_entry *git_index_class_entry;
 
 static void php_git_index_free_storage(php_git_index_t *obj TSRMLS_DC)
 {
@@ -82,7 +83,7 @@ PHP_METHOD(git_index, current)
 
     git_oid_fmt(oid,&entry->oid);
     MAKE_STD_ZVAL(git_index_entry);
-    object_init(git_index_entry);
+    object_init_ex(git_index_entry,git_index_entry_class_entry);
 
     add_property_string_ex(git_index_entry,"path", 5, entry->path, 1 TSRMLS_CC);
     add_property_string_ex(git_index_entry,"oid",4,oid, 1 TSRMLS_CC);
@@ -233,7 +234,7 @@ PHP_METHOD(git_index, getEntry)
     git_oid_fmt(oid,&entry->oid);
 
     MAKE_STD_ZVAL(git_index_entry);
-    object_init(git_index_entry);
+    object_init_ex(git_index_entry,git_index_entry_class_entry);
 
     add_property_string_ex(git_index_entry,"path", 5, entry->path, 1 TSRMLS_CC);
     add_property_string_ex(git_index_entry,"oid",4,oid, 1 TSRMLS_CC);
