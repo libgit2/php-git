@@ -26,6 +26,7 @@ class GitCommitTest extends \PHPUnit_Framework_TestCase
         $commit->setAuthor(new Git\Signature("Someone Else","someone@example.com",new DateTime("@1293956764")));
         $author = $commit->getAuthor();
         $this->assertEquals("Someone Else",$author->name);
+        
         $this->assertEquals("someone@example.com",$author->email);
         $this->assertEquals(1293956764,$author->time);
     }
@@ -46,7 +47,7 @@ class GitCommitTest extends \PHPUnit_Framework_TestCase
         $commit = $repository->getCommit("1f27eed71970a0dbc0ca758f449e4b68c4c91bd8");
  
         $author = $commit->getAuthor();
-
+        
         $this->assertEquals("Shuhei Tanuma",$author->name);
         $this->assertEquals("shuhei.tanuma@gmail.com",$author->email);
 
@@ -64,5 +65,17 @@ class GitCommitTest extends \PHPUnit_Framework_TestCase
         $entry2 = $tree->entries[1];
         $this->assertEquals("README.md",$entry2->name);
         $this->assertEquals("a1a07d27e9d8a78e3bc6fb8a6d8308d358ff9b07",$entry2->oid);
+        
+        $commit = $repository->getCommit("bba0bb972cbdc72d908ebd7c89157d7e207f5e92");
+        $parent = $commit->getParent();
+        $this->assertEquals("b500d73e7125ae105ce125b96390ad09d6174629",$parent->getId());
+
+        $author = $parent->getAuthor();
+        $this->assertEquals("Shuhei Tanuma",$author->name);
+        $this->assertEquals("shuhei.tanuma@gmail.com",$author->email);
+
+        $committer = $parent->getCommitter();
+        $this->assertEquals("Shuhei Tanuma",$committer->name);
+        $this->assertEquals("shuhei.tanuma@gmail.com",$committer->email);
     }
 }
