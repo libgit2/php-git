@@ -71,13 +71,8 @@ zend_object_value php_git_tree_new(zend_class_entry *ce TSRMLS_DC)
 
 PHP_METHOD(git_tree, count)
 {
-	long cnt = 0;
-    zval *entries;
-
-    entries = zend_read_property(git_tree_entry_class_entry,getThis(),"entries",7,0 TSRMLS_DC);
-	cnt = zend_hash_num_elements(Z_ARRVAL_P(entries));
-
-    RETURN_LONG(cnt);
+    php_git_tree_t *this= (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    RETVAL_LONG(git_tree_entrycount(this->object));
 }
 
 

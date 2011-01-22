@@ -29,4 +29,17 @@
          }
          unset($git);
      }
+
+     public function testCount()
+     {
+         try{
+            $repository = new Git\Repository("./.git");
+            $tree = $repository->getTree("8b230bc64e9384f6cedc9c8128270c30635571a7");
+            $this->assertEquals(2,count($tree));
+         }catch(\Exception $e){
+             $this->fail();
+         }
+         unset($git);
+     }
+
  }
