@@ -50,7 +50,7 @@ PHPAPI zend_class_entry *git_object_class_entry;
 extern PHPAPI zend_class_entry *git_index_class_entry;
 extern PHPAPI zend_class_entry *git_index_entry_class_entry;
 PHPAPI zend_class_entry *git_walker_class_entry;
-PHPAPI zend_class_entry *git_tree_class_entry;
+extern PHPAPI zend_class_entry *git_tree_class_entry;
 PHPAPI zend_class_entry *git_tree_entry_class_entry;
 extern PHPAPI zend_class_entry *git_commit_class_entry;
 extern PHPAPI zend_class_entry *git_signature_class_entry;

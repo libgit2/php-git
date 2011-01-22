@@ -28,11 +28,25 @@
 #include <string.h>
 #include <time.h>
 
+PHPAPI zend_class_entry *git_tree_class_entry;
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree__construct, 0, 0, 1)
+    ZEND_ARG_INFO(0, repository)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_add, 0, 0, 1)
+    ZEND_ARG_INFO(0, entry)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_path, 0, 0, 1)
+    ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO()
+
 static void php_git_tree_free_storage(php_git_tree_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     
-    //RepositoryでFreeされるよ
+    //Todo: which engine shoud free (php / libgit2)
     obj->object = NULL;
     efree(obj);
 }
@@ -55,8 +69,6 @@ zend_object_value php_git_tree_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
-
-
 PHP_METHOD(git_tree, count)
 {
 	long cnt = 0;
@@ -68,9 +80,6 @@ PHP_METHOD(git_tree, count)
     RETURN_LONG(cnt);
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_path, 0, 0, 1)
-    ZEND_ARG_INFO(0, path)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_tree, path)
 {
@@ -85,9 +94,6 @@ PHP_METHOD(git_tree, path)
     }
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_add, 0, 0, 1)
-    ZEND_ARG_INFO(0, entry)
-ZEND_END_ARG_INFO()
 PHP_METHOD(git_tree, add)
 {
     zval *object = getThis();
@@ -103,18 +109,12 @@ PHP_METHOD(git_tree, add)
     }
     
     php_git_tree_t *myobj = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    //php_printf("tree-oid: %s\n",Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,1 TSRMLS_CC)));
     git_oid_mkstr(&oid, Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,1 TSRMLS_CC)));
     filename = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"name",4,1 TSRMLS_CC));
     attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"mode",4,1 TSRMLS_CC));
 
     git_tree_add_entry(myobj->object, &oid, filename, attr);
 }
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree__construct, 0, 0, 1)
-    ZEND_ARG_INFO(0, repository)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_tree, __construct)
 {
@@ -131,24 +131,25 @@ PHP_METHOD(git_tree, __construct)
     int ret = git_tree_new(&obj->object,git->repository);
 
     if(ret != GIT_SUCCESS){
-        php_printf("can't create new tree");
+        php_error_docref(NULL TSRMLS_CC, E_ERROR, "can't create new tree");
+        RETURN_FALSE;
     }
 }
 
-// GitTree
 PHPAPI function_entry php_git_tree_methods[] = {
     PHP_ME(git_tree, __construct, arginfo_git_tree__construct, ZEND_ACC_PUBLIC)
-    PHP_ME(git_tree, count, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_tree, path, arginfo_git_tree_path, ZEND_ACC_PUBLIC)
-    PHP_ME(git_tree, add,  arginfo_git_tree_add, ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, count,       NULL,                        ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, path,        arginfo_git_tree_path,       ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, add,         arginfo_git_tree_add,        ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
 void git_init_tree(TSRMLS_D)
 {
-    zend_class_entry git_tree_ce;
-    INIT_NS_CLASS_ENTRY(git_tree_ce, PHP_GIT_NS,"Tree", php_git_tree_methods);
-    git_tree_class_entry = zend_register_internal_class_ex(&git_tree_ce, git_object_class_entry, NULL TSRMLS_CC);
+    zend_class_entry ce;
+    INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Tree", php_git_tree_methods);
+    git_tree_class_entry = zend_register_internal_class_ex(&ce, git_object_class_entry, NULL TSRMLS_CC);
 	git_tree_class_entry->create_object = php_git_tree_new;
+    
     zend_class_implements(git_tree_class_entry TSRMLS_CC, 1, spl_ce_Countable);
 }
