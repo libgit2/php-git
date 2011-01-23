@@ -28,11 +28,24 @@
 #include <string.h>
 #include <time.h>
 
+PHPAPI zend_class_entry *git_walker_class_entry;
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_hide, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_push, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_sort, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
 
 static void php_git_walker_free_storage(php_git_walker_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
-    //git_repositoryでFreeされる
+    //obj->walker will free by git_repository
     obj->walker = NULL;
     obj->repository = NULL;
     efree(obj);
@@ -60,11 +73,6 @@ PHP_METHOD(git_walker, __construct)
 {
 }
 
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_hide, 0, 0, 1)
-    ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
-
 PHP_METHOD(git_walker, hide)
 {
     char *hash;
@@ -90,11 +98,6 @@ PHP_METHOD(git_walker, hide)
     git_revwalk_hide(walker,commit);
 }
 
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_push, 0, 0, 1)
-    ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
-
 PHP_METHOD(git_walker, push)
 {
     char *hash;
@@ -111,7 +114,6 @@ PHP_METHOD(git_walker, push)
 
     php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     walker = myobj->walker;
-    
     repository = git_revwalk_repository(walker);
     
     git_oid_mkstr(&oid,hash);
@@ -137,60 +139,29 @@ PHP_METHOD(git_walker, next)
     if(commit == NULL){
         RETURN_FALSE;
     }
-    /**
-     * git_signature
-     * (char*)->name
-     * (char*)->email
-     * (git_time)->when
-     */
-    signature = git_commit_author(commit);
-
-    //printf("commit:%s\n",signature->email);
 
     MAKE_STD_ZVAL(git_commit_object);
     object_init_ex(git_commit_object,git_commit_class_entry);
-    git_oid_fmt(&oid,git_commit_id(commit));
 
+    zval *author;
+    zval *committer;
 
-            //コピペ
-            git_signature *sig;
-            zval *committer;
-            zval *author;
-            MAKE_STD_ZVAL(author);
-            char *name;
-            char out[40];
-            object_init_ex(author,git_signature_class_entry);
-            sig = git_commit_author(commit);
-            add_property_string(author,"name",sig->name,1 TSRMLS_CC);
-            add_property_string(author,"email",sig->email,1 TSRMLS_CC);
-            add_property_long(author,"time",sig->when.time);
+    create_signature_from_commit(&author, git_commit_author(commit));
+    create_signature_from_commit(&committer, git_commit_committer(commit));
+    
+    MAKE_STD_ZVAL(git_commit_object);
+    object_init_ex(git_commit_object,git_commit_class_entry);
 
-            MAKE_STD_ZVAL(committer);
-            object_init_ex(committer,git_signature_class_entry);
+    php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(git_commit_object TSRMLS_CC);
+    cobj->object = commit;
 
-            sig = git_commit_committer(commit);
-            add_property_string(committer,"name",sig->name,1 TSRMLS_CC);
-            add_property_string(committer,"email",sig->email,1 TSRMLS_CC);
-            add_property_long(committer,"time",sig->when.time);
+    add_property_zval(git_commit_object,"author", author);
+    add_property_zval(git_commit_object,"committer", committer);
 
-
-            sig = git_commit_author(commit);
-            git_tree *tree = git_commit_tree(commit);
-            git_oid *tree_oid;
-            tree_oid = git_tree_id(tree);
-            git_oid_to_string(&out,41,tree_oid);
-            //add_property_string(git_raw_object,"tree", out,1);
-
-            add_property_zval(git_commit_object,"author", author);
-            add_property_zval(git_commit_object,"committer", committer);
-            //Endコピペ
-
-
-    add_property_string_ex(git_commit_object,"oid",4, &out, 1 TSRMLS_DC);
-    add_property_string_ex(git_commit_object,"message",8, git_commit_message(commit), 1 TSRMLS_DC);
-    add_property_string_ex(git_commit_object,"message_short",14, git_commit_message_short(commit), 1 TSRMLS_DC);
-    //add_property_string_ex(git_commit_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
     RETURN_ZVAL(git_commit_object,1,0);
+    efree(git_commit_object);
+    efree(author);
+    efree(committer);
 }
 
 
@@ -200,11 +171,6 @@ PHP_METHOD(git_walker, reset)
     git_revwalk_free(myobj->walker);
     RETURN_TRUE;
 }
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker_sort, 0, 0, 1)
-    ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_walker, sort)
 {
@@ -220,21 +186,15 @@ PHP_METHOD(git_walker, sort)
     RETURN_TRUE;
 }
 
-
-
-
-// GitWalker
 PHPAPI function_entry php_git_walker_methods[] = {
-    PHP_ME(git_walker, __construct, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_walker, push, arginfo_git_walker_push, ZEND_ACC_PUBLIC)
-    PHP_ME(git_walker, next, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_walker, hide, arginfo_git_walker_hide, ZEND_ACC_PUBLIC)
-    PHP_ME(git_walker, reset, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_walker, sort, arginfo_git_walker_sort, ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, __construct, NULL,                    ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, push,        arginfo_git_walker_push, ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, next,        NULL,                    ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, hide,        arginfo_git_walker_hide, ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, reset,       NULL,                    ZEND_ACC_PUBLIC)
+    PHP_ME(git_walker, sort,        arginfo_git_walker_sort, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
-
-
 
 void git_init_walker(TSRMLS_D)
 {

@@ -28,6 +28,18 @@
 #include <string.h>
 #include <time.h>
 
+PHPAPI zend_class_entry *git_rawobject_class_entry;
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_rawobject_set_content, 0, 0, 1)
+    ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_rawobject__construct, 0, 0, 2)
+    ZEND_ARG_INFO(0, type)
+    ZEND_ARG_INFO(0, data)
+    ZEND_ARG_INFO(0, len)
+ZEND_END_ARG_INFO()
+
 static void php_git_rawobject_free_storage(php_git_rawobject_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
@@ -51,17 +63,6 @@ zend_object_value php_git_rawobject_new(zend_class_entry *ce TSRMLS_DC)
 	retval.handlers = zend_get_std_object_handlers();
 	return retval;
 }
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_rawobject_set_content, 0, 0, 1)
-    ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_rawobject__construct, 0, 0, 2)
-    ZEND_ARG_INFO(0, type)
-    ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, len)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_raw_object, __construct)
 {
@@ -102,7 +103,7 @@ PHP_METHOD(git_raw_object, getId)
 
 PHPAPI function_entry php_git_rawobject_methods[] = {
     PHP_ME(git_raw_object, __construct, arginfo_git_rawobject__construct, ZEND_ACC_PUBLIC)
-    PHP_ME(git_raw_object, getId, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_raw_object, getId,       NULL,                             ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
@@ -113,5 +114,4 @@ void git_init_rawobject(TSRMLS_D)
 
     git_rawobject_class_entry = zend_register_internal_class(&git_rawobject_ce TSRMLS_CC);
 	git_rawobject_class_entry->create_object = php_git_rawobject_new;
-
 }

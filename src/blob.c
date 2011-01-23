@@ -28,11 +28,21 @@
 #include <string.h>
 #include <time.h>
 
+PHPAPI zend_class_entry *git_blob_class_entry;
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blob__construct, 0, 0, 1)
+    ZEND_ARG_INFO(0, repository)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blob_set_content, 0, 0, 1)
+    ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
+
 static void php_git_blob_free_storage(php_git_blob_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     
-    //git_repositoryがfreeしてくれる
+    //obj->object will free by git_repository.
     obj->object = NULL;
     efree(obj);
 }
@@ -56,13 +66,6 @@ zend_object_value php_git_blob_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blob__construct, 0, 0, 1)
-    ZEND_ARG_INFO(0, repository)
-ZEND_END_ARG_INFO()
-    
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blob_set_content, 0, 0, 1)
-    ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
 
 
 PHP_METHOD(git_blob, __construct)
@@ -80,7 +83,8 @@ PHP_METHOD(git_blob, __construct)
     int ret = git_blob_new(&obj->object,git->repository);
 
     if(ret != GIT_SUCCESS){
-        php_printf("can't create new blob");
+        php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't create new blob!");
+        return;
     }
 }
 
@@ -99,14 +103,11 @@ PHP_METHOD(git_blob, setContent)
 
     int ret = git_blob_set_rawcontent(obj->object,string, string_len);
     if(ret != GIT_SUCCESS){
-        php_printf("can't create new blob");
+        php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't set content!");
+        return;
     }
     add_property_string_ex(getThis(), "data",sizeof("data")+1,string, 1 TSRMLS_CC);
 }
-
-
-
-
 
 PHPAPI function_entry php_git_blob_methods[] = {
     PHP_ME(git_blob, __construct, arginfo_git_blob__construct, ZEND_ACC_PUBLIC)
@@ -116,14 +117,6 @@ PHPAPI function_entry php_git_blob_methods[] = {
 
 void git_init_blob(TSRMLS_D)
 {
-/*
-    struct git_object {
-	git_oid id;
-	git_repository *repo;
-	git_odb_source source;
-	int in_memory:1, modified:1;
-};
-*/
     zend_class_entry ce;
     INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Blob", php_git_blob_methods);
 

@@ -28,8 +28,22 @@
 #include <string.h>
 #include <time.h>
 
+PHPAPI zend_class_entry *git_class_entry;
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_string_to_type, 0, 0, 1)
     ZEND_ARG_INFO(0, string_type)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_type_to_string, 0, 0, 1)
+    ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_hex_to_raw, 0, 0, 1)
+    ZEND_ARG_INFO(0, hex)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_raw_to_hex, 0, 0, 1)
+    ZEND_ARG_INFO(0, raw)
 ZEND_END_ARG_INFO()
 
 PHP_FUNCTION(git_string_to_type)
@@ -44,11 +58,6 @@ PHP_FUNCTION(git_string_to_type)
 
     RETVAL_LONG(git_object_string2type(string_type))
 }
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_type_to_string, 0, 0, 1)
-    ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
 
 PHP_FUNCTION(git_type_to_string)
 {
@@ -66,10 +75,6 @@ PHP_FUNCTION(git_type_to_string)
     RETVAL_STRING(str,1);
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_hex_to_raw, 0, 0, 1)
-    ZEND_ARG_INFO(0, hex)
-ZEND_END_ARG_INFO()
-
 PHP_FUNCTION(git_hex_to_raw)
 {
     git_oid oid;
@@ -84,10 +89,6 @@ PHP_FUNCTION(git_hex_to_raw)
     git_oid_mkstr(&oid, hex);
     RETVAL_STRINGL((&oid)->id,GIT_OID_RAWSZ,1);
 }
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_raw_to_hex, 0, 0, 1)
-    ZEND_ARG_INFO(0, raw)
-ZEND_END_ARG_INFO()
 
 PHP_FUNCTION(git_raw_to_hex)
 {
@@ -125,7 +126,6 @@ void git_init(TSRMLS_D)
     zend_class_entry git_ce;
     INIT_NS_CLASS_ENTRY(git_ce, PHP_GIT_NS,"Git", php_git_methods);
     git_class_entry = zend_register_internal_class(&git_ce TSRMLS_CC);
-	//git_class_entry->create_object = php_git_repository_new;
 }
 
 PHP_MINIT_FUNCTION(git) {
@@ -165,7 +165,7 @@ PHP_MINFO_FUNCTION(git)
 {
     php_printf("PHP Git Extension\n");
     php_info_print_table_start();
-    php_info_print_table_row(2,"Version", PHP_GIT_EXTVER " (alpha development)");
+    php_info_print_table_row(2,"Version", PHP_GIT_EXTVER " (1st alpha development)");
     php_info_print_table_row(2, "Authors", "Shuhei Tanuma 'stanuma@zynga.co.jp' (lead)\n");
     php_info_print_table_end();
 }

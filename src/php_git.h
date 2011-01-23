@@ -44,19 +44,19 @@ extern zend_module_entry git_module_entry;
 #define phpext_git_ptr &git_module_entry;
 #define PHP_GIT_NS "Git"
 
-PHPAPI zend_class_entry *git_class_entry;
-PHPAPI zend_class_entry *git_repository_class_entry;
-PHPAPI zend_class_entry *git_object_class_entry;
+extern PHPAPI zend_class_entry *git_class_entry;
+extern PHPAPI zend_class_entry *git_repository_class_entry;
+extern PHPAPI zend_class_entry *git_object_class_entry;
 extern PHPAPI zend_class_entry *git_index_class_entry;
 extern PHPAPI zend_class_entry *git_index_entry_class_entry;
-PHPAPI zend_class_entry *git_walker_class_entry;
+extern PHPAPI zend_class_entry *git_walker_class_entry;
 extern PHPAPI zend_class_entry *git_tree_class_entry;
-PHPAPI zend_class_entry *git_tree_entry_class_entry;
+extern PHPAPI zend_class_entry *git_tree_entry_class_entry;
 extern PHPAPI zend_class_entry *git_commit_class_entry;
 extern PHPAPI zend_class_entry *git_signature_class_entry;
-PHPAPI zend_class_entry *git_rawobject_class_entry;
-PHPAPI zend_class_entry *git_tag_class_entry;
-PHPAPI zend_class_entry *git_blob_class_entry;
+extern PHPAPI zend_class_entry *git_rawobject_class_entry;
+extern PHPAPI zend_class_entry *git_tag_class_entry;
+extern PHPAPI zend_class_entry *git_blob_class_entry;
 extern PHPAPI zend_class_entry *git_odb_class_entry;
 extern PHPAPI zend_class_entry *git_backend_class_entry;
 

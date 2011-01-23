@@ -28,6 +28,12 @@
 #include <string.h>
 #include <time.h>
 
+PHPAPI zend_class_entry *git_tree_entry_class_entry;
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_entry_set_id, 0, 0, 1)
+    ZEND_ARG_INFO(0, hash)
+ZEND_END_ARG_INFO()
+
 static void php_git_tree_entry_free_storage(php_git_tree_entry_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
@@ -53,10 +59,6 @@ zend_object_value php_git_tree_entry_new(zend_class_entry *ce TSRMLS_DC)
 	retval.handlers = zend_get_std_object_handlers();
 	return retval;
 }
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_entry_set_id, 0, 0, 1)
-    ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_tree_entry, setId)
 {

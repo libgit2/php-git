@@ -28,6 +28,8 @@
 #include <string.h>
 #include <time.h>
 
+PHPAPI zend_class_entry *git_object_class_entry;
+
 static void php_git_object_free_storage(php_git_object_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
@@ -100,14 +102,10 @@ PHP_METHOD(git_object, write)
     RETVAL_STRING(out,1);
 }
 
-
-
 PHPAPI function_entry php_git_object_methods[] = {
     PHP_ME(git_object, getId,   NULL,ZEND_ACC_PUBLIC)
     PHP_ME(git_object, getType, NULL,ZEND_ACC_PUBLIC)
     PHP_ME(git_object, write,   NULL,ZEND_ACC_PUBLIC)
-    //PHP_ME(git_object, getOwner,NULL,ZEND_ACC_PUBLIC)
-
     {NULL, NULL, NULL}
 };
 
