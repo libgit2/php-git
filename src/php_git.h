@@ -60,8 +60,6 @@ extern PHPAPI zend_class_entry *git_blob_class_entry;
 extern PHPAPI zend_class_entry *git_odb_class_entry;
 extern PHPAPI zend_class_entry *git_backend_class_entry;
 
-
-//これ外部に公開したくないんだけどやり方分からんので調べる
 typedef struct{
     zend_object zo;
     git_repository *repository;
