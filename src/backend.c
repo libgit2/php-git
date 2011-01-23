@@ -28,6 +28,8 @@
 #include <string.h>
 #include <time.h>
 
+PHPAPI zend_class_entry *git_backend_class_entry;
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, priority)
 ZEND_END_ARG_INFO()
@@ -47,8 +49,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_write, 0, 0, 1)
     ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
-
-// FIXME
 
 static void php_git_backend_free_storage(php_git_backend_t *obj TSRMLS_DC)
 {
@@ -75,7 +75,7 @@ int php_git_backend__exists(git_odb_backend *_backend, const git_oid *oid)
 	MAKE_STD_ZVAL(params[0]);
     ZVAL_STRING(params[0],out, 1);
 
-    call_user_function(EG(function_table),&object->self,&func,retval,1,params TSRMLS_CC);
+    call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC);
     result = Z_BVAL_P(retval);
 	zval_ptr_dtor(&retval);
 	zval_ptr_dtor(&params[0]);
@@ -142,7 +142,7 @@ int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_
     MAKE_STD_ZVAL(params[0]);
     ZVAL_STRING(params[0],out, 1);
 
-    call_user_function(EG(function_table),&object->self,&func,retval,1,params TSRMLS_CC);
+    call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC);
 
     if(!instanceof_function(Z_OBJCE_P(retval), git_rawobject_class_entry TSRMLS_CC)){
         fprintf(stderr,"read interface must return Git\\Rawobject");
@@ -151,7 +151,7 @@ int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_
 
     zval *str = zend_read_property(git_rawobject_class_entry, retval,"data",4, 0 TSRMLS_CC);
     
-    // do not use ecalloc. obj->data freed git_rawobject_close()
+    // do not use ecalloc. obj->data will free by git_rawobject_close()
     obj->data = calloc(1,strlen(Z_STRVAL_P(str)));
     obj->len = strlen(Z_STRVAL_P(str));
     obj->type = GIT_OBJ_BLOB;
@@ -181,7 +181,7 @@ int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, con
     MAKE_STD_ZVAL(params[0]);
     ZVAL_STRING(params[0],out, 1);
 
-    call_user_function(EG(function_table),&object->self,&func,retval,1,params TSRMLS_CC);
+    call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC);
 
     if(!instanceof_function(Z_OBJCE_P(retval), git_rawobject_class_entry TSRMLS_CC)){
         fprintf(stderr,"read interface must return Git\\Rawobject");
@@ -213,7 +213,7 @@ void php_git_backend__free(git_odb_backend *backend)
 
     ZVAL_STRING(&func,"free", 1);
 
-    call_user_function(EG(function_table),&object->self,&func,retval,0,NULL TSRMLS_CC);
+    call_user_function(NULL,&object->self,&func,retval,0,NULL TSRMLS_CC);
 
 	zval_ptr_dtor(&retval);
     zval_dtor(&func);
