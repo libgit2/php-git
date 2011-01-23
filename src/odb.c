@@ -27,14 +27,15 @@
 #include <zend_interfaces.h>
 #include <string.h>
 #include <time.h>
+
+PHPAPI zend_class_entry *git_odb_class_entry;
+
 int php_git_odb_add_backend(git_odb **odb, zval *backend);
 
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_odb_add_backend,0, 0, 1)
     ZEND_ARG_INFO(0, backend)
 ZEND_END_ARG_INFO()
-
-
 
 static void php_git_odb_free_storage(php_git_odb_t *obj TSRMLS_DC)
 {
