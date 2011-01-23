@@ -32,7 +32,14 @@ class GitTest extends \PHPUnit_Framework_TestCase
     {
         // currentry nothing to do.
     }
-    
+
+    public function testGetBlob()
+    {
+       $git = new Git\Repository("./.git");
+       $blob = $git->getObject("5b4a19f66f8271d7457839f0e8554b3fe5aa6fd0");
+       $this->assertEquals("e5967f930ae406f5ffc077043c328f526d74101b",sha1($blob->data));
+    }
+
     public function testGetTree()
     {
        $git = new Git\Repository("./.git");
