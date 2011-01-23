@@ -486,10 +486,10 @@ PHP_METHOD(git_repository, update)
     repository = myobj->repository;
 
     prop = zend_read_property(git_class_entry,object,"path",4,0 TSRMLS_DC);
-    char *uhi = Z_STRVAL_P(prop);
+    char *repository_path = Z_STRVAL_P(prop);
     
     FILE *fp;
-    sprintf(&buf,"%s/refs/heads/%s",uhi,branch);
+    sprintf(&buf,"%s/refs/heads/%s",repository_path,branch);
     if((fp = fopen(&buf,"w")) == NULL){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"specified branch name not found");
         return;
