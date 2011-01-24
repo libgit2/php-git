@@ -92,7 +92,7 @@ PHP_METHOD(git_raw_object, getId)
 {
     php_git_rawobject_t *this = (php_git_rawobject_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_oid oid;
-    char out[40];
+    char out[41] = {0};
 
     git_rawobj_hash(&oid,this->object);
     git_oid_to_string(out,GIT_OID_HEXSZ+1,&oid);

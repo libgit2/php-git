@@ -69,7 +69,7 @@ PHP_METHOD(git_index, current)
 
     zval *offset;
     //FIXME: ほぼGit::getIndexのコピペ。
-    long *z_offset;
+    long z_offset;
     git_index_entry *entry;
     zval *git_index_entry;
     char oid[GIT_OID_HEXSZ];
@@ -120,7 +120,7 @@ PHP_METHOD(git_index, key)
     }
     git_oid_fmt(oid,&entry->oid);
     
-    RETVAL_STRINGL(&oid,GIT_OID_HEXSZ,1);
+    RETURN_STRINGL(oid,GIT_OID_HEXSZ,1);
 }
 
 PHP_METHOD(git_index, next)
@@ -141,8 +141,8 @@ PHP_METHOD(git_index, valid)
 {
     zval *entry_count;
     zval *offset;
-    long *z_entry_count;
-    long *z_offset;
+    long z_entry_count;
+    long z_offset;
 
     entry_count = zend_read_property(git_index_class_entry,getThis(),"entry_count",11,0 TSRMLS_DC);
     offset = zend_read_property(git_index_class_entry,getThis(),"offset",6,0 TSRMLS_DC);
@@ -167,7 +167,7 @@ PHP_METHOD(git_index, count)
 
     entry_count = zend_read_property(git_index_class_entry,getThis(),"entry_count",11,0 TSRMLS_DC);
 
-    long *count = Z_LVAL_P(entry_count);
+    long count = Z_LVAL_P(entry_count);
 
     RETVAL_LONG(count);
 }

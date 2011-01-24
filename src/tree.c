@@ -131,7 +131,7 @@ PHP_METHOD(git_tree, path)
             MAKE_STD_ZVAL(git_object);
             object_init_ex(git_object, git_blob_class_entry);
             php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_object TSRMLS_CC);
-            blobobj->object = object;
+            blobobj->object = (git_blob *)object;
 
             add_property_string_ex(git_object,"data", 5, git_blob_rawcontent((git_blob *)object), 1 TSRMLS_CC);
             RETURN_ZVAL(git_object,1,0);

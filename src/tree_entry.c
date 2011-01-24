@@ -76,8 +76,8 @@ PHP_METHOD(git_tree_entry, setId)
     git_oid_mkstr(&oid,hash);
     git_tree_entry_set_id(this->entry,&oid);
 
-    char out[40];
-    git_oid_to_string(&out,41,git_tree_entry_id(this->entry));
+    char out[41] = {0};
+    git_oid_to_string(out,41,git_tree_entry_id(this->entry));
     
     add_property_string(getThis(), "oid", hash, 1 TSRMLS_C);
     
@@ -117,7 +117,7 @@ PHP_METHOD(git_tree_entry, toObject)
 
             int r = git_tree_entrycount(tree);
             int i = 0;
-            char buf[40];
+            char buf[41] = {0};
             char *offset;
             git_oid *moid;
             zval *array_ptr;

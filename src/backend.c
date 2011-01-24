@@ -59,8 +59,8 @@ static void php_git_backend_free_storage(php_git_backend_t *obj TSRMLS_DC)
 int php_git_backend__exists(git_odb_backend *_backend, const git_oid *oid)
 {
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
-    char out[41];
-    git_oid_to_string(&out,41,oid);
+    char out[41] = {0};
+    git_oid_to_string(out,41,oid);
 
 	zval *retval;
 	zval *params[1];
@@ -127,7 +127,7 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
 int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_oid *oid)
 {
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
-    char out[40];
+    char out[41] = {0};
     git_oid_to_string(out,41,oid);
 
 	zval *retval;
@@ -165,7 +165,7 @@ int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_
 }
 int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, const git_oid *oid)
 {
-    char out[40] ;
+    char out[41] = {0} ;
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
     git_oid_to_string(out,41,oid);
 

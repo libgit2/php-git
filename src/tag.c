@@ -91,7 +91,7 @@ PHP_METHOD(git_tag, getName)
 PHP_METHOD(git_tag, getTarget)
 {
     php_git_tag_t *tag = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    git_object *object;
+    const git_object *object;
     git_otype type;
     
     object = git_tag_target(tag->object);

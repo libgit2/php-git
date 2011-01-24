@@ -216,7 +216,7 @@ PHP_METHOD(git_commit, setTree)
     repository = myobj->repository;
 
     git_oid_mkstr(&oid, hash);
-    git_repository_lookup (&tree, repository, &oid, GIT_OBJ_TREE);
+    git_repository_lookup ((git_object **)&tree, repository, &oid, GIT_OBJ_TREE);
     git_commit_set_tree(myobj->object,tree);
 
     if(tree){
@@ -231,7 +231,7 @@ PHP_METHOD(git_commit, setTree)
 
         int r = git_tree_entrycount(tree);
         int i = 0;
-        char mbuf[40];
+        char mbuf[41] = {0};
         char *offset;
         git_oid *moid;
         zval *array_ptr;
@@ -282,7 +282,7 @@ PHP_METHOD(git_commit, setMessage)
 PHP_METHOD(git_commit, getMessage)
 {
     php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    char *message;
+    const char *message;
     
     message = git_commit_message(this->object);
     RETURN_STRING(message,1 TSRMLS_C);
@@ -291,7 +291,7 @@ PHP_METHOD(git_commit, getMessage)
 PHP_METHOD(git_commit, getShortMessage)
 {
     php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    char *message;
+    const char *message;
     
     message = git_commit_message_short(this->object);
     RETURN_STRING(message,1 TSRMLS_C);

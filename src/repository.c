@@ -30,8 +30,8 @@
 
 PHPAPI zend_class_entry *git_repository_class_entry;
 
-extern void create_signature_from_commit(zval *signature, git_signature *sig);
-extern int php_git_odb_add_backend(git_odb **odb, zval *backend);
+void create_signature_from_commit(zval **signature, const git_signature *sig);
+int php_git_odb_add_backend(git_odb **odb, zval *backend);
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 2)
     ZEND_ARG_INFO(0, path)
@@ -207,8 +207,7 @@ PHP_METHOD(git_repository, getObject)
             blobobj->object = blob;
 
             add_property_string_ex(git_raw_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
-            RETURN_ZVAL(git_raw_object,1,0);
-            zend_object_std_dtor(git_raw_object TSRMLS_CC);
+            RETURN_ZVAL(git_raw_object,1,1);
         }else{
             RETURN_FALSE;
         }
@@ -218,15 +217,15 @@ PHP_METHOD(git_repository, getObject)
 
 void create_tree_entry_from_entry(zval **object, git_tree_entry *entry)
 {
-    char buf[40];
-    git_oid *oid;
+    char buf[41] = {0};
+    const git_oid *oid;
     MAKE_STD_ZVAL(*object);
     object_init_ex(*object, git_tree_entry_class_entry);
     php_git_tree_entry_t *entry_obj = (php_git_tree_entry_t *) zend_object_store_get_object(*object TSRMLS_CC);
 
     entry_obj->entry = entry;
     oid = git_tree_entry_id(entry);
-    git_oid_to_string(&buf,41,oid);
+    git_oid_to_string(buf,41,oid);
     
     add_property_string(*object, "name", git_tree_entry_name(entry), 1);
     add_property_string(*object, "oid", buf, 1);
@@ -244,7 +243,7 @@ PHP_METHOD(git_repository, getCommit)
     git_odb *odb;
     git_object *blob;
     git_oid oid;
-    char out[40];
+    char out[41] = {0};
     char *hash;
     int hash_len = 0;
     int ret = 0;
@@ -263,20 +262,21 @@ PHP_METHOD(git_repository, getCommit)
     if(!git_odb_exists(odb,&oid)){
         RETURN_FALSE;
     }else{
-        ret = git_repository_lookup(&blob, repository,&oid , GIT_OBJ_COMMIT);
+        ret = git_repository_lookup((git_object **)&blob, repository,&oid , GIT_OBJ_COMMIT);
         
         if(ret == GIT_SUCCESS){
             zval *author;
             zval *committer;
+			git_commit *commit = (git_commit *)blob;
 
-            create_signature_from_commit(&author, git_commit_author(blob));
-            create_signature_from_commit(&committer, git_commit_committer(blob));
+            create_signature_from_commit(&author, git_commit_author(commit));
+            create_signature_from_commit(&committer, git_commit_committer(commit));
             
             MAKE_STD_ZVAL(git_commit_object);
             object_init_ex(git_commit_object,git_commit_class_entry);
 
             php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(git_commit_object TSRMLS_CC);
-            cobj->object = blob;
+            cobj->object = commit;
 
             add_property_zval(git_commit_object,"author", author);
             add_property_zval(git_commit_object,"committer", committer);
@@ -367,7 +367,7 @@ PHP_METHOD(git_repository, getTree)
 
     int r = git_tree_entrycount(tree);
     int i = 0;
-    char buf[40];
+    char buf[41] = {0};
     char *offset;
     git_oid *moid;
     zval *array_ptr;
@@ -436,7 +436,7 @@ PHP_METHOD(git_repository, getBranch)
     zval *prop;
     git_repository *repository;
     char *branch;
-    char buf[255];
+    char buf[256] = {0};
     int branch_len = 0;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -452,8 +452,8 @@ PHP_METHOD(git_repository, getBranch)
     
     //FIXME
     FILE *fp;
-    sprintf(&buf,"%s/refs/heads/%s",uhi,branch);
-    if((fp = fopen(&buf,"r")) == NULL){
+    snprintf(buf,256,"%s/refs/heads/%s",uhi,branch);
+    if((fp = fopen(buf,"r")) == NULL){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"specified branch name not found");
         return;
     }
@@ -475,7 +475,7 @@ PHP_METHOD(git_repository, update)
     char *hash;
     int hash_len = 0;
     int branch_len = 0;
-    char buf[255];
+    char buf[256] = {0};
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "ss", &branch, &branch_len, &hash, &hash_len) == FAILURE){
@@ -489,8 +489,8 @@ PHP_METHOD(git_repository, update)
     char *repository_path = Z_STRVAL_P(prop);
     
     FILE *fp;
-    sprintf(&buf,"%s/refs/heads/%s",repository_path,branch);
-    if((fp = fopen(&buf,"w")) == NULL){
+    snprintf(buf,256,"%s/refs/heads/%s",repository_path,branch);
+    if((fp = fopen(buf,"w")) == NULL){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"specified branch name not found");
         return;
     }
