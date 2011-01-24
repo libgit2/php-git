@@ -436,7 +436,7 @@ PHP_METHOD(git_repository, getBranch)
     zval *prop;
     git_repository *repository;
     char *branch;
-    char buf[256] = {0};
+    char buf[MAXPATHLEN] = {0};
     int branch_len = 0;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -452,7 +452,7 @@ PHP_METHOD(git_repository, getBranch)
     
     //FIXME
     FILE *fp;
-    snprintf(buf,256,"%s/refs/heads/%s",uhi,branch);
+    snprintf(buf,MAXPATHLEN,"%s/refs/heads/%s",uhi,branch);
     if((fp = fopen(buf,"r")) == NULL){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"specified branch name not found");
         return;
@@ -475,7 +475,7 @@ PHP_METHOD(git_repository, update)
     char *hash;
     int hash_len = 0;
     int branch_len = 0;
-    char buf[256] = {0};
+    char buf[MAXPATHLEN] = {0};
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "ss", &branch, &branch_len, &hash, &hash_len) == FAILURE){
@@ -489,7 +489,7 @@ PHP_METHOD(git_repository, update)
     char *repository_path = Z_STRVAL_P(prop);
     
     FILE *fp;
-    snprintf(buf,256,"%s/refs/heads/%s",repository_path,branch);
+    snprintf(buf,MAXPATHLEN,"%s/refs/heads/%s",repository_path,branch);
     if((fp = fopen(buf,"w")) == NULL){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"specified branch name not found");
         return;
