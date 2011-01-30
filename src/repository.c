@@ -58,8 +58,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_walker, 0, 0, 1)
     ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_branch, 0, 0, 1)
-    ZEND_ARG_INFO(0, branch)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_lookup_ref, 0, 0, 1)
+    ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_update, 0, 0, 2)
@@ -388,7 +388,6 @@ PHP_METHOD(git_repository, getWalker)
     zval *object = getThis();
     git_repository *repository;
     git_index *index;
-    //FIXME: GitWalkerを呼びたいけどコレでいいの？
     zval *walker_object = emalloc(sizeof(zval));
     git_revwalk *walk;
     int ret = 0;
@@ -426,39 +425,44 @@ PHP_METHOD(git_repository, addBackend)
 }
 
 
-
-PHP_METHOD(git_repository, getBranch)
+PHP_METHOD(git_repository, lookupRef)
 {
-    zval *object = getThis();
-    zval *prop;
-    git_repository *repository;
-    char *branch;
-    char buf[MAXPATHLEN] = {0};
-    int branch_len = 0;
+    php_git_repository_t *this = (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    char *name;
+    int  name_len = 0;
+    int  result;
+    zval ref;
+    zval *ref_r;
+    char out[GIT_OID_HEXSZ+1] = {0};
+    git_oid *oid;
+    git_reference *reference;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-            "s", &branch, &branch_len) == FAILURE){
+        "s", &name, &name_len) == FAILURE){
         return;
     }
 
-    php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
-    repository = myobj->repository;
-
-    prop = zend_read_property(git_class_entry,object,"path",4,0 TSRMLS_DC);
-    char *uhi = Z_STRVAL_P(prop);
-    
-    //FIXME
-    FILE *fp;
-    snprintf(buf,MAXPATHLEN,"%s/refs/heads/%s",uhi,branch);
-    if((fp = fopen(buf,"r")) == NULL){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING,"specified branch name not found");
-        return;
+    result = git_repository_lookup_ref(&reference, this->repository, name);
+    if(result != GIT_SUCCESS) {
+        php_error_docref(NULL TSRMLS_CC, E_WARNING,
+            "Can't find specified reference.");
+        RETURN_FALSE;
     }
-    memset(buf,0,sizeof(buf));
-    fread(buf,1,40,fp);
-    fclose(fp);
-    
-    RETVAL_STRINGL(buf,40,1 TSRMLS_DC);
+
+    object_init_ex(&ref, git_reference_class_entry);
+    php_git_reference_t *refobj  = (php_git_reference_t *) zend_object_store_get_object(&ref TSRMLS_CC);
+    refobj->object = reference;
+    ref_r = &ref;
+    add_property_string_ex(ref_r,"name",  sizeof("name"),  git_reference_name(reference), 1 TSRMLS_CC);
+    char *target = git_reference_target(reference);
+
+    if(target != NULL){
+        add_property_string_ex(ref_r,"target",sizeof("target"),git_reference_target(reference), 1 TSRMLS_CC);
+    }
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,git_reference_oid(reference));
+    add_property_string_ex(ref_r,"oid",sizeof("oid"),out, 1 TSRMLS_CC);
+
+    RETURN_ZVAL(ref_r,1,1);
 }
 
 
@@ -539,7 +543,7 @@ PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, getCommit, arginfo_git_get_commit, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getObject, arginfo_git_get_object, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getIndex, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_repository, getBranch, arginfo_git_get_branch, ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, lookupRef, arginfo_git_lookup_ref, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getWalker, arginfo_git_walker, ZEND_ACC_PUBLIC) // FIXME
     PHP_ME(git_repository, getTree, arginfo_git_get_tree, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)

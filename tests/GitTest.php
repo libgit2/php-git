@@ -33,6 +33,18 @@ class GitTest extends \PHPUnit_Framework_TestCase
         // currentry nothing to do.
     }
 
+    public function testLookupRef()
+    {
+        //temporary added Git\\Reference.
+        $git = new Git\Repository(dirname(__DIR__) . "/.git/");
+        $ref = $git->lookupRef("refs/heads/master");
+        $commit = $git->getCommit($ref->oid);
+
+        $this->assertInstanceof("Git\\Reference",$ref,"Git\\Referenceが帰ってきているか？");
+        $this->assertInstanceof("Git\\Commit",$commit,"Git\\Commitが帰ってきているか？");
+    }
+
+
     public function testGetBlob()
     {
        $git = new Git\Repository(dirname(__DIR__) . "/.git/");
