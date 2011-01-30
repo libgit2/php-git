@@ -139,16 +139,15 @@ PHP_METHOD(git_repository, getIndex)
     zval *object = getThis();
     git_repository *repository;
     git_index *index;
-    //FIXME: GitIndexを呼びたいけどコレでいいの？
+
     zval *index_object = emalloc(sizeof(zval));
     int ret = 0;
 
     php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
 
-
     index = git_repository_index(myobj->repository);
-    if(!index){
-        php_printf("Git Repository not found");
+    if(index == NULL){
+        php_printf("specified index cannot be opend");
         RETURN_FALSE;
     }
 
@@ -300,8 +299,6 @@ PHP_METHOD(git_repository, __construct)
     git_repository *repository;
     zval *object = getThis();
 
-    object_init_ex(object, git_repository_class_entry);
-
     if(!object){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,
             "Constructor called statically!");
@@ -322,7 +319,7 @@ PHP_METHOD(git_repository, __construct)
             RETURN_FALSE;
         }
         myobj->repository = repository;
-       add_property_string_ex(object, "path",5,repository_path, 1 TSRMLS_CC);
+        add_property_string_ex(object, "path",5,repository_path, 1 TSRMLS_CC);
     }else{
         myobj->repository = NULL;
     }

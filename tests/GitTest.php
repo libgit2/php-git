@@ -35,14 +35,14 @@ class GitTest extends \PHPUnit_Framework_TestCase
 
     public function testGetBlob()
     {
-       $git = new Git\Repository("./.git");
+       $git = new Git\Repository(dirname(__DIR__) . "/.git/");
        $blob = $git->getObject("5b4a19f66f8271d7457839f0e8554b3fe5aa6fd0");
        $this->assertEquals("e5967f930ae406f5ffc077043c328f526d74101b",sha1($blob->data));
     }
 
     public function testGetTree()
     {
-       $git = new Git\Repository("./.git");
+       $git = new Git\Repository(dirname(__DIR__) . "/.git/");
        $tree= $git->getTree("c40b970eb68bd1c8980f1f97b57396f4c7ae107f");
        $this->assertInstanceof("Git\\Tree",$tree);
        $this->assertEquals("c40b970eb68bd1c8980f1f97b57396f4c7ae107f",$tree->getId());
@@ -69,7 +69,7 @@ class GitTest extends \PHPUnit_Framework_TestCase
     public function testConstruct()
     {
         try{
-            $git = new Git\Repository("./.git");
+            $git = new Git\Repository(dirname(__DIR__) . "/.git/");
             $this->assertInstanceof("Git\\Repository",$git);
             unset($git);
         }catch(\Exception $e){
@@ -86,10 +86,7 @@ class GitTest extends \PHPUnit_Framework_TestCase
     
     public function testGetIndex()
     {
-
-//        $this->markTestIncomplete("testGetIndex not implemented yet");
-
-        $git = new Git\Repository("./.git");
+        $git = new Git\Repository(dirname(__DIR__) . "/.git/");
         $index = $git->getIndex();
         if($index instanceof Git\Index){
             foreach($index as $entry){
@@ -103,6 +100,7 @@ class GitTest extends \PHPUnit_Framework_TestCase
     
     public function testInitRepository()
     {
+
         require_once __DIR__ . "/lib/MemoryBackend.php";
         require_once __DIR__ . "/lib/MemcachedBackend.php";
 

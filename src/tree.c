@@ -157,11 +157,13 @@ PHP_METHOD(git_tree, add)
     }
     
     php_git_tree_t *myobj = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    php_git_tree_entry_t *te = (php_git_tree_entry_t *) zend_object_store_get_object(entry TSRMLS_CC);
+
     git_oid_mkstr(&oid, Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,1 TSRMLS_CC)));
     filename = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"name",4,1 TSRMLS_CC));
     attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"mode",4,1 TSRMLS_CC));
 
-    git_tree_add_entry(myobj->object, &oid, filename, attr);
+    git_tree_add_entry(&te->entry, myobj->object, &oid, filename, attr);
 }
 
 PHP_METHOD(git_tree, __construct)
