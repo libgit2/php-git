@@ -53,6 +53,9 @@ ZEND_END_ARG_INFO()
 static void php_git_backend_free_storage(php_git_backend_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    if(obj->backend) {
+        php_git_backend_internal *backend = obj->backend;
+    }
     efree(obj);
 }
 
@@ -245,13 +248,21 @@ PHP_METHOD(git_backend, __construct)
     php_git_backend_t *this =  (php_git_backend_t *)zend_object_store_get_object(getThis() TSRMLS_CC);
     php_git_backend_internal *internal;
 
+    long priority = 3;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "l", &priority) == FAILURE){
+        return;
+    }
+
+
     internal = ecalloc(1,sizeof(php_git_backend_internal));
     internal->parent.read        = &php_git_backend__read;
     internal->parent.read_header = &php_git_backend__read_header;
     internal->parent.write       = &php_git_backend__write;
     internal->parent.exists      = &php_git_backend__exists;
     internal->parent.free        = &php_git_backend__free;
-    internal->parent.priority    = 5;
+    internal->parent.priority    = priority;
     internal->self = getThis();
 
     this->backend = internal;

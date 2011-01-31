@@ -42,6 +42,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_reference_set_oid, 0, 0, 1)
     ZEND_ARG_INFO(0, oid)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_reference__construct, 0, 0, 1)
+    ZEND_ARG_INFO(0, repository)
+ZEND_END_ARG_INFO()
+    
 static void php_git_reference_free_storage(php_git_reference_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
@@ -72,6 +76,43 @@ zend_object_value php_git_reference_new(zend_class_entry *ce TSRMLS_DC)
 }
 
 
+PHP_METHOD(git_reference, getTarget)
+{
+    php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_rtype type;
+    
+    type = git_reference_type(this->object);
+    if(type == GIT_REF_SYMBOLIC) {
+        const char *target = git_reference_target(this->object);
+        // FIXME: this method only available if the reference is symbolic.
+        if(target != NULL) {
+            add_property_string_ex(getThis() ,"target",sizeof("target")+1,target, 1 TSRMLS_CC);
+            RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"target",sizeof("target"),1 TSRMLS_CC)),0);
+        }
+    } else {
+        php_error_docref(NULL TSRMLS_CC, E_WARNING,"Git\\Reference::getTarget method only available if the reference is symbolic.");
+        return;
+    }
+}
+
+PHP_METHOD(git_reference, getType)
+{
+    php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_rtype rtype = git_reference_type(this->object);
+
+    RETVAL_LONG((long)rtype);
+}
+
+
+PHP_METHOD(git_reference, getName)
+{
+    php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    const char *name = git_reference_name(this->object);
+
+    add_property_string_ex(getThis() ,"name",sizeof("name")+1,name, 1 TSRMLS_CC);
+    RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"name",sizeof("name"),1 TSRMLS_CC)),0);
+}
+
 PHP_METHOD(git_reference, setName)
 {
     php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -84,8 +125,21 @@ PHP_METHOD(git_reference, setName)
     }
 
     git_reference_set_name(this->object, name);
-    add_property_string_ex(getThis() ,"name",sizeof("name")+1,name, 1 TSRMLS_CC);
+    add_property_string_ex(getThis() ,"name",sizeof("name"),name, 1 TSRMLS_CC);
 }
+
+PHP_METHOD(git_reference, write)
+{
+    php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+    int ret = git_reference_write(this->object);
+    if(ret != GIT_SUCCESS) {
+        php_error_docref(NULL TSRMLS_CC, E_ERROR,"can't write reference. something wrong");
+        RETURN_FALSE;
+    }
+    RETURN_TRUE;
+}
+
 
 PHP_METHOD(git_reference, setTarget)
 {
@@ -99,7 +153,7 @@ PHP_METHOD(git_reference, setTarget)
     }
 
     git_reference_set_target(this->object, target);
-    add_property_string_ex(getThis() ,"target",sizeof("target")+1,target, 1 TSRMLS_CC);
+    add_property_string_ex(getThis() ,"target",sizeof("target"),target, 1 TSRMLS_CC);
 }
 
 PHP_METHOD(git_reference, setOID)
@@ -116,15 +170,41 @@ PHP_METHOD(git_reference, setOID)
 
     git_oid_mkstr(&out, oid);
 
-    git_tag_set_oid(this->object, &out);
-    add_property_string_ex(getThis() ,"oid",sizeof("oid")+1,oid, 1 TSRMLS_CC);
+    git_reference_set_oid(this->object, &out);
+    add_property_string_ex(getThis() ,"oid",sizeof("oid"),oid, 1 TSRMLS_CC);
 }
 
+PHP_METHOD(git_reference, __construct)
+{
+    php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    php_git_repository_t *repository;
+    zval *z_repo;
+    int res = 0;
+    
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "z", &z_repo) == FAILURE){
+        return;
+    }
+    
+    if(instanceof_function(Z_OBJCE_P(z_repo), git_repository_class_entry TSRMLS_CC)){
+         repository = (php_git_repository_t *) zend_object_store_get_object(z_repo TSRMLS_CC);
+    }else{
+        php_error_docref(NULL TSRMLS_CC, E_ERROR,"specified parameter doesn't Git\\Repository");
+        RETURN_FALSE;
+    }
+    
+    res = git_reference_new(&this->object,repository->repository);
+    if(res != GIT_SUCCESS) {
+        php_error_docref(NULL TSRMLS_CC, E_ERROR,"can't create Git\\Reference. something wrong.");
+    }
+}
 
 PHPAPI function_entry php_git_reference_methods[] = {
-    //PHP_ME(git_reference, __construct, NULL, ZEND_ACC_PUBLIC)
-    //PHP_ME(git_reference, getTarget,   NULL, ZEND_ACC_PUBLIC)
-    //PHP_ME(git_reference, getName,     NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_reference, __construct, arginfo_git_reference__construct, ZEND_ACC_PUBLIC)
+    PHP_ME(git_reference, getTarget,   NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_reference, getType,     NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_reference, getName,     NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_reference, write,       NULL, ZEND_ACC_PUBLIC)
     //PHP_ME(git_reference, resolve, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, setName,     arginfo_git_reference_set_name, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, setTarget,   arginfo_git_reference_set_target, ZEND_ACC_PUBLIC)

@@ -121,7 +121,7 @@ class GitTest extends \PHPUnit_Framework_TestCase
         }
         
     
-        $backend = new Git\Backend\Memory(5);
+        $backend = new Git\Backend\Memory(1);
         $repository = Git\Repository::init(__DIR__ . "/git_init_test",true);
         $repository->addBackend($backend);
 
@@ -132,8 +132,9 @@ class GitTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $hash,"First Object1 write correctly");
         $this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $blob->getid(),"rawobject and blob hash are same.");
         $data = $backend->read($hash);
-        
-        $this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $backend->read($hash)->getId(),"Backend return same rawobject");
+        if($backend->read($hash)){
+            $this->assertEquals("abd5864efb91d0fae3385e078cd77bf7c6bea826", $backend->read($hash)->getId(),"Backend return same rawobject");
+        }
         
         $tree = new Git\Tree($repository);
         $entry = new Git\Tree\Entry();
@@ -145,7 +146,9 @@ class GitTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$tree_hash, "tree writing");
         
         $data = $backend->read("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70");
+        if($data){
         $this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$data->getId(), "Backend return same tree raw");
+        }
         
         $commit = new Git\Commit($repository);
         $commit->setAuthor(new Git\Signature("Someone","someone@example.com", new DateTime("2011-01-01 00:00:00",new DateTimezone("Asia/Tokyo"))));
@@ -159,8 +162,15 @@ class GitTest extends \PHPUnit_Framework_TestCase
 
         //$this->markTestIncomplete("this test does not implemente yet.");
         $this->assertEquals("69b3d7402ff73e3a85f8eedbf06860481cbb72b2",$master_hash,"commit writing");
-        unset($repository);
 
+        $re = new Git\Reference($repository);
+        $re->setName("refs/heads/master");
+        //$re->setTarget("refs/heads/master");
+        // you can't use setOid if setTarget called.
+        $re->setOID("69b3d7402ff73e3a85f8eedbf06860481cbb72b2");
+        $re->write();
+
+        unset($repository);
         $rmdir = function($dir) use(&$rmdir){
            if (is_dir($dir)) { 
              $objects = scandir($dir); 
