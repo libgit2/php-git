@@ -139,20 +139,20 @@ static void php_git_signature_free_storage(php_git_signature_t *obj TSRMLS_DC)
 
 zend_object_value php_git_signature_new(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_object_value retval;
-	php_git_signature_t *obj;
-	zval *tmp;
+    zend_object_value retval;
+    php_git_signature_t *obj;
+    zval *tmp;
 
-	obj = ecalloc(1, sizeof(*obj));
-	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
-	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+    obj = ecalloc(1, sizeof(*obj));
+    zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(obj, 
+    retval.handle = zend_objects_store_put(obj, 
         (zend_objects_store_dtor_t)zend_objects_destroy_object,
         (zend_objects_free_object_storage_t)php_git_signature_free_storage,
         NULL TSRMLS_CC);
-	retval.handlers = zend_get_std_object_handlers();
-	return retval;
+    retval.handlers = zend_get_std_object_handlers();
+    return retval;
 }
 
 int php_git_signature_create(zval *object, char *name, int name_len, char *email, int email_len, zval *time)
@@ -161,17 +161,17 @@ int php_git_signature_create(zval *object, char *name, int name_len, char *email
     int ret = 0;
     // Todo: should use `zend_fcall*` instead of `call_user-function` for performance improvement.
 
-	zval *retval;
+    zval *retval;
     zval *offset;
     zval func;
     zval func2;
     ZVAL_STRING(&func,"getTimestamp", 1);
-	MAKE_STD_ZVAL(retval);
-	ZVAL_NULL(retval);
+    MAKE_STD_ZVAL(retval);
+    ZVAL_NULL(retval);
     call_user_function(NULL,&time,&func,retval,0,NULL TSRMLS_CC);
     
-	MAKE_STD_ZVAL(offset);
-	ZVAL_NULL(offset);
+    MAKE_STD_ZVAL(offset);
+    ZVAL_NULL(offset);
     ZVAL_STRING(&func2,"getOffset", 1);
     call_user_function(NULL,&time,&func2,offset,0,NULL TSRMLS_CC);
     this->signature = git_signature_new(name,email,Z_LVAL_P(retval),Z_LVAL_P(offset)/60);
@@ -180,9 +180,9 @@ int php_git_signature_create(zval *object, char *name, int name_len, char *email
     add_property_string_ex(object,"email",sizeof("email"), email, 1 TSRMLS_CC);
     add_property_zval_ex(object,"time",sizeof("time"),time);
 
-	zval_ptr_dtor(&retval);
+    zval_ptr_dtor(&retval);
     zval_dtor(&func);
-	zval_ptr_dtor(&offset);
+    zval_ptr_dtor(&offset);
     zval_dtor(&func2);
 
     return ret;
