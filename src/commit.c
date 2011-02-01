@@ -143,6 +143,8 @@ PHP_METHOD(git_commit, getCommitter)
 {
     zval *object = getThis();
     zval *signature = zend_read_property(git_commit_class_entry, object,"committer",9, 0 TSRMLS_CC);
+
+    zval_copy_ctor(signature);
     RETURN_ZVAL(signature,0, 0);
 }
 
@@ -331,6 +333,8 @@ PHP_METHOD(git_commit, getAuthor)
 {
     zval *object = getThis();
     zval *signature = zend_read_property(git_commit_class_entry, object,"author",6, 0 TSRMLS_CC);
+
+    zval_copy_ctor(signature);
     RETURN_ZVAL(signature,0, 0);
 }
 
