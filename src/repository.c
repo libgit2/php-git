@@ -431,6 +431,7 @@ PHP_METHOD(git_repository, lookupRef)
     zval *ref_r;
     char out[GIT_OID_HEXSZ+1] = {0};
     git_oid *oid;
+    git_rtype type;
     git_reference *reference;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -450,12 +451,20 @@ PHP_METHOD(git_repository, lookupRef)
     refobj->object = reference;
     ref_r = &ref;
     add_property_string_ex(ref_r,"name",  sizeof("name"),  git_reference_name(reference), 1 TSRMLS_CC);
-    char *target = git_reference_target(reference);
 
-    if(target != NULL){
-        add_property_string_ex(ref_r,"target",sizeof("target"),git_reference_target(reference), 1 TSRMLS_CC);
+    type = git_reference_type(reference);
+    if(type == GIT_REF_SYMBOLIC) {
+        const char *target = git_reference_target(reference);
+        if(target != NULL) {
+            add_property_string_ex(ref_r ,"target",sizeof("target"),target, 1 TSRMLS_CC);
+        }
+        int rr = git_reference_resolve(&refobj->object,reference);
+        if(rr != GIT_SUCCESS){
+            fprintf(stderr,"something wrong");
+        }
     }
-    git_oid_to_string(out,GIT_OID_HEXSZ+1,git_reference_oid(reference));
+
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,git_reference_oid(refobj->object));
     add_property_string_ex(ref_r,"oid",sizeof("oid"),out, 1 TSRMLS_CC);
 
     RETURN_ZVAL(ref_r,1,1);

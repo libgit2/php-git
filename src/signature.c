@@ -93,14 +93,13 @@ void git_init_signature(TSRMLS_D)
 
 void create_signature_from_commit(zval **signature, git_signature *sig)
 {
-    char *name;
     MAKE_STD_ZVAL(*signature);
     object_init_ex(*signature,git_signature_class_entry);
     php_git_signature_t *object = (php_git_signature_t *) zend_object_store_get_object(*signature TSRMLS_CC);
     object->signature = sig;
     
-    add_property_string(*signature,"name", sig->name,1 TSRMLS_CC);
-    add_property_string(*signature,"email",sig->email,1 TSRMLS_CC);
+    add_property_string_ex(*signature,"name",sizeof("name"), sig->name,1 TSRMLS_CC);
+    add_property_string_ex(*signature,"email",sizeof("email"),sig->email,1 TSRMLS_CC);
     add_property_long(*signature,  "time", sig->when.time);
 }
 
