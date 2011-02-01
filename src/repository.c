@@ -72,10 +72,11 @@ ZEND_END_ARG_INFO()
 
 static void php_git_repository_free_storage(php_git_repository_t *obj TSRMLS_DC)
 {
-    zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    // if added some backend. free backend before free zend_object.
     if(obj->repository){
         git_repository_free(obj->repository);
     }
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
     obj->repository = NULL;
     efree(obj);
 }

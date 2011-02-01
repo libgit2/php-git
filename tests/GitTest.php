@@ -170,7 +170,7 @@ class GitTest extends \PHPUnit_Framework_TestCase
         $re->setOID("69b3d7402ff73e3a85f8eedbf06860481cbb72b2");
         $re->write();
 
-        unset($repository);
+
         $rmdir = function($dir) use(&$rmdir){
            if (is_dir($dir)) { 
              $objects = scandir($dir); 
