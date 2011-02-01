@@ -25,6 +25,6 @@
          
          $this->assertEquals("Name",$signature->name);
          $this->assertEquals("sample@example.com",$signature->email);
-         $this->assertEquals(1294147094,$signature->time);
+         $this->assertEquals(1294147094,$signature->time->getTimestamp());
      }
  }

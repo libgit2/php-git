@@ -192,7 +192,7 @@ PHP_METHOD(git_commit, setAuthor)
     c_obj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
     s_obj = (php_git_signature_t *) zend_object_store_get_object(z_signature TSRMLS_CC);
     git_commit_set_committer(c_obj->object, s_obj->signature);
-    add_property_zval_ex(object,"author",7,z_signature);
+    add_property_zval_ex(object,"author",sizeof("author"),z_signature);
 }
 
 PHP_METHOD(git_commit, setTree)

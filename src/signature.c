@@ -93,14 +93,33 @@ void git_init_signature(TSRMLS_D)
 
 void create_signature_from_commit(zval **signature, git_signature *sig)
 {
+    zval *datetime;
     MAKE_STD_ZVAL(*signature);
+
     object_init_ex(*signature,git_signature_class_entry);
     php_git_signature_t *object = (php_git_signature_t *) zend_object_store_get_object(*signature TSRMLS_CC);
     object->signature = sig;
     
     add_property_string_ex(*signature,"name",sizeof("name"), sig->name,1 TSRMLS_CC);
     add_property_string_ex(*signature,"email",sizeof("email"),sig->email,1 TSRMLS_CC);
-    add_property_long(*signature,  "time", sig->when.time);
+
+    MAKE_STD_ZVAL(datetime);
+    zval constructor;
+    zval method;
+    zval result;
+    zval *params[1];
+    ZVAL_STRING(&constructor,"__construct",0);
+    ZVAL_STRING(&method,"setTimestamp", 0);
+
+    object_init_ex(datetime,php_date_get_date_ce());
+    call_user_function(NULL,&datetime,&constructor,&result,0,NULL TSRMLS_CC);
+
+    MAKE_STD_ZVAL(params[0]);
+    ZVAL_LONG(params[0],sig->when.time);
+    call_user_function(NULL,&datetime,&method,&result,1,params TSRMLS_CC);
+    add_property_zval(*signature,  "time", datetime);
+    
+    zval_ptr_dtor(&params[0]);
 }
 
 static void php_git_signature_free_storage(php_git_signature_t *obj TSRMLS_DC)
@@ -159,7 +178,7 @@ int php_git_signature_create(zval *object, char *name, int name_len, char *email
 
     add_property_string_ex(object,"name", sizeof("name"),  name,  1 TSRMLS_CC);
     add_property_string_ex(object,"email",sizeof("email"), email, 1 TSRMLS_CC);
-    add_property_long(object,     "time", Z_LVAL_P(retval));
+    add_property_zval_ex(object,"time",sizeof("time"),time);
 
 	zval_ptr_dtor(&retval);
     zval_dtor(&func);
