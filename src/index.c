@@ -287,7 +287,7 @@ PHP_METHOD(git_index, __construct)
     myobj->index = index;
 
     add_property_long(object, "offset", 0);
-    add_property_string_ex(object, "path",5,repository_path, 1 TSRMLS_CC);
+    add_property_string_ex(object, "path",5,(char *)repository_path, 1 TSRMLS_CC);
     add_property_long(object, "entry_count",git_index_entrycount(index));
 }
 

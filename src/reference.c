@@ -86,7 +86,7 @@ PHP_METHOD(git_reference, getTarget)
         const char *target = git_reference_target(this->object);
         // FIXME: this method only available if the reference is symbolic.
         if(target != NULL) {
-            add_property_string_ex(getThis() ,"target",sizeof("target")+1,target, 1 TSRMLS_CC);
+            add_property_string_ex(getThis() ,"target",sizeof("target")+1,(char *)target, 1 TSRMLS_CC);
             RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"target",sizeof("target"),1 TSRMLS_CC)),0);
         }
     } else {
@@ -109,7 +109,7 @@ PHP_METHOD(git_reference, getName)
     php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     const char *name = git_reference_name(this->object);
 
-    add_property_string_ex(getThis() ,"name",sizeof("name")+1,name, 1 TSRMLS_CC);
+    add_property_string_ex(getThis() ,"name",sizeof("name")+1,(char *)name, 1 TSRMLS_CC);
     RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"name",sizeof("name"),1 TSRMLS_CC)),0);
 }
 
@@ -204,7 +204,7 @@ PHP_METHOD(git_reference, __construct)
     if(type == GIT_REF_SYMBOLIC) {
         const char *target = git_reference_target(refs);
         if(target != NULL) {
-            add_property_string_ex(getThis() ,"target",sizeof("target")+1,target, 1 TSRMLS_CC);
+            add_property_string_ex(getThis() ,"target",sizeof("target")+1,(char *)target, 1 TSRMLS_CC);
             RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"target",sizeof("target"),1 TSRMLS_CC)),0);
         }
         git_reference_resolve(&this->object,refs);

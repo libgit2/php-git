@@ -90,15 +90,15 @@ PHP_METHOD(git_tag, getName)
 
 PHP_METHOD(git_tag, getTarget)
 {
+    php_error_docref(NULL TSRMLS_CC, E_WARNING, "this method didn't implement yet");
+/*
     php_git_tag_t *tag = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     const git_object *object;
     git_otype type;
     
     object = git_tag_target(tag->object);
     type = git_object_type(object);
-    // must return GIT_OBJ_TAG
-    //FIXME
-    
+*/
 }
 
 PHP_METHOD(git_tag, setTarget)
@@ -176,7 +176,7 @@ PHP_METHOD(git_tag, __construct)
     int ret = git_tag_new(&this->object,r_obj->repository);
 
     if(ret != GIT_SUCCESS){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't create Git\Tag.");
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't create Git\\Tag.");
     }
 }
 

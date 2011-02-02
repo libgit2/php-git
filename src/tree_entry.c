@@ -101,9 +101,9 @@ PHP_METHOD(git_tree_entry, toObject)
             MAKE_STD_ZVAL(git_raw_object);
             object_init_ex(git_raw_object, git_blob_class_entry);
             php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
-            blobobj->object = object;
+            blobobj->object = (git_blob *)object;
 
-            add_property_string_ex(git_raw_object,"data", 5, git_blob_rawcontent((git_blob *)object), 1 TSRMLS_CC);
+            add_property_string_ex(git_raw_object,"data", 5, (char *)git_blob_rawcontent((git_blob *)object), 1 TSRMLS_CC);
             RETURN_ZVAL(git_raw_object,1,0);
         } else if(type == GIT_OBJ_TREE) {
             git_tree *tree = (git_tree *)object;
@@ -119,7 +119,7 @@ PHP_METHOD(git_tree_entry, toObject)
             int i = 0;
             char buf[41] = {0};
             char *offset;
-            git_oid *moid;
+            const git_oid *moid;
             zval *array_ptr;
 
             for(i; i < r; i++){
@@ -130,7 +130,7 @@ PHP_METHOD(git_tree_entry, toObject)
                 MAKE_STD_ZVAL(array_ptr);
                 object_init_ex(array_ptr, git_tree_entry_class_entry);
 
-                add_property_string(array_ptr, "name", git_tree_entry_name(entry), 1);
+                add_property_string(array_ptr, "name", (char *)git_tree_entry_name(entry), 1);
                 add_property_string(array_ptr, "oid", buf, 1);
                 add_property_long(array_ptr, "mode", git_tree_entry_attributes(entry));
 

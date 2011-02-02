@@ -201,7 +201,7 @@ PHP_METHOD(git_repository, getObject)
             php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
             blobobj->object = blob;
 
-            add_property_string_ex(git_raw_object,"data", 5, git_blob_rawcontent(blob), 1 TSRMLS_CC);
+            add_property_string_ex(git_raw_object,"data", 5, (char *)git_blob_rawcontent(blob), 1 TSRMLS_CC);
             RETURN_ZVAL(git_raw_object,1,1);
         }else{
             RETURN_FALSE;
@@ -222,7 +222,7 @@ void create_tree_entry_from_entry(zval **object, git_tree_entry *entry)
     oid = git_tree_entry_id(entry);
     git_oid_to_string(buf,41,oid);
     
-    add_property_string(*object, "name", git_tree_entry_name(entry), 1);
+    add_property_string(*object, "name", (char *)git_tree_entry_name(entry), 1);
     add_property_string(*object, "oid", buf, 1);
     add_property_long(*object, "mode", git_tree_entry_attributes(entry));
 }
@@ -315,7 +315,7 @@ PHP_METHOD(git_repository, __construct)
             RETURN_FALSE;
         }
         myobj->repository = repository;
-        add_property_string_ex(object, "path",5,repository_path, 1 TSRMLS_CC);
+        add_property_string_ex(object, "path",5,(char *)repository_path, 1 TSRMLS_CC);
     }else{
         myobj->repository = NULL;
     }
@@ -450,13 +450,13 @@ PHP_METHOD(git_repository, lookupRef)
     php_git_reference_t *refobj  = (php_git_reference_t *) zend_object_store_get_object(&ref TSRMLS_CC);
     refobj->object = reference;
     ref_r = &ref;
-    add_property_string_ex(ref_r,"name",  sizeof("name"),  git_reference_name(reference), 1 TSRMLS_CC);
+    add_property_string_ex(ref_r,"name",  sizeof("name"),  (char *)git_reference_name(reference), 1 TSRMLS_CC);
 
     type = git_reference_type(reference);
     if(type == GIT_REF_SYMBOLIC) {
         const char *target = git_reference_target(reference);
         if(target != NULL) {
-            add_property_string_ex(ref_r ,"target",sizeof("target"),target, 1 TSRMLS_CC);
+            add_property_string_ex(ref_r ,"target",sizeof("target"),(char *)target, 1 TSRMLS_CC);
         }
         int rr = git_reference_resolve(&refobj->object,reference);
         if(rr != GIT_SUCCESS){

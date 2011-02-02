@@ -235,7 +235,7 @@ PHP_METHOD(git_commit, setTree)
         int i = 0;
         char mbuf[41] = {0};
         char *offset;
-        git_oid *moid;
+        const git_oid *moid;
         zval *array_ptr;
 
         for(i; i < r; i++){
@@ -246,7 +246,7 @@ PHP_METHOD(git_commit, setTree)
             MAKE_STD_ZVAL(array_ptr);
             object_init_ex(array_ptr, git_tree_entry_class_entry);
 
-            add_property_string(array_ptr, "name", git_tree_entry_name(entry), 1);
+            add_property_string(array_ptr, "name", (char *)git_tree_entry_name(entry), 1);
             add_property_string(array_ptr, "oid", mbuf, 1);
             add_property_long(array_ptr, "mode", git_tree_entry_attributes(entry));
 
@@ -302,7 +302,15 @@ PHP_METHOD(git_commit, getShortMessage)
 PHP_METHOD(git_commit, getTree)
 {
     php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    git_tree *tree = git_commit_tree(this->object);
+    const git_tree *ref_tree = git_commit_tree(this->object);
+    const git_oid *oid = 	git_object_id((git_object*)ref_tree);
+
+    git_tree *tree;
+    int ret = git_repository_lookup((git_object **)&tree, git_object_owner((git_object*)this->object),oid, GIT_OBJ_TREE);
+    if(ret != GIT_SUCCESS) {
+        php_error_docref(NULL TSRMLS_CC, E_ERROR, "specified tree not found.");
+        return;
+    }
 
     git_oid *tree_oid;
     zval *git_tree;
@@ -318,7 +326,7 @@ PHP_METHOD(git_commit, getTree)
 
     int r = git_tree_entrycount(tree);
     int i = 0;
-    
+
     for(i; i < r; i++){
         create_tree_entry_from_entry(&entry,git_tree_entry_byindex(tree,i));
         add_next_index_zval(entries, entry);

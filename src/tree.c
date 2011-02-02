@@ -133,7 +133,7 @@ PHP_METHOD(git_tree, path)
             php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_object TSRMLS_CC);
             blobobj->object = (git_blob *)object;
 
-            add_property_string_ex(git_object,"data", 5, git_blob_rawcontent((git_blob *)object), 1 TSRMLS_CC);
+            add_property_string_ex(git_object,"data", 5, (char *)git_blob_rawcontent((git_blob *)object), 1 TSRMLS_CC);
             RETURN_ZVAL(git_object,1,0);
         } else {
             php_error_docref(NULL TSRMLS_CC, E_ERROR, "Git\\Tree::path can resolve GIT_OBJ_TREE or GIT_OBJ_BLOB. unhandled object type %d found.", git_object_type(object));
