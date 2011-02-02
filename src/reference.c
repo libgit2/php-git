@@ -86,8 +86,8 @@ PHP_METHOD(git_reference, getTarget)
         const char *target = git_reference_target(this->object);
         // FIXME: this method only available if the reference is symbolic.
         if(target != NULL) {
-            add_property_string_ex(getThis() ,"target",sizeof("target")+1,(char *)target, 1 TSRMLS_CC);
-            RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"target",sizeof("target"),1 TSRMLS_CC)),0);
+            add_property_string_ex(getThis() ,"target",sizeof("target"),(char *)target, 1 TSRMLS_CC);
+            RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"target",sizeof("target")-1,1 TSRMLS_CC)),0);
         }
     } else {
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"Git\\Reference::getTarget method only available if the reference is symbolic.");
@@ -109,8 +109,8 @@ PHP_METHOD(git_reference, getName)
     php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     const char *name = git_reference_name(this->object);
 
-    add_property_string_ex(getThis() ,"name",sizeof("name")+1,(char *)name, 1 TSRMLS_CC);
-    RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"name",sizeof("name"),1 TSRMLS_CC)),0);
+    add_property_string_ex(getThis() ,"name",sizeof("name"),(char *)name, 1 TSRMLS_CC);
+    RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"name",sizeof("name")-1,1 TSRMLS_CC)),0);
 }
 
 PHP_METHOD(git_reference, setName)
@@ -204,8 +204,8 @@ PHP_METHOD(git_reference, __construct)
     if(type == GIT_REF_SYMBOLIC) {
         const char *target = git_reference_target(refs);
         if(target != NULL) {
-            add_property_string_ex(getThis() ,"target",sizeof("target")+1,(char *)target, 1 TSRMLS_CC);
-            RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"target",sizeof("target"),1 TSRMLS_CC)),0);
+            add_property_string_ex(getThis() ,"target",sizeof("target"),(char *)target, 1 TSRMLS_CC);
+            RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"target",sizeof("target")-1,1 TSRMLS_CC)),0);
         }
         git_reference_resolve(&this->object,refs);
     } else {
@@ -232,7 +232,7 @@ void git_init_reference(TSRMLS_D)
     git_reference_class_entry = zend_register_internal_class_ex(&ce, git_object_class_entry,NULL TSRMLS_CC);
     git_reference_class_entry->create_object = php_git_reference_new;
     
-    zend_declare_property_null(git_reference_class_entry, "oid",sizeof("oid")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_reference_class_entry, "name",sizeof("name")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_reference_class_entry, "target",sizeof("target")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_reference_class_entry, "oid",sizeof("oid"), ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_reference_class_entry, "name",sizeof("name"), ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_reference_class_entry, "target",sizeof("target"), ZEND_ACC_PUBLIC TSRMLS_CC);
 }

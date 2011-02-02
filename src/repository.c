@@ -126,7 +126,7 @@ PHP_METHOD(git_repository, init)
     php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(obj TSRMLS_CC);
     myobj->repository = repository;
 
-    add_property_string_ex(obj, "path",5,path, 1 TSRMLS_CC);
+    add_property_string_ex(obj, "path",sizeof("path"),path, 1 TSRMLS_CC);
     RETURN_ZVAL(obj, 1, 1);
 }
 
@@ -201,7 +201,7 @@ PHP_METHOD(git_repository, getObject)
             php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
             blobobj->object = blob;
 
-            add_property_string_ex(git_raw_object,"data", 5, (char *)git_blob_rawcontent(blob), 1 TSRMLS_CC);
+            add_property_string_ex(git_raw_object,"data", sizeof("data"), (char *)git_blob_rawcontent(blob), 1 TSRMLS_CC);
             RETURN_ZVAL(git_raw_object,1,1);
         }else{
             RETURN_FALSE;
@@ -315,7 +315,7 @@ PHP_METHOD(git_repository, __construct)
             RETURN_FALSE;
         }
         myobj->repository = repository;
-        add_property_string_ex(object, "path",5,(char *)repository_path, 1 TSRMLS_CC);
+        add_property_string_ex(object, "path",sizeof("path"),(char *)repository_path, 1 TSRMLS_CC);
     }else{
         myobj->repository = NULL;
     }

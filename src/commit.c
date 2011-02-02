@@ -171,7 +171,7 @@ PHP_METHOD(git_commit, setParent)
     git_commit_lookup(&commit,c_obj->repository,&oid);
     git_commit_add_parent(c_obj->object, commit);
     //FIXME: not parent. parents.
-    add_property_string_ex(this,"parent",7,hash, 1 TSRMLS_CC);
+    add_property_string_ex(this,"parent",sizeof("parent"),hash, 1 TSRMLS_CC);
 }
 
 

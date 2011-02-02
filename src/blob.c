@@ -106,7 +106,7 @@ PHP_METHOD(git_blob, setContent)
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't set content!");
         return;
     }
-    add_property_string_ex(getThis(), "data",sizeof("data")+1,string, 1 TSRMLS_CC);
+    add_property_string_ex(getThis(), "data", sizeof("data"),string, 1 TSRMLS_CC);
 }
 
 PHPAPI function_entry php_git_blob_methods[] = {

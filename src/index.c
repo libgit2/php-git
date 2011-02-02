@@ -85,8 +85,8 @@ PHP_METHOD(git_index, current)
     MAKE_STD_ZVAL(git_index_entry);
     object_init_ex(git_index_entry,git_index_entry_class_entry);
 
-    add_property_string_ex(git_index_entry,"path", 5, entry->path, 1 TSRMLS_CC);
-    add_property_string_ex(git_index_entry,"oid",4,oid, 1 TSRMLS_CC);
+    add_property_string_ex(git_index_entry,"path", sizeof("path"), entry->path, 1 TSRMLS_CC);
+    add_property_string_ex(git_index_entry,"oid",sizeof("oid"),oid, 1 TSRMLS_CC);
     add_property_long(git_index_entry,"dev",entry->dev);
     add_property_long(git_index_entry,"ino",entry->ino);
     add_property_long(git_index_entry,"mode",entry->mode);
@@ -236,8 +236,8 @@ PHP_METHOD(git_index, getEntry)
     MAKE_STD_ZVAL(git_index_entry);
     object_init_ex(git_index_entry,git_index_entry_class_entry);
 
-    add_property_string_ex(git_index_entry,"path", 5, entry->path, 1 TSRMLS_CC);
-    add_property_string_ex(git_index_entry,"oid",4,oid, 1 TSRMLS_CC);
+    add_property_string_ex(git_index_entry,"path", sizeof("path"), entry->path, 1 TSRMLS_CC);
+    add_property_string_ex(git_index_entry,"oid",sizeof("oid"),oid, 1 TSRMLS_CC);
     add_property_long(git_index_entry,"dev",entry->dev);
     add_property_long(git_index_entry,"ino",entry->ino);
     add_property_long(git_index_entry,"mode",entry->mode);
@@ -287,7 +287,7 @@ PHP_METHOD(git_index, __construct)
     myobj->index = index;
 
     add_property_long(object, "offset", 0);
-    add_property_string_ex(object, "path",5,(char *)repository_path, 1 TSRMLS_CC);
+    add_property_string_ex(object, "path",sizeof("path"),(char *)repository_path, 1 TSRMLS_CC);
     add_property_long(object, "entry_count",git_index_entrycount(index));
 }
 

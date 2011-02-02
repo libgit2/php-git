@@ -78,13 +78,13 @@ zend_object_value php_git_tag_new(zend_class_entry *ce TSRMLS_DC)
 
 PHP_METHOD(git_tag, getMessage)
 {
-    zval *message = zend_read_property(git_tag_class_entry, getThis(),"message",sizeof("message"), 0 TSRMLS_CC);
+    zval *message = zend_read_property(git_tag_class_entry, getThis(),"message",sizeof("message")-1, 0 TSRMLS_CC);
     RETURN_ZVAL(message,1,0);
 }
 
 PHP_METHOD(git_tag, getName)
 {
-    zval *name = zend_read_property(git_tag_class_entry, getThis(),"name",sizeof("name"), 0 TSRMLS_CC);
+    zval *name = zend_read_property(git_tag_class_entry, getThis(),"name",sizeof("name")-1, 0 TSRMLS_CC);
     RETVAL_ZVAL(name,1,0);
 }
 
@@ -134,7 +134,7 @@ PHP_METHOD(git_tag, setMessage)
     }
 
     git_tag_set_message(this->object, message);
-    add_property_string_ex(getThis() ,"message",sizeof("message")+1,message,1 TSRMLS_CC);
+    add_property_string_ex(getThis() ,"message",sizeof("message"),message,1 TSRMLS_CC);
 }
 
 PHP_METHOD(git_tag, setName)
@@ -149,7 +149,7 @@ PHP_METHOD(git_tag, setName)
     }
 
     git_tag_set_name(this->object, name);
-    add_property_string_ex(getThis() ,"name",sizeof("name")+1,name, 1 TSRMLS_CC);
+    add_property_string_ex(getThis() ,"name",sizeof("name"),name, 1 TSRMLS_CC);
 }
 
 
@@ -200,8 +200,8 @@ void git_init_tag(TSRMLS_D)
     git_tag_class_entry = zend_register_internal_class_ex(&git_tag_ce, git_object_class_entry,NULL TSRMLS_CC);
     git_tag_class_entry->create_object = php_git_tag_new;
 
-    zend_declare_property_null(git_tag_class_entry, "target", sizeof("target")-1,  ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_tag_class_entry, "name",   sizeof("name")-1,    ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_tag_class_entry, "tagger", sizeof("tagger")-1,  ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_tag_class_entry, "message",sizeof("message")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_tag_class_entry, "target", sizeof("target"),  ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_tag_class_entry, "name",   sizeof("name"),    ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_tag_class_entry, "tagger", sizeof("tagger"),  ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_tag_class_entry, "message",sizeof("message"), ZEND_ACC_PUBLIC TSRMLS_CC);
 }
