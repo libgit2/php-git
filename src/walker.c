@@ -135,8 +135,8 @@ PHP_METHOD(git_walker, next)
     php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     walker = myobj->walker;
 
-    commit = git_revwalk_next(walker);
-    if(commit == NULL){
+    int ret = git_revwalk_next(&commit,walker);
+    if(ret != GIT_SUCCESS){
         RETURN_FALSE;
     }
 

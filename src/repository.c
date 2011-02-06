@@ -141,9 +141,13 @@ PHP_METHOD(git_repository, getIndex)
 
     php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
 
-    index = git_repository_index(myobj->repository);
-    if(index == NULL){
-        php_printf("specified index cannot be opend");
+    ret = git_repository_index(&index,myobj->repository);
+
+    if (ret == GIT_EBAREINDEX) {
+        php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The index file is not backed up by an existing repository.");
+        RETURN_FALSE;
+    } else if(ret != GIT_SUCCESS){
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "specified index cannot be opend");
         RETURN_FALSE;
     }
 
