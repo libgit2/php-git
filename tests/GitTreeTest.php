@@ -49,7 +49,7 @@
             $tree = $repository->getTree("f031269837fabfa2c63e7a37b000a91171855f3f");
             $object = $tree->path("EXPERIMENTAL");
             $this->assertInstanceof("Git\\Blob",$object,"正しくblobが取れている");
-            $this->assertEquals("22e5486c5958bd769598582be2a38c619e6460e7",sha1($object->data));
+            $this->assertEquals("80afdcd19e73e8e39757ebcdebedbf8fee2ebfc1",$object->getId());
             $object = $tree->path("docs");
             $this->assertInstanceof("Git\\Tree",$object,"正しくtreeが取れている");
          }catch(\Exception $e){
