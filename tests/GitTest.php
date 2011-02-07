@@ -143,11 +143,11 @@ class GitTest extends \PHPUnit_Framework_TestCase
         $entry->oid = $hash;
         $tree->add($entry);
         $tree_hash = $tree->write();
-        $this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$tree_hash, "tree writing");
+        $this->assertEquals("b50edf18423fe6984b57a5dad342600522f6429c",$tree_hash, "tree writing");
         
-        $data = $backend->read("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70");
+        $data = $backend->read("b50edf18423fe6984b57a5dad342600522f6429c");
         if($data){
-        $this->assertEquals("1d9b59c9d46969914a4f0875faa89f6a3bdd7b70",$data->getId(), "Backend return same tree raw");
+        $this->assertEquals("b50edf18423fe6984b57a5dad342600522f6429c",$data->getId(), "Backend return same tree raw");
         }
         
         $commit = new Git\Commit($repository);
@@ -161,13 +161,13 @@ class GitTest extends \PHPUnit_Framework_TestCase
         $master_hash = $commit->write();
 
         //$this->markTestIncomplete("this test does not implemente yet.");
-        $this->assertEquals("69b3d7402ff73e3a85f8eedbf06860481cbb72b2",$master_hash,"commit writing");
+        $this->assertEquals("56f9daa6f728c3a2b3eed89834da421b1e19356b",$master_hash,"commit writing");
 
         $re = new Git\Reference($repository);
         $re->setName("refs/heads/master");
         //$re->setTarget("refs/heads/master");
         // you can't use setOid if setTarget called.
-        $re->setOID("69b3d7402ff73e3a85f8eedbf06860481cbb72b2");
+        $re->setOID("56f9daa6f728c3a2b3eed89834da421b1e19356b");
         $re->write();
 
 
