@@ -32,12 +32,12 @@ class Memcached extends \Git\Backend
        }
     }
 
-    public function __construct($priority, $address = "127.0.0.1", $port = 11211){
+    public function __construct($address = "127.0.0.1", $port = 11211){
        $memcached = new \Memcached();
        $memcached->addServer($address,$port);
        $this->memcached = $memcached;
 
-       parent::__construct($priority);
+       parent::__construct();
     }
 
     /**

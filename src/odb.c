@@ -30,7 +30,7 @@
 
 PHPAPI zend_class_entry *git_odb_class_entry;
 
-int php_git_odb_add_backend(git_odb **odb, zval *backend);
+int php_git_odb_add_backend(git_odb **odb, zval *backend, int priority);
 
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_odb_add_backend,0, 0, 1)
@@ -77,7 +77,7 @@ PHP_METHOD(git_odb, __construct)
     }
 }
 
-int php_git_odb_add_backend(git_odb **odb, zval *backend)
+int php_git_odb_add_backend(git_odb **odb, zval *backend, int priority)
 {
     int ret = GIT_SUCCESS;
     php_git_backend_t *b;
@@ -87,7 +87,7 @@ int php_git_odb_add_backend(git_odb **odb, zval *backend)
     }
 
     b = (php_git_backend_t *) zend_object_store_get_object(backend TSRMLS_CC);
-    ret = git_odb_add_backend(*odb,(git_odb_backend *)b->backend);
+    ret = git_odb_add_backend(*odb,(git_odb_backend *)b->backend, priority);
 
     if(ret != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"can't add backend");
@@ -101,12 +101,13 @@ PHP_METHOD(git_odb, addBackend)
 {
     php_git_odb_t *this = (php_git_odb_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     zval *backend;
+    int priority = 0;
 
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &backend) == FAILURE){
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &backend, &priority) == FAILURE){
         return;
     }
     
-    php_git_odb_add_backend(&this->odb,backend);
+    php_git_odb_add_backend(&this->odb,backend, priority);
 }
 
 PHPAPI function_entry php_git_odb_methods[] = {

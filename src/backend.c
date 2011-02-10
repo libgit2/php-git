@@ -30,10 +30,6 @@
 
 PHPAPI zend_class_entry *git_backend_class_entry;
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend__construct, 0, 0, 1)
-    ZEND_ARG_INFO(0, priority)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_read, 0, 0, 1)
     ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
@@ -248,28 +244,19 @@ PHP_METHOD(git_backend, __construct)
     php_git_backend_t *this =  (php_git_backend_t *)zend_object_store_get_object(getThis() TSRMLS_CC);
     php_git_backend_internal *internal;
 
-    long priority = 3;
-
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "l", &priority) == FAILURE){
-        return;
-    }
-
-
     internal = ecalloc(1,sizeof(php_git_backend_internal));
     internal->parent.read        = &php_git_backend__read;
     internal->parent.read_header = &php_git_backend__read_header;
     internal->parent.write       = &php_git_backend__write;
     internal->parent.exists      = &php_git_backend__exists;
     internal->parent.free        = &php_git_backend__free;
-    internal->parent.priority    = priority;
     internal->self = getThis();
 
     this->backend = internal;
 }
 
 PHPAPI function_entry php_git_backend_methods[] = {
-    PHP_ME(git_backend, __construct, arginfo_git_backend__construct, ZEND_ACC_PUBLIC)
+    PHP_ME(git_backend, __construct, NULL,    ZEND_ACC_PUBLIC)
     PHP_ABSTRACT_ME(git_backend, read,        arginfo_git_backend_read)
     PHP_ABSTRACT_ME(git_backend, read_header, arginfo_git_backend_read_header)
     PHP_ABSTRACT_ME(git_backend, exists,      arginfo_git_backend_exists)

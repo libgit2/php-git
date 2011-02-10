@@ -124,9 +124,9 @@ class GitTest extends \PHPUnit_Framework_TestCase
         }
         
     
-        $backend = new Git\Backend\Memory(1);
+        $backend = new Git\Backend\Memory();
         $repository = Git\Repository::init(__DIR__ . "/git_init_test",true);
-        $repository->addBackend($backend);
+        $repository->addBackend($backend,1);
 
         $blob = new Git\Blob($repository);
         $blob->setContent("First Object1");

@@ -30,8 +30,8 @@
 
 PHPAPI zend_class_entry *git_repository_class_entry;
 
-void create_signature_from_commit(zval **signature, const git_signature *sig);
-int php_git_odb_add_backend(git_odb **odb, zval *backend);
+extern void create_signature_from_commit(zval **signature, const git_signature *sig);
+extern int php_git_odb_add_backend(git_odb **odb, zval *backend, int priority);
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 2)
     ZEND_ARG_INFO(0, path)
@@ -407,6 +407,7 @@ PHP_METHOD(git_repository, getWalker)
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_add_backend, 0, 0, 1)
     ZEND_ARG_INFO(0, backend)
+    ZEND_ARG_INFO(0, priority)
 ZEND_END_ARG_INFO()
 
 PHP_METHOD(git_repository, addBackend)
@@ -415,13 +416,14 @@ PHP_METHOD(git_repository, addBackend)
     zval *backend;
     git_odb *odb;
     git_odb_backend *odb_backend;
+    int priority = 0;
 
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &backend) == FAILURE){
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &backend, &priority) == FAILURE){
         return;
     }
     
     odb = git_repository_database(this->repository);
-    int ret = php_git_odb_add_backend(&odb, backend);
+    int ret = php_git_odb_add_backend(&odb, backend, priority);
 }
 
 

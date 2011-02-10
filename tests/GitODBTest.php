@@ -42,8 +42,8 @@ class GitODBTest extends \PHPUnit_Framework_TestCase
     public function testAddBackend()
     {
         $odb = new Git\ODB();
-        $memcached = new Git\Backend\Memcached(5);
-        $odb->addBackend($memcached);
+        $memcached = new Git\Backend\Memcached();
+        $odb->addBackend($memcached,5);
         $this->assertInstanceof("Git\\ODB",$odb);
     }
 
@@ -51,8 +51,8 @@ class GitODBTest extends \PHPUnit_Framework_TestCase
     {
 
         $odb = new Git\ODB();
-        $memory = new Git\Backend\Memory(5);
-        $odb->addBackend($memory);
+        $memory = new Git\Backend\Memory();
+        $odb->addBackend($memory,5);
         $this->assertInstanceof("Git\\ODB",$odb);
     }
 

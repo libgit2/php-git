@@ -73,7 +73,6 @@ class GitBackendTest extends \PHPUnit_Framework_TestCase
 
         $parameters = $method->getParameters();
 
-        $this->assertEquals(1,count($parameters));
-        $this->assertEquals("priority",$parameters[0]->getname());
+        $this->assertEquals(0,count($parameters));
     }
 }
