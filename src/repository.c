@@ -127,7 +127,7 @@ PHP_METHOD(git_repository, init)
     int suc = git_repository_init(&repository,path,is_bare);
 
     if(suc != 0){
-        php_printf("can't create repository\n");
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't create repository\n");
         return;
     }
     

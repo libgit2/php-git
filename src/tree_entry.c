@@ -109,7 +109,6 @@ PHP_METHOD(git_tree_entry, toObject)
             git_tree *tree = (git_tree *)object;
             zval *git_tree;
             zval *entries;
-            git_tree_entry *entry;
             MAKE_STD_ZVAL(git_tree);
             MAKE_STD_ZVAL(entries);
             array_init(entries);
@@ -119,30 +118,18 @@ PHP_METHOD(git_tree_entry, toObject)
             int i = 0;
             char buf[41] = {0};
             char *offset;
-            const git_oid *moid;
+            git_oid *moid;
             zval *array_ptr;
 
             for(i; i < r; i++){
-                entry = git_tree_entry_byindex(tree,i);
-                moid = git_tree_entry_id(entry);
-                git_oid_to_string(buf,41,moid);
-
-                MAKE_STD_ZVAL(array_ptr);
-                object_init_ex(array_ptr, git_tree_entry_class_entry);
-
-                add_property_string(array_ptr, "name", (char *)git_tree_entry_name(entry), 1);
-                add_property_string(array_ptr, "oid", buf, 1);
-                add_property_long(array_ptr, "mode", git_tree_entry_attributes(entry));
-
+                create_tree_entry_from_entry(&array_ptr, git_tree_entry_byindex(tree,i));
                 add_next_index_zval(entries,  array_ptr);
             }
-
             php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
             tobj->object = tree;
-
             add_property_zval(git_tree,"entries", entries);
-
             RETURN_ZVAL(git_tree,1,0);
+
         } else{
             php_error_docref(NULL TSRMLS_CC, E_ERROR,
                 "unexpected git_otype found.");
