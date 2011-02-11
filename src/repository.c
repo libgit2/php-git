@@ -172,12 +172,13 @@ PHP_METHOD(git_repository, getIndex)
 PHP_METHOD(git_repository, getObject)
 {
     zval *object = getThis();
-    zval *git_raw_object;
+    zval *git_object;
+    int git_rawsz = 0;
     git_repository *repository;
     git_odb *odb;
     git_blob *blob;
     git_oid oid;
-
+    
     char *hash;
     int hash_len = 0;
     int ret = 0;
@@ -200,13 +201,14 @@ PHP_METHOD(git_repository, getObject)
         ret = git_blob_lookup(&blob, repository,&oid);
 
         if(ret == GIT_SUCCESS){
-            MAKE_STD_ZVAL(git_raw_object);
-            object_init_ex(git_raw_object, git_blob_class_entry);
-            php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
+            MAKE_STD_ZVAL(git_object);
+            object_init_ex(git_object, git_blob_class_entry);
+            php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_object TSRMLS_CC);
             blobobj->object = blob;
 
-            add_property_string_ex(git_raw_object,"data", sizeof("data"), (char *)git_blob_rawcontent(blob), 1 TSRMLS_CC);
-            RETURN_ZVAL(git_raw_object,1,1);
+            git_rawsz = git_blob_rawsize(blob);
+            add_property_stringl_ex(git_object,"data", sizeof("data"), (char *)git_blob_rawcontent(blob),git_rawsz, 1 TSRMLS_CC);
+            RETURN_ZVAL(git_object,1,1);
         }else{
             RETURN_FALSE;
         }
