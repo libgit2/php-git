@@ -32,6 +32,7 @@ PHPAPI zend_class_entry *git_repository_class_entry;
 
 extern void create_signature_from_commit(zval **signature, const git_signature *sig);
 extern int php_git_odb_add_backend(git_odb **odb, zval *backend, int priority);
+extern int php_git_odb_add_alternate(git_odb **odb, zval *backend, int priority);
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_init, 0, 0, 2)
     ZEND_ARG_INFO(0, path)
@@ -69,6 +70,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_open3, 0, 0, 1)
     ZEND_ARG_INFO(0, tree)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_add_backend, 0, 0, 2)
+    ZEND_ARG_INFO(0, backend)
+    ZEND_ARG_INFO(0, priority)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_add_alternate, 0, 0, 2)
+    ZEND_ARG_INFO(0, backend)
+    ZEND_ARG_INFO(0, priority)
+ZEND_END_ARG_INFO()
 
 static void php_git_repository_free_storage(php_git_repository_t *obj TSRMLS_DC)
 {
@@ -407,10 +417,22 @@ PHP_METHOD(git_repository, getWalker)
 }
 
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_add_backend, 0, 0, 1)
-    ZEND_ARG_INFO(0, backend)
-    ZEND_ARG_INFO(0, priority)
-ZEND_END_ARG_INFO()
+PHP_METHOD(git_repository, addAlternate)
+{
+    php_git_repository_t *this = (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    zval *backend;
+    git_odb *odb;
+    git_odb_backend *odb_backend;
+    int priority = 0;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &backend, &priority) == FAILURE){
+        return;
+    }
+    
+    odb = git_repository_database(this->repository);
+    int ret = php_git_odb_add_alternate(&odb, backend, priority);
+}
+
 
 PHP_METHOD(git_repository, addBackend)
 {
@@ -528,6 +550,7 @@ PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, getTree, arginfo_git_get_tree, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     PHP_ME(git_repository, addBackend, arginfo_git_add_backend, ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, addAlternate, arginfo_git_add_alternate, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, open3, arginfo_git_open3, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };

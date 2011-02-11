@@ -55,5 +55,13 @@ class GitODBTest extends \PHPUnit_Framework_TestCase
         $odb->addBackend($memory,5);
         $this->assertInstanceof("Git\\ODB",$odb);
     }
+    
+    public function testAddAlternate()
+    {
 
+        $odb = new Git\ODB();
+        $memory = new Git\Backend\Memory();
+        $odb->addAlternate($memory,5);
+        $this->assertInstanceof("Git\\ODB",$odb);
+    }
 }
