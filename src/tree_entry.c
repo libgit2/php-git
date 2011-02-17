@@ -139,7 +139,12 @@ PHP_METHOD(git_tree_entry, toObject)
 
 }
 
+PHP_METHOD(git_tree_entry, __construct)
+{
+}
+
 PHPAPI function_entry php_git_tree_entry_methods[] = {
+    PHP_ME(git_tree_entry, __construct, NULL, ZEND_ACC_PRIVATE)
     PHP_ME(git_tree_entry, setId,    arginfo_git_tree_entry_set_id, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_entry, toObject, NULL,                          ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}

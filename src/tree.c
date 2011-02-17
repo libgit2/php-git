@@ -34,8 +34,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, repository)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_add, 0, 0, 1)
-    ZEND_ARG_INFO(0, entry)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_add, 0, 0, 2)
+    ZEND_ARG_INFO(0, name)
+    ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_path, 0, 0, 1)
@@ -145,25 +146,30 @@ PHP_METHOD(git_tree, path)
 PHP_METHOD(git_tree, add)
 {
     zval *object = getThis();
-    zval *entry;
+    git_tree_entry *entry;
     char *filename;
+    char *entry_oid;
+    int entry_oid_len;
+    int filename_len = 0;
+    int attr = 0;
+
     git_oid oid;
     git_tree *tree;
-    int attr;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "z", &entry) == FAILURE){
+        "ssl", &entry_oid, &entry_oid_len,&filename,&filename_len,&attr) == FAILURE){
         return;
     }
-    
+
+    git_oid_mkstr(&oid, entry_oid);
     php_git_tree_t *myobj = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    php_git_tree_entry_t *te = (php_git_tree_entry_t *) zend_object_store_get_object(entry TSRMLS_CC);
+    int ret = git_tree_add_entry(&entry, myobj->object, &oid, filename, attr);
+    if(ret != GIT_SUCCESS) {
+        php_error_docref(NULL TSRMLS_CC, E_ERROR, "can't add tree entry");
+        RETURN_FALSE;
+    }
 
-    git_oid_mkstr(&oid, Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"oid",3,1 TSRMLS_CC)));
-    filename = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"name",4,1 TSRMLS_CC));
-    attr = Z_LVAL_P(zend_read_property(git_tree_entry_class_entry,entry,"mode",4,1 TSRMLS_CC));
-
-    git_tree_add_entry(&te->entry, myobj->object, &oid, filename, attr);
+    RETURN_TRUE;
 }
 
 PHP_METHOD(git_tree, __construct)
