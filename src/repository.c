@@ -411,7 +411,6 @@ PHP_METHOD(git_repository, getWalker)
     ret = git_revwalk_new(&walk,repository);
     php_git_walker_t *wobj = (php_git_walker_t *) zend_object_store_get_object(walker_object TSRMLS_CC);
     wobj->walker = walk;
-    wobj->repository = repository;
 
     RETURN_ZVAL(walker_object,1,0);
 }

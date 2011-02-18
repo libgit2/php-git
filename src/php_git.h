@@ -80,7 +80,6 @@ typedef struct{
 
 typedef struct{
     zend_object zo;
-    git_repository *repository;
     git_revwalk *walker;
 } php_git_walker_t;
 

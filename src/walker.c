@@ -44,10 +44,11 @@ ZEND_END_ARG_INFO()
 
 static void php_git_walker_free_storage(php_git_walker_t *obj TSRMLS_DC)
 {
+    if(obj->walker != NULL){
+        git_revwalk_free(obj->walker);
+        obj->walker = NULL;
+    }
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
-    //obj->walker will free by git_repository
-    obj->walker = NULL;
-    obj->repository = NULL;
     efree(obj);
 }
 
@@ -168,7 +169,7 @@ PHP_METHOD(git_walker, next)
 PHP_METHOD(git_walker, reset)
 {
     php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    git_revwalk_free(myobj->walker);
+    git_revwalk_reset(myobj->walker);
     RETURN_TRUE;
 }
 
