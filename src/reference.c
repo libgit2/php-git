@@ -232,7 +232,7 @@ void git_init_reference(TSRMLS_D)
     git_reference_class_entry = zend_register_internal_class_ex(&ce, git_object_class_entry,NULL TSRMLS_CC);
     git_reference_class_entry->create_object = php_git_reference_new;
     
-    zend_declare_property_null(git_reference_class_entry, "oid",sizeof("oid"), ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_reference_class_entry, "name",sizeof("name"), ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_reference_class_entry, "target",sizeof("target"), ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_reference_class_entry, "oid",    sizeof("oid")-1,    ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_reference_class_entry, "name",   sizeof("name")-1,   ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_reference_class_entry, "target", sizeof("target")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 }
