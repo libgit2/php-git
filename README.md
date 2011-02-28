@@ -6,9 +6,9 @@ php-git is a set of PHP 5.3+ bindings to the libgit2 linkable C Git library.
 How Can I Contribute?
 =======================================================
 
-* fork my repository.
+* fork our repository.
 
-<https://github.com/chobie/php-git>
+<https://github.com/libgit2/php-git>
 
 * create topic branch on your repository (contributors looking issue
 themselves)
@@ -18,7 +18,7 @@ e.g. fix-repository-xxxx-bug, fix-barerepository-detection-bug.
   topic branch desirable minimum change.
 
   or post probrem to Github issues feature.
-  https://github.com/chobie/php-git/issues
+  https://github.com/libgit2/php-git/issues
 
   then i'll fix as possible.
 
@@ -38,7 +38,7 @@ just work on php. not fully tested. classes and methods may changed.
 
 *2nd alpha development release: (2011/2)
 added some unit test. libgit2 feature fully support.
-
+(i'm busy my work, 1 or 2 week delayed)
 
 i'll follow libgit2 changes as possible as :)
 
