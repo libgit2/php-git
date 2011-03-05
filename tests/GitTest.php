@@ -76,13 +76,16 @@ class GitTest extends \PHPUnit_Framework_TestCase
     
     public function testRepositoryInit()
     {
-        $repo = Git\Repository::init("/tmp/uhi",1);
-        $this->assertEquals("/tmp/uhi",file_exists("/tmp/uhi"));
+        $this->rmdir(__DIR__ . "/init_sample");
+        $repo = Git\Repository::init(__DIR__ . "/init_sample",1);
+        $this->assertTrue(file_exists(__DIR__ . "/init_sample"));
         $this->assertInstanceof("Git\\Repository",$repo);
+        $this->rmdir(__DIR__ . "/init_sample");
     }
 
     public function testConstruct()
     {
+
         try{
             $git = new Git\Repository(dirname(__DIR__) . "/.git/");
             $this->assertInstanceof("Git\\Repository",$git);
@@ -115,13 +118,12 @@ class GitTest extends \PHPUnit_Framework_TestCase
     
     public function testInitRepository()
     {
-
         require_once __DIR__ . "/lib/MemoryBackend.php";
         require_once __DIR__ . "/lib/MemcachedBackend.php";
 
-        if(!is_dir(__DIR__ . "/git_init_test")){
-            mkdir(__DIR__ . "/git_init_test",0755);
-        }
+
+        $this->rmdir(__DIR__ . "/git_init_test");
+        mkdir(__DIR__ . "/git_init_test",0755);
         
     
         $backend = new Git\Backend\Memory();
@@ -161,27 +163,29 @@ class GitTest extends \PHPUnit_Framework_TestCase
 
         //$this->markTestIncomplete("this test does not implemente yet.");
         $this->assertEquals("c12883a96cf60d1b2edba971183ffaca6d1b077e",$master_hash,"commit writing");
-
+/*
         $re = new Git\Reference($repository);
         $re->setName("refs/heads/master");
         //$re->setTarget("refs/heads/master");
         // you can't use setOid if setTarget called.
         $re->setOID("c12883a96cf60d1b2edba971183ffaca6d1b077e");
         $re->write();
+*/
 
-
-        $rmdir = function($dir) use(&$rmdir){
-           if (is_dir($dir)) { 
-             $objects = scandir($dir); 
-             foreach ($objects as $object) { 
-               if ($object != "." && $object != "..") { 
-                 if (filetype($dir."/".$object) == "dir") $rmdir($dir."/".$object); else unlink($dir."/".$object); 
-               } 
-             } 
-             reset($objects); 
-             rmdir($dir); 
+        $this->rmdir(__DIR__ . "/git_init_test");
+    }
+    
+    protected function rmdir($dir)
+    {
+       if (is_dir($dir)) { 
+         $objects = scandir($dir); 
+         foreach ($objects as $object) { 
+           if ($object != "." && $object != "..") { 
+             if (filetype($dir."/".$object) == "dir") $this->rmdir($dir."/".$object); else unlink($dir."/".$object); 
            } 
-        };
-        $rmdir(__DIR__ . "/git_init_test");
+         } 
+         reset($objects); 
+         rmdir($dir); 
+       } 
     }
 }

@@ -85,9 +85,10 @@ static void php_git_repository_free_storage(php_git_repository_t *obj TSRMLS_DC)
     // if added some backend. free backend before free zend_object.
     if(obj->repository){
         git_repository_free(obj->repository);
+        obj->repository = NULL;
     }
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
-    obj->repository = NULL;
+
     efree(obj);
 }
 
@@ -126,7 +127,7 @@ PHP_METHOD(git_repository, init)
 
     int suc = git_repository_init(&repository,path,is_bare);
 
-    if(suc != 0){
+    if(suc != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't create repository\n");
         return;
     }
@@ -273,7 +274,7 @@ PHP_METHOD(git_repository, getCommit)
     if(!git_odb_exists(odb,&oid)){
         RETURN_FALSE;
     }else{
-        ret = git_repository_lookup((git_object **)&blob, repository,&oid , GIT_OBJ_COMMIT);
+        ret = git_object_lookup((git_object **)&blob, repository,&oid , GIT_OBJ_COMMIT);
         
         if(ret == GIT_SUCCESS){
             zval *author;

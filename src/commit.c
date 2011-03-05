@@ -218,7 +218,7 @@ PHP_METHOD(git_commit, setTree)
     repository = myobj->repository;
 
     git_oid_mkstr(&oid, hash);
-    git_repository_lookup ((git_object **)&tree, repository, &oid, GIT_OBJ_TREE);
+    git_object_lookup ((git_object **)&tree, repository, &oid, GIT_OBJ_TREE);
     git_commit_set_tree(myobj->object,tree);
 
     if(tree){
@@ -306,7 +306,7 @@ PHP_METHOD(git_commit, getTree)
     const git_oid *oid = 	git_object_id((git_object*)ref_tree);
 
     git_tree *tree;
-    int ret = git_repository_lookup((git_object **)&tree, git_object_owner((git_object*)this->object),oid, GIT_OBJ_TREE);
+    int ret = git_object_lookup((git_object **)&tree, git_object_owner((git_object*)this->object),oid, GIT_OBJ_TREE);
     if(ret != GIT_SUCCESS) {
         php_error_docref(NULL TSRMLS_CC, E_ERROR, "specified tree not found.");
         return;
