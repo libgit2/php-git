@@ -6,6 +6,9 @@ docs/_build/*
 docs/_static/*
 docs/_templates/*
 
+# ignore temporary files
+tmp/*
+
 # ignore your phpunit xml file.
 phpunit.xml
 
