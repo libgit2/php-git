@@ -48,12 +48,10 @@ ZEND_END_ARG_INFO()
     
 static void php_git_reference_free_storage(php_git_reference_t *obj TSRMLS_DC)
 {
-    zend_object_std_dtor(&obj->zo TSRMLS_CC);
-
     if(obj->object){
         obj->object = NULL;
     }
-
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
     efree(obj);
 }
 

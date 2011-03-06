@@ -34,6 +34,7 @@
 #endif
 
 #include "php.h"
+#include "ext/spl/spl_exceptions.h"
 #include <git2.h>
 #include <git2/odb_backend.h>
 
