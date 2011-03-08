@@ -61,23 +61,23 @@ int php_git_backend__exists(git_odb_backend *_backend, const git_oid *oid)
     char out[41] = {0};
     git_oid_to_string(out,41,oid);
 
-	zval *retval;
-	zval *params[1];
+    zval *retval;
+    zval *params[1];
     zval func;
     int result;
 
-	MAKE_STD_ZVAL(retval);
-	ZVAL_NULL(retval);
+    MAKE_STD_ZVAL(retval);
+    ZVAL_NULL(retval);
 
     ZVAL_STRING(&func,"exists", 1);
 
-	MAKE_STD_ZVAL(params[0]);
+    MAKE_STD_ZVAL(params[0]);
     ZVAL_STRING(params[0],out, 1);
 
     call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC);
     result = Z_BVAL_P(retval);
-	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&params[0]);
+    zval_ptr_dtor(&retval);
+    zval_ptr_dtor(&params[0]);
     zval_dtor(&func);
 
     if(result){
@@ -90,11 +90,11 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
 {
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
     int ret = 0;
-	zval *retval;
-	zval *params[1];
+    zval *retval;
+    zval *params[1];
     zval func;
-	MAKE_STD_ZVAL(retval);
-	ZVAL_NULL(retval);
+    MAKE_STD_ZVAL(retval);
+    ZVAL_NULL(retval);
     ZVAL_STRING(&func,"write", 1);
 
 
@@ -126,15 +126,15 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
 int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_oid *oid)
 {
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
-    char out[41] = {0};
-    git_oid_to_string(out,41,oid);
+    char out[GIT_OID_HEXSZ+1] = {0};
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
 
-	zval *retval;
-	zval *params[1];
+    zval *retval;
+    zval *params[1];
     zval func;
 
-	MAKE_STD_ZVAL(retval);
-	ZVAL_NULL(retval);
+    MAKE_STD_ZVAL(retval);
+    ZVAL_NULL(retval);
 
     ZVAL_STRING(&func,"read", 1);
 
@@ -164,16 +164,16 @@ int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_
 }
 int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, const git_oid *oid)
 {
-    char out[41] = {0} ;
+    char out[GIT_OID_HEXSZ+1] = {0} ;
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
-    git_oid_to_string(out,41,oid);
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
 
-	zval *retval;
-	zval *params[1];
+    zval *retval;
+    zval *params[1];
     zval func;
 
-	MAKE_STD_ZVAL(retval);
-	ZVAL_NULL(retval);
+    MAKE_STD_ZVAL(retval);
+    ZVAL_NULL(retval);
 
     ZVAL_STRING(&func,"read", 1);
 
@@ -193,8 +193,8 @@ int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, con
     obj->len = strlen(Z_STRVAL_P(str));
     obj->type = GIT_OBJ_BLOB;
     
-	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&params[0]);
+    zval_ptr_dtor(&retval);
+    zval_ptr_dtor(&params[0]);
     zval_dtor(&func);
     
     return GIT_SUCCESS;
@@ -204,17 +204,17 @@ void php_git_backend__free(git_odb_backend *backend)
 {
     php_git_backend_internal *object = (php_git_backend_internal *)backend;
 
-	zval *retval;
+    zval *retval;
     zval func;
 
-	MAKE_STD_ZVAL(retval);
-	ZVAL_NULL(retval);
+    MAKE_STD_ZVAL(retval);
+    ZVAL_NULL(retval);
 
     ZVAL_STRING(&func,"free", 1);
 
     call_user_function(NULL,&object->self,&func,retval,0,NULL TSRMLS_CC);
 
-	zval_ptr_dtor(&retval);
+    zval_ptr_dtor(&retval);
     zval_dtor(&func);
 }
 
@@ -270,5 +270,5 @@ void git_init_backend(TSRMLS_D)
     zend_class_entry ce;
     INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Backend", php_git_backend_methods);
     git_backend_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-	git_backend_class_entry->create_object = php_git_backend_new;
+    git_backend_class_entry->create_object = php_git_backend_new;
 }
