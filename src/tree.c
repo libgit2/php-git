@@ -92,14 +92,15 @@ PHP_METHOD(git_tree, path)
         return;
     }
     entry = git_tree_entry_byname(this->object,path);
+
     if(entry == NULL){
         return;
     }else{
         ret = git_tree_entry_2object(&object, entry);
 
         if (ret != GIT_SUCCESS) {
-            php_error_docref(NULL TSRMLS_CC, E_ERROR, "something uncaught error happend.");
-            return;
+            zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"something uncaught error happend.");
+            RETURN_FALSE;
         }
         git_otype type = git_object_type(object);
 
@@ -135,10 +136,11 @@ PHP_METHOD(git_tree, path)
             blobobj->object = (git_blob *)object;
 
             add_property_stringl_ex(git_object,"data", sizeof("data"), (char *)git_blob_rawcontent((git_blob *)object),git_blob_rawsize(object), 1 TSRMLS_CC);
-            RETURN_ZVAL(git_object,1,0);
+            RETURN_ZVAL(git_object,0,0);
         } else {
-            php_error_docref(NULL TSRMLS_CC, E_ERROR, "Git\\Tree::path can resolve GIT_OBJ_TREE or GIT_OBJ_BLOB. unhandled object type %d found.", git_object_type(object));
-            return;
+            zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
+                            "Git\\Tree::path can resolve GIT_OBJ_TREE or GIT_OBJ_BLOB. unhandled object type %d found.", git_object_type(object));
+            RETURN_FALSE;
         }
     }
 }
