@@ -54,20 +54,20 @@ static void php_git_walker_free_storage(php_git_walker_t *obj TSRMLS_DC)
 
 zend_object_value php_git_walker_new(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_object_value retval;
-	php_git_walker_t *obj;
-	zval *tmp;
+    zend_object_value retval;
+    php_git_walker_t *obj;
+    zval *tmp;
 
-	obj = ecalloc(1, sizeof(*obj));
-	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
-	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+    obj = ecalloc(1, sizeof(*obj));
+    zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(obj, 
+    retval.handle = zend_objects_store_put(obj, 
         (zend_objects_store_dtor_t)zend_objects_destroy_object,
         (zend_objects_free_object_storage_t)php_git_walker_free_storage,
         NULL TSRMLS_CC);
-	retval.handlers = zend_get_std_object_handlers();
-	return retval;
+    retval.handlers = zend_get_std_object_handlers();
+    return retval;
 }
 
 PHP_METHOD(git_walker, __construct)
@@ -128,7 +128,7 @@ PHP_METHOD(git_walker, next)
     zval *git_commit_object;
     char *hash;
     int hash_len = 0;
-    char oid[GIT_OID_HEXSZ];
+    char oid[GIT_OID_HEXSZ+1];
     git_commit *commit;
     git_revwalk *walker;
     git_signature *signature;
@@ -159,10 +159,7 @@ PHP_METHOD(git_walker, next)
     add_property_zval(git_commit_object,"author", author);
     add_property_zval(git_commit_object,"committer", committer);
 
-    RETURN_ZVAL(git_commit_object,1,0);
-    efree(git_commit_object);
-    efree(author);
-    efree(committer);
+    RETURN_ZVAL(git_commit_object,0,0);
 }
 
 
@@ -202,5 +199,5 @@ void git_init_walker(TSRMLS_D)
     zend_class_entry git_walker_ce;
     INIT_NS_CLASS_ENTRY(git_walker_ce, PHP_GIT_NS,"Revwalk", php_git_walker_methods);
     git_walker_class_entry = zend_register_internal_class(&git_walker_ce TSRMLS_CC);
-	git_walker_class_entry->create_object = php_git_walker_new;
+    git_walker_class_entry->create_object = php_git_walker_new;
 }
