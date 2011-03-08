@@ -112,13 +112,13 @@ PHP_METHOD(git_object, write)
 
     ret = git_object_write((git_object *)this->object);
     if(ret != GIT_SUCCESS){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING,
-            "Can't write object:%d:",ret);
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
+            "Can't write object: %d",ret);
         RETURN_FALSE;
     }
 
     oid = git_object_id((git_object *)this->object);
-    git_oid_to_string(out,41,oid);
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
     
     RETVAL_STRING(out,1);
 }
