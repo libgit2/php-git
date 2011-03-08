@@ -54,20 +54,20 @@ static void php_git_tree_free_storage(php_git_tree_t *obj TSRMLS_DC)
 
 zend_object_value php_git_tree_new(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_object_value retval;
-	php_git_tree_t *obj;
-	zval *tmp;
+    zend_object_value retval;
+    php_git_tree_t *obj;
+    zval *tmp;
 
-	obj = ecalloc(1, sizeof(*obj));
-	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
-	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+    obj = ecalloc(1, sizeof(*obj));
+    zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(obj, 
+    retval.handle = zend_objects_store_put(obj, 
         (zend_objects_store_dtor_t)zend_objects_destroy_object,
         (zend_objects_free_object_storage_t)php_git_tree_free_storage,
         NULL TSRMLS_CC);
-	retval.handlers = zend_get_std_object_handlers();
-	return retval;
+    retval.handlers = zend_get_std_object_handlers();
+    return retval;
 }
 
 PHP_METHOD(git_tree, count)
@@ -205,7 +205,7 @@ void git_init_tree(TSRMLS_D)
     zend_class_entry ce;
     INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Tree", php_git_tree_methods);
     git_tree_class_entry = zend_register_internal_class_ex(&ce, git_object_class_entry, NULL TSRMLS_CC);
-	git_tree_class_entry->create_object = php_git_tree_new;
+    git_tree_class_entry->create_object = php_git_tree_new;
     
     zend_class_implements(git_tree_class_entry TSRMLS_CC, 1, spl_ce_Countable);
 }
