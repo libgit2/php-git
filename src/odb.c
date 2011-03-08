@@ -74,7 +74,7 @@ PHP_METHOD(git_odb, __construct)
     int ret = 0;
     ret = git_odb_new(&this->odb);
     if(ret != GIT_SUCCESS){
-        php_error_docref(NULL TSRMLS_CC, E_ERROR,"can't create Git\\ODB.");
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"can't create Git\\ODB");
     }
 }
 
@@ -84,7 +84,7 @@ int php_git_odb_add_alternate(git_odb **odb, zval *backend, int priority)
     int ret = GIT_SUCCESS;
     php_git_backend_t *b;
     if(!instanceof_function(Z_OBJCE_P(backend), git_backend_class_entry TSRMLS_CC)){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING,"alternate must extends Git\\Backend");
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,"alternate must extends Git\\Backend");
         return GIT_ERROR;
     }
 
@@ -92,7 +92,7 @@ int php_git_odb_add_alternate(git_odb **odb, zval *backend, int priority)
     ret = git_odb_add_alternate(*odb,(git_odb_backend *)b->backend, priority);
 
     if(ret != GIT_SUCCESS){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING,"can't add alternate");
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"can't add alternate");
         return GIT_ERROR;
     }
     
