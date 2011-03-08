@@ -43,20 +43,20 @@ static void php_git_object_free_storage(php_git_object_t *obj TSRMLS_DC)
 
 zend_object_value php_git_object_new(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_object_value retval;
-	php_git_object_t *obj;
-	zval *tmp;
+    zend_object_value retval;
+    php_git_object_t *obj;
+    zval *tmp;
 
-	obj = ecalloc(1, sizeof(*obj));
-	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
-	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+    obj = ecalloc(1, sizeof(*obj));
+    zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(obj, 
+    retval.handle = zend_objects_store_put(obj,
         (zend_objects_store_dtor_t)zend_objects_destroy_object,
         (zend_objects_free_object_storage_t)php_git_object_free_storage,
         NULL TSRMLS_CC);
-	retval.handlers = zend_get_std_object_handlers();
-	return retval;
+    retval.handlers = zend_get_std_object_handlers();
+    return retval;
 }
 
 
@@ -75,7 +75,6 @@ PHP_METHOD(git_object, getId)
 PHP_METHOD(git_object, isBlob)
 {
     php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    git_otype type;
 
     if(git_object_type((git_object *)this->object) == GIT_OBJ_BLOB ) {
         RETURN_TRUE;
@@ -87,8 +86,6 @@ PHP_METHOD(git_object, isBlob)
 PHP_METHOD(git_object, isTree)
 {
     php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    git_otype type;
-
     if(git_object_type((git_object *)this->object) == GIT_OBJ_TREE ) {
         RETURN_TRUE;
     } else {
@@ -110,7 +107,7 @@ PHP_METHOD(git_object, write)
 {
     php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     const git_oid *oid;
-    char out[41] = {0};
+    char out[GIT_OID_HEXSZ+1] = {0};
     int ret = 0;
 
     ret = git_object_write((git_object *)this->object);
@@ -130,7 +127,6 @@ PHPAPI function_entry php_git_object_methods[] = {
     PHP_ME(git_object, getId,   NULL,ZEND_ACC_PUBLIC)
     PHP_ME(git_object, getType, NULL,ZEND_ACC_PUBLIC)
     PHP_ME(git_object, write,   NULL,ZEND_ACC_PUBLIC)
-        
     PHP_ME(git_object, isTree, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_object, isBlob, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
