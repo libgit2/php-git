@@ -1,0 +1,9 @@
+Git\\Index
+===========================
+
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   *
