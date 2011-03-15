@@ -601,18 +601,20 @@ PHP_METHOD(git_repository, open3)
     }
 }
 
+
 PHPAPI function_entry php_git_repository_methods[] = {
-    PHP_ME(git_repository, __construct, arginfo_git_construct, ZEND_ACC_PUBLIC)
-    PHP_ME(git_repository, getCommit, arginfo_git_get_commit, ZEND_ACC_PUBLIC)
-    PHP_ME(git_repository, getObject, arginfo_git_get_object, ZEND_ACC_PUBLIC)
-    PHP_ME(git_repository, getIndex, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_repository, lookupRef, arginfo_git_lookup_ref, ZEND_ACC_PUBLIC)
-    PHP_ME(git_repository, getWalker, arginfo_git_walker, ZEND_ACC_PUBLIC)
-    PHP_ME(git_repository, getTree, arginfo_git_get_tree, ZEND_ACC_PUBLIC)
-    PHP_ME(git_repository, init, arginfo_git_init, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-    PHP_ME(git_repository, addBackend, arginfo_git_add_backend, ZEND_ACC_PUBLIC)
-    PHP_ME(git_repository, addAlternate, arginfo_git_add_alternate, ZEND_ACC_PUBLIC)
-    PHP_ME(git_repository, open3, arginfo_git_open3, ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, __construct,   arginfo_git_construct,      ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, getCommit,     arginfo_git_get_commit,     ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, getObject,     arginfo_git_get_object,     ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, getIndex,      NULL,                       ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, lookupRef,     arginfo_git_lookup_ref,     ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, getWalker,     arginfo_git_walker,         ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, getTree,       arginfo_git_get_tree,       ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, init,          arginfo_git_init,           ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    PHP_ME(git_repository, addBackend,    arginfo_git_add_backend,    ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, addAlternate,  arginfo_git_add_alternate,  ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, open3,         arginfo_git_open3,          ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, getReferences, arginfo_git_get_references, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
