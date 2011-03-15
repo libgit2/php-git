@@ -5,24 +5,37 @@
 Git\\Index::find
 ===========================================================
 
+returns specified file offset in git_index.
+
+.. note::
+   this method may change next development.
+
 Description
 ***********************************************************
 
-public **Git\\Index::find** (*$path*)
+public **Git\\Index::find** (string *$path*)
 
 
 Parameters
 ***********************************************************
 
 *path*
-  fill them out later
-
+  file name
 
 Return Values
 ***********************************************************
 
+int offset
+
 Examples
 ***********************************************************
+
+.. code-block::php
+
+    <?php
+    $repo = new Git\Repository("/tmp/specified.git");
+    $index = $repo->getIndex();
+    $offset = $index->find("README.md");
 
 See Also
 ***********************************************************

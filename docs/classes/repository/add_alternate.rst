@@ -5,6 +5,8 @@
 Git\\Repository::addAlternate
 ===========================================================
 
+add alternate backend. this feature can resolve external objects.
+
 Description
 ***********************************************************
 
@@ -15,17 +17,21 @@ Parameters
 ***********************************************************
 
 *backend*
-  fill them out later
+  Specifies a class that inherits from :doc:`Git\\Backend </classes/backend/index>`
 
 *priority*
-  fill them out later
+  [low] 1 ... 5[high]
 
 
 Return Values
 ***********************************************************
+
+void
 
 Examples
 ***********************************************************
 
 See Also
 ***********************************************************
+
+:doc:`Git\\Backend </classes/backend/index>`

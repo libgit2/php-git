@@ -5,6 +5,8 @@
 Git\\Repository::getWalker
 ===========================================================
 
+returns Git\Revwalk.
+
 Description
 ***********************************************************
 
@@ -21,8 +23,26 @@ Parameters
 Return Values
 ***********************************************************
 
+:doc:`Git\\Revwalk </classes/revwalk/index>`
+
 Examples
 ***********************************************************
 
+
+.. code-block:: php
+
+   <?php
+   $repo = new Git\Repository("/tmp/specified.git");
+   $reference = $repo->lookupRef("refs/heads/master");
+   $walker = $repo->getWalker();
+   $walker->push($reference->getId());
+
+   while($commit = $walker->next()){
+     var_dump($commit);
+   }
+
 See Also
 ***********************************************************
+
+:doc:`Git\\Revwalk </classes/revwalk/index>`
+:doc:`Git\\Commit </classes/commit/index>`

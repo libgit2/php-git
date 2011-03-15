@@ -5,6 +5,8 @@
 Git\\Repository::init
 ===========================================================
 
+create a new git repository on your filesystem.
+
 Description
 ***********************************************************
 
@@ -15,17 +17,29 @@ Parameters
 ***********************************************************
 
 *path*
-  fill them out later
+  blank directory
 
 *is_bare*
-  fill them out later
+  create bare repository when is_bare is true.
 
+
+.. note::
+   do not call this method when specified repository exists.
 
 Return Values
 ***********************************************************
 
+:doc:`Git\\Repository </classes/repository/index>`
+
 Examples
 ***********************************************************
 
+.. code-block:: php
+
+   <?php
+   $repo = Git\Repository::init("/tmp/new.git",true);
+
 See Also
 ***********************************************************
+
+:doc:`Git\\Repository </classes/repository/index>`

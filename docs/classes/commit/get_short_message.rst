@@ -24,5 +24,13 @@ Return Values
 Examples
 ***********************************************************
 
+.. code-block:: php
+
+   <?php
+   $repo = new Git\Repository("/path/repository");
+   $ref  = $repo->lookupRef("refs/heads/master");
+   $commit = $repo->getCommit($ref->getId());
+   $message = $commit->getShortMessage();
+
 See Also
 ***********************************************************

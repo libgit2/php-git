@@ -8,15 +8,14 @@ Git\\Commit::setTree
 Description
 ***********************************************************
 
-public **Git\\Commit::setTree** (*$entry*)
+public **Git\\Commit::setTree** (string *$tree*)
 
 
 Parameters
 ***********************************************************
 
-*entry*
-  fill them out later
-
+*tree*
+  tree hash id
 
 Return Values
 ***********************************************************
@@ -26,3 +25,5 @@ Examples
 
 See Also
 ***********************************************************
+
+:doc:`Git\\Commit </classes/commit/index>`

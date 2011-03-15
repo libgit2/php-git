@@ -24,3 +24,5 @@ Examples
 
 See Also
 ***********************************************************
+
+:doc:`Git\\Object::isTree </classes/object/is_tree>`

@@ -5,6 +5,19 @@
 Git\\Revwalk::hide
 ===========================================================
 
+hide uninterested commits.
+
+::
+
+  o---o---o---o---o---o---o---o
+               `--o---o--/
+                  ^hide
+
+::
+
+  o---o---o---o---o---o---o---o
+
+
 Description
 ***********************************************************
 
@@ -15,14 +28,25 @@ Parameters
 ***********************************************************
 
 *hash*
-  fill them out later
+  uninterested commit id
 
 
 Return Values
 ***********************************************************
 
+void
+
 Examples
 ***********************************************************
+
+.. code-block:: php
+
+   <?php
+   $repo = new Git\Repository("/tmp/specified.git");
+   $master = $repo->lookupRef("refs/heads/master");
+   $revwalk = $repo->getWalker();
+   $uninterested = "";// specified uninterested commit id
+   $revwalk->hide($uninterested);
 
 See Also
 ***********************************************************

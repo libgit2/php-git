@@ -5,6 +5,8 @@
 Git\\Repository::lookupRef
 ===========================================================
 
+return specified reference object.
+
 Description
 ***********************************************************
 
@@ -15,14 +17,24 @@ Parameters
 ***********************************************************
 
 *name*
-  fill them out later
+  reference name. 
 
 
 Return Values
 ***********************************************************
 
+:doc:`Git\\Reference </classes/reference/index>`
+
 Examples
 ***********************************************************
 
+.. code-block:: php
+
+   <?php
+   $repo = new Git\Repository("/tmp/specified.git");
+   $reference = $repo->lookupRef("refs/heads/master");
+
 See Also
 ***********************************************************
+
+:doc:`Git\\Reference </classes/reference/index>`

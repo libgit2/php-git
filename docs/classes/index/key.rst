@@ -5,6 +5,8 @@
 Git\\Index::key
 ===========================================================
 
+Iterator interface.
+
 Description
 ***********************************************************
 
@@ -24,3 +26,5 @@ Examples
 
 See Also
 ***********************************************************
+
+`The Iterator interface(PHP Documents) <http://jp.php.net/manual/en/class.iterator.php>`_

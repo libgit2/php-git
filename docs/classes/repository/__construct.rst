@@ -15,14 +15,21 @@ Parameters
 ***********************************************************
 
 *repository_path*
-  fill them out later
+  git repository path.
 
 
 Return Values
 ***********************************************************
 
+:doc:`Git\Repository </classes/repository/index>`
+
 Examples
 ***********************************************************
+
+.. code-block:: php
+
+    <?php
+    $repository = new Git\Repository("/tmp/specified.git");
 
 See Also
 ***********************************************************
