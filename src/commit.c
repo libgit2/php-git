@@ -38,7 +38,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit__construct, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_committer, 0, 0, 1)
-    ZEND_ARG_INFO(0, author)
+    ZEND_ARG_INFO(0, committer)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_parent, 0, 0, 1)
@@ -396,8 +396,8 @@ PHPAPI function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, setCommitter,    arginfo_git_commit_set_committer,ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getCommitter,    NULL,                            ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setMessage,      arginfo_git_commit_set_message,  ZEND_ACC_PUBLIC)
-    PHP_ME(git_commit, getMessage,      arginfo_git_commit_set_message,  ZEND_ACC_PUBLIC)
-    PHP_ME(git_commit, getShortMessage, arginfo_git_commit_set_message,  ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, getMessage,      NULL,                            ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, getShortMessage, NULL,                            ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setParent,       arginfo_git_commit_set_parent,   ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getParent,       arginfo_git_commit_get_parent,   ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
