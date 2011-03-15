@@ -302,7 +302,8 @@ PHP_METHOD(git_commit, getShortMessage)
 PHP_METHOD(git_commit, getTree)
 {
     php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    const git_tree *ref_tree = git_commit_tree(this->object);
+    git_tree *ref_tree;
+    git_commit_tree(&ref_tree, this->object);
     const git_oid *oid = 	git_object_id((git_object*)ref_tree);
 
     git_tree *tree;
@@ -362,8 +363,8 @@ PHP_METHOD(git_commit, getParent)
         return;
     }
     
-    commit = git_commit_parent(this->object,offset);
-    if(commit == NULL){
+    ret = git_commit_parent(&commit, this->object,offset);
+    if(ret != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_ERROR, "specified offset not found.");
         RETURN_FALSE;
     }

@@ -136,7 +136,7 @@ PHP_METHOD(git_tree, path)
             php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_object TSRMLS_CC);
             blobobj->object = (git_blob *)object;
 
-            add_property_stringl_ex(git_object,"data", sizeof("data"), (char *)git_blob_rawcontent((git_blob *)object),git_blob_rawsize(object), 1 TSRMLS_CC);
+            add_property_stringl_ex(git_object,"data", sizeof("data"), (char *)git_blob_rawcontent((git_blob *)object),git_blob_rawsize((git_blob *)object), 1 TSRMLS_CC);
             RETURN_ZVAL(git_object,0,0);
         } else {
             zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,

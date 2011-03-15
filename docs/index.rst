@@ -7,9 +7,7 @@ Welcome to php-git's documentation!
 ===================================
 
 php-git is a set of PHP 5.3+ bindings to the libgit2 linkable C Git library.
-first alpha development release is extreamly EXPERIMENTAL.
-
-you should not use write feature on this release.
+*Important Notice* this module is EXPERIMENTAL.
 
 Contents:
 
@@ -17,7 +15,11 @@ Contents:
    :maxdepth: 2
    :glob:
 
-   classes/*
+   intro
+   setup
+   constants
+   examples
+   classes/*/index
 
 Indices and tables
 ==================

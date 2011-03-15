@@ -94,9 +94,8 @@ PHP_METHOD(git_walker, hide)
     repository = git_revwalk_repository(walker);
     
     git_oid_mkstr(&oid,hash);
-    git_commit_lookup(&commit,repository,&oid);
 
-    git_revwalk_hide(walker,commit);
+    git_revwalk_hide(walker,&oid);
 }
 
 PHP_METHOD(git_walker, push)
@@ -118,9 +117,8 @@ PHP_METHOD(git_walker, push)
     repository = git_revwalk_repository(walker);
     
     git_oid_mkstr(&oid,hash);
-    git_commit_lookup(&head,repository,&oid);
     
-    git_revwalk_push(walker,head);
+    git_revwalk_push(walker,&oid);
 }
 
 PHP_METHOD(git_walker, next)
@@ -128,7 +126,7 @@ PHP_METHOD(git_walker, next)
     zval *git_commit_object;
     char *hash;
     int hash_len = 0;
-    char oid[GIT_OID_HEXSZ+1];
+    git_oid oid;
     git_commit *commit;
     git_revwalk *walker;
     git_signature *signature;
@@ -136,10 +134,11 @@ PHP_METHOD(git_walker, next)
     php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     walker = myobj->walker;
 
-    int ret = git_revwalk_next(&commit,walker);
+    int ret = git_revwalk_next(&oid,walker);
     if(ret != GIT_SUCCESS){
         RETURN_FALSE;
     }
+    git_object_lookup((git_object **)&commit, git_revwalk_repository(walker), &oid, GIT_OBJ_COMMIT);
 
     MAKE_STD_ZVAL(git_commit_object);
     object_init_ex(git_commit_object,git_commit_class_entry);
