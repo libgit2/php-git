@@ -108,7 +108,7 @@ PHP_METHOD(git_reference, getName)
     const char *name = git_reference_name(this->object);
 
     add_property_string_ex(getThis() ,"name",sizeof("name"),(char *)name, 1 TSRMLS_CC);
-    RETVAL_STRING(Z_STRVAL_P(zend_read_property(git_reference_class_entry,getThis(),"name",sizeof("name")-1,1 TSRMLS_CC)),0);
+    RETVAL_STRING(name, 1);
 }
 
 PHP_METHOD(git_reference, setName)
