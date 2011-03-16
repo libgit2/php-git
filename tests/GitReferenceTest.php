@@ -14,12 +14,12 @@ class GitReferenceTest extends \PHPUnit_Framework_TestCase
         //this test still legacy. fix environment probrem soon
         $this->markTestSkipped();
     }
-    
+
     protected function tearDown()
     {
         // currentry nothing to do.
     }
-    
+
     /**
      * Repository can lookup Git Reference.
      */
@@ -27,10 +27,10 @@ class GitReferenceTest extends \PHPUnit_Framework_TestCase
     {
         $rep = new Git\Repository(dirname(__DIR__) . "/.git/");
         $reference = $rep->lookupRef("refs/heads/develop");
-        $this->assertInstanceof("Git\\Reference",$reference,"returned object does not Git\\Reference");
+        $this->assertTrue($reference instanceof Git\Reference, 'returned object does not Git\\Reference');
     }
-    
-    
+
+
     /**
      * Reference can call getType()
      */
@@ -41,7 +41,7 @@ class GitReferenceTest extends \PHPUnit_Framework_TestCase
         $type = $ref->getType();
         $this->assertEquals(1,$type,"illegal reference type returned.(this is legacy test. check test file)");
     }
-    
+
     /**
      * Reference can call getName();
      */
@@ -50,10 +50,10 @@ class GitReferenceTest extends \PHPUnit_Framework_TestCase
         $rep = new Git\Repository(dirname(__DIR__) . "/.git/");
         $ref = $rep->lookupRef("refs/heads/develop");
         $name = $ref->getName();
-        
+
         $this->assertEquals("refs/heads/develop",$name,"reference name missmatched.");
     }
-    
+
     /**
      * Reference can call getId();
      */
@@ -62,7 +62,7 @@ class GitReferenceTest extends \PHPUnit_Framework_TestCase
         $rep = new Git\Repository(dirname(__DIR__) . "/.git/");
         $ref = $rep->lookupRef("refs/heads/develop");
         $id = $ref->getId();
-        
+
         $this->assertEquals(40,strlen($id),"illegal oid size returned");
     }
 

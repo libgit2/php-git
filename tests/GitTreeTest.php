@@ -13,12 +13,12 @@
      {
          // currentry nothing to do.
      }
-     
+
      protected function tearDown()
      {
          // currentry nothing to do.
      }
-     
+
      public function testConstruct()
      {
          try{
@@ -48,10 +48,10 @@
             $repository = new Git\Repository("./.git");
             $tree = $repository->getTree("f031269837fabfa2c63e7a37b000a91171855f3f");
             $object = $tree->path("EXPERIMENTAL");
-            $this->assertInstanceof("Git\\Blob",$object,"正しくblobが取れている");
+            $this->assertTrue($object instanceof Git\Blob,'正しくblobが取れている');
             $this->assertEquals("80afdcd19e73e8e39757ebcdebedbf8fee2ebfc1",$object->getId());
             $object = $tree->path("docs");
-            $this->assertInstanceof("Git\\Tree",$object,"正しくtreeが取れている");
+            $this->assertTrue($object instanceof Git\Tree,"正しくtreeが取れている");
          }catch(\Exception $e){
              $this->fail();
          }

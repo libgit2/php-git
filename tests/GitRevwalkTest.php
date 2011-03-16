@@ -29,25 +29,25 @@ class GitRevwalkTest extends \PHPUnit_Framework_TestCase
     {
         // currentry nothing to do.
     }
-    
+
     public function testGetWalker()
     {
         $git = new Git\Repository(".git");
         $walker = $git->getWalker();
-        $this->assertInstanceOf("Git\\Revwalk",$walker);
+        $this->assertTrue($walker instanceof Git\Revwalk);
         unset($git);
     }
-    
+
     public function testPush()
     {
         $git = new Git\Repository(".git");
         $walker = $git->getWalker();
         $walker->push("1def80657903dcf8d9d87a5e4edfaca92ddcff38");
         $commit = $walker->next();
-        $this->assertInstanceof("Git\\Commit",$commit);
+        $this->assertTrue($commit instanceof Git\Commit);
         unset($git);
     }
-    
+
     public function testRest()
     {
         $git = new Git\Repository(".git");
@@ -69,6 +69,6 @@ class GitRevwalkTest extends \PHPUnit_Framework_TestCase
         $walker = $git->getWalker();
         $walker->sort(Git\Revwalk\SORT_NONE);
         $walker->push("1def80657903dcf8d9d87a5e4edfaca92ddcff38");
-        $this->assertInstanceof("Git\\Commit",$walker->next());
+        $this->assertTrue($walker->next() instanceof Git\Commit);
     }
 }

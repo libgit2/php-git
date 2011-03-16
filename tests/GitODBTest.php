@@ -15,25 +15,25 @@ class GitODBTest extends \PHPUnit_Framework_TestCase
     {
         // currentry nothing to do.
     }
-    
+
     protected function tearDown()
     {
         // currentry nothing to do.
     }
-    
+
     public function testCheckMemcachedModule()
     {
         $this->assertEquals(true,extension_loaded("memcached"));
         require_once __DIR__ . "/lib/MemcachedBackend.php";
     }
-    
+
     /**
      * @depends testCheckMemcachedModule
      */
     public function testConstruct()
     {
         $odb = new Git\ODB();
-        $this->assertInstanceof("Git\\ODB",$odb);
+        $this->assertTrue($odb instanceof Git\ODB);
     }
 
     /**
@@ -44,7 +44,7 @@ class GitODBTest extends \PHPUnit_Framework_TestCase
         $odb = new Git\ODB();
         $memcached = new Git\Backend\Memcached();
         $odb->addBackend($memcached,5);
-        $this->assertInstanceof("Git\\ODB",$odb);
+        $this->assertTrue($odb instanceof Git\ODB);
     }
 
     public function testMemoryBackend()
@@ -53,15 +53,15 @@ class GitODBTest extends \PHPUnit_Framework_TestCase
         $odb = new Git\ODB();
         $memory = new Git\Backend\Memory();
         $odb->addBackend($memory,5);
-        $this->assertInstanceof("Git\\ODB",$odb);
+        $this->assertTrue($odb instanceof Git\ODB);
     }
-    
+
     public function testAddAlternate()
     {
 
         $odb = new Git\ODB();
         $memory = new Git\Backend\Memory();
         $odb->addAlternate($memory,5);
-        $this->assertInstanceof("Git\\ODB",$odb);
+        $this->assertTrue($odb instanceof Git\ODB);
     }
 }
