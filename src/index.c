@@ -36,7 +36,6 @@ static void php_git_index_free_storage(php_git_index_t *obj TSRMLS_DC)
     if(obj->index){
         git_index_free(obj->index);
     }
-    obj->repository = NULL;
     efree(obj);
 }
 
@@ -82,6 +81,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_index_insert, 0, 0, 1)
   ZEND_ARG_INFO(0, entry)
 ZEND_END_ARG_INFO()
+
+/*
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_index__construct, 0, 0, 1)
+  ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO()
+*/
 
 void php_git_index_entry_create(zval **index, git_index_entry *entry)
 {
@@ -223,7 +228,7 @@ PHP_METHOD(git_index, add)
     php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     index = myobj->index;
 
-    //FIXME: stage の値の意味を調べる
+    //FIXME: examine stage value.
     // 0 => new file
     // 1 => deleted ?
     // 2 => ?
@@ -280,6 +285,30 @@ PHP_METHOD(git_index, refresh)
     git_index_read(index);
 }
 /*
+PHP_METHOD(git_index, __construct)
+{
+    php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_index *index;
+    char *path;
+    int path_len = 0;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &path, &path_len) == FAILURE){
+        return;
+    }
+    int ret = git_index_open_bare(&index,path);
+    if(ret != GIT_SUCCESS){
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+            "can't read specified index");
+        RETURN_FALSE;
+    }
+    this->index = index;
+    this->offset = 0;
+    add_property_long(getThis(), "entry_count",git_index_entrycount(index));
+
+}
+*/
+/*
 PHP_METHOD(git_index, insert)
 {
     php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -311,6 +340,7 @@ PHP_METHOD(git_index, insert)
 */
 
 PHPAPI function_entry php_git_index_methods[] = {
+    //PHP_ME(git_index, __construct, arginfo_git_index__construct,ZEND_ACC_PUBLIC)
     PHP_ME(git_index, getEntry,    arginfo_git_index_get_entry, ZEND_ACC_PUBLIC)
     PHP_ME(git_index, find,        arginfo_git_index_find,      ZEND_ACC_PUBLIC)
     PHP_ME(git_index, add,         arginfo_git_index_add,       ZEND_ACC_PUBLIC)

@@ -64,7 +64,6 @@ extern PHPAPI zend_class_entry *git_backend_class_entry;
 
 typedef struct{
     zend_object zo;
-    git_repository *repository;
     git_index *index;
     long offset;
 } php_git_index_t;
