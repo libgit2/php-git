@@ -10,7 +10,7 @@ namespace Git\Backend;
 class Memcached extends \Git\Backend
 {
     protected $memcached;
-    
+
     protected function serialize($value){
         return serialize($value);
     }
@@ -56,7 +56,7 @@ class Memcached extends \Git\Backend
            $raw->data = $data->data;
            $raw->type = $data->type;
        }
-       
+
        return $raw;
     }
 
@@ -74,7 +74,7 @@ class Memcached extends \Git\Backend
            $raw->data = null;
            $raw->type = $data->type;
        }
-       
+
        return $raw;
     }
 
