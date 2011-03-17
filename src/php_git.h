@@ -47,6 +47,7 @@ extern zend_module_entry git_module_entry;
 
 extern PHPAPI zend_class_entry *git_class_entry;
 extern PHPAPI zend_class_entry *git_reference_class_entry;
+extern PHPAPI zend_class_entry *git_reference_manager_class_entry;
 extern PHPAPI zend_class_entry *git_repository_class_entry;
 extern PHPAPI zend_class_entry *git_object_class_entry;
 extern PHPAPI zend_class_entry *git_index_class_entry;
@@ -147,6 +148,11 @@ typedef struct{
     zend_object zo;
     git_reference *object;
 } php_git_reference_t;
+
+typedef struct{
+    zend_object zo;
+    git_repository *repository;
+} php_git_reference_manager_t;
 
 
 #endif /* PHP_GIT_H */
