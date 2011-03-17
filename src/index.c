@@ -234,7 +234,6 @@ PHP_METHOD(git_index, add)
         RETURN_FALSE;
     }
 
-    git_index_read(index);
     RETURN_TRUE;
 }
 
