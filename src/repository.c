@@ -84,6 +84,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_get_references, 0, 0, 1)
     ZEND_ARG_INFO(0, flag)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_open2, 0, 0, 4)
+    ZEND_ARG_INFO(0, git_dir)
+    ZEND_ARG_INFO(0, git_object_directory)
+    ZEND_ARG_INFO(0, git_index_file)
+    ZEND_ARG_INFO(0, git_work_tree)
+ZEND_END_ARG_INFO()
+
 static void php_git_repository_free_storage(php_git_repository_t *obj TSRMLS_DC)
 {
     // if added some backend. free backend before free zend_object.
@@ -601,6 +608,40 @@ PHP_METHOD(git_repository, open3)
     }
 }
 
+PHP_METHOD(git_repository, open2)
+{
+    php_git_repository_t *this= (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    char *git_dir;
+    char *git_object_directory;
+    char *git_index_file;
+    char *git_work_tree;
+    int git_dir_len = 0;
+    int git_object_directory_len = 0;
+    int git_index_file_len = 0;
+    int git_work_tree_len = 0;
+    git_repository *repository;
+    
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "ssss", &git_dir, &git_dir_len, &git_object_directory, &git_object_directory_len, &git_index_file, &git_index_file_len, &git_work_tree, &git_work_tree_len) == FAILURE){
+        return;
+    }
+    
+    if(this->repository != NULL){
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "repository busy");
+        return;
+    }
+    
+    int ret = git_repository_open2(&repository,git_dir, git_object_directory, git_index_file, git_work_tree);
+    if(ret != GIT_SUCCESS){
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,"can't open specified directories");
+        RETURN_FALSE;
+    }
+
+    add_property_string_ex(getThis(), "path",sizeof("path"),(char *)git_dir, 1 TSRMLS_CC);
+    this->repository = repository;
+    RETURN_TRUE;
+}
+
 
 PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, __construct,   arginfo_git_construct,      ZEND_ACC_PUBLIC)
@@ -614,6 +655,7 @@ PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, addBackend,    arginfo_git_add_backend,    ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, addAlternate,  arginfo_git_add_alternate,  ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, open3,         arginfo_git_open3,          ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, open2,         arginfo_git_open2,          ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getReferences, arginfo_git_get_references, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
