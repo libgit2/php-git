@@ -40,20 +40,20 @@ static void php_git_index_entry_free_storage(php_git_index_entry_t *obj TSRMLS_D
 
 zend_object_value php_git_index_entry_new(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_object_value retval;
-	php_git_index_entry_t *obj;
-	zval *tmp;
+    zend_object_value retval;
+    php_git_index_entry_t *obj;
+    zval *tmp;
 
-	obj = ecalloc(1, sizeof(*obj));
-	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
-	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+    obj = ecalloc(1, sizeof(*obj));
+    zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(obj, 
+    retval.handle = zend_objects_store_put(obj, 
         (zend_objects_store_dtor_t)zend_objects_destroy_object,
         (zend_objects_free_object_storage_t)php_git_index_entry_free_storage,
         NULL TSRMLS_CC);
-	retval.handlers = zend_get_std_object_handlers();
-	return retval;
+    retval.handlers = zend_get_std_object_handlers();
+    return retval;
 }
 
 PHPAPI function_entry php_git_index_entry_methods[] = {
@@ -66,5 +66,17 @@ void git_index_entry_init(TSRMLS_D)
     INIT_NS_CLASS_ENTRY(ce, ZEND_NS_NAME(PHP_GIT_NS,"Index"),"Entry", php_git_index_entry_methods);
 
     git_index_entry_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-	git_index_entry_class_entry->create_object = php_git_index_entry_new;
+    git_index_entry_class_entry->create_object = php_git_index_entry_new;
+    zend_declare_property_null(git_index_entry_class_entry , "path",sizeof("path")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "oid",sizeof("oid")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "dev",sizeof("dev")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "ino",sizeof("ino")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "mode",sizeof("mode")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "uid",sizeof("uid")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "gid",sizeof("gid")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "file_size",sizeof("file_size")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "flags",sizeof("flags")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "flags_extended",sizeof("flags_extended")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "ctime",sizeof("ctime")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_index_entry_class_entry , "mtime",sizeof("mtime")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 }

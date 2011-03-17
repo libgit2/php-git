@@ -178,16 +178,16 @@ PHP_METHOD(git_repository, getIndex)
 
     iobj->index = index;
     iobj->repository = repository;
+    iobj->offset = 0;
 
     git_index_read(index);
 
     //Todo: Read from Git object.
     //add_property_string_ex(index_object, "path",5,index->index_file_path, 1 TSRMLS_CC);
-    add_property_long(index_object, "offset", 0);
     add_property_long(index_object, "entry_count",git_index_entrycount(index));
     zend_list_addref(ret);
 
-    RETURN_ZVAL(index_object,1,0);
+    RETURN_ZVAL(index_object,0,0);
 }
 
 

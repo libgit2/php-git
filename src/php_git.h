@@ -66,6 +66,7 @@ typedef struct{
     zend_object zo;
     git_repository *repository;
     git_index *index;
+    long offset;
 } php_git_index_t;
 
 typedef struct{
