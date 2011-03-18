@@ -53,7 +53,7 @@ class GitIndexTest extends \PHPUnit_Framework_TestCase
         $repository = new Repository(__DIR__ . self::REPOSITORY_NAME . "/.git");
         $index = $repository->getIndex();
         $index->add("example");
-        $index->remove(0);
+        $index->remove("example");
         $index->write();
         $data = file_get_contents(__DIR__ . self::REPOSITORY_NAME . "/.git/index");
         $this->assertTrue((strpos($data,"example") === false),"couldn't remove index");

@@ -76,7 +76,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_index_construct, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_index_remove, 0, 0, 1)
-  ZEND_ARG_INFO(0, position)
+  ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_index_insert, 0, 0, 1)
@@ -200,13 +200,22 @@ PHP_METHOD(git_index, add)
 PHP_METHOD(git_index, remove)
 {
     php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    int position = 0;
+    char *path;
+    int path_len = 0;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "l", &position) == FAILURE){
+        "s", &path, &path_len) == FAILURE){
         return;
     }
-    int result = git_index_remove(this->index, position);
+
+    int offset = git_index_find(this->index,path);
+    if(offset < 0){
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+            "specified path does not exist.");
+        RETURN_FALSE;
+    }
+
+    int result = git_index_remove(this->index, offset);
     if(result != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "specified offset does not exist.");
