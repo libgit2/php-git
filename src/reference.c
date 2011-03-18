@@ -211,11 +211,22 @@ PHP_METHOD(git_reference, __construct)
     }
 }
 
+PHP_METHOD(git_reference, getId)
+{
+    php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_oid *oid = git_reference_oid(this->object);
+    char out[GIT_OID_HEXSZ+1] = {0};
+    
+    git_oid_to_string(&out, GIT_OID_HEXSZ+1, oid);
+    RETURN_STRINGL(&out,GIT_OID_HEXSZ, 1);
+}
+
 PHPAPI function_entry php_git_reference_methods[] = {
     PHP_ME(git_reference, __construct, arginfo_git_reference__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, getTarget,   NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, getType,     NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, getName,     NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_reference, getId,       NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, write,       NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, setName,     arginfo_git_reference_set_name, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, setTarget,   arginfo_git_reference_set_target, ZEND_ACC_PUBLIC)
