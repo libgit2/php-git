@@ -1,22 +1,19 @@
 .. index::
-   single: current (Git\Index method)
+   single: getIterator (Git\Index method)
 
 
-Git\\Index::current
+Git\\Index::getIterator
 ===========================================================
 
-Iterator interface.
+IteratorAggregate interface.
 
 Description
 ***********************************************************
 
-public **Git\\Index::current** ()
-
+public **Git\\Index::getIterator** ()
 
 Parameters
 ***********************************************************
-
-
 
 Return Values
 ***********************************************************
@@ -24,16 +21,14 @@ Return Values
 Examples
 ***********************************************************
 
-.. code-block:: php
+.. code-block::php
 
     <?php
     $repo = new Git\Repository("/tmp/specified.git");
     $index = $repo->getIndex();
-    foreach($index as $hash => $entry){
-      var_dump($entry);
+    foreach($index->getIterator() as $entry){
+       // something...
     }
-
+    
 See Also
 ***********************************************************
-
-`The Iterator interface(PHP Documents) <http://jp.php.net/manual/en/class.iterator.php>`_
