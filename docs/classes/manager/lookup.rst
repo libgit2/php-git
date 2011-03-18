@@ -1,16 +1,16 @@
 .. index::
-   single: lookupRef (Git\Reference\Manager method)
+   single: lookup (Git\Reference\Manager method)
 
 
-Git\\Reference\\Manager::lookupRef
+Git\\Reference\\Manager::lookup
 ===========================================================
 
-this method same as Git\Repository::lookupRef();
+this method same as Git\Repository::lookup();
 
 Description
 ***********************************************************
 
-public **Git\\Reference\\Manager::lookupRef** (string *$name*)
+public **Git\\Reference\\Manager::lookup** (string *$name*)
 
 
 Parameters
@@ -25,6 +25,12 @@ Return Values
 
 Git\\Reference
 
+ChangeLog
+***********************************************************
+
+- method name changed from lookupRef to lookup.
+  (can't define lookup method because php-compat defines `lookup` preprocessor.)
+
 Examples
 ***********************************************************
 
@@ -33,7 +39,7 @@ Examples
    <?php
    $repo = new Git\Repository("/path/to/repository/.git");
    $manager = new Git\Reference\Manager($repo);
-   $ref = $manager->lookupRef("refs/heads/master");
+   $ref = $manager->lookup("refs/heads/master");
 
 
 See Also

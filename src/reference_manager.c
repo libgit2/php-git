@@ -27,6 +27,7 @@
 #include <zend_interfaces.h>
 #include <string.h>
 #include <time.h>
+#undef lookup
 
 PHPAPI zend_class_entry *git_reference_manager_class_entry;
 
@@ -161,7 +162,7 @@ PHP_METHOD(git_reference_manager, pack)
     RETURN_TRUE;
 }
 
-PHP_METHOD(git_reference_manager, lookupRef)
+PHP_METHOD(git_reference_manager, lookup)
 {
     php_git_reference_manager_t *this = (php_git_reference_manager_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     char *name;
@@ -279,7 +280,7 @@ PHP_METHOD(git_reference_manager, create)
 PHPAPI function_entry php_git_reference_manager_methods[] = {
     PHP_ME(git_reference_manager, __construct, arginfo_git_reference_manager__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference_manager, getList,     NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_reference_manager, lookupRef,   arginfo_git_reference_manager_lookup, ZEND_ACC_PUBLIC)
+    PHP_ME(git_reference_manager, lookup,   arginfo_git_reference_manager_lookup, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference_manager, pack,        NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference_manager, create,      arginfo_git_reference_manager_create, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
