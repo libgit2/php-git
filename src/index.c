@@ -29,6 +29,7 @@
 #include <time.h>
 
 PHPAPI zend_class_entry *git_index_class_entry;
+PHPAPI zend_class_entry *git_index_iterator_class_entry;
 
 static void php_git_index_free_storage(php_git_index_t *obj TSRMLS_DC)
 {
@@ -107,52 +108,6 @@ void php_git_index_entry_create(zval **index, git_index_entry *entry)
     add_property_long(*index,"flags_extended",entry->flags_extended);
     add_property_long(*index,"ctime",time(&entry->ctime.seconds));
     add_property_long(*index,"mtime",time(&entry->mtime.seconds));
-}
-
-PHP_METHOD(git_index, current)
-{
-    php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    git_index_entry *entry;
-    zval *git_index_entry;
-
-    entry = git_index_get(this->index,this->offset);
-    if(entry == NULL){
-        return;
-    }
-    php_git_index_entry_create(&git_index_entry, entry);
-    RETURN_ZVAL(git_index_entry,0,0);
-}
-
-PHP_METHOD(git_index, key)
-{
-    php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    RETURN_LONG(this->offset);
-}
-
-PHP_METHOD(git_index, next)
-{
-    php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    this->offset++;
-
-    RETURN_TRUE;
-}
-
-PHP_METHOD(git_index, rewind)
-{
-    php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    this->offset = 0;
-}
-
-PHP_METHOD(git_index, valid)
-{
-    php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    int entry_count = git_index_entrycount(this->index);
-    
-    if(this->offset < entry_count && this->offset >= 0){
-        RETURN_TRUE;
-    }else{
-        RETURN_FALSE;
-    }
 }
 
 PHP_METHOD(git_index, count)
@@ -284,6 +239,19 @@ PHP_METHOD(git_index, refresh)
 
     git_index_read(index);
 }
+
+PHP_METHOD(git_index, getIterator)
+{
+    php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    zval *iterator;
+    
+    MAKE_STD_ZVAL(iterator);
+    object_init_ex(iterator,git_index_iterator_class_entry);
+    php_git_index_iterator_t *obj = (php_git_index_iterator_t *) zend_object_store_get_object(iterator TSRMLS_CC);
+    obj->index = this->index;
+    obj->offset = 0;
+    RETURN_ZVAL(iterator,0,0);
+}
 /*
 PHP_METHOD(git_index, __construct)
 {
@@ -350,12 +318,7 @@ PHPAPI function_entry php_git_index_methods[] = {
     //PHP_ME(git_index, insert,      arginfo_git_index_insert,    ZEND_ACC_PUBLIC)
     // Countable
     PHP_ME(git_index, count,       NULL,                        ZEND_ACC_PUBLIC)
-    // Iterator
-    PHP_ME(git_index, current,     NULL,                        ZEND_ACC_PUBLIC)
-    PHP_ME(git_index, key,         NULL,                        ZEND_ACC_PUBLIC)
-    PHP_ME(git_index, next,        NULL,                        ZEND_ACC_PUBLIC)
-    PHP_ME(git_index, rewind,      NULL,                        ZEND_ACC_PUBLIC)
-    PHP_ME(git_index, valid,       NULL,                        ZEND_ACC_PUBLIC)
+    PHP_ME(git_index, getIterator, NULL,                        ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
@@ -366,5 +329,5 @@ void git_index_init(TSRMLS_D)
 
     git_index_class_entry = zend_register_internal_class(&git_index_ce TSRMLS_CC);
     git_index_class_entry->create_object = php_git_index_new;
-    zend_class_implements(git_index_class_entry TSRMLS_CC, 2, spl_ce_Countable, spl_ce_Iterator);
+    zend_class_implements(git_index_class_entry TSRMLS_CC, 2, spl_ce_Countable, zend_ce_aggregate);
 }

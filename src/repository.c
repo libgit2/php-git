@@ -158,7 +158,7 @@ PHP_METHOD(git_repository, getIndex)
     git_repository *repository;
     git_index *index;
 
-    zval *index_object = emalloc(sizeof(zval));
+    zval *index_object;
     int ret = 0;
 
     php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
@@ -173,17 +173,17 @@ PHP_METHOD(git_repository, getIndex)
         RETURN_FALSE;
     }
 
+    MAKE_STD_ZVAL(index_object);
     object_init_ex(index_object, git_index_class_entry);
     php_git_index_t *iobj = (php_git_index_t *) zend_object_store_get_object(index_object TSRMLS_CC);
 
     iobj->index = index;
-    iobj->offset = 0;
 
     git_index_read(index);
 
     //Todo: Read from Git object.
     //add_property_string_ex(index_object, "path",5,index->index_file_path, 1 TSRMLS_CC);
-    add_property_long(index_object, "entry_count",git_index_entrycount(index));
+    //add_property_long(index_object, "entry_count",git_index_entrycount(index));
 
     RETURN_ZVAL(index_object,0,0);
 }

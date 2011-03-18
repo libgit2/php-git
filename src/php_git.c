@@ -133,6 +133,7 @@ PHP_MINIT_FUNCTION(git) {
     git_init_object(TSRMLS_C);
     git_init_reference(TSRMLS_C);
     php_git_repository_init(TSRMLS_C);
+    git_index_iterator_init(TSRMLS_C);
     git_index_entry_init(TSRMLS_C);
     git_index_init(TSRMLS_C);
     git_init_signature(TSRMLS_C);
