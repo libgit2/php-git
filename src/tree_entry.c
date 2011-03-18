@@ -143,10 +143,36 @@ PHP_METHOD(git_tree_entry, __construct)
 {
 }
 
+PHP_METHOD(git_tree_entry, isTree)
+{
+    php_git_tree_entry_t *this = (php_git_tree_entry_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    int attribute = git_tree_entry_attributes(this->entry);
+    if(attribute & 040000){
+        RETURN_TRUE;
+    }else{
+        RETURN_FALSE;
+    }
+}
+
+PHP_METHOD(git_tree_entry, isBlob)
+{
+    php_git_tree_entry_t *this = (php_git_tree_entry_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    int attribute = git_tree_entry_attributes(this->entry);
+    if(!(attribute & 040000)){
+        RETURN_TRUE;
+    }else{
+        RETURN_FALSE;
+    }
+}
+
+
+
 PHPAPI function_entry php_git_tree_entry_methods[] = {
     PHP_ME(git_tree_entry, __construct, NULL, ZEND_ACC_PRIVATE)
     PHP_ME(git_tree_entry, setId,    arginfo_git_tree_entry_set_id, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_entry, toObject, NULL,                          ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree_entry, isTree,   NULL,                          ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree_entry, isBlob,   NULL,                          ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 

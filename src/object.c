@@ -72,27 +72,6 @@ PHP_METHOD(git_object, getId)
     RETVAL_STRING(out,1);
 }
 
-PHP_METHOD(git_object, isBlob)
-{
-    php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-
-    if(git_object_type((git_object *)this->object) == GIT_OBJ_BLOB ) {
-        RETURN_TRUE;
-    } else {
-        RETURN_FALSE;
-    }
-}
-
-PHP_METHOD(git_object, isTree)
-{
-    php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    if(git_object_type((git_object *)this->object) == GIT_OBJ_TREE ) {
-        RETURN_TRUE;
-    } else {
-        RETURN_FALSE;
-    }
-}
-
 PHP_METHOD(git_object, getType)
 {
     php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -127,8 +106,6 @@ PHPAPI function_entry php_git_object_methods[] = {
     PHP_ME(git_object, getId,   NULL,ZEND_ACC_PUBLIC)
     PHP_ME(git_object, getType, NULL,ZEND_ACC_PUBLIC)
     PHP_ME(git_object, write,   NULL,ZEND_ACC_PUBLIC)
-    PHP_ME(git_object, isTree, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_object, isBlob, NULL, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
