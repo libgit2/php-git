@@ -9,10 +9,17 @@
  
 class GitReferenceTest extends \PHPUnit_Framework_TestCase
 {
+    public static $reference_name = "";
+    
+    public static function setUpBeforeClass()
+    {
+        self::$reference_name = trim(preg_replace("/^ref: /","",file_get_contents(dirname(__DIR__) . "/.git/HEAD")));
+    }
+    
     protected function setUp()
     {
         //this test still legacy. fix environment probrem soon
-        $this->markTestSkipped();
+        //$this->markTestSkipped();
     }
     
     protected function tearDown()
@@ -26,7 +33,7 @@ class GitReferenceTest extends \PHPUnit_Framework_TestCase
     public function testGitRefrenceCanResolve()
     {
         $rep = new Git\Repository(dirname(__DIR__) . "/.git/");
-        $reference = $rep->lookupRef("refs/heads/develop");
+        $reference = $rep->lookupRef(self::$reference_name);
         $this->assertInstanceof("Git\\Reference",$reference,"returned object does not Git\\Reference");
     }
     
@@ -37,7 +44,7 @@ class GitReferenceTest extends \PHPUnit_Framework_TestCase
     public function testGitReferenceCanUseGetType()
     {
         $rep = new Git\Repository(dirname(__DIR__) . "/.git/");
-        $ref = $rep->lookupRef("refs/heads/develop");
+        $ref = $rep->lookupRef(self::$reference_name);
         $type = $ref->getType();
         $this->assertEquals(1,$type,"illegal reference type returned.(this is legacy test. check test file)");
     }
@@ -48,10 +55,10 @@ class GitReferenceTest extends \PHPUnit_Framework_TestCase
     public function testGitReferenceGetName()
     {
         $rep = new Git\Repository(dirname(__DIR__) . "/.git/");
-        $ref = $rep->lookupRef("refs/heads/develop");
+        $ref = $rep->lookupRef(self::$reference_name);
         $name = $ref->getName();
         
-        $this->assertEquals("refs/heads/develop",$name,"reference name missmatched.");
+        $this->assertEquals(self::$reference_name,$name,"reference name missmatched.");
     }
     
     /**
@@ -60,7 +67,7 @@ class GitReferenceTest extends \PHPUnit_Framework_TestCase
     public function testGitReferenceGetId()
     {
         $rep = new Git\Repository(dirname(__DIR__) . "/.git/");
-        $ref = $rep->lookupRef("refs/heads/develop");
+        $ref = $rep->lookupRef(self::$reference_name);
         $id = $ref->getId();
         
         $this->assertEquals(40,strlen($id),"illegal oid size returned");
@@ -73,7 +80,7 @@ class GitReferenceTest extends \PHPUnit_Framework_TestCase
     public function testGitReferenceGetTarget()
     {
         $rep = new Git\Repository(dirname(__DIR__) . "/.git/");
-        $ref = $rep->lookupRef("refs/heads/develop");
+        $ref = $rep->lookupRef(self::$reference_name);
         try{
             $target = $ref->getTarget();
             $this->fail("something wrong. this method allowed symbolic reference only.");

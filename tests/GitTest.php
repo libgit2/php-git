@@ -23,6 +23,13 @@ Git repository management routines
 
 class GitTest extends \PHPUnit_Framework_TestCase
 {
+    public static $reference_name = "";
+    
+    public static function setUpBeforeClass()
+    {
+        self::$reference_name = trim(preg_replace("/^ref: /","",file_get_contents(dirname(__DIR__) . "/.git/HEAD")));
+    }
+
     protected function setUp()
     {
         // currentry nothing to do.
@@ -35,16 +42,12 @@ class GitTest extends \PHPUnit_Framework_TestCase
 
     public function testLookupRef()
     {
-        //this test still legacy. fix environment probrem soon
-        $this->markTestSkipped();
-        
-        //temporary added Git\\Reference.
         $git = new Git\Repository(dirname(__DIR__) . "/.git/");
-        $ref = $git->lookupRef("refs/heads/master");
-        $commit = $git->getCommit($ref->oid);
+        $ref = $git->lookupRef(self::$reference_name);
+        $commit = $git->getCommit($ref->getId());
 
-        $this->assertInstanceof("Git\\Reference",$ref,"Git\\Referenceが帰ってきているか？");
-        $this->assertInstanceof("Git\\Commit",$commit,"Git\\Commitが帰ってきているか？");
+        $this->assertInstanceof("Git\\Reference",$ref,"can't lookup reference");
+        $this->assertInstanceof("Git\\Commit",$commit,"reference can't return commit object");
     }
 
 
@@ -120,7 +123,7 @@ class GitTest extends \PHPUnit_Framework_TestCase
     public function testInitRepository()
     {
         require_once __DIR__ . "/lib/MemoryBackend.php";
-        require_once __DIR__ . "/lib/MemcachedBackend.php";
+        //require_once __DIR__ . "/lib/MemcachedBackend.php";
 
 
         $this->rmdir(__DIR__ . "/git_init_test");
@@ -164,6 +167,7 @@ class GitTest extends \PHPUnit_Framework_TestCase
 
         //$this->markTestIncomplete("this test does not implemente yet.");
         $this->assertEquals("c12883a96cf60d1b2edba971183ffaca6d1b077e",$master_hash,"commit writing");
+        
 /*
         $re = new Git\Reference($repository);
         $re->setName("refs/heads/master");
