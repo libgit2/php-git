@@ -315,16 +315,14 @@ PHP_METHOD(git_commit, getTree)
 
     git_oid *tree_oid;
     zval *git_tree;
-    zval *entries;
     zval *entry;
 
     MAKE_STD_ZVAL(git_tree);
-    MAKE_STD_ZVAL(entries);
-    array_init(entries);
     object_init_ex(git_tree, git_tree_class_entry);
     php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
     tobj->object = tree;
 
+/*
     int r = git_tree_entrycount(tree);
     int i = 0;
 
@@ -334,7 +332,7 @@ PHP_METHOD(git_commit, getTree)
     }
 
     add_property_zval(git_tree,"entries", entries);
-
+*/
     RETURN_ZVAL(git_tree,0,0);
 }
 

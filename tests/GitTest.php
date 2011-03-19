@@ -64,7 +64,7 @@ class GitTest extends \PHPUnit_Framework_TestCase
        $tree= $git->getTree("c40b970eb68bd1c8980f1f97b57396f4c7ae107f");
        $this->assertInstanceof("Git\\Tree",$tree);
        $this->assertEquals("c40b970eb68bd1c8980f1f97b57396f4c7ae107f",$tree->getId());
-       foreach($tree->entries as $entry){
+       foreach($tree->getIterator() as $entry){
            $object = $entry->toObject();
            $this->assertInstanceof("Git\\Object",$object);
            if($object->getType() == GIT\Object\Blob){
