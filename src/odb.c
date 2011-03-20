@@ -116,7 +116,8 @@ int php_git_odb_add_backend(git_odb **odb, zval *backend, int priority)
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"can't add backend");
         return GIT_ERROR;
     }
-    
+
+    Z_ADDREF_P(backend);
     return ret;
 }
 

@@ -74,7 +74,10 @@ int php_git_backend__exists(git_odb_backend *_backend, const git_oid *oid)
     MAKE_STD_ZVAL(params[0]);
     ZVAL_STRING(params[0],out, 1);
 
-    call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC);
+    if(call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC) == FAILURE){
+        fprintf(stderr,"can't call method");
+        return 0;
+    }
     result = Z_BVAL_P(retval);
     zval_ptr_dtor(&retval);
     zval_ptr_dtor(&params[0]);
@@ -116,9 +119,9 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
         ret = GIT_ERROR;
     }
     
-    raw->object = NULL;
     zval_ptr_dtor(&retval);
-    zval_ptr_dtor(&params[0]);
+    //do not free Git\RawObject here.
+    //zval_ptr_dtor(&params[0]);
     zval_dtor(&func);
 
     return ret;
