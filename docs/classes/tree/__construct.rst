@@ -8,14 +8,14 @@ Git\\Tree::__construct
 Description
 ***********************************************************
 
-public **Git\\Tree::__construct** (*$repository*)
+public **Git\\Tree::__construct** (Git\Repository *$repository*)
 
 
 Parameters
 ***********************************************************
 
 *repository*
-  fill them out later
+  Git\Repository Object
 
 
 Return Values

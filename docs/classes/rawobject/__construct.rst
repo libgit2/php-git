@@ -8,20 +8,20 @@ Git\\RawObject::__construct
 Description
 ***********************************************************
 
-public **Git\\RawObject::__construct** (*$type*, *$data*,  [*$len*])
+public **Git\\RawObject::__construct** (int *$type*, string *$data*,  [int *$len*])
 
 
 Parameters
 ***********************************************************
 
 *type*
-  fill them out later
+  object type.
 
 *data*
-  fill them out later
+  object data
 
 *len*
-  fill them out later
+  object data length
 
 
 Return Values

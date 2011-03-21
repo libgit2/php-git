@@ -15,7 +15,7 @@ Parameters
 ***********************************************************
 
 *string*
-  fill them out later
+  contents
 
 
 Return Values

@@ -8,18 +8,20 @@ Git\\Backend::write
 Description
 ***********************************************************
 
-public **Git\\Backend::write** (*$object*)
+abstract public **Git\\Backend::write** (Git\RawObject *$object*)
 
 
 Parameters
 ***********************************************************
 
 *object*
-  fill them out later
+  Git\RawObject
 
 
 Return Values
 ***********************************************************
+
+true / false
 
 Examples
 ***********************************************************

@@ -8,14 +8,14 @@ Git\\Reference::__construct
 Description
 ***********************************************************
 
-public **Git\\Reference::__construct** (*$repository*)
+public **Git\\Reference::__construct** (Git\Repository *$repository*)
 
 
 Parameters
 ***********************************************************
 
-*repository*
-  fill them out later
+Git\Repository *repository*
+  Git\Repository object.
 
 
 Return Values

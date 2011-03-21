@@ -8,18 +8,20 @@ Git\\Backend::read
 Description
 ***********************************************************
 
-public **Git\\Backend::read** (*$key*)
+abstract public **Git\\Backend::read** (string *$key*)
 
 
 Parameters
 ***********************************************************
 
 *key*
-  fill them out later
+  target hash id
 
 
 Return Values
 ***********************************************************
+
+Git\\RawObject / false
 
 Examples
 ***********************************************************

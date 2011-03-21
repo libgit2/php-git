@@ -8,23 +8,23 @@ Git\\Repository::open3
 Description
 ***********************************************************
 
-public **Git\\Repository::open3** (*$git_dir*,  [*$odb*],  [*$index*],  [*$tree*])
+public **Git\\Repository::open3** (string *$git_dir*,  [Git\Odb *$odb*],  [string *$index*],  [string *$tree*])
 
 
 Parameters
 ***********************************************************
 
 *git_dir*
-  fill them out later
+  specified git repository directory
 
 *odb*
-  fill them out later
+  Git\Odb object which added custom backends.
 
 *index*
-  fill them out later
+  specified git index path.
 
 *tree*
-  fill them out later
+  specified git working tree path.
 
 
 Return Values

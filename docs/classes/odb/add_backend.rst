@@ -8,14 +8,14 @@ Git\\ODB::addBackend
 Description
 ***********************************************************
 
-public **Git\\ODB::addBackend** (*$backend*)
+public **Git\\ODB::addBackend** (Git\Backend *$backend*)
 
 
 Parameters
 ***********************************************************
 
-*backend*
-  fill them out later
+Git\Backend *backend*
+  custom backend object
 
 
 Return Values

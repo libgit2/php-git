@@ -19,8 +19,7 @@
   </target>
 
   <target name="install">
-    <exec executable="sudo" dir="src">
-        <arg value="make" />
+    <exec executable="make" dir="src">
         <arg value="install" />
     </exec>
   </target>

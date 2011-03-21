@@ -8,18 +8,20 @@ Git\\Backend::exists
 Description
 ***********************************************************
 
-public **Git\\Backend::exists** (*$key*)
+abstract public **Git\\Backend::exists** (string *$key*)
 
 
 Parameters
 ***********************************************************
 
 *key*
-  fill them out later
+  target hash id.
 
 
 Return Values
 ***********************************************************
+
+this method must return true or false.
 
 Examples
 ***********************************************************

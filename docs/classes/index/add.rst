@@ -11,14 +11,14 @@ add specified file to your index. you have to call Git::Index::write after this 
 Description
 ***********************************************************
 
-public **Git\\Index::add** (string *$path*)
+public **Git\\Index::add** (string *$path*,int *$staging* = 0)
 
 
 Parameters
 ***********************************************************
 
 *path*
-  fill them out later
+  file path.
 
 
 Return Values

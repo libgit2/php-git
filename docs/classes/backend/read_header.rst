@@ -8,18 +8,20 @@ Git\\Backend::read_header
 Description
 ***********************************************************
 
-public **Git\\Backend::read_header** (*$key*)
+abstract public **Git\\Backend::read_header** (*$key*)
 
 
 Parameters
 ***********************************************************
 
 *key*
-  fill them out later
+  target hash id.
 
 
 Return Values
 ***********************************************************
+
+Git\RawObject / false
 
 Examples
 ***********************************************************

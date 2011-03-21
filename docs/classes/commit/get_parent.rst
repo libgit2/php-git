@@ -14,8 +14,8 @@ public **Git\\Commit::getParent** (int *$offset* = 0)
 Parameters
 ***********************************************************
 
-*offset*
-  fill them out later
+int *offset*
+  specified parent offset.
 
 Return Values
 ***********************************************************

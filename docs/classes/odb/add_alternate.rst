@@ -8,14 +8,14 @@ Git\\ODB::addAlternate
 Description
 ***********************************************************
 
-public **Git\\ODB::addAlternate** (*$backend*)
+public **Git\\ODB::addAlternate** (Git\Backend *$backend*)
 
 
 Parameters
 ***********************************************************
 
-*backend*
-  fill them out later
+Git\Backend *backend*
+  custom backend object
 
 
 Return Values

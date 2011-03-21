@@ -8,15 +8,11 @@ Git\\Commit::getShortMessage
 Description
 ***********************************************************
 
-public **Git\\Commit::getShortMessage** (*$message*)
+public **Git\\Commit::getShortMessage** ()
 
 
 Parameters
 ***********************************************************
-
-*message*
-  fill them out later
-
 
 Return Values
 ***********************************************************

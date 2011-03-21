@@ -10,15 +10,11 @@ returns Git\Revwalk.
 Description
 ***********************************************************
 
-public **Git\\Repository::getWalker** (*$hash*)
+public **Git\\Repository::getWalker** ()
 
 
 Parameters
 ***********************************************************
-
-*hash*
-  fill them out later
-
 
 Return Values
 ***********************************************************

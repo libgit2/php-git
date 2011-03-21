@@ -8,14 +8,14 @@ Git\\Blob::__construct
 Description
 ***********************************************************
 
-public **Git\\Blob::__construct** (*$repository*)
+public **Git\\Blob::__construct** (Git\Repository *$repository*)
 
 
 Parameters
 ***********************************************************
 
 *repository*
-  fill them out later
+  Git\Repository object.
 
 
 Return Values
