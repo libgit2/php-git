@@ -58,8 +58,8 @@ static void php_git_backend_free_storage(php_git_backend_t *obj TSRMLS_DC)
 int php_git_backend__exists(git_odb_backend *_backend, const git_oid *oid)
 {
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
-    char out[41] = {0};
-    git_oid_to_string(out,41,oid);
+    char out[GIT_OID_HEXSZ+1] = {0};
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
 
     zval *retval;
     zval *params[1];
@@ -68,14 +68,13 @@ int php_git_backend__exists(git_odb_backend *_backend, const git_oid *oid)
 
     MAKE_STD_ZVAL(retval);
     ZVAL_NULL(retval);
-
     ZVAL_STRING(&func,"exists", 1);
-
     MAKE_STD_ZVAL(params[0]);
     ZVAL_STRING(params[0],out, 1);
 
     if(call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC) == FAILURE){
-        fprintf(stderr,"can't call method");
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+            "can't call exists method");
         return 0;
     }
     result = Z_BVAL_P(retval);
@@ -111,7 +110,11 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
     php_git_rawobject_t *raw = (php_git_rawobject_t *) zend_object_store_get_object(params[0] TSRMLS_CC);
     raw->object = obj;
 
-    call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC);
+    if(call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC) == FAILURE){
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+            "can't call write method");
+        return GIT_ERROR;
+    }
     if(strlen(Z_STRVAL_P(retval)) == 40){
         git_oid_mkstr(id,Z_STRVAL_P(retval));
         ret = GIT_SUCCESS;
@@ -144,7 +147,11 @@ int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_
     MAKE_STD_ZVAL(params[0]);
     ZVAL_STRING(params[0],out, 1);
 
-    call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC);
+    if(call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC) == FAILURE){
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+            "can't call read method");
+        return GIT_ERROR;
+    }
 
     if(!instanceof_function(Z_OBJCE_P(retval), git_rawobject_class_entry TSRMLS_CC)){
         fprintf(stderr,"read interface must return Git\\Rawobject");
@@ -183,14 +190,18 @@ int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, con
     MAKE_STD_ZVAL(params[0]);
     ZVAL_STRING(params[0],out, 1);
 
-    call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC);
+    if(call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC) == FAILURE){
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+            "can't call read_header method");
+        return GIT_ERROR;
+    }
 
     if(!instanceof_function(Z_OBJCE_P(retval), git_rawobject_class_entry TSRMLS_CC)){
         fprintf(stderr,"read interface must return Git\\Rawobject");
         return GIT_ENOTFOUND;
     }
 
-    zval *str = zend_read_property(git_rawobject_class_entry, retval,"data",4, 0 TSRMLS_CC);
+    zval *str = zend_read_property(git_rawobject_class_entry, retval,"data",sizeof("data"), 0 TSRMLS_CC);
     
     obj->data = NULL;
     obj->len = strlen(Z_STRVAL_P(str));
@@ -215,7 +226,11 @@ void php_git_backend__free(git_odb_backend *backend)
 
     ZVAL_STRING(&func,"free", 1);
 
-    call_user_function(NULL,&object->self,&func,retval,0,NULL TSRMLS_CC);
+    if(call_user_function(NULL,&object->self,&func,retval,0,NULL TSRMLS_CC) == FAILURE){
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+            "can't call free method");
+        return 0;
+    }
 
     zval_ptr_dtor(&retval);
     zval_dtor(&func);
