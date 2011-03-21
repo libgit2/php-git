@@ -42,6 +42,7 @@ ZEND_END_ARG_INFO()
 
 static void php_git_rawobject_free_storage(php_git_rawobject_t *obj TSRMLS_DC)
 {
+/*
     if(obj->object->data){
         efree(obj->object->data);
         obj->object->data = NULL;
@@ -51,7 +52,7 @@ static void php_git_rawobject_free_storage(php_git_rawobject_t *obj TSRMLS_DC)
         efree(obj->object);
         obj->object= NULL;
     }
-
+*/
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     efree(obj);
 }

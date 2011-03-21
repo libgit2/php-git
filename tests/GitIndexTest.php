@@ -26,6 +26,14 @@ class GitIndexTest extends \PHPUnit_Framework_TestCase
         self::rmdir(__DIR__ . self::REPOSITORY_NAME);
     }
 
+    public function testGetIndex()
+    {
+        $repository = new Repository(__DIR__ . self::REPOSITORY_NAME . "/.git");
+        $index = $repository->getIndex();
+        $this->assertInstanceOf("Git\\Index",$index);
+    }
+
+
     public function testAddIndex()
     {
         file_put_contents(__DIR__ . self::REPOSITORY_NAME . "/example","Hello World");
@@ -79,7 +87,7 @@ class GitIndexTest extends \PHPUnit_Framework_TestCase
         
         $this->assertInstanceOf("Iterator",$it);
     }
-
+    
     public static function rmdir($dir)
     {
        if (is_dir($dir)) { 

@@ -105,21 +105,6 @@ class GitTest extends \PHPUnit_Framework_TestCase
         }
     }
     
-    public function testGetIndex()
-    {
-
-        $git = new Git\Repository(dirname(__DIR__) . "/.git/");
-        $index = $git->getIndex();
-        if($index instanceof Git\Index){
-            foreach($index->getIterator() as $entry){
-                $this->assertInstanceof("Git\\Index\\Entry",$entry);
-            }
-            return true;
-        }else{
-            return false;
-        }
-    }
-    
     public function testInitRepository()
     {
         require_once __DIR__ . "/lib/MemoryBackend.php";
