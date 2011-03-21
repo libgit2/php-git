@@ -44,6 +44,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_path, 0, 0, 1)
     ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_get_entry, 0, 0, 1)
+    ZEND_ARG_INFO(0, position)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_remove, 0, 0, 1)
+    ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
 static void php_git_tree_free_storage(php_git_tree_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
@@ -195,11 +203,92 @@ PHP_METHOD(git_tree, __construct)
     }
 }
 
+PHP_METHOD(git_tree, getIterator)
+{
+    php_git_tree_t *this = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    zval *iterator;
+    
+    MAKE_STD_ZVAL(iterator);
+    object_init_ex(iterator,git_tree_iterator_class_entry);
+    php_git_tree_iterator_t *obj = (php_git_tree_iterator_t *) zend_object_store_get_object(iterator TSRMLS_CC);
+    obj->tree = this->object;
+    obj->offset = 0;
+    RETURN_ZVAL(iterator,0,0);
+}
+
+PHP_METHOD(git_tree, getEntry)
+{
+    php_git_tree_t *this = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_tree_entry *entry;
+    zval *git_tree_entry;
+    int offset = 0;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "l", &offset) == FAILURE){
+        return;
+    }
+
+    entry = git_tree_entry_byindex(this->object,offset);
+    create_tree_entry_from_entry(&git_tree_entry, entry);
+    RETURN_ZVAL(git_tree_entry,0, 0);
+}
+
+PHP_METHOD(git_tree, remove)
+{
+    php_git_tree_t *this = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    char *path;
+    int path_len = 0;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &path, &path_len) == FAILURE){
+        return;
+    }
+
+    git_tree_entry *entry = git_tree_entry_byname(this->object,path);
+    if(entry == NULL){
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+            "specified path does not exist.");
+        RETURN_FALSE;
+    }
+
+    int result = git_tree_remove_entry_byname(this->object, path);
+    if(result != GIT_SUCCESS){
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+            "can't remove tree entry");
+        RETURN_FALSE
+    }
+    RETURN_TRUE;
+}
+
+PHP_METHOD(git_tree, getEntries)
+{
+    php_git_tree_t *this = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_tree_entry *entry;
+    int i;
+    
+    int r = git_tree_entrycount(this->object);
+    zval *entries;
+    MAKE_STD_ZVAL(entries);
+    array_init(entries);
+    zval *array_ptr;
+    for(i = 0; i < r; i++){
+        create_tree_entry_from_entry(&array_ptr, git_tree_entry_byindex(this->object,i));
+        add_next_index_zval(entries,  array_ptr);
+    }
+
+    RETURN_ZVAL(entries,0,0);
+}
+
+
 PHPAPI function_entry php_git_tree_methods[] = {
     PHP_ME(git_tree, __construct, arginfo_git_tree__construct, ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, getEntry,    arginfo_git_tree_get_entry,  ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, getEntries,  NULL,                        ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, getIterator, NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, count,       NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, path,        arginfo_git_tree_path,       ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, add,         arginfo_git_tree_add,        ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree, remove,      arginfo_git_tree_remove,     ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
@@ -210,5 +299,5 @@ void git_init_tree(TSRMLS_D)
     git_tree_class_entry = zend_register_internal_class_ex(&ce, git_object_class_entry, NULL TSRMLS_CC);
     git_tree_class_entry->create_object = php_git_tree_new;
     
-    zend_class_implements(git_tree_class_entry TSRMLS_CC, 1, spl_ce_Countable);
+    zend_class_implements(git_tree_class_entry TSRMLS_CC, 2, spl_ce_Countable,zend_ce_aggregate);
 }
