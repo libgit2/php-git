@@ -81,6 +81,7 @@ PHP_METHOD(git_odb, __construct)
 
 int php_git_odb_add_alternate(git_odb **odb, zval *backend, int priority)
 {
+    TSRMLS_FETCH();
     int ret = GIT_SUCCESS;
     php_git_backend_t *b;
     if(!instanceof_function(Z_OBJCE_P(backend), git_backend_class_entry TSRMLS_CC)){
@@ -102,6 +103,7 @@ int php_git_odb_add_alternate(git_odb **odb, zval *backend, int priority)
 
 int php_git_odb_add_backend(git_odb **odb, zval *backend, int priority)
 {
+    TSRMLS_FETCH();
     int ret = GIT_SUCCESS;
     php_git_backend_t *b;
     if(!instanceof_function(Z_OBJCE_P(backend), git_backend_class_entry TSRMLS_CC)){

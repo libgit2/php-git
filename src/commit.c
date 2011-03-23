@@ -136,7 +136,7 @@ PHP_METHOD(git_commit, setCommitter)
     c_obj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
     s_obj = (php_git_signature_t *) zend_object_store_get_object(z_signature TSRMLS_CC);
     git_commit_set_author(c_obj->object, s_obj->signature);
-    add_property_zval_ex(object,"committer",10,z_signature);
+    add_property_zval_ex(object,"committer",10,z_signature TSRMLS_CC);
 }
 
 PHP_METHOD(git_commit, getCommitter)
@@ -194,7 +194,7 @@ PHP_METHOD(git_commit, setAuthor)
     c_obj = (php_git_commit_t *) zend_object_store_get_object(this TSRMLS_CC);
     s_obj = (php_git_signature_t *) zend_object_store_get_object(z_signature TSRMLS_CC);
     git_commit_set_committer(c_obj->object, s_obj->signature);
-    add_property_zval_ex(object,"author",sizeof("author"),z_signature);
+    add_property_zval_ex(object,"author",sizeof("author"),z_signature TSRMLS_CC);
 }
 
 PHP_METHOD(git_commit, setTree)
@@ -287,7 +287,7 @@ PHP_METHOD(git_commit, getMessage)
     const char *message;
     
     message = git_commit_message(this->object);
-    RETURN_STRING(message,1 TSRMLS_C);
+    RETURN_STRING(message,1);
 }
 
 PHP_METHOD(git_commit, getShortMessage)
@@ -296,7 +296,7 @@ PHP_METHOD(git_commit, getShortMessage)
     const char *message;
     
     message = git_commit_message_short(this->object);
-    RETURN_STRING(message,1 TSRMLS_C);
+    RETURN_STRING(message,1);
 }
 
 PHP_METHOD(git_commit, getTree)

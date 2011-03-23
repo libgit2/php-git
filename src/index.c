@@ -91,6 +91,7 @@ ZEND_END_ARG_INFO()
 
 void php_git_index_entry_create(zval **index, git_index_entry *entry)
 {
+    TSRMLS_FETCH();
     MAKE_STD_ZVAL(*index);
     char oid[GIT_OID_HEXSZ+1] = {0};
     object_init_ex(*index,git_index_entry_class_entry);

@@ -57,6 +57,7 @@ static void php_git_backend_free_storage(php_git_backend_t *obj TSRMLS_DC)
 
 int php_git_backend__exists(git_odb_backend *_backend, const git_oid *oid)
 {
+    TSRMLS_FETCH();
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
     char out[GIT_OID_HEXSZ+1] = {0};
     git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
@@ -90,6 +91,7 @@ int php_git_backend__exists(git_odb_backend *_backend, const git_oid *oid)
 }
 int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *obj)
 {
+    TSRMLS_FETCH();
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
     int ret = 0;
     zval *retval;
@@ -104,8 +106,8 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
     object_init_ex(params[0],git_rawobject_class_entry);
     
     add_property_stringl_ex(params[0],"data",sizeof("data"),obj->data,obj->len,1 TSRMLS_CC);
-    add_property_long(params[0],"type",obj->type TSRMLS_CC);
-    add_property_long(params[0],"len",obj->len TSRMLS_CC);
+    add_property_long(params[0],"type",obj->type);
+    add_property_long(params[0],"len",obj->len);
 
     php_git_rawobject_t *raw = (php_git_rawobject_t *) zend_object_store_get_object(params[0] TSRMLS_CC);
     raw->object = obj;
@@ -131,6 +133,7 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
 }
 int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_oid *oid)
 {
+    TSRMLS_FETCH();
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
     char out[GIT_OID_HEXSZ+1] = {0};
     git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
@@ -174,6 +177,7 @@ int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_
 }
 int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, const git_oid *oid)
 {
+    TSRMLS_FETCH();
     char out[GIT_OID_HEXSZ+1] = {0} ;
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
     git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
@@ -216,6 +220,7 @@ int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, con
 
 void php_git_backend__free(git_odb_backend *backend)
 {
+    TSRMLS_FETCH();
     php_git_backend_internal *object = (php_git_backend_internal *)backend;
 
     zval *retval;

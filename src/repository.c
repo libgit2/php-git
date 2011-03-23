@@ -238,6 +238,7 @@ PHP_METHOD(git_repository, getObject)
 
 void create_tree_entry_from_entry(zval **object, git_tree_entry *entry)
 {
+    TSRMLS_FETCH();
     char buf[41] = {0};
     const git_oid *oid;
     MAKE_STD_ZVAL(*object);

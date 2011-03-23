@@ -93,6 +93,7 @@ void git_init_signature(TSRMLS_D)
 
 void create_signature_from_commit(zval **signature, git_signature *sig)
 {
+    TSRMLS_FETCH();
     zval *datetime;
     MAKE_STD_ZVAL(*signature);
 
@@ -157,6 +158,7 @@ zend_object_value php_git_signature_new(zend_class_entry *ce TSRMLS_DC)
 
 int php_git_signature_create(zval *object, char *name, int name_len, char *email, int email_len, zval *time)
 {
+    TSRMLS_FETCH();
     php_git_signature_t *this = (php_git_signature_t *) zend_object_store_get_object(object TSRMLS_CC);
     int ret = 0;
     // Todo: should use `zend_fcall*` instead of `call_user-function` for performance improvement.
@@ -178,7 +180,7 @@ int php_git_signature_create(zval *object, char *name, int name_len, char *email
 
     add_property_string_ex(object,"name", sizeof("name"),  name,  1 TSRMLS_CC);
     add_property_string_ex(object,"email",sizeof("email"), email, 1 TSRMLS_CC);
-    add_property_zval_ex(object,"time",sizeof("time"),time);
+    add_property_zval_ex(object,"time",sizeof("time"),time TSRMLS_CC);
 
     zval_ptr_dtor(&retval);
     zval_dtor(&func);

@@ -79,7 +79,7 @@ PHP_METHOD(git_tree_entry, setId)
     char out[GIT_OID_HEXSZ+1] = {0};
     git_oid_to_string(out,GIT_OID_HEXSZ+1,git_tree_entry_id(this->entry));
     
-    add_property_string(getThis(), "oid", hash, 1 TSRMLS_C);
+    add_property_string(getThis(), "oid", hash, 1);
     
     RETVAL_STRING(hash, 1);
 }
