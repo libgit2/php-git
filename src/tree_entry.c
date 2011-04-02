@@ -60,30 +60,6 @@ zend_object_value php_git_tree_entry_new(zend_class_entry *ce TSRMLS_DC)
     return retval;
 }
 
-PHP_METHOD(git_tree_entry, setId)
-{
-    php_git_tree_entry_t *this = (php_git_tree_entry_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    char *hash;
-    int hash_len = 0;
-    git_oid oid;
-    
-    int ret = 0;
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "s", &hash, &hash_len) == FAILURE){
-        return;
-    }
-    git_oid_mkstr(&oid,hash);
-    git_tree_entry_set_id(this->entry,&oid);
-
-    char out[GIT_OID_HEXSZ+1] = {0};
-    git_oid_to_string(out,GIT_OID_HEXSZ+1,git_tree_entry_id(this->entry));
-    
-    add_property_string(getThis(), "oid", hash, 1);
-    
-    RETVAL_STRING(hash, 1);
-}
-
 
 PHP_METHOD(git_tree_entry, toObject)
 {
@@ -169,7 +145,6 @@ PHP_METHOD(git_tree_entry, isBlob)
 
 PHPAPI function_entry php_git_tree_entry_methods[] = {
     PHP_ME(git_tree_entry, __construct, NULL, ZEND_ACC_PRIVATE)
-    PHP_ME(git_tree_entry, setId,    arginfo_git_tree_entry_set_id, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_entry, toObject, NULL,                          ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_entry, isTree,   NULL,                          ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_entry, isBlob,   NULL,                          ZEND_ACC_PUBLIC)
