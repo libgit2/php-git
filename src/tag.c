@@ -101,59 +101,6 @@ PHP_METHOD(git_tag, getTarget)
 */
 }
 
-PHP_METHOD(git_tag, setTarget)
-{
-    php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    zval *target;
-
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "z", &target) == FAILURE){
-        return;
-    }
-
-    if(!instanceof_function(Z_OBJCE_P(target), git_object_class_entry TSRMLS_CC)){
-        // FIXME
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git\\Tag::setTarget only allow Git\\Object.");
-        return;
-    }
-    php_git_object_t *obj = (php_git_object_t *) zend_object_store_get_object(target TSRMLS_CC);
-    
-    git_tag_set_target(this->object, obj->object);
-}
-
-
-PHP_METHOD(git_tag, setMessage)
-{
-    php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    char *message;
-    int message_len = 0;
-
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "s", &message, &message_len) == FAILURE){
-        return;
-    }
-
-    git_tag_set_message(this->object, message);
-    add_property_string_ex(getThis() ,"message",sizeof("message"),message,1 TSRMLS_CC);
-}
-
-PHP_METHOD(git_tag, setName)
-{
-    php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    char *name;
-    int name_len = 0;
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "s", &name, &name_len) == FAILURE){
-        return;
-    }
-
-    git_tag_set_name(this->object, name);
-    add_property_string_ex(getThis() ,"name",sizeof("name"),name, 1 TSRMLS_CC);
-}
-
-
-
 PHP_METHOD(git_tag, __construct)
 {
     php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -186,10 +133,6 @@ PHPAPI function_entry php_git_tag_methods[] = {
     PHP_ME(git_tag, getMessage,  NULL,                       ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getName,     NULL,                       ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getTarget,   NULL,                       ZEND_ACC_PUBLIC)
-
-    PHP_ME(git_tag, setMessage, arginfo_git_tag_set_message, ZEND_ACC_PUBLIC)
-    PHP_ME(git_tag, setName,    arginfo_git_tag_set_name,    ZEND_ACC_PUBLIC)
-    PHP_ME(git_tag, setTarget,  arginfo_git_tag_set_target,  ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
