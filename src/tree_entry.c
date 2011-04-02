@@ -91,7 +91,7 @@ PHP_METHOD(git_tree_entry, toObject)
     git_object *object;
     git_otype type;
 
-    int ret = git_tree_entry_2object(&object, this->entry);
+    int ret = git_tree_entry_2object(&object, git_object_owner(this->entry), this->entry);
 
     if(ret == GIT_SUCCESS){
         type = git_object_type(object);

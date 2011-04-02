@@ -105,7 +105,7 @@ PHP_METHOD(git_tree, path)
     if(entry == NULL){
         return;
     }else{
-        ret = git_tree_entry_2object(&object, entry);
+        ret = git_tree_entry_2object(&object,git_object_owner(this->object), entry);
 
         if (ret != GIT_SUCCESS) {
             zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"something uncaught error happend.");

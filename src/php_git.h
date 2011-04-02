@@ -59,11 +59,10 @@ extern PHPAPI zend_class_entry *git_tree_iterator_class_entry;
 extern PHPAPI zend_class_entry *git_tree_entry_class_entry;
 extern PHPAPI zend_class_entry *git_commit_class_entry;
 extern PHPAPI zend_class_entry *git_signature_class_entry;
-extern PHPAPI zend_class_entry *git_rawobject_class_entry;
 extern PHPAPI zend_class_entry *git_tag_class_entry;
 extern PHPAPI zend_class_entry *git_blob_class_entry;
 extern PHPAPI zend_class_entry *git_odb_class_entry;
-extern PHPAPI zend_class_entry *git_backend_class_entry;
+PHPAPI zend_class_entry *git_backend_class_entry;
 
 typedef struct{
     zend_object zo;
@@ -116,12 +115,6 @@ typedef struct{
     zend_object zo;
     git_odb *odb;
 } php_git_odb_t;
-
-
-typedef struct{
-    zend_object zo;
-    git_rawobj *object;
-} php_git_rawobject_t;
 
 typedef struct{
     zend_object zo;
