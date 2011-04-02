@@ -35,6 +35,7 @@ static void php_git_object_free_storage(php_git_object_t *obj TSRMLS_DC)
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
 
     if(obj->object){
+        git_object_close(obj->object);
         obj->object = NULL;
     }
 
@@ -82,30 +83,9 @@ PHP_METHOD(git_object, getType)
     RETVAL_LONG(type);
 }
 
-PHP_METHOD(git_object, write)
-{
-    php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    const git_oid *oid;
-    char out[GIT_OID_HEXSZ+1] = {0};
-    int ret = 0;
-
-    ret = git_object_write((git_object *)this->object);
-    if(ret != GIT_SUCCESS){
-        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
-            "Can't write object: %d",ret);
-        RETURN_FALSE;
-    }
-
-    oid = git_object_id((git_object *)this->object);
-    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
-    
-    RETVAL_STRING(out,1);
-}
-
 PHPAPI function_entry php_git_object_methods[] = {
     PHP_ME(git_object, getId,   NULL,ZEND_ACC_PUBLIC)
     PHP_ME(git_object, getType, NULL,ZEND_ACC_PUBLIC)
-    PHP_ME(git_object, write,   NULL,ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
