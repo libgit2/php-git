@@ -28,7 +28,7 @@
 #include <string.h>
 #include <time.h>
 
-extern void create_tree_entry_from_entry(zval **object, git_tree_entry *entry);
+extern void create_tree_entry_from_entry(zval **object, git_tree_entry *entry,git_repository *repository);
 
 PHPAPI zend_class_entry *git_tree_iterator_class_entry;
 extern void php_tree_index_entry_create(zval **index, git_tree_entry *entry);
@@ -74,7 +74,7 @@ PHP_METHOD(git_tree_iterator, current)
             "specified offset does not exist. %d");
         RETURN_FALSE;
     }
-    create_tree_entry_from_entry(&git_tree_entry,entry);
+    create_tree_entry_from_entry(&git_tree_entry,entry,this->repository);
     RETURN_ZVAL(git_tree_entry,0,0);
 }
 

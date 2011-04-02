@@ -66,8 +66,8 @@ PHP_METHOD(git_tree_entry, toObject)
     php_git_tree_entry_t *this = (php_git_tree_entry_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_object *object;
     git_otype type;
-
-    int ret = git_tree_entry_2object(&object, git_object_owner(this->entry), this->entry);
+    
+    int ret = git_tree_entry_2object(&object, this->repository, this->entry);
 
     if(ret == GIT_SUCCESS){
         type = git_object_type(object);
@@ -98,11 +98,12 @@ PHP_METHOD(git_tree_entry, toObject)
             zval *array_ptr;
 
             for(i; i < r; i++){
-                create_tree_entry_from_entry(&array_ptr, git_tree_entry_byindex(tree,i));
+                create_tree_entry_from_entry(&array_ptr, git_tree_entry_byindex(tree,i),this->repository);
                 add_next_index_zval(entries,  array_ptr);
             }
             php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
             tobj->object = tree;
+            tobj->repository = this->repository;
             add_property_zval(git_tree,"entries", entries);
             RETURN_ZVAL(git_tree,0,0);
 

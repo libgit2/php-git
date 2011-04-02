@@ -130,7 +130,7 @@ PHP_METHOD(git_tree, path)
             int r = git_tree_entrycount(tree);
             int i = 0;
             for(i; i < r; i++){
-                create_tree_entry_from_entry(&entry,git_tree_entry_byindex(tree,i));
+                create_tree_entry_from_entry(&entry,git_tree_entry_byindex(tree,i),this->repository);
                 add_next_index_zval(entries, entry);
             }
             add_property_zval(git_tree,"entries", entries);
@@ -176,6 +176,7 @@ PHP_METHOD(git_tree, getIterator)
     object_init_ex(iterator,git_tree_iterator_class_entry);
     php_git_tree_iterator_t *obj = (php_git_tree_iterator_t *) zend_object_store_get_object(iterator TSRMLS_CC);
     obj->tree = this->object;
+    obj->repository = this->repository;
     obj->offset = 0;
     RETURN_ZVAL(iterator,0,0);
 }
@@ -193,7 +194,7 @@ PHP_METHOD(git_tree, getEntry)
     }
 
     entry = git_tree_entry_byindex(this->object,offset);
-    create_tree_entry_from_entry(&git_tree_entry, entry);
+    create_tree_entry_from_entry(&git_tree_entry, entry,this->repository);
     RETURN_ZVAL(git_tree_entry,0, 0);
 }
 
@@ -209,7 +210,7 @@ PHP_METHOD(git_tree, getEntries)
     array_init(entries);
     zval *array_ptr;
     for(i = 0; i < r; i++){
-        create_tree_entry_from_entry(&array_ptr, git_tree_entry_byindex(this->object,i));
+        create_tree_entry_from_entry(&array_ptr, git_tree_entry_byindex(this->object,i),this->repository);
         add_next_index_zval(entries,  array_ptr);
     }
 

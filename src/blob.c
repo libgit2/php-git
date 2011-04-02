@@ -34,10 +34,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blob__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, repository)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blob_set_content, 0, 0, 1)
-    ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
 static void php_git_blob_free_storage(php_git_blob_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);

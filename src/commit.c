@@ -28,7 +28,7 @@
 #include <string.h>
 #include <time.h>
 
-extern void create_tree_entry_from_entry(zval **object, git_tree_entry *entry);
+extern void create_tree_entry_from_entry(zval **object, git_tree_entry *entry, git_repository *repository);
 extern zend_object_value php_git_repository_new(zend_class_entry *ce TSRMLS_DC);
 
 PHPAPI zend_class_entry *git_commit_class_entry;
@@ -136,6 +136,7 @@ PHP_METHOD(git_commit, getTree)
     object_init_ex(git_tree, git_tree_class_entry);
     php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
     tobj->object = tree;
+    tobj->repository = this->repository;
 
 /*
     int r = git_tree_entrycount(tree);

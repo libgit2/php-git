@@ -236,7 +236,7 @@ PHP_METHOD(git_repository, getObject)
 }
 
 
-void create_tree_entry_from_entry(zval **object, git_tree_entry *entry)
+void create_tree_entry_from_entry(zval **object, git_tree_entry *entry, git_repository *repository)
 {
     TSRMLS_FETCH();
     char buf[41] = {0};
@@ -246,6 +246,7 @@ void create_tree_entry_from_entry(zval **object, git_tree_entry *entry)
     php_git_tree_entry_t *entry_obj = (php_git_tree_entry_t *) zend_object_store_get_object(*object TSRMLS_CC);
 
     entry_obj->entry = entry;
+    entry_obj->repository = repository;
     oid = git_tree_entry_id(entry);
     git_oid_to_string(buf,41,oid);
     
@@ -289,7 +290,7 @@ PHP_METHOD(git_repository, getCommit)
         if(ret == GIT_SUCCESS){
             zval *author;
             zval *committer;
-			git_commit *commit = (git_commit *)blob;
+            git_commit *commit = (git_commit *)blob;
 
             create_signature_from_commit(&author, git_commit_author(commit));
             create_signature_from_commit(&committer, git_commit_committer(commit));
@@ -299,6 +300,7 @@ PHP_METHOD(git_repository, getCommit)
 
             php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(git_commit_object TSRMLS_CC);
             cobj->object = commit;
+            cobj->repository = repository;
 
             add_property_zval(git_commit_object,"author", author);
             add_property_zval(git_commit_object,"committer", committer);
@@ -379,6 +381,7 @@ PHP_METHOD(git_repository, getTree)
 
     php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
     tobj->object = tree;
+    tobj->repository = myobj->repository;
 
     RETURN_ZVAL(git_tree,0,0);
 }
