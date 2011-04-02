@@ -89,29 +89,8 @@ PHP_METHOD(git_blob, __construct)
 }
 
 
-PHP_METHOD(git_blob, setContent)
-{
-    char *string;
-    size_t string_len = 0;
-
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "s", &string, &string_len) == FAILURE){
-        return;
-    }
-
-    php_git_blob_t *obj = (php_git_blob_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-
-    int ret = git_blob_set_rawcontent(obj->object,string, string_len);
-    if(ret != GIT_SUCCESS){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't set content!");
-        return;
-    }
-    add_property_string_ex(getThis(), "data", sizeof("data"),string, 1 TSRMLS_CC);
-}
-
 PHPAPI function_entry php_git_blob_methods[] = {
     PHP_ME(git_blob, __construct, arginfo_git_blob__construct, ZEND_ACC_PUBLIC)
-    PHP_ME(git_blob, setContent, arginfo_git_blob_set_content, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
