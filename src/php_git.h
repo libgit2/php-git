@@ -146,10 +146,18 @@ typedef struct{
     git_tag *object;
 } php_git_tag_t;
 
+enum php_git_blob_write_type{
+    PHP_GIT_LOAD_FROM_FILE,
+    PHP_GIT_LOAD_FROM_STRING
+};
 
 typedef struct{
     zend_object zo;
     git_blob *object;
+    git_repository *repository;
+    enum php_git_blob_write_type type;
+    char *contents;
+    int contents_len;
 } php_git_blob_t;
 
 typedef struct{
