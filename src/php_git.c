@@ -166,10 +166,10 @@ PHP_MINIT_FUNCTION(git) {
 
 PHP_MINFO_FUNCTION(git)
 {
-    php_printf("PHP Git Extension\n");
+    php_printf("PHP libgit2 Extension\n");
     php_info_print_table_start();
-    php_info_print_table_row(2,"Version", PHP_GIT_EXTVER " (1st alpha development)");
-    php_info_print_table_row(2, "Authors", "Shuhei Tanuma 'stanuma@zynga.co.jp' (lead)\n");
+    php_info_print_table_row(2,"Version", PHP_GIT_EXTVER "-dev");
+    php_info_print_table_row(2,"libgit2 version", LIBGIT2_VERSION);
     php_info_print_table_end();
 }
 
