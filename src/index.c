@@ -226,7 +226,7 @@ PHP_METHOD(git_index, remove)
 }
 
 
-PHP_METHOD(git_index, write)
+PHP_METHOD(git_index, update)
 {
     php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -262,6 +262,24 @@ PHP_METHOD(git_index, getIterator)
     obj->offset = 0;
     RETURN_ZVAL(iterator,0,0);
 }
+
+PHP_METHOD(git_index, writeTree)
+{
+    php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_oid oid;
+    char out[GIT_OID_HEXSZ+1];
+
+    int ret = git_tree_create_fromindex(&oid, this->index);
+    if(ret != GIT_SUCCESS) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+            "can't write tree from index.");
+        RETURN_FALSE
+    }
+    
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,&oid);
+    RETVAL_STRING(out,1);
+}
+
 /*
 PHP_METHOD(git_index, __construct)
 {
@@ -324,7 +342,8 @@ PHPAPI function_entry php_git_index_methods[] = {
     PHP_ME(git_index, add,         arginfo_git_index_add,       ZEND_ACC_PUBLIC)
     PHP_ME(git_index, remove,      arginfo_git_index_remove,    ZEND_ACC_PUBLIC)
     PHP_ME(git_index, refresh,     NULL,                        ZEND_ACC_PUBLIC)
-    PHP_ME(git_index, write,       NULL,                        ZEND_ACC_PUBLIC)
+    PHP_ME(git_index, update,      NULL,                        ZEND_ACC_PUBLIC)
+    PHP_ME(git_index, writeTree,   NULL,                        ZEND_ACC_PUBLIC)
     //PHP_ME(git_index, insert,      arginfo_git_index_insert,    ZEND_ACC_PUBLIC)
     // Countable
     PHP_ME(git_index, count,       NULL,                        ZEND_ACC_PUBLIC)
