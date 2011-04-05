@@ -28,10 +28,7 @@
 #include <string.h>
 #include <time.h>
 
-extern void create_tree_entry_from_entry(zval **object, git_tree_entry *entry,git_repository *repository);
-
 PHPAPI zend_class_entry *git_tree_builder_class_entry;
-extern void php_tree_index_entry_create(zval **index, git_tree_entry *entry);
 
 static void php_git_tree_builder_free_storage(php_git_tree_builder_t *obj TSRMLS_DC)
 {
@@ -68,6 +65,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_builder__construct, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_builder_add, 0, 0, 2)
+  ZEND_ARG_INFO(0, hash)
   ZEND_ARG_INFO(0, path)
   ZEND_ARG_INFO(0, attribute)
 ZEND_END_ARG_INFO()
@@ -75,7 +73,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_builder_remove, 0, 0, 1)
   ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
-
 
 PHP_METHOD(git_tree_builder, __construct)
 {
@@ -86,10 +83,20 @@ PHP_METHOD(git_tree_builder, __construct)
         "z", &ztree) == FAILURE){
         return;
     }
+
+    if(!instanceof_function(Z_OBJCE_P(ztree), git_tree_class_entry TSRMLS_CC)){
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"argment does not Git\\Tree instance.");
+        RETURN_LONG(GIT_ERROR);
+    }
+
     php_git_tree_t *tree = (php_git_tree_t *) zend_object_store_get_object(ztree TSRMLS_CC);
 
     git_treebuilder *builder;
-    git_treebuilder_create(&builder,tree->object);
+    if(git_treebuilder_create(&builder,tree->object) != GIT_SUCCESS) {
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"can't create tree builder instance");
+        RETURN_LONG(GIT_ERROR);
+    }
+
     this->builder = builder;
     this->repository = tree->repository;
 }
@@ -98,53 +105,74 @@ PHP_METHOD(git_tree_builder, __construct)
 PHP_METHOD(git_tree_builder,add)
 {
     php_git_tree_builder_t *this = (php_git_tree_builder_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    int ret = 0;
+    int error = GIT_ERROR;
     char *path;
+    char *hash;
     int path_len = 0;
+    int hash_len = 0;
     unsigned int attributes;
-    git_tree_entry *entry;
     git_oid id;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "sl", &path,&path_len,&attributes) == FAILURE){
+        "ssl", &hash,&hash_len,&path,&path_len,&attributes) == FAILURE){
         return;
     }
 
-    ret = git_treebuilder_insert(&entry,this->builder,path,&id,attributes);
-    if(ret == GIT_SUCCESS) {
-        RETURN_TRUE;
+    error = git_oid_mkstr(&id, hash);
+    if (error != GIT_SUCCESS) {
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"can't create object id.");
+        RETURN_FALSE;
     }
+
+    error = git_treebuilder_insert(NULL,this->builder,path,&id,attributes);
+    if (error != GIT_SUCCESS) {
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"can't add entry");
+        RETURN_FALSE;
+    }
+    RETURN_TRUE;
 }
 
 PHP_METHOD(git_tree_builder,remove)
 {
     php_git_tree_builder_t *this = (php_git_tree_builder_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    int ret = 0;
     char *path;
     int path_len = 0;
+    int error = GIT_ERROR;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "sl", &path,&path_len) == FAILURE){
+        "s", &path,&path_len) == FAILURE){
         return;
     }
+    
+    if (path_len < 1) {
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"must specify target.");
+        RETURN_FALSE;
+    }
 
-    ret = git_treebuilder_remove(this->builder,path);
-    if(ret == GIT_SUCCESS) {
+    error = git_treebuilder_remove(this->builder,path);
+
+    if (error == GIT_SUCCESS) {
         RETURN_TRUE;
+    } else {
+        RETURN_FALSE;
     }
 }
 
 PHP_METHOD(git_tree_builder,write)
 {
     php_git_tree_builder_t *this = (php_git_tree_builder_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    git_oid oid;
     char out[GIT_OID_HEXSZ+1];
+    git_oid oid;
+    int error = GIT_ERROR;
 
-    int ret = git_treebuilder_write(&oid,this->repository,this->builder);
-    if(ret == GIT_SUCCESS) {
-        git_oid_to_string(out,GIT_OID_HEXSZ+1,&oid);
-        RETVAL_STRING(out, 1);
+    error = git_treebuilder_write(&oid,this->repository,this->builder);
+    if(error != GIT_SUCCESS) {
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"can't write tree");
+        RETURN_FALSE;
     }
+
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,&oid);
+    RETVAL_STRING(out, 1);
 }
 
 PHPAPI function_entry php_git_tree_builder_methods[] = {
