@@ -46,7 +46,7 @@ ZEND_END_ARG_INFO()
 static void php_git_blob_free_storage(php_git_blob_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
-    
+
     if (obj->object != NULL) {
         git_object_close(obj->object);
         obj->object = NULL;
@@ -61,8 +61,8 @@ static void php_git_blob_free_storage(php_git_blob_t *obj TSRMLS_DC)
 
 zend_object_value php_git_blob_new(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_object_value retval;
-    php_git_repository_t *obj;
+    zend_object_value retval;
+    php_git_blob_t *obj;
     zval *tmp;
 
     obj = ecalloc(1, sizeof(*obj));
