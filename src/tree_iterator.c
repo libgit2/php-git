@@ -28,9 +28,9 @@
 #include <string.h>
 #include <time.h>
 
-extern void create_tree_entry_from_entry(zval **object, git_tree_entry *entry);
-
 PHPAPI zend_class_entry *git_tree_iterator_class_entry;
+
+extern void create_tree_entry_from_entry(zval **object, git_tree_entry *entry);
 extern void php_tree_index_entry_create(zval **index, git_tree_entry *entry);
 
 static void php_git_tree_iterator_free_storage(php_git_tree_iterator_t *obj TSRMLS_DC)
@@ -132,6 +132,7 @@ PHPAPI function_entry php_git_tree_iterator_methods[] = {
     PHP_ME(git_tree_iterator, next,        NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_iterator, rewind,      NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_iterator, valid,       NULL,                        ZEND_ACC_PUBLIC)
+    {NULL,NULL,NULL}
 };
 
 void git_tree_iterator_init(TSRMLS_D)
