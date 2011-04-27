@@ -1,0 +1,16 @@
+// $Id: config.w32,v 1.4.2.3 2009/07/08 15:25:01 rjs Exp $
+// vim:ft=javascript
+
+ARG_ENABLE("git", "phpgit support", "no");
+
+if (PHP_GIT != "no") {
+    if (CHECK_HEADER_ADD_INCLUDE("git2.h", "CFLAGS_GIT", PHP_GIT) &&
+        CHECK_LIB("git2.lib", "git", PHP_GIT)
+    )
+    {
+    AC_DEFINE('HAVE_GIT', 1);
+    EXTENSION('git', 'php_git.c reference.c reference_manager.c repository.c signature.c commit.c index_entry.c index_iterator.c index.c tree.c blob.c tree_entry.c tree_iterator.c walker.c object.c rawobject.c tag.c odb.c backend.c');
+    } else {
+    WARNING("phpgit not enabled; libraries and/or headers not found");
+    }
+}
