@@ -33,6 +33,16 @@
 #include "config.h"
 #endif
 
+#ifdef PHP_WIN32
+#define PHP_GIT_API __declspec(dllexport)
+#else
+#define PHP_GIT_API
+#endif
+
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
 #include "php.h"
 #include "ext/spl/spl_exceptions.h"
 #include <git2.h>

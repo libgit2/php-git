@@ -41,7 +41,7 @@ ZEND_END_ARG_INFO()
 static void php_git_blob_free_storage(php_git_blob_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
-    
+
     //obj->object will free by git_repository.
     obj->object = NULL;
     efree(obj);
@@ -49,21 +49,21 @@ static void php_git_blob_free_storage(php_git_blob_t *obj TSRMLS_DC)
 
 zend_object_value php_git_blob_new(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_object_value retval;
-	php_git_repository_t *obj;
-	zval *tmp;
+    zend_object_value retval;
+    php_git_repository_t *obj;
+    zval *tmp;
 
-	obj = ecalloc(1, sizeof(*obj));
-	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
-	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+    obj = ecalloc(1, sizeof(*obj));
+    zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(obj, 
+    retval.handle = zend_objects_store_put(obj, 
         (zend_objects_store_dtor_t)zend_objects_destroy_object,
         (zend_objects_free_object_storage_t)php_git_blob_free_storage,
         NULL TSRMLS_CC);
-	retval.handlers = zend_get_std_object_handlers();
+    retval.handlers = zend_get_std_object_handlers();
 
-	return retval;
+    return retval;
 }
 
 
@@ -71,16 +71,19 @@ zend_object_value php_git_blob_new(zend_class_entry *ce TSRMLS_DC)
 PHP_METHOD(git_blob, __construct)
 {
     zval *z_repository;
+    php_git_repository_t *git;
+    php_git_blob_t     *obj;
+    int ret;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "z", &z_repository) == FAILURE){
         return;
     }
 
-    php_git_repository_t *git = (php_git_repository_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
-    php_git_blob_t *obj = (php_git_blob_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    
-    int ret = git_blob_new(&obj->object,git->repository);
+    git = (php_git_repository_t *) zend_object_store_get_object(z_repository TSRMLS_CC);
+    obj = (php_git_blob_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+    ret = git_blob_new(&obj->object,git->repository);
 
     if(ret != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't create new blob!");
@@ -93,22 +96,24 @@ PHP_METHOD(git_blob, setContent)
 {
     char *string;
     size_t string_len = 0;
+    php_git_blob_t *obj;
+    int ret;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &string, &string_len) == FAILURE){
         return;
     }
 
-    php_git_blob_t *obj = (php_git_blob_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    obj = (php_git_blob_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
-    int ret = git_blob_set_rawcontent(obj->object,string, string_len);
+    ret = git_blob_set_rawcontent(obj->object,string, string_len);
     if(ret != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't set content!");
         return;
     }
     add_property_string_ex(getThis(), "data", sizeof("data"),string, 1 TSRMLS_CC);
 }
-
+/*
 PHPAPI function_entry php_git_blob_methods[] = {
     PHP_ME(git_blob, __construct, arginfo_git_blob__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_blob, setContent, arginfo_git_blob_set_content, ZEND_ACC_PUBLIC)
@@ -121,6 +126,7 @@ void git_init_blob(TSRMLS_D)
     INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Blob", php_git_blob_methods);
 
     git_blob_class_entry = zend_register_internal_class_ex(&ce, git_object_class_entry, NULL TSRMLS_CC);
-	git_blob_class_entry->create_object = php_git_blob_new;
+    git_blob_class_entry->create_object = php_git_blob_new;
 
 }
+*/

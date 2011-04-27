@@ -25,6 +25,7 @@
 #include "php_git.h"
 #include <spl/spl_array.h>
 #include <zend_interfaces.h>
+#include <zend_exceptions.h>
 #include <string.h>
 #include <time.h>
 
@@ -60,12 +61,13 @@ int php_git_backend__exists(git_odb_backend *_backend, const git_oid *oid)
     TSRMLS_FETCH();
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
     char out[GIT_OID_HEXSZ+1] = {0};
-    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
 
     zval *retval;
     zval *params[1];
     zval func;
     int result;
+
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
 
     MAKE_STD_ZVAL(retval);
     ZVAL_NULL(retval);
@@ -97,6 +99,8 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
     zval *retval;
     zval *params[1];
     zval func;
+    php_git_rawobject_t *raw;
+
     MAKE_STD_ZVAL(retval);
     ZVAL_NULL(retval);
     ZVAL_STRING(&func,"write", 1);
@@ -104,12 +108,13 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
 
     MAKE_STD_ZVAL(params[0]);
     object_init_ex(params[0],git_rawobject_class_entry);
-    
+
     add_property_stringl_ex(params[0],"data",sizeof("data"),obj->data,obj->len,1 TSRMLS_CC);
     add_property_long(params[0],"type",obj->type);
     add_property_long(params[0],"len",obj->len);
 
-    php_git_rawobject_t *raw = (php_git_rawobject_t *) zend_object_store_get_object(params[0] TSRMLS_CC);
+
+    raw = (php_git_rawobject_t *) zend_object_store_get_object(params[0] TSRMLS_CC);
     raw->object = obj;
 
     if(call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC) == FAILURE){
@@ -123,7 +128,7 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
     }else{
         ret = GIT_ERROR;
     }
-    
+
     zval_ptr_dtor(&retval);
     //do not free Git\RawObject here.
     //zval_ptr_dtor(&params[0]);
@@ -135,12 +140,14 @@ int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_
 {
     TSRMLS_FETCH();
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
-    char out[GIT_OID_HEXSZ+1] = {0};
-    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
+    char out[GIT_OID_HEXSZ+1] = {0};   
 
     zval *retval;
     zval *params[1];
     zval func;
+    zval *str;
+
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
 
     MAKE_STD_ZVAL(retval);
     ZVAL_NULL(retval);
@@ -161,18 +168,18 @@ int php_git_backend__read(git_rawobj *obj, git_odb_backend *_backend, const git_
         return GIT_ENOTFOUND;
     }
 
-    zval *str = zend_read_property(git_rawobject_class_entry, retval,"data",4, 0 TSRMLS_CC);
-    
+    str = zend_read_property(git_rawobject_class_entry, retval,"data",4, 0 TSRMLS_CC);
+
     // do not use ecalloc. obj->data will free by git_rawobject_close()
     obj->data = calloc(1,strlen(Z_STRVAL_P(str)));
     obj->len = strlen(Z_STRVAL_P(str));
     obj->type = GIT_OBJ_BLOB;
     memcpy(obj->data, Z_STRVAL_P(str),obj->len);
-    
+
     zval_ptr_dtor(&retval);
     zval_ptr_dtor(&params[0]);
     zval_dtor(&func);
-    
+
     return GIT_SUCCESS;
 }
 int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, const git_oid *oid)
@@ -180,11 +187,13 @@ int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, con
     TSRMLS_FETCH();
     char out[GIT_OID_HEXSZ+1] = {0} ;
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
-    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
 
     zval *retval;
     zval *params[1];
     zval func;
+    zval *str;
+
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
 
     MAKE_STD_ZVAL(retval);
     ZVAL_NULL(retval);
@@ -205,20 +214,20 @@ int php_git_backend__read_header(git_rawobj *obj, git_odb_backend *_backend, con
         return GIT_ENOTFOUND;
     }
 
-    zval *str = zend_read_property(git_rawobject_class_entry, retval,"data",sizeof("data"), 0 TSRMLS_CC);
-    
+    str = zend_read_property(git_rawobject_class_entry, retval,"data",sizeof("data"), 0 TSRMLS_CC);
+
     obj->data = NULL;
     obj->len = strlen(Z_STRVAL_P(str));
     obj->type = GIT_OBJ_BLOB;
-    
+
     zval_ptr_dtor(&retval);
     zval_ptr_dtor(&params[0]);
     zval_dtor(&func);
-    
+
     return GIT_SUCCESS;
 }
 
-void php_git_backend__free(git_odb_backend *backend)
+int php_git_backend__free(git_odb_backend *backend)
 {
     TSRMLS_FETCH();
     php_git_backend_internal *object = (php_git_backend_internal *)backend;
@@ -239,6 +248,8 @@ void php_git_backend__free(git_odb_backend *backend)
 
     zval_ptr_dtor(&retval);
     zval_dtor(&func);
+
+    return 1;
 }
 
 zend_object_value php_git_backend_new(zend_class_entry *ce TSRMLS_DC)
@@ -278,7 +289,7 @@ PHP_METHOD(git_backend, __construct)
     this->backend = internal;
 }
 
-PHPAPI function_entry php_git_backend_methods[] = {
+static zend_function_entry php_git_backend_methods[] = {
     PHP_ME(git_backend, __construct, NULL,    ZEND_ACC_PUBLIC)
     PHP_ABSTRACT_ME(git_backend, read,        arginfo_git_backend_read)
     PHP_ABSTRACT_ME(git_backend, read_header, arginfo_git_backend_read_header)

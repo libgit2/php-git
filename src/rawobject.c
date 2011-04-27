@@ -81,12 +81,13 @@ PHP_METHOD(git_raw_object, __construct)
     int data_len = 0;
     int type = 0;
     int len = 0;
+    php_git_rawobject_t *this;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "lsl", &type, &data, &data_len, &len) == FAILURE){
         return;
     }
-    php_git_rawobject_t *this= (php_git_rawobject_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    this = (php_git_rawobject_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     this->object = emalloc(sizeof(git_rawobj));
     this->object->data = NULL;
     this->object->type = type;
@@ -112,7 +113,7 @@ PHP_METHOD(git_raw_object, getId)
 }
 
 
-PHPAPI function_entry php_git_rawobject_methods[] = {
+static zend_function_entry php_git_rawobject_methods[] = {
     PHP_ME(git_raw_object, __construct, arginfo_git_rawobject__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_raw_object, getId,       NULL,                             ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
@@ -124,5 +125,5 @@ void git_init_rawobject(TSRMLS_D)
     INIT_NS_CLASS_ENTRY(git_rawobject_ce, PHP_GIT_NS,"RawObject", php_git_rawobject_methods);
 
     git_rawobject_class_entry = zend_register_internal_class(&git_rawobject_ce TSRMLS_CC);
-	git_rawobject_class_entry->create_object = php_git_rawobject_new;
+    git_rawobject_class_entry->create_object = php_git_rawobject_new;
 }

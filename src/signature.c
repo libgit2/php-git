@@ -49,7 +49,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_signature__construct, 0, 0, 3)
     ZEND_ARG_INFO(0, when)
 ZEND_END_ARG_INFO()
 
-PHPAPI function_entry php_git_signature_methods[] = {
+static zend_function_entry php_git_signature_methods[] = {
     PHP_ME(git_signature, __construct, arginfo_git_signature__construct, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
@@ -61,6 +61,7 @@ PHP_METHOD(git_signature, __construct)
     int name_len  = 0;
     int email_len = 0;
     zval *time;
+	int ret;
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "ssz", &name, &name_len, &email, &email_len, &time) == FAILURE){
@@ -72,7 +73,7 @@ PHP_METHOD(git_signature, __construct)
         return;
     }
 
-    int ret = php_git_signature_create(getThis(), name, name_len, email, email_len, time);
+    ret = php_git_signature_create(getThis(), name, name_len, email, email_len, time);
     if (ret != GIT_SUCCESS) {
         php_error_docref(NULL TSRMLS_CC, E_WARNING, "Git\\Signature internal error");
     }
@@ -95,20 +96,22 @@ void create_signature_from_commit(zval **signature, git_signature *sig)
 {
     TSRMLS_FETCH();
     zval *datetime;
+	php_git_signature_t *object;
+	zval constructor;
+    zval method;
+    zval result;
+    zval *params[1];
+	
     MAKE_STD_ZVAL(*signature);
 
     object_init_ex(*signature,git_signature_class_entry);
-    php_git_signature_t *object = (php_git_signature_t *) zend_object_store_get_object(*signature TSRMLS_CC);
+    object = (php_git_signature_t *) zend_object_store_get_object(*signature TSRMLS_CC);
     object->signature = sig;
     
     add_property_string_ex(*signature,"name",sizeof("name"), sig->name,1 TSRMLS_CC);
     add_property_string_ex(*signature,"email",sizeof("email"),sig->email,1 TSRMLS_CC);
 
-    MAKE_STD_ZVAL(datetime);
-    zval constructor;
-    zval method;
-    zval result;
-    zval *params[1];
+    MAKE_STD_ZVAL(datetime);    
     ZVAL_STRING(&constructor,"__construct",0);
     ZVAL_STRING(&method,"setTimestamp", 0);
 

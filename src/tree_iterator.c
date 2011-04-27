@@ -25,6 +25,7 @@
 #include "php_git.h"
 #include <spl/spl_array.h>
 #include <zend_interfaces.h>
+#include <zend_exceptions.h>
 #include <string.h>
 #include <time.h>
 
@@ -113,19 +114,20 @@ PHP_METHOD(git_tree_iterator, __construct)
 {
     php_git_tree_iterator_t *this = (php_git_tree_iterator_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     zval *php_tree_index;
+	php_git_tree_t *tree;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "z", &php_tree_index) == FAILURE){
         return;
     }
-    php_git_tree_t *tree = (php_git_tree_t *) zend_object_store_get_object(php_tree_index TSRMLS_CC);
+    tree = (php_git_tree_t *) zend_object_store_get_object(php_tree_index TSRMLS_CC);
 
     this->tree = tree->object;
     this->offset = 0;
 }
 
 
-PHPAPI function_entry php_git_tree_iterator_methods[] = {
+static zend_function_entry php_git_tree_iterator_methods[] = {
     PHP_ME(git_tree_iterator, __construct, arginfo_git_tree_iterator__construct,ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_iterator, current,     NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_iterator, key,         NULL,                        ZEND_ACC_PUBLIC)

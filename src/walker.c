@@ -82,13 +82,14 @@ PHP_METHOD(git_walker, hide)
     git_commit *commit;
     git_repository *repository;
     git_oid oid;
+	php_git_walker_t *myobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &hash, &hash_len) == FAILURE){
         return;
     }
 
-    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     walker = myobj->walker;
 
     repository = git_revwalk_repository(walker);
@@ -106,13 +107,14 @@ PHP_METHOD(git_walker, push)
     git_commit *head;
     git_revwalk *walker;
     git_repository *repository;
+	php_git_walker_t *myobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &hash, &hash_len) == FAILURE){
         return;
     }
 
-    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     walker = myobj->walker;
     repository = git_revwalk_repository(walker);
     
@@ -130,21 +132,22 @@ PHP_METHOD(git_walker, next)
     git_commit *commit;
     git_revwalk *walker;
     git_signature *signature;
+	int ret;
+	zval *author;
+    zval *committer;
+	php_git_commit_t *cobj;
 
     php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     walker = myobj->walker;
 
-    int ret = git_revwalk_next(&oid,walker);
+    ret = git_revwalk_next(&oid,walker);
     if(ret != GIT_SUCCESS){
         RETURN_FALSE;
     }
     git_object_lookup((git_object **)&commit, git_revwalk_repository(walker), &oid, GIT_OBJ_COMMIT);
 
     MAKE_STD_ZVAL(git_commit_object);
-    object_init_ex(git_commit_object,git_commit_class_entry);
-
-    zval *author;
-    zval *committer;
+    object_init_ex(git_commit_object,git_commit_class_entry);    
 
     create_signature_from_commit(&author, git_commit_author(commit));
     create_signature_from_commit(&committer, git_commit_committer(commit));
@@ -152,7 +155,7 @@ PHP_METHOD(git_walker, next)
     MAKE_STD_ZVAL(git_commit_object);
     object_init_ex(git_commit_object,git_commit_class_entry);
 
-    php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(git_commit_object TSRMLS_CC);
+    cobj = (php_git_commit_t *) zend_object_store_get_object(git_commit_object TSRMLS_CC);
     cobj->object = commit;
 
     add_property_zval(git_commit_object,"author", author);
@@ -172,18 +175,19 @@ PHP_METHOD(git_walker, reset)
 PHP_METHOD(git_walker, sort)
 {
     int mode = 0;
+	php_git_walker_t *myobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "l", &mode) == FAILURE){
         return;
     }
 
-    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_revwalk_sorting(myobj->walker, mode);
     RETURN_TRUE;
 }
 
-PHPAPI function_entry php_git_walker_methods[] = {
+static zend_function_entry php_git_walker_methods[] = {
     PHP_ME(git_walker, __construct, NULL,                    ZEND_ACC_PUBLIC)
     PHP_ME(git_walker, push,        arginfo_git_walker_push, ZEND_ACC_PUBLIC)
     PHP_ME(git_walker, next,        NULL,                    ZEND_ACC_PUBLIC)
