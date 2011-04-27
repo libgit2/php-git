@@ -25,6 +25,7 @@
 #include "php_git.h"
 #include <spl/spl_array.h>
 #include <zend_interfaces.h>
+#include <zend_exceptions.h>
 #include <string.h>
 #include <time.h>
 
@@ -130,13 +131,15 @@ PHP_METHOD(git_repository, init)
     int is_bare = 0;
     int ret;
     zval *obj;
+	int suc;
+	php_git_repository_t *myobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,"sl",
         &path, &path_len, &is_bare) == FAILURE){
         return;
     }
 
-    int suc = git_repository_init(&repository,path,is_bare);
+    suc = git_repository_init(&repository,path,is_bare);
 
     if(suc != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't create repository\n");
@@ -145,7 +148,7 @@ PHP_METHOD(git_repository, init)
     
     MAKE_STD_ZVAL(obj);
     object_init_ex(obj, git_repository_class_entry);
-    php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(obj TSRMLS_CC);
+    myobj = (php_git_repository_t *) zend_object_store_get_object(obj TSRMLS_CC);
     myobj->repository = repository;
 
     add_property_string_ex(obj, "path",sizeof("path"),path, 1 TSRMLS_CC);
@@ -160,6 +163,7 @@ PHP_METHOD(git_repository, getIndex)
 
     zval *index_object;
     int ret = 0;
+	php_git_index_t *iobj;
 
     php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
 
@@ -175,7 +179,7 @@ PHP_METHOD(git_repository, getIndex)
 
     MAKE_STD_ZVAL(index_object);
     object_init_ex(index_object, git_index_class_entry);
-    php_git_index_t *iobj = (php_git_index_t *) zend_object_store_get_object(index_object TSRMLS_CC);
+    iobj = (php_git_index_t *) zend_object_store_get_object(index_object TSRMLS_CC);
 
     iobj->index = index;
 
@@ -202,6 +206,8 @@ PHP_METHOD(git_repository, getObject)
     char *hash;
     int hash_len = 0;
     int ret = 0;
+	php_git_repository_t *myobj;
+	php_git_blob_t *blobobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &hash, &hash_len) == FAILURE){
@@ -210,7 +216,7 @@ PHP_METHOD(git_repository, getObject)
     
     git_oid_mkstr(&oid, hash);
     
-    php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
+    myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
     repository = myobj->repository;
     
     odb = git_repository_database(repository);
@@ -223,7 +229,7 @@ PHP_METHOD(git_repository, getObject)
         if(ret == GIT_SUCCESS){
             MAKE_STD_ZVAL(git_object);
             object_init_ex(git_object, git_blob_class_entry);
-            php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_object TSRMLS_CC);
+            blobobj = (php_git_blob_t *) zend_object_store_get_object(git_object TSRMLS_CC);
             blobobj->object = blob;
 
             git_rawsz = git_blob_rawsize(blob);
@@ -241,9 +247,11 @@ void create_tree_entry_from_entry(zval **object, git_tree_entry *entry)
     TSRMLS_FETCH();
     char buf[41] = {0};
     const git_oid *oid;
+	php_git_tree_entry_t *entry_obj;
+	
     MAKE_STD_ZVAL(*object);
     object_init_ex(*object, git_tree_entry_class_entry);
-    php_git_tree_entry_t *entry_obj = (php_git_tree_entry_t *) zend_object_store_get_object(*object TSRMLS_CC);
+    entry_obj = (php_git_tree_entry_t *) zend_object_store_get_object(*object TSRMLS_CC);
 
     entry_obj->entry = entry;
     oid = git_tree_entry_id(entry);
@@ -269,6 +277,8 @@ PHP_METHOD(git_repository, getCommit)
     char *hash;
     int hash_len = 0;
     int ret = 0;
+	php_git_repository_t *myobj;
+	php_git_commit_t *cobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &hash, &hash_len) == FAILURE){
@@ -277,7 +287,7 @@ PHP_METHOD(git_repository, getCommit)
     
     git_oid_mkstr(&oid, hash);
     
-    php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
+    myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
     repository = myobj->repository;
     odb = git_repository_database(repository);
     
@@ -297,7 +307,7 @@ PHP_METHOD(git_repository, getCommit)
             MAKE_STD_ZVAL(git_commit_object);
             object_init_ex(git_commit_object,git_commit_class_entry);
 
-            php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(git_commit_object TSRMLS_CC);
+            cobj = (php_git_commit_t *) zend_object_store_get_object(git_commit_object TSRMLS_CC);
             cobj->object = commit;
 
             add_property_zval(git_commit_object,"author", author);
@@ -321,13 +331,14 @@ PHP_METHOD(git_repository, __construct)
     int arg_len = 0;
     git_repository *repository;
     zval *object = getThis();
+	php_git_repository_t *myobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "|s", &repository_path, &arg_len) == FAILURE){
         return;
     }
 
-    php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
+    myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
 
     if(arg_len > 0){
         ret = git_repository_open(&repository,repository_path);
@@ -358,6 +369,8 @@ PHP_METHOD(git_repository, getTree)
     php_git_tree_entry_t *te;
     char buf[GIT_OID_HEXSZ+1] = {0};
     int i = 0;
+	php_git_repository_t *myobj;
+	php_git_tree_t *tobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &hash, &hash_len) == FAILURE){
@@ -365,7 +378,7 @@ PHP_METHOD(git_repository, getTree)
     }
 
     git_oid_mkstr(&oid, hash);
-    php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
+    myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
 
     ret = git_tree_lookup(&tree, myobj->repository, &oid);
     if(ret != GIT_SUCCESS){
@@ -377,7 +390,7 @@ PHP_METHOD(git_repository, getTree)
     MAKE_STD_ZVAL(git_tree);
     object_init_ex(git_tree, git_tree_class_entry);
 
-    php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
+    tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
     tobj->object = tree;
 
     RETURN_ZVAL(git_tree,0,0);
@@ -389,13 +402,14 @@ PHP_METHOD(git_repository, getWalker)
     zval *walker_object;
     git_revwalk *walk;
     int ret = 0;
+	php_git_walker_t *wobj;
 
     php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     ret = git_revwalk_new(&walk,myobj->repository);
 
     MAKE_STD_ZVAL(walker_object);
     object_init_ex(walker_object, git_walker_class_entry);
-    php_git_walker_t *wobj = (php_git_walker_t *) zend_object_store_get_object(walker_object TSRMLS_CC);
+    wobj = (php_git_walker_t *) zend_object_store_get_object(walker_object TSRMLS_CC);
     wobj->walker = walk;
 
     RETURN_ZVAL(walker_object,0,0);
@@ -409,6 +423,7 @@ PHP_METHOD(git_repository, addAlternate)
     git_odb *odb;
     git_odb_backend *odb_backend;
     int priority = 0;
+	int ret;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &backend, &priority) == FAILURE){
         return;
@@ -421,7 +436,7 @@ PHP_METHOD(git_repository, addAlternate)
     }
 
     odb = git_repository_database(this->repository);
-    int ret = php_git_odb_add_alternate(&odb, backend, priority);
+    ret = php_git_odb_add_alternate(&odb, backend, priority);
 }
 
 
@@ -432,6 +447,7 @@ PHP_METHOD(git_repository, addBackend)
     git_odb *odb;
     git_odb_backend *odb_backend;
     int priority = 0;
+	int ret;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &backend, &priority) == FAILURE){
         return;
@@ -443,7 +459,7 @@ PHP_METHOD(git_repository, addBackend)
     }
     
     odb = git_repository_database(this->repository);
-    int ret = php_git_odb_add_backend(&odb, backend, priority);
+    ret = php_git_odb_add_backend(&odb, backend, priority);
 }
 
 
@@ -458,6 +474,8 @@ PHP_METHOD(git_repository, lookupRef)
     git_oid *oid;
     git_rtype type;
     git_reference *reference;
+	php_git_reference_t *refobj;
+	int rr;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &name, &name_len) == FAILURE){
@@ -473,7 +491,7 @@ PHP_METHOD(git_repository, lookupRef)
 
     MAKE_STD_ZVAL(ref);
     object_init_ex(ref, git_reference_class_entry);
-    php_git_reference_t *refobj  = (php_git_reference_t *) zend_object_store_get_object(ref TSRMLS_CC);
+    refobj = (php_git_reference_t *) zend_object_store_get_object(ref TSRMLS_CC);
     refobj->object = reference;
 
     add_property_string_ex(ref,"name",  sizeof("name"),  (char *)git_reference_name(reference), 1 TSRMLS_CC);
@@ -484,7 +502,7 @@ PHP_METHOD(git_repository, lookupRef)
         if(target != NULL) {
             add_property_string_ex(ref,"target",sizeof("target"),(char *)target, 1 TSRMLS_CC);
         }
-        int rr = git_reference_resolve(&refobj->object,reference);
+        rr = git_reference_resolve(&refobj->object,reference);
         if(rr != GIT_SUCCESS){
             zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
                 "something wrong");
@@ -515,6 +533,8 @@ PHP_METHOD(git_repository, getReferences)
     array_init(references);
     for(i = 0; i < list->count; i++){
         zval *ref;
+		php_git_reference_t *refobj;
+		int rr;
 
         // FIXME
         result = git_reference_lookup(&reference, this->repository, list->strings[i]);
@@ -526,7 +546,7 @@ PHP_METHOD(git_repository, getReferences)
 
         MAKE_STD_ZVAL(ref);
         object_init_ex(ref, git_reference_class_entry);
-        php_git_reference_t *refobj  = (php_git_reference_t *) zend_object_store_get_object(ref TSRMLS_CC);
+        refobj  = (php_git_reference_t *) zend_object_store_get_object(ref TSRMLS_CC);
         refobj->object = reference;
 
         add_property_string_ex(ref,"name",  sizeof("name"),  (char *)git_reference_name(reference), 1 TSRMLS_CC);
@@ -537,7 +557,7 @@ PHP_METHOD(git_repository, getReferences)
             if(target != NULL) {
                 add_property_string_ex(ref,"target",sizeof("target"),(char *)target, 1 TSRMLS_CC);
             }
-            int rr = git_reference_resolve(&refobj->object,reference);
+            rr = git_reference_resolve(&refobj->object,reference);
             if(rr != GIT_SUCCESS){
                 zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
                     "something wrong");
@@ -607,6 +627,7 @@ PHP_METHOD(git_repository, open2)
     int git_index_file_len = 0;
     int git_work_tree_len = 0;
     git_repository *repository;
+	int ret;
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "ssss", &git_dir, &git_dir_len, &git_object_directory, &git_object_directory_len, &git_index_file, &git_index_file_len, &git_work_tree, &git_work_tree_len) == FAILURE){
@@ -618,7 +639,7 @@ PHP_METHOD(git_repository, open2)
         return;
     }
     
-    int ret = git_repository_open2(&repository,git_dir, git_object_directory, git_index_file, git_work_tree);
+    ret = git_repository_open2(&repository,git_dir, git_object_directory, git_index_file, git_work_tree);
     if(ret != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,"can't open specified directories");
         RETURN_FALSE;
@@ -630,7 +651,7 @@ PHP_METHOD(git_repository, open2)
 }
 
 
-PHPAPI function_entry php_git_repository_methods[] = {
+static zend_function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, __construct,   arginfo_git_construct,      ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getCommit,     arginfo_git_get_commit,     ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getObject,     arginfo_git_get_object,     ZEND_ACC_PUBLIC)

@@ -25,6 +25,7 @@
 #include "php_git.h"
 #include <spl/spl_array.h>
 #include <zend_interfaces.h>
+#include <zend_exceptions.h>
 #include <string.h>
 #include <time.h>
 
@@ -102,7 +103,7 @@ PHP_METHOD(git_object, write)
     RETVAL_STRING(out,1);
 }
 
-PHPAPI function_entry php_git_object_methods[] = {
+static zend_function_entry php_git_object_methods[] = {
     PHP_ME(git_object, getId,   NULL,ZEND_ACC_PUBLIC)
     PHP_ME(git_object, getType, NULL,ZEND_ACC_PUBLIC)
     PHP_ME(git_object, write,   NULL,ZEND_ACC_PUBLIC)

@@ -25,6 +25,7 @@
 #include "php_git.h"
 #include <spl/spl_array.h>
 #include <zend_interfaces.h>
+#include <zend_exceptions.h>
 #include <string.h>
 #include <time.h>
 
@@ -112,18 +113,19 @@ PHP_METHOD(git_index_iterator, __construct)
 {
     php_git_index_iterator_t *this = (php_git_index_iterator_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     zval *php_git_index;
+	php_git_index_t *idx;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "z", &php_git_index) == FAILURE){
         return;
     }
-    php_git_index_t *idx = (php_git_index_t *) zend_object_store_get_object(php_git_index TSRMLS_CC);
+    idx = (php_git_index_t *) zend_object_store_get_object(php_git_index TSRMLS_CC);
 
     this->index = idx->index;
     this->offset = 0;
 }
 
-PHPAPI function_entry php_git_index_iterator_methods[] = {
+static zend_function_entry php_git_index_iterator_methods[] = {
     PHP_ME(git_index_iterator, __construct, arginfo_git_index_iterator__construct,ZEND_ACC_PUBLIC)
     PHP_ME(git_index_iterator, current,     NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_index_iterator, key,         NULL,                        ZEND_ACC_PUBLIC)

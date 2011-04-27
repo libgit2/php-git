@@ -25,6 +25,7 @@
 #include "php_git.h"
 #include <spl/spl_array.h>
 #include <zend_interfaces.h>
+#include <zend_exceptions.h>
 #include <string.h>
 #include <time.h>
 
@@ -91,9 +92,9 @@ ZEND_END_ARG_INFO()
 
 void php_git_index_entry_create(zval **index, git_index_entry *entry)
 {
-    TSRMLS_FETCH();
-    MAKE_STD_ZVAL(*index);
+    TSRMLS_FETCH();    
     char oid[GIT_OID_HEXSZ+1] = {0};
+	MAKE_STD_ZVAL(*index);
     object_init_ex(*index,git_index_entry_class_entry);
     git_oid_to_string(oid,GIT_OID_HEXSZ+1,&entry->oid);
 
@@ -127,13 +128,14 @@ PHP_METHOD(git_index, find)
     git_index *index = NULL;
     git_index_entry *entry;
     zval *z_git_index_entry;
+	php_git_index_t *myobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &path, &path_len) == FAILURE){
         return;
     }
 
-    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     index = myobj->index;
 
     offset = git_index_find(index,path);
@@ -175,20 +177,22 @@ PHP_METHOD(git_index, add)
     int path_len = 0;
     git_index *index = NULL;
     long stage = 0;
+	php_git_index_t *myobj;
+	int success;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s|l", &path, &path_len, &stage) == FAILURE){
         return;
     }
 
-    php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     index = myobj->index;
 
     //FIXME: examine stage value.
     // 0 => new file
     // 1 => deleted ?
     // 2 => ?
-    int success = git_index_add(index,path,stage);
+    success = git_index_add(index,path,stage);
     if(success != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "can't add specified index.");
@@ -203,20 +207,22 @@ PHP_METHOD(git_index, remove)
     php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     char *path;
     int path_len = 0;
+	int offset;
+	int result;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &path, &path_len) == FAILURE){
         return;
     }
 
-    int offset = git_index_find(this->index,path);
+    offset = git_index_find(this->index,path);
     if(offset < 0){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "specified path does not exist.");
         RETURN_FALSE;
     }
 
-    int result = git_index_remove(this->index, offset);
+    result = git_index_remove(this->index, offset);
     if(result != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "specified offset does not exist.");
@@ -254,10 +260,11 @@ PHP_METHOD(git_index, getIterator)
 {
     php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     zval *iterator;
+	php_git_index_iterator_t *obj;
     
     MAKE_STD_ZVAL(iterator);
     object_init_ex(iterator,git_index_iterator_class_entry);
-    php_git_index_iterator_t *obj = (php_git_index_iterator_t *) zend_object_store_get_object(iterator TSRMLS_CC);
+    obj = (php_git_index_iterator_t *) zend_object_store_get_object(iterator TSRMLS_CC);
     obj->index = this->index;
     obj->offset = 0;
     RETURN_ZVAL(iterator,0,0);
@@ -317,7 +324,7 @@ PHP_METHOD(git_index, insert)
 }
 */
 
-PHPAPI function_entry php_git_index_methods[] = {
+static zend_function_entry php_git_index_methods[] = {
     //PHP_ME(git_index, __construct, arginfo_git_index__construct,ZEND_ACC_PUBLIC)
     PHP_ME(git_index, getEntry,    arginfo_git_index_get_entry, ZEND_ACC_PUBLIC)
     PHP_ME(git_index, find,        arginfo_git_index_find,      ZEND_ACC_PUBLIC)
