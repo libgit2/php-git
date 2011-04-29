@@ -6,11 +6,11 @@ ARG_ENABLE("git", "for git support", "no");
 if (PHP_GIT != "no") {
     if (CHECK_HEADER_ADD_INCLUDE("git2.h", "CFLAGS_GIT", PHP_GIT) &&
         CHECK_LIB("git2.lib", "git", PHP_GIT) &&
-		CHECK_LIB("libgit2.lib", "git", PHP_GIT)
+        CHECK_LIB("libgit2.lib", "git", PHP_GIT)
     ) {
-		AC_DEFINE('HAVE_GIT', 1);
-		EXTENSION('git', 'php_git.c walker.c tree_iterator.c tree_entry.c tree.c tag.c signature.c repository.c reference_manager.c reference.c rawobject.c odb.c object.c index_iterator.c index_entry.c index.c commit.c blob.c backend.c');
+        AC_DEFINE('HAVE_GIT', 1);
+        EXTENSION('git', 'php_git.c walker.c tree_iterator.c tree_entry.c tree.c tag.c signature.c repository.c reference_manager.c reference.c rawobject.c odb.c object.c index_iterator.c index_entry.c index.c commit.c blob.c backend.c');
     } else {
-		WARNING("phpgit not enabled; libraries and/or headers not found");
+        WARNING("phpgit not enabled; libraries and/or headers not found");
     }
 }
