@@ -29,8 +29,8 @@
 #include <string.h>
 #include <time.h>
 
-PHPAPI zend_class_entry *git_index_class_entry;
-PHPAPI zend_class_entry *git_index_iterator_class_entry;
+zend_class_entry *git_index_class_entry;
+zend_class_entry *git_index_iterator_class_entry;
 
 static void php_git_index_free_storage(php_git_index_t *obj TSRMLS_DC)
 {

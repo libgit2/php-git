@@ -28,7 +28,7 @@
 #include <string.h>
 #include <time.h>
 
-PHPAPI zend_class_entry *git_blob_class_entry;
+zend_class_entry *git_blob_class_entry;
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blob__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, repository)
@@ -113,8 +113,8 @@ PHP_METHOD(git_blob, setContent)
     }
     add_property_string_ex(getThis(), "data", sizeof("data"),string, 1 TSRMLS_CC);
 }
-/*
-PHPAPI function_entry php_git_blob_methods[] = {
+
+zend_function_entry php_git_blob_methods[] = {
     PHP_ME(git_blob, __construct, arginfo_git_blob__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_blob, setContent, arginfo_git_blob_set_content, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
@@ -129,4 +129,3 @@ void git_init_blob(TSRMLS_D)
     git_blob_class_entry->create_object = php_git_blob_new;
 
 }
-*/

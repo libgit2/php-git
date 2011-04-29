@@ -29,7 +29,7 @@
 #include <string.h>
 #include <time.h>
 
-PHPAPI zend_class_entry *git_signature_class_entry;
+zend_class_entry *git_signature_class_entry;
 
 void create_signature_from_commit(zval **signature, git_signature *sig);
 static void php_git_signature_free_storage(php_git_signature_t *obj TSRMLS_DC);

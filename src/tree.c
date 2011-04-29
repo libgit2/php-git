@@ -29,7 +29,7 @@
 #include <string.h>
 #include <time.h>
 
-PHPAPI zend_class_entry *git_tree_class_entry;
+zend_class_entry *git_tree_class_entry;
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, repository)

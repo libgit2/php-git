@@ -29,7 +29,7 @@
 #include <string.h>
 #include <time.h>
 
-PHPAPI zend_class_entry *git_backend_class_entry;
+zend_class_entry *git_backend_class_entry;
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_backend_read, 0, 0, 1)
     ZEND_ARG_INFO(0, key)
@@ -107,7 +107,7 @@ int php_git_backend__write(git_oid *id, git_odb_backend *_backend, git_rawobj *o
 
 
     MAKE_STD_ZVAL(params[0]);
-    object_init_ex(params[0],git_rawobject_class_entry);
+    object_init_ex(params[0], git_rawobject_class_entry);
 
     add_property_stringl_ex(params[0],"data",sizeof("data"),obj->data,obj->len,1 TSRMLS_CC);
     add_property_long(params[0],"type",obj->type);

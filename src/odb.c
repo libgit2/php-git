@@ -29,7 +29,7 @@
 #include <string.h>
 #include <time.h>
 
-PHPAPI zend_class_entry *git_odb_class_entry;
+zend_class_entry *git_odb_class_entry;
 
 int php_git_odb_add_backend(git_odb **odb, zval *backend, int priority);
 int php_git_odb_add_alternate(git_odb **odb, zval *backend, int priority);

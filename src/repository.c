@@ -29,7 +29,7 @@
 #include <string.h>
 #include <time.h>
 
-PHPAPI zend_class_entry *git_repository_class_entry;
+zend_class_entry *git_repository_class_entry;
 
 extern void create_signature_from_commit(zval **signature, const git_signature *sig);
 extern int php_git_odb_add_backend(git_odb **odb, zval *backend, int priority);

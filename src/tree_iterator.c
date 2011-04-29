@@ -31,7 +31,7 @@
 
 extern void create_tree_entry_from_entry(zval **object, git_tree_entry *entry);
 
-PHPAPI zend_class_entry *git_tree_iterator_class_entry;
+zend_class_entry *git_tree_iterator_class_entry;
 extern void php_tree_index_entry_create(zval **index, git_tree_entry *entry);
 
 static void php_git_tree_iterator_free_storage(php_git_tree_iterator_t *obj TSRMLS_DC)

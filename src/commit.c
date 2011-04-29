@@ -31,7 +31,7 @@
 extern void create_tree_entry_from_entry(zval **object, git_tree_entry *entry);
 extern zend_object_value php_git_repository_new(zend_class_entry *ce TSRMLS_DC);
 
-PHPAPI zend_class_entry *git_commit_class_entry;
+zend_class_entry *git_commit_class_entry;
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, repository)

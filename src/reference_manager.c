@@ -30,7 +30,7 @@
 #include <time.h>
 #undef lookup
 
-PHPAPI zend_class_entry *git_reference_manager_class_entry;
+zend_class_entry *git_reference_manager_class_entry;
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_reference_manager__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, repository)

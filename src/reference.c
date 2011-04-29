@@ -28,9 +28,9 @@
 #include <string.h>
 #include <time.h>
 
-PHPAPI zend_class_entry *git_reference_class_entry;
+zend_class_entry *git_reference_class_entry;
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_reference_set_name, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_reference_rename, 0, 0, 1)
     ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
@@ -41,11 +41,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_reference_set_oid, 0, 0, 1)
     ZEND_ARG_INFO(0, oid)
 ZEND_END_ARG_INFO()
-
+/*
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_reference__construct, 0, 0, 1)
     ZEND_ARG_INFO(0, repository)
 ZEND_END_ARG_INFO()
-    
+*/  
 static void php_git_reference_free_storage(php_git_reference_t *obj TSRMLS_DC)
 {
     if(obj->object){
@@ -111,7 +111,7 @@ PHP_METHOD(git_reference, getName)
     RETVAL_STRING(name, 1);
 }
 
-PHP_METHOD(git_reference, setName)
+PHP_METHOD(git_reference, rename)
 {
     php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     char *name;
@@ -122,10 +122,10 @@ PHP_METHOD(git_reference, setName)
         return;
     }
 
-    git_reference_set_name(this->object, name);
+    git_reference_rename(this->object, name);
     add_property_string_ex(getThis() ,"name",sizeof("name"),name, 1 TSRMLS_CC);
 }
-
+/*
 PHP_METHOD(git_reference, write)
 {
     php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -137,6 +137,7 @@ PHP_METHOD(git_reference, write)
     }
     RETURN_TRUE;
 }
+*/
 
 
 PHP_METHOD(git_reference, setTarget)
@@ -171,7 +172,7 @@ PHP_METHOD(git_reference, setOID)
     git_reference_set_oid(this->object, &out);
     add_property_string_ex(getThis() ,"oid",sizeof("oid"),oid, 1 TSRMLS_CC);
 }
-
+/*
 PHP_METHOD(git_reference, __construct)
 {
     php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -210,7 +211,7 @@ PHP_METHOD(git_reference, __construct)
         this->object = refs;
     }
 }
-
+*/
 PHP_METHOD(git_reference, getId)
 {
     php_git_reference_t *this = (php_git_reference_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -222,13 +223,13 @@ PHP_METHOD(git_reference, getId)
 }
 
 static zend_function_entry php_git_reference_methods[] = {
-    PHP_ME(git_reference, __construct, arginfo_git_reference__construct, ZEND_ACC_PUBLIC)
+    //PHP_ME(git_reference, __construct, arginfo_git_reference__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, getTarget,   NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, getType,     NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, getName,     NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, getId,       NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_reference, write,       NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_reference, setName,     arginfo_git_reference_set_name, ZEND_ACC_PUBLIC)
+    //PHP_ME(git_reference, write,       NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_reference, rename,     arginfo_git_reference_rename, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, setTarget,   arginfo_git_reference_set_target, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, setOID,      arginfo_git_reference_set_oid, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}

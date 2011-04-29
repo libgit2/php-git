@@ -55,25 +55,45 @@ extern zend_module_entry git_module_entry;
 #define phpext_git_ptr &git_module_entry;
 #define PHP_GIT_NS "Git"
 
-extern PHPAPI zend_class_entry *git_class_entry;
-extern PHPAPI zend_class_entry *git_reference_class_entry;
-extern PHPAPI zend_class_entry *git_reference_manager_class_entry;
-extern PHPAPI zend_class_entry *git_repository_class_entry;
-extern PHPAPI zend_class_entry *git_object_class_entry;
-extern PHPAPI zend_class_entry *git_index_class_entry;
-extern PHPAPI zend_class_entry *git_index_iterator_class_entry;
-extern PHPAPI zend_class_entry *git_index_entry_class_entry;
-extern PHPAPI zend_class_entry *git_walker_class_entry;
-extern PHPAPI zend_class_entry *git_tree_class_entry;
-extern PHPAPI zend_class_entry *git_tree_iterator_class_entry;
-extern PHPAPI zend_class_entry *git_tree_entry_class_entry;
-extern PHPAPI zend_class_entry *git_commit_class_entry;
-extern PHPAPI zend_class_entry *git_signature_class_entry;
-extern PHPAPI zend_class_entry *git_rawobject_class_entry;
-extern PHPAPI zend_class_entry *git_tag_class_entry;
-extern PHPAPI zend_class_entry *git_blob_class_entry;
-extern PHPAPI zend_class_entry *git_odb_class_entry;
-extern PHPAPI zend_class_entry *git_backend_class_entry;
+extern zend_class_entry *git_class_entry;
+extern zend_class_entry *git_reference_class_entry;
+extern zend_class_entry *git_reference_manager_class_entry;
+extern zend_class_entry *git_repository_class_entry;
+extern zend_class_entry *git_object_class_entry;
+extern zend_class_entry *git_index_class_entry;
+extern zend_class_entry *git_index_iterator_class_entry;
+extern zend_class_entry *git_index_entry_class_entry;
+extern zend_class_entry *git_walker_class_entry;
+extern zend_class_entry *git_tree_class_entry;
+extern zend_class_entry *git_tree_iterator_class_entry;
+extern zend_class_entry *git_tree_entry_class_entry;
+extern zend_class_entry *git_commit_class_entry;
+extern zend_class_entry *git_signature_class_entry;
+extern zend_class_entry *git_rawobject_class_entry;
+extern zend_class_entry *git_tag_class_entry;
+extern zend_class_entry *git_blob_class_entry;
+extern zend_class_entry *git_odb_class_entry;
+extern zend_class_entry *git_backend_class_entry;
+
+extern void git_init_backend(TSRMLS_D);
+extern void git_init_blob(TSRMLS_D);
+extern void git_init_commit(TSRMLS_D);
+extern void git_index_init(TSRMLS_D);
+extern void git_index_entry_init(TSRMLS_D);
+extern void git_index_iterator_init(TSRMLS_D);
+extern void git_init_object(TSRMLS_D);
+extern void git_init_odb(TSRMLS_D);
+extern void git_init_rawobject(TSRMLS_D);
+extern void git_init_reference(TSRMLS_D);
+extern void git_init_reference_manager(TSRMLS_D);
+extern void php_git_repository_init(TSRMLS_D);
+extern void git_init_tag(TSRMLS_D);
+extern void git_init_tree(TSRMLS_D);
+extern void git_init_tree_entry(TSRMLS_D);
+extern void git_tree_iterator_init(TSRMLS_D);
+extern void git_init_signature(TSRMLS_D);
+extern void git_init_walker(TSRMLS_D);
+
 
 typedef struct{
     zend_object zo;
