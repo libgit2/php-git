@@ -643,6 +643,20 @@ PHP_METHOD(git_repository, getWorkdir)
     }
 }
 
+PHP_METHOD(git_repository, empty)
+{
+    php_git_repository_t *this= (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    if (this->repository != NULL) {
+        if (git_repository_is_empty(this->repository)) {
+            RETURN_TRUE;
+        } else {
+            RETURN_FALSE;
+        }
+    } else {
+        RETURN_TRUE;
+    }
+}
+
 
 PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, __construct,   arginfo_git_construct,      ZEND_ACC_PUBLIC)
@@ -659,6 +673,7 @@ PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, open2,         arginfo_git_open2,          ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getReferences, arginfo_git_get_references, ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getWorkdir,    NULL,                       ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, empty,         NULL,                       ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
