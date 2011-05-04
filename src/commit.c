@@ -41,6 +41,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_get_parent, 0, 0, 1)
     ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_author, 0, 0, 1)
+    ZEND_ARG_INFO(0, author)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_committer, 0, 0, 1)
+    ZEND_ARG_INFO(0, committer)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_parents, 0, 0, 1)
+    ZEND_ARG_INFO(0, parents)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_message, 0, 0, 1)
+    ZEND_ARG_INFO(0, message)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_set_tree, 0, 0, 1)
+    ZEND_ARG_INFO(0, tree)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_commit_write, 0, 0, 1)
+    ZEND_ARG_INFO(0, update_ref)
+ZEND_END_ARG_INFO()
+
 static void php_git_commit_free_storage(php_git_commit_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
@@ -138,19 +162,175 @@ PHP_METHOD(git_commit, getTree)
     tobj->object = tree;
     tobj->repository = this->repository;
 
-/*
-    int r = git_tree_entrycount(tree);
-    int i = 0;
-
-    for(i; i < r; i++){
-        create_tree_entry_from_entry(&entry,git_tree_entry_byindex(tree,i));
-        add_next_index_zval(entries, entry);
-    }
-
-    add_property_zval(git_tree,"entries", entries);
-*/
     RETURN_ZVAL(git_tree,0,0);
 }
+
+PHP_METHOD(git_commit, setAuthor)
+{
+    php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    zval *author;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "z", &author) == FAILURE){
+        return;
+    }
+
+    if(!instanceof_function(Z_OBJCE_P(author), git_signature_class_entry TSRMLS_CC)){
+        fprintf(stderr,"Git\\Commit::setAuthor() requires Git\\Signature");
+        return;
+    }
+
+    add_property_zval(getThis(),"author", author);
+}
+
+PHP_METHOD(git_commit, setCommitter)
+{
+    php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    zval *committer;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "z", &committer) == FAILURE){
+        return;
+    }
+
+    if(!instanceof_function(Z_OBJCE_P(committer), git_signature_class_entry TSRMLS_CC)){
+        fprintf(stderr,"Git\\Commit::setCommitter() requires Git\\Signature");
+        return;
+    }
+
+    add_property_zval(getThis(),"committer", committer);
+}
+
+PHP_METHOD(git_commit, setTree)
+{
+    php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    char *tree;
+    int tree_len;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &tree,&tree_len) == FAILURE){
+        return;
+    }
+
+    add_property_string(getThis(),"tree", tree,1);
+}
+
+
+PHP_METHOD(git_commit, setParents)
+{
+    php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    zval *parents;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "z", &parents) == FAILURE){
+        return;
+    }
+
+    add_property_zval(getThis(),"parents", parents);
+}
+
+PHP_METHOD(git_commit, write)
+{
+    php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_oid oid;
+    php_git_signature_t *author;
+    php_git_signature_t *committer;
+
+    char *update_ref = NULL;
+    int update_ref_len = 0;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "|s", &update_ref,&update_ref_len) == FAILURE){
+        return;
+    }
+    
+    if(ZEND_NUM_ARGS() == 0) {
+        git_reference *ref;
+        if(git_reference_lookup(&ref,this->repository,"HEAD")==GIT_SUCCESS){
+            if (git_reference_type(ref) == GIT_REF_SYMBOLIC) {
+                git_reference *ref2;
+                git_reference_resolve(&ref2,ref);
+                update_ref = (char *)git_reference_name(ref2);
+            } else {
+                update_ref = (char *)git_reference_name(ref);
+            }
+        }
+    }
+
+
+    git_oid tree_oid;
+    char *tree_oid_str = Z_STRVAL_P(zend_read_property(git_commit_class_entry, getThis(),"tree",sizeof("tree")-1, 0 TSRMLS_CC));
+    git_oid_mkstr(&tree_oid, tree_oid_str);
+
+    zval *z_author = zend_read_property(git_commit_class_entry, getThis(),"author",sizeof("author")-1, 0 TSRMLS_CC);
+    author = (php_git_signature_t *) zend_object_store_get_object(z_author TSRMLS_CC);
+
+    zval *z_committer = zend_read_property(git_commit_class_entry, getThis(),"committer",sizeof("committer")-1, 0 TSRMLS_CC);
+    committer = (php_git_signature_t *) zend_object_store_get_object(z_committer TSRMLS_CC);
+    
+    zval *z_parents = zend_read_property(git_commit_class_entry, getThis(),"parents",sizeof("parents")-1, 0 TSRMLS_CC);
+
+    int count = zend_hash_num_elements(Z_ARRVAL_P(z_parents));
+
+
+    HashTable *array_hash = Z_ARRVAL_P(z_parents);
+    HashPosition pointer;
+    git_oid *tmp;
+    zval **data;
+    git_oid **p;
+    git_oid **parents = (git_oid**)calloc(count,sizeof(git_oid));
+    p = parents;
+
+    for (zend_hash_internal_pointer_reset_ex(array_hash, &pointer);
+        zend_hash_has_more_elements_ex(array_hash,&pointer) == SUCCESS;
+        zend_hash_move_forward_ex(array_hash,&pointer)
+    ) {
+        tmp = (git_oid *)malloc(sizeof(git_oid));
+        zend_hash_get_current_data_ex(array_hash, (void **)&data, &pointer);
+        git_oid_mkstr(tmp,Z_STRVAL_PP(data));
+
+        *p = tmp;
+        p++;
+    }
+    
+    char *message = Z_STRVAL_P(zend_read_property(git_commit_class_entry, getThis(),"message",sizeof("message")-1, 0 TSRMLS_CC));
+    git_commit_create(&oid,
+        this->repository,
+        update_ref,
+        author->signature,
+        committer->signature,
+        message,
+        &tree_oid,
+        count,
+        parents
+    );
+
+    char out[GIT_OID_HEXSZ+1];
+    git_oid_to_string(out,GIT_OID_HEXSZ+1,&oid);
+
+    int i;
+    for(i = 0; i < count;i++){
+        free(parents[i]);
+    }
+    free(parents);
+
+    RETVAL_STRING(out,1);
+}
+
+PHP_METHOD(git_commit, setMessage)
+{
+    php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    char *message;
+    int message_len;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &message,&message_len) == FAILURE){
+        return;
+    }
+
+    add_property_string(getThis(),"message", message, 1);
+}
+
 
 PHP_METHOD(git_commit, getAuthor)
 {
@@ -204,6 +384,12 @@ PHP_METHOD(git_commit, getParent)
 
 PHPAPI function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, __construct,     arginfo_git_commit__construct,   ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, setAuthor,       arginfo_git_commit_set_author,   ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, setCommitter,    arginfo_git_commit_set_committer,ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, setParents,      arginfo_git_commit_set_parents,  ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, setMessage,      arginfo_git_commit_set_message,  ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, setTree,         arginfo_git_commit_set_tree,     ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, write,           NULL,                            ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getTree,         NULL,                            ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getAuthor,       NULL,                            ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getCommitter,    NULL,                            ZEND_ACC_PUBLIC)
@@ -213,13 +399,16 @@ PHPAPI function_entry php_git_commit_methods[] = {
     {NULL, NULL, NULL}
 };
 
-void git_init_commit(TSRMLS_C)
+void git_init_commit(TSRMLS_D)
 {
-    zend_class_entry git_commit_ce;
-    INIT_NS_CLASS_ENTRY(git_commit_ce, PHP_GIT_NS,"Commit", php_git_commit_methods);
-
-    git_commit_class_entry = zend_register_internal_class_ex(&git_commit_ce,git_object_class_entry,NULL TSRMLS_CC);
+    zend_class_entry ce;
+    INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Commit", php_git_commit_methods);
+    git_commit_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
     git_commit_class_entry->create_object = php_git_commit_new;
+
     zend_declare_property_null(git_commit_class_entry, "author",   sizeof("author")-1,    ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(git_commit_class_entry, "committer",sizeof("committer")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_commit_class_entry, "parents",  sizeof("parents")-1,   ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_commit_class_entry, "message",  sizeof("message")-1,   ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_commit_class_entry, "tree",     sizeof("tree")-1,      ZEND_ACC_PUBLIC TSRMLS_CC);
 }
