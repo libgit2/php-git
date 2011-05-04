@@ -34,3 +34,5 @@ src/Makefile*
 src/modules
 src/ltmain.sh
 src/*.la
+src/tmp-php.ini
+src/php_test_results*

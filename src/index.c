@@ -279,6 +279,21 @@ PHP_METHOD(git_index, writeTree)
     RETVAL_STRING(out,1);
 }
 
+PHP_METHOD(git_index, write)
+{
+    php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    int ret = GIT_ERROR;
+
+    if (this->index != NULL) {
+        ret = git_index_write(this->index);
+        if(ret == GIT_SUCCESS) {
+            RETURN_TRUE
+        }
+    }
+
+    RETURN_FALSE;
+}
+
 /*
 PHP_METHOD(git_index, __construct)
 {
@@ -343,6 +358,7 @@ PHPAPI function_entry php_git_index_methods[] = {
     PHP_ME(git_index, refresh,     NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_index, update,      NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_index, writeTree,   NULL,                        ZEND_ACC_PUBLIC)
+    PHP_ME(git_index, write,       NULL,                        ZEND_ACC_PUBLIC)
     //PHP_ME(git_index, insert,      arginfo_git_index_insert,    ZEND_ACC_PUBLIC)
     // Countable
     PHP_ME(git_index, count,       NULL,                        ZEND_ACC_PUBLIC)

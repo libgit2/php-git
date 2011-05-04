@@ -23,8 +23,4 @@
         <arg value="install" />
     </exec>
   </target>
-
-  <target name="test">
-    <exec executable="phpunit" />
-  </target>
 </project>
