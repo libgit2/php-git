@@ -78,7 +78,7 @@ PHP_METHOD(git_odb, __construct)
     }
 }
 
-
+/*
 int php_git_odb_add_alternate(git_odb **odb, zval *backend, int priority)
 {
     TSRMLS_FETCH();
@@ -148,12 +148,12 @@ PHP_METHOD(git_odb, addAlternate)
     
     php_git_odb_add_alternate(&this->odb,backend, priority);
 }
-
+*/
 
 PHPAPI function_entry php_git_odb_methods[] = {
     PHP_ME(git_odb, __construct, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(git_odb, addBackend, arginfo_git_odb_add_backend, ZEND_ACC_PUBLIC)
-    PHP_ME(git_odb, addAlternate, arginfo_git_odb_add_backend, ZEND_ACC_PUBLIC)
+//    PHP_ME(git_odb, addBackend, arginfo_git_odb_add_backend, ZEND_ACC_PUBLIC)
+//    PHP_ME(git_odb, addAlternate, arginfo_git_odb_add_backend, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
