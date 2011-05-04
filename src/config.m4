@@ -29,7 +29,7 @@ if test $PHP_GIT != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(git2, $LIBGIT2_LIBDIR, GIT_SHARED_LIBADD)
 
   PHP_SUBST(GIT_SHARED_LIBADD)
-  PHP_NEW_EXTENSION(git,php_git.c backend.c reference.c reference_manager.c repository.c signature.c commit.c index_entry.c index_iterator.c index.c tree_builder.c tree_iterator.c tree.c blob.c tree_entry.c walker.c object.c tag.c odb.c, $ext_shared)
+  PHP_NEW_EXTENSION(git,php_git.c rawobject.c backend.c reference.c reference_manager.c repository.c signature.c commit.c index_entry.c index_iterator.c index.c tree_builder.c tree_iterator.c tree.c blob.c tree_entry.c walker.c object.c tag.c odb.c, $ext_shared)
 
   ifdef([PHP_ADD_EXTENSION_DEP],
   [

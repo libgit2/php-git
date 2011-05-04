@@ -18,7 +18,7 @@ class Memory extends \Git\Backend
        if(isset($this->memory[$key])){
            $obj = $this->memory[$key];
 
-           return new \Git\RawObject($obj->type,$obj->data,$obj->len);
+           return $obj;
        }else{
            return false;
        }
@@ -50,7 +50,7 @@ class Memory extends \Git\Backend
      */
     public function read_header($key){
        if(isset($this->memory[$key])){
-           return new \Git\RawObject($obj->type,"",$obj->len);
+           return $this->memory[$key];
        }
     }
 
@@ -76,16 +76,11 @@ class Memory extends \Git\Backend
      *
      * @param string $key  sha1 hash.
      * @param Git\RawObject $object.
-     * @return hash
+     * @return bool
      */
-    public function write($object){
-        $key = $object->getId();
-        $std = new \Stdclass();
-        $std->data = $object->data;
-        $std->type = $object->type;
-        $std->len = $object->len;
-        $this->memory[$key] = $std;
-        return $key;
+    public function write(Git\RawObject $object){
+        $this->memory[$object->getId()] = $object;
+        return true;
     }
 
     public function free()
