@@ -180,6 +180,7 @@ PHPAPI function_entry php_git_tree_builder_methods[] = {
     PHP_ME(git_tree_builder, add,         arginfo_git_tree_builder_add,       ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_builder, remove,      arginfo_git_tree_builder_remove,    ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_builder, write,       NULL,                               ZEND_ACC_PUBLIC)
+    {NULL,NULL,NULL}
 };
 
 void git_tree_builder_init(TSRMLS_D)

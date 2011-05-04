@@ -132,6 +132,7 @@ PHPAPI function_entry php_git_tree_iterator_methods[] = {
     PHP_ME(git_tree_iterator, next,        NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_iterator, rewind,      NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_iterator, valid,       NULL,                        ZEND_ACC_PUBLIC)
+    {NULL,NULL,NULL}
 };
 
 void git_tree_iterator_init(TSRMLS_D)
