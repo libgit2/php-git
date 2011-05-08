@@ -4,7 +4,8 @@ Check Git\Signature behavior
 <?php if (!extension_loaded("git")) print "skip"; ?>
 --FILE--
 <?php
- $signature = new Git\Signature("Name","sample@example.com",new Datetime("@1294147094"));
+date_default_timezone_set("Asia/Tokyo");
+$signature = new Git\Signature("Name","sample@example.com",new Datetime("@1294147094"));
  
 echo $signature->name . PHP_EOL;
 echo $signature->email . PHP_EOL;
