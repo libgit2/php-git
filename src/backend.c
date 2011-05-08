@@ -57,8 +57,11 @@ void php_git_backend__free(git_odb_backend *backend);
 static void php_git_backend_free_storage(php_git_backend_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
+    
     if(obj->backend) {
         php_git_backend_internal *backend = obj->backend;
+        efree(obj->backend);
+        obj->backend = NULL;
     }
     efree(obj);
 }
@@ -167,6 +170,7 @@ int php_git_backend__read(void **buffer,size_t size, git_otype *type, git_odb_ba
     php_git_backend_internal *object = (php_git_backend_internal *)_backend;
     char out[GIT_OID_HEXSZ+1] = {0};
     git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);
+    int result = GIT_ERROR;
 
     zval *retval;
     zval *params[1];
@@ -183,12 +187,19 @@ int php_git_backend__read(void **buffer,size_t size, git_otype *type, git_odb_ba
     if(call_user_function(NULL,&object->self,&func,retval,1,params TSRMLS_CC) == FAILURE){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "can't call read method");
-        return GIT_ERROR;
+        result =  GIT_ERROR;
+        goto cleanup;
+    }
+
+    if(Z_BVAL_P(retval) == false) {
+        result =  GIT_ERROR;
+        goto cleanup;
     }
 
     if(!instanceof_function(Z_OBJCE_P(retval), git_rawobject_class_entry TSRMLS_CC)){
         fprintf(stderr,"read interface must return Git\\RawObject");
-        return GIT_ENOTFOUND;
+        result =  GIT_ERROR;
+        goto cleanup;
     }
 
     zval *str = zend_read_property(git_rawobject_class_entry, retval,"data",4, 0 TSRMLS_CC);
@@ -199,12 +210,15 @@ int php_git_backend__read(void **buffer,size_t size, git_otype *type, git_odb_ba
     memcpy(buffer,Z_STRVAL_P(str),Z_LVAL_P(len));
     type = Z_LVAL_P(tp);
     size = Z_LVAL_P(len);
-    
+
+    result = GIT_SUCCESS;
+
+
+cleanup:
     zval_ptr_dtor(&retval);
     zval_ptr_dtor(&params[0]);
     zval_dtor(&func);
-    
-    return GIT_SUCCESS;
+    return result;
 }
 
 int php_git_backend__read_header(size_t size, git_otype *type, git_odb_backend *_backend, const git_oid *oid)

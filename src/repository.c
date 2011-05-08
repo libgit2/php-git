@@ -420,7 +420,7 @@ PHP_METHOD(git_repository, getWalker)
     RETURN_ZVAL(walker_object,0,1);
 }
 
-/*
+
 PHP_METHOD(git_repository, addAlternate)
 {
     php_git_repository_t *this = (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -464,7 +464,7 @@ PHP_METHOD(git_repository, addBackend)
     odb = git_repository_database(this->repository);
     int ret = php_git_odb_add_backend(&odb, backend, priority);
 }
-*/
+
 
 PHP_METHOD(git_repository, lookupRef)
 {
@@ -683,8 +683,8 @@ PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, getWalker,     arginfo_git_walker,         ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getTree,       arginfo_git_get_tree,       ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, init,          arginfo_git_init,           ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-    //PHP_ME(git_repository, addBackend,    arginfo_git_add_backend,    ZEND_ACC_PUBLIC)
-    //PHP_ME(git_repository, addAlternate,  arginfo_git_add_alternate,  ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, addBackend,    arginfo_git_add_backend,    ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, addAlternate,  arginfo_git_add_alternate,  ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, open3,         arginfo_git_open3,          ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, open2,         arginfo_git_open2,          ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getReferences, arginfo_git_get_references, ZEND_ACC_PUBLIC)
