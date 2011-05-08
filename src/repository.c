@@ -401,7 +401,7 @@ PHP_METHOD(git_repository, getWalker)
     php_git_walker_t *wobj = (php_git_walker_t *) zend_object_store_get_object(walker_object TSRMLS_CC);
     wobj->walker = walk;
 
-    RETURN_ZVAL(walker_object,0,0);
+    RETURN_ZVAL(walker_object,0,1);
 }
 
 /*
