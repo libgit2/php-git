@@ -119,7 +119,8 @@ void create_signature_from_commit(zval **signature, git_signature *sig)
     ZVAL_LONG(params[0],sig->when.time);
     call_user_function(NULL,&datetime,&method,&result,1,params TSRMLS_CC);
     add_property_zval(*signature,  "time", datetime);
-    
+
+    zval_ptr_dtor(&datetime);
     zval_ptr_dtor(&params[0]);
 }
 

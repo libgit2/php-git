@@ -266,7 +266,7 @@ PHP_METHOD(git_repository, getCommit)
     git_odb *odb;
     git_object *blob;
     git_oid oid;
-    char out[41] = {0};
+    char out[GIT_OID_HEXSZ+1] = {0};
     char *hash;
     int hash_len = 0;
     int ret = 0;
@@ -305,10 +305,25 @@ PHP_METHOD(git_repository, getCommit)
             add_property_zval(git_commit_object,"author", author);
             add_property_zval(git_commit_object,"committer", committer);
 
-            RETURN_ZVAL(git_commit_object,1,0);
-            efree(git_commit_object);
-            efree(author);
-            efree(committer);
+            add_property_string_ex(git_commit_object,"tree",sizeof("tree"),git_oid_allocfmt(git_commit_tree_oid(commit)), 1 TSRMLS_CC);
+
+            int parent_count = git_commit_parentcount(commit);
+            int i;
+            zval *parents;
+
+            MAKE_STD_ZVAL(parents);
+            array_init(parents);
+            for (i = 0; i < parent_count; i++) {
+                add_next_index_string(parents,git_oid_allocfmt(git_commit_parent_oid(commit,i)),1);
+            }
+            
+            add_property_string_ex(git_commit_object,"message",sizeof("message"),git_commit_message(commit), 1 TSRMLS_CC);
+            add_property_zval_ex(git_commit_object,"parents",sizeof("parents"),parents TSRMLS_CC);
+
+            RETVAL_ZVAL(git_commit_object,0,1);
+            zval_ptr_dtor(&parents);
+            zval_ptr_dtor(&author);
+            zval_ptr_dtor(&committer);
         }else{
             RETURN_FALSE;
         }

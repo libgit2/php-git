@@ -121,6 +121,7 @@ PHP_METHOD(git_walker, push)
     git_revwalk_push(walker,&oid);
 }
 
+
 PHP_METHOD(git_walker, next)
 {
     zval *git_commit_object;
@@ -130,6 +131,7 @@ PHP_METHOD(git_walker, next)
     git_commit *commit;
     git_revwalk *walker;
     git_signature *signature;
+    zval *parents;
 
     php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     walker = myobj->walker;
@@ -158,7 +160,22 @@ PHP_METHOD(git_walker, next)
     add_property_zval(git_commit_object,"author", author);
     add_property_zval(git_commit_object,"committer", committer);
 
-    RETURN_ZVAL(git_commit_object,0,0);
+    
+    add_property_string_ex(git_commit_object,"tree",sizeof("tree"),git_oid_allocfmt(git_commit_tree_oid(commit)), 1 TSRMLS_CC);
+
+    int parent_count = git_commit_parentcount(commit);
+    int i;
+
+    MAKE_STD_ZVAL(parents);
+    array_init(parents);
+    for (i = 0; i < parent_count; i++) {
+        add_next_index_string(parents,git_oid_allocfmt(git_commit_parent_oid(commit,i)),1);
+    }
+    
+    add_property_string_ex(git_commit_object,"message",sizeof("message"),git_commit_message(commit), 1 TSRMLS_CC);
+    add_property_zval_ex(git_commit_object,"parents",sizeof("parents"),parents TSRMLS_CC);
+
+    RETURN_ZVAL(git_commit_object,0,1);
 }
 
 
