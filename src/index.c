@@ -147,7 +147,7 @@ PHP_METHOD(git_index, find)
         return;
     }
     php_git_index_entry_create(&z_git_index_entry, entry);
-    RETURN_ZVAL(z_git_index_entry,0,0);
+    RETURN_ZVAL(z_git_index_entry,0,1);
 }
 
 PHP_METHOD(git_index, getEntry)
@@ -164,7 +164,7 @@ PHP_METHOD(git_index, getEntry)
 
     entry = git_index_get(this->index,offset);
     php_git_index_entry_create(&git_index_entry, entry);
-    RETURN_ZVAL(git_index_entry,0, 0);
+    RETURN_ZVAL(git_index_entry,0, 1);
 }
 
 PHP_METHOD(git_index, add)
@@ -259,7 +259,7 @@ PHP_METHOD(git_index, getIterator)
     php_git_index_iterator_t *obj = (php_git_index_iterator_t *) zend_object_store_get_object(iterator TSRMLS_CC);
     obj->index = this->index;
     obj->offset = 0;
-    RETURN_ZVAL(iterator,0,0);
+    RETURN_ZVAL(iterator,0,1);
 }
 
 PHP_METHOD(git_index, writeTree)
