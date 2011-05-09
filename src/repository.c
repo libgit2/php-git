@@ -94,8 +94,7 @@ ZEND_END_ARG_INFO()
 static void php_git_repository_free_storage(php_git_repository_t *obj TSRMLS_DC)
 {
     zval **data;
-    if(zend_hash_exists(obj->zo.properties,"odb",sizeof("odb"))) {
-        zend_hash_find(obj->zo.properties,"odb",sizeof("odb"),(void **)&data);
+    if(zend_hash_find(obj->zo.properties,"odb",sizeof("odb"),(void **)&data) == SUCCESS) {
         zval_ptr_dtor(data);
         //zend_hash_del(obj->zo.properties,"odb",sizeof("odb"));
     }
@@ -363,12 +362,16 @@ PHP_METHOD(git_repository, __construct)
         }
         myobj->repository = repository;
         add_property_string_ex(object, "path",sizeof("path"),(char *)repository_path, 1 TSRMLS_CC);
-        
+
         MAKE_STD_ZVAL(odb);
         object_init_ex(odb,git_odb_class_entry);
         php_git_odb_t *odb_t = (php_git_odb_t *) zend_object_store_get_object(odb TSRMLS_CC);
         odb_t->odb = git_repository_database(myobj->repository);
 
+
+        zval *backends;
+        array_init(backends);
+        add_property_zval_ex(odb,"backends",sizeof("backends"),backends TSRMLS_CC);
         add_property_zval_ex(object, "odb",sizeof("odb"),odb TSRMLS_CC);
     }else{
         myobj->repository = NULL;
@@ -464,6 +467,7 @@ PHP_METHOD(git_repository, addBackend)
     zval *backend;
     git_odb *odb;
     git_odb_backend *odb_backend;
+    zval **data;
     int priority = 0;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &backend, &priority) == FAILURE){
@@ -474,9 +478,20 @@ PHP_METHOD(git_repository, addBackend)
             "parameter does not extends Git\\Backend");
         return;
     }
-    
-    odb = git_repository_database(this->repository);
-    int ret = php_git_odb_add_backend(&odb, backend, priority);
+
+    if(zend_hash_exists(Z_OBJPROP_P(getThis()),"odb",sizeof("odb"))) {
+        if (zend_hash_find(Z_OBJPROP_P(getThis()),"odb",sizeof("odb"),(void **)&data) == SUCCESS) {
+            php_git_odb_t *odb_t = (php_git_odb_t *) zend_object_store_get_object(*data TSRMLS_CC);
+            php_git_odb_add_backend(&odb_t->odb,backend, priority);
+            
+            zval **hash;
+            if (zend_hash_find(Z_OBJPROP_P(*data),"backends",sizeof("backends"),(void **)&hash) == SUCCESS) {
+                add_next_index_zval(*hash,backend);
+            }
+        } else {
+            RETURN_FALSE;
+        }
+    }
 }
 
 

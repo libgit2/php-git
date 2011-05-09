@@ -40,6 +40,24 @@ ZEND_END_ARG_INFO()
 
 static void php_git_odb_free_storage(php_git_odb_t *obj TSRMLS_DC)
 {
+    zval **data;
+    if(zend_hash_find(obj->zo.properties,"backends",sizeof("backends"),(void **)&data) == SUCCESS) {
+        int count = zend_hash_num_elements(Z_ARRVAL_P(*data));
+        HashTable *array_hash = Z_ARRVAL_P(*data);
+        HashPosition pointer;
+        zval **val;
+
+        for (zend_hash_internal_pointer_reset_ex(array_hash, &pointer);
+            zend_hash_has_more_elements_ex(array_hash,&pointer) == SUCCESS;
+            zend_hash_move_forward_ex(array_hash,&pointer)
+        ) {
+            zend_hash_get_current_data_ex(array_hash, (void **)&val, &pointer);
+            zval_ptr_dtor(val);
+        }
+
+        zval_ptr_dtor(data);
+    }
+
     if(obj->odb != NULL){
         obj->odb = NULL;
     }
@@ -70,11 +88,17 @@ PHP_METHOD(git_odb, __construct)
 {
     php_git_odb_t *this = (php_git_odb_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_odb *odb;
+    zval *backends;
+    
     int ret = 0;
     ret = git_odb_new(&this->odb);
     if(ret != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"can't create Git\\ODB");
     }
+    
+    MAKE_STD_ZVAL(backends);
+    array_init(backends);
+    add_property_zval_ex(getThis(),"backends",sizeof("backends"),backends TSRMLS_CC);
 }
 
 
@@ -162,4 +186,6 @@ void git_init_odb(TSRMLS_D)
     INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"ODB", php_git_odb_methods);
     git_odb_class_entry = zend_register_internal_class_ex(&ce, git_odb_class_entry,NULL TSRMLS_CC);
     git_odb_class_entry->create_object = php_git_odb_new;
+
+    zend_declare_property_null(git_odb_class_entry, "backends",sizeof("backends")-1,ZEND_ACC_PUBLIC TSRMLS_CC);
 }
