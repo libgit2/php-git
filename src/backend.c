@@ -321,4 +321,6 @@ void git_init_backend(TSRMLS_D)
     INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Backend", php_git_backend_methods);
     git_backend_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
     git_backend_class_entry->create_object = php_git_backend_new;
+
+    zend_declare_property_null(git_backend_class_entry, "backends",sizeof("backends")-1,ZEND_ACC_PUBLIC TSRMLS_CC);
 }

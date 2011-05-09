@@ -40,11 +40,10 @@ ZEND_END_ARG_INFO()
 
 static void php_git_odb_free_storage(php_git_odb_t *obj TSRMLS_DC)
 {
-    zend_object_std_dtor(&obj->zo TSRMLS_CC);
-
-    if(obj->odb){
+    if(obj->odb != NULL){
         obj->odb = NULL;
     }
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
 
     efree(obj);
 }

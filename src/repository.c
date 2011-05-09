@@ -93,7 +93,13 @@ ZEND_END_ARG_INFO()
 
 static void php_git_repository_free_storage(php_git_repository_t *obj TSRMLS_DC)
 {
-    // if added some backend. free backend before free zend_object.
+    zval **data;
+    if(zend_hash_exists(obj->zo.properties,"odb",sizeof("odb"))) {
+        zend_hash_find(obj->zo.properties,"odb",sizeof("odb"),(void **)&data);
+        zval_ptr_dtor(data);
+        //zend_hash_del(obj->zo.properties,"odb",sizeof("odb"));
+    }
+    
     if(obj->repository){
         git_repository_free(obj->repository);
         obj->repository = NULL;
@@ -339,6 +345,7 @@ PHP_METHOD(git_repository, __construct)
     int arg_len = 0;
     git_repository *repository;
     zval *object = getThis();
+    zval *odb;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "|s", &repository_path, &arg_len) == FAILURE){
@@ -356,6 +363,13 @@ PHP_METHOD(git_repository, __construct)
         }
         myobj->repository = repository;
         add_property_string_ex(object, "path",sizeof("path"),(char *)repository_path, 1 TSRMLS_CC);
+        
+        MAKE_STD_ZVAL(odb);
+        object_init_ex(odb,git_odb_class_entry);
+        php_git_odb_t *odb_t = (php_git_odb_t *) zend_object_store_get_object(odb TSRMLS_CC);
+        odb_t->odb = git_repository_database(myobj->repository);
+
+        add_property_zval_ex(object, "odb",sizeof("odb"),odb TSRMLS_CC);
     }else{
         myobj->repository = NULL;
     }
@@ -673,12 +687,26 @@ PHP_METHOD(git_repository, empty)
     }
 }
 
+PHP_METHOD(git_repository, getOdb)
+{
+    zval *obj = getThis();
+    HashTable *hash = Z_OBJPROP_P(obj);
+    zval **odb;
+
+    if(zend_hash_exists(hash,"odb",sizeof("odb"))) {
+        if(zend_hash_find(hash,"odb",sizeof("odb"),(void *)&odb) == SUCCESS) {
+            RETURN_ZVAL(*odb,0,0);
+        }
+    }
+}
+
 
 PHPAPI function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, __construct,   arginfo_git_construct,      ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getCommit,     arginfo_git_get_commit,     ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getObject,     arginfo_git_get_object,     ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getIndex,      NULL,                       ZEND_ACC_PUBLIC)
+    PHP_ME(git_repository, getOdb,        NULL,                       ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, lookupRef,     arginfo_git_lookup_ref,     ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getWalker,     arginfo_git_walker,         ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getTree,       arginfo_git_get_tree,       ZEND_ACC_PUBLIC)
@@ -699,4 +727,6 @@ void php_git_repository_init(TSRMLS_D)
     INIT_NS_CLASS_ENTRY(ce, PHP_GIT_NS,"Repository", php_git_repository_methods);
     git_repository_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
     git_repository_class_entry->create_object = php_git_repository_new;
+
+    zend_declare_property_null(git_repository_class_entry, "odb",sizeof("odb")-1,ZEND_ACC_PUBLIC TSRMLS_CC);
 }
