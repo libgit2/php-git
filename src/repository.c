@@ -94,10 +94,14 @@ ZEND_END_ARG_INFO()
 static void php_git_repository_free_storage(php_git_repository_t *obj TSRMLS_DC)
 {
     zval **data;
-    if(zend_hash_find(obj->zo.properties,"odb",sizeof("odb"),(void **)&data) == SUCCESS) {
+    char *prop_name;
+    int prop_name_len;
+    zend_mangle_property_name(&prop_name, &prop_name_len, "*", 1, "odb", sizeof("odb"), 0);
+    if(zend_hash_find(obj->zo.properties,prop_name,prop_name_len,(void **)&data) == SUCCESS) {
         zval_ptr_dtor(data);
         //zend_hash_del(obj->zo.properties,"odb",sizeof("odb"));
     }
+    efree(prop_name);
     
     if(obj->repository != NULL){
         git_repository_free(obj->repository);
@@ -165,7 +169,12 @@ PHP_METHOD(git_repository, init)
     MAKE_STD_ZVAL(backends);
     array_init(backends);
     add_property_zval_ex(odb,"backends",sizeof("backends"),backends TSRMLS_CC);
-    add_property_zval_ex(obj, "odb",sizeof("odb"),odb TSRMLS_CC);
+
+    char *prop_name;
+    int prop_name_len;
+    zend_mangle_property_name(&prop_name, &prop_name_len, "*", 1, "odb", sizeof("odb"), 0);
+    add_property_zval_ex(obj, prop_name,prop_name_len,odb TSRMLS_CC);
+    efree(prop_name);
 
     RETVAL_ZVAL(obj, 1, 1);
 }
@@ -385,7 +394,14 @@ PHP_METHOD(git_repository, __construct)
         zval *backends;
         array_init(backends);
         add_property_zval_ex(odb,"backends",sizeof("backends"),backends TSRMLS_CC);
-        add_property_zval_ex(object, "odb",sizeof("odb"),odb TSRMLS_CC);
+
+        char *prop_name;
+        long prop_len = 0;
+
+        zend_mangle_property_name(&prop_name, &prop_len, "*", 1, "odb", sizeof("odb"), 0);
+        HashTable *prop = Z_OBJPROP_P(object);
+        zend_hash_update(prop,prop_name,prop_len, &odb, sizeof(zval *), NULL);
+        efree(prop_name);
     }else{
         myobj->repository = NULL;
     }
@@ -720,12 +736,15 @@ PHP_METHOD(git_repository, getOdb)
     zval *obj = getThis();
     HashTable *hash = Z_OBJPROP_P(obj);
     zval **odb;
-
-    if(zend_hash_exists(hash,"odb",sizeof("odb"))) {
-        if(zend_hash_find(hash,"odb",sizeof("odb"),(void *)&odb) == SUCCESS) {
-            RETURN_ZVAL(*odb,0,0);
+    char *prop_name;
+    int prop_name_len;
+    zend_mangle_property_name(&prop_name, &prop_name_len, "*", 1, "odb", sizeof("odb"), 0);
+    if(zend_hash_exists(hash,prop_name,prop_name_len)) {
+        if(zend_hash_find(hash,prop_name,prop_name_len,(void *)&odb) == SUCCESS) {
+            RETVAL_ZVAL(*odb,0,0);
         }
     }
+    efree(prop_name);
 }
 
 
@@ -756,5 +775,5 @@ void php_git_repository_init(TSRMLS_D)
     git_repository_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
     git_repository_class_entry->create_object = php_git_repository_new;
 
-    zend_declare_property_null(git_repository_class_entry, "odb",sizeof("odb")-1,ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_repository_class_entry, "odb",sizeof("odb")-1,ZEND_ACC_PROTECTED TSRMLS_CC);
 }
