@@ -191,7 +191,7 @@ int php_git_backend__read(void **buffer,size_t size, git_otype *type, git_odb_ba
         goto cleanup;
     }
 
-    if(Z_BVAL_P(retval) == false) {
+    if(Z_BVAL_P(retval) == 0) {
         result =  GIT_ERROR;
         goto cleanup;
     }
