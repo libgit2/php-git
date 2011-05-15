@@ -80,32 +80,19 @@ PHP_METHOD(git_tree_entry, toObject)
             blobobj->object = (git_blob *)object;
 
             add_property_stringl_ex(git_raw_object,"data", sizeof("data"), (char *)git_blob_rawcontent((git_blob *)object),git_blob_rawsize((git_blob *)object), 1 TSRMLS_CC);
-            RETURN_ZVAL(git_raw_object,0,0);
+            RETURN_ZVAL(git_raw_object,0,1);
         } else if(type == GIT_OBJ_TREE) {
             git_tree *tree = (git_tree *)object;
+
             zval *git_tree;
-            zval *entries;
             MAKE_STD_ZVAL(git_tree);
-            MAKE_STD_ZVAL(entries);
-            array_init(entries);
             object_init_ex(git_tree, git_tree_class_entry);
 
-            int r = git_tree_entrycount(tree);
-            int i = 0;
-            char buf[GIT_OID_HEXSZ+1] = {0};
-            char *offset;
-            git_oid *moid;
-            zval *array_ptr;
-
-            for(i; i < r; i++){
-                create_tree_entry_from_entry(&array_ptr, git_tree_entry_byindex(tree,i),this->repository);
-                add_next_index_zval(entries,  array_ptr);
-            }
             php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
             tobj->object = tree;
             tobj->repository = this->repository;
-            add_property_zval(git_tree,"entries", entries);
-            RETURN_ZVAL(git_tree,0,0);
+
+            RETURN_ZVAL(git_tree,0,1);
 
         } else{
             zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
