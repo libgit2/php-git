@@ -170,6 +170,11 @@ int git_tree_entry_resolve_byname(git_tree_entry **object, git_tree *tree, git_r
         position++;
     }
     *object = entry;
+    if(entry == NULL) {
+        return GIT_ERROR;
+    } else {
+        return GIT_SUCCESS;
+    }
 }
 
 

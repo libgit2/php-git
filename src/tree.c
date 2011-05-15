@@ -229,6 +229,7 @@ PHP_METHOD(git_tree, resolve)
     git_tree_entry *entry;
     git_object *object;
     git_otype type;
+    int ret;
     char *path;
     int path_len;
 
@@ -237,9 +238,15 @@ PHP_METHOD(git_tree, resolve)
         return;
     }
 
-    git_tree_entry_resolve_byname(&entry, this->object, this->repository, path);
+    ret = git_tree_entry_resolve_byname(&entry, this->object, this->repository, path);
+    if(ret != GIT_SUCCESS) {
+        RETURN_FALSE;
+    }
 
-    int ret = git_tree_entry_2object(&object, this->repository, entry);
+    ret = git_tree_entry_2object(&object, this->repository, entry);
+    if(ret != GIT_SUCCESS) {
+        RETURN_FALSE;
+    }
 
     type = git_object_type(object);
     if (type == GIT_OBJ_BLOB) {
