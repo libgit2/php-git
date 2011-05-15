@@ -254,10 +254,10 @@ void create_tree_entry_from_entry(zval **object, git_tree_entry *entry, git_repo
 
 PHP_METHOD(git_repository, getCommit)
 {
-    zval *object = getThis();
+    php_git_repository_t *this = (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     zval *git_commit_object;
-    php_git_tree_entry_t *entry_obj;
     git_repository *repository;
+
     git_odb *odb;
     git_object *blob;
     git_oid oid;
@@ -272,53 +272,14 @@ PHP_METHOD(git_repository, getCommit)
     }
     
     git_oid_mkstr(&oid, hash);
-    
-    php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
-    repository = myobj->repository;
-    odb = git_repository_database(repository);
-    
+    odb = git_repository_database(this->repository);
     if(!git_odb_exists(odb,&oid)){
         RETURN_FALSE;
     }else{
-        ret = git_object_lookup((git_object **)&blob, repository,&oid , GIT_OBJ_COMMIT);
-        
+        ret = git_object_lookup((git_object **)&blob, this->repository,&oid , GIT_OBJ_COMMIT);
         if(ret == GIT_SUCCESS){
-            zval *author;
-            zval *committer;
-            git_commit *commit = (git_commit *)blob;
-
-            create_signature_from_commit(&author, git_commit_author(commit));
-            create_signature_from_commit(&committer, git_commit_committer(commit));
-            
-            MAKE_STD_ZVAL(git_commit_object);
-            object_init_ex(git_commit_object,git_commit_class_entry);
-
-            php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(git_commit_object TSRMLS_CC);
-            cobj->object = commit;
-            cobj->repository = repository;
-
-            add_property_zval(git_commit_object,"author", author);
-            add_property_zval(git_commit_object,"committer", committer);
-
-            add_property_string_ex(git_commit_object,"tree",sizeof("tree"),git_oid_allocfmt(git_commit_tree_oid(commit)), 1 TSRMLS_CC);
-
-            int parent_count = git_commit_parentcount(commit);
-            int i;
-            zval *parents;
-
-            MAKE_STD_ZVAL(parents);
-            array_init(parents);
-            for (i = 0; i < parent_count; i++) {
-                add_next_index_string(parents,git_oid_allocfmt(git_commit_parent_oid(commit,i)),1);
-            }
-            
-            add_property_string_ex(git_commit_object,"message",sizeof("message"),git_commit_message(commit), 1 TSRMLS_CC);
-            add_property_zval_ex(git_commit_object,"parents",sizeof("parents"),parents TSRMLS_CC);
-
+            php_git_commit_init(&git_commit_object, (git_commit*)blob, this->repository TSRMLS_CC);
             RETVAL_ZVAL(git_commit_object,0,1);
-            zval_ptr_dtor(&parents);
-            zval_ptr_dtor(&author);
-            zval_ptr_dtor(&committer);
         }else{
             RETURN_FALSE;
         }

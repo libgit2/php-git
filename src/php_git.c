@@ -63,7 +63,7 @@ int php_git_add_protected_property_zval_ex(zval *object, char *name, int name_le
     zend_mangle_property_name(&key,&length,"*",1,name,name_length,0);
     zend_hash_update(Z_OBJPROP_P(object),key,length,&data,sizeof(zval *),NULL);
     efree(key);
-    
+
     return SUCCESS;
 }
 
@@ -96,6 +96,37 @@ int php_git_odb_init(zval **object, git_odb *database TSRMLS_DC)
     php_git_add_protected_property_zval_ex(*object,"backends",sizeof("backends"),backends TSRMLS_CC);
 
     return SUCCESS;
+}
+
+void php_git_commit_init(zval **object, git_commit *commit, git_repository *repository TSRMLS_DC)
+{
+    zval *author, *committer;
+
+    MAKE_STD_ZVAL(*object);
+    object_init_ex(*object,git_commit_class_entry);
+
+    create_signature_from_commit(&author, git_commit_author(commit));
+    create_signature_from_commit(&committer, git_commit_committer(commit));
+
+    php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(*object TSRMLS_CC);
+    cobj->object = commit;
+    cobj->repository = repository;
+
+
+    int parent_count = git_commit_parentcount(commit);
+    int i;
+    zval *parents;
+    MAKE_STD_ZVAL(parents);
+    array_init(parents);
+    for (i = 0; i < parent_count; i++) {
+        add_next_index_string(parents,git_oid_allocfmt(git_commit_parent_oid(commit,i)),1);
+    }
+    
+    php_git_add_protected_property_zval_ex(*object,"author",sizeof("author"),author TSRMLS_CC);
+    php_git_add_protected_property_zval_ex(*object,"committer",sizeof("committer"),committer TSRMLS_CC);
+    php_git_add_protected_property_string_ex(*object,"tree",sizeof("tree"),git_oid_allocfmt(git_commit_tree_oid(commit)),1 TSRMLS_CC);
+    php_git_add_protected_property_string_ex(*object,"message",sizeof("message"),git_commit_message(commit), 1 TSRMLS_CC);
+    php_git_add_protected_property_zval_ex(*object,"parents",sizeof("parents"),parents TSRMLS_CC);
 }
 
 

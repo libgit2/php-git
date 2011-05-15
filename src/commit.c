@@ -406,9 +406,9 @@ void git_init_commit(TSRMLS_D)
     git_commit_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
     git_commit_class_entry->create_object = php_git_commit_new;
 
-    zend_declare_property_null(git_commit_class_entry, "author",   sizeof("author")-1,    ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_commit_class_entry, "committer",sizeof("committer")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_commit_class_entry, "parents",  sizeof("parents")-1,   ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_commit_class_entry, "message",  sizeof("message")-1,   ZEND_ACC_PUBLIC TSRMLS_CC);
-    zend_declare_property_null(git_commit_class_entry, "tree",     sizeof("tree")-1,      ZEND_ACC_PUBLIC TSRMLS_CC);
+    zend_declare_property_null(git_commit_class_entry, "author",   sizeof("author")-1,    ZEND_ACC_PROTECTED TSRMLS_CC);
+    zend_declare_property_null(git_commit_class_entry, "committer",sizeof("committer")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
+    zend_declare_property_null(git_commit_class_entry, "parents",  sizeof("parents")-1,   ZEND_ACC_PROTECTED TSRMLS_CC);
+    zend_declare_property_null(git_commit_class_entry, "message",  sizeof("message")-1,   ZEND_ACC_PROTECTED TSRMLS_CC);
+    zend_declare_property_null(git_commit_class_entry, "tree",     sizeof("tree")-1,      ZEND_ACC_PROTECTED TSRMLS_CC);
 }

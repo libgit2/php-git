@@ -141,39 +141,7 @@ PHP_METHOD(git_walker, next)
         RETURN_FALSE;
     }
     git_object_lookup((git_object **)&commit, git_revwalk_repository(walker), &oid, GIT_OBJ_COMMIT);
-
-    MAKE_STD_ZVAL(git_commit_object);
-    object_init_ex(git_commit_object,git_commit_class_entry);
-
-    zval *author;
-    zval *committer;
-
-    create_signature_from_commit(&author, git_commit_author(commit));
-    create_signature_from_commit(&committer, git_commit_committer(commit));
-    
-    MAKE_STD_ZVAL(git_commit_object);
-    object_init_ex(git_commit_object,git_commit_class_entry);
-
-    php_git_commit_t *cobj = (php_git_commit_t *) zend_object_store_get_object(git_commit_object TSRMLS_CC);
-    cobj->object = commit;
-
-    add_property_zval(git_commit_object,"author", author);
-    add_property_zval(git_commit_object,"committer", committer);
-
-    
-    add_property_string_ex(git_commit_object,"tree",sizeof("tree"),git_oid_allocfmt(git_commit_tree_oid(commit)), 1 TSRMLS_CC);
-
-    int parent_count = git_commit_parentcount(commit);
-    int i;
-
-    MAKE_STD_ZVAL(parents);
-    array_init(parents);
-    for (i = 0; i < parent_count; i++) {
-        add_next_index_string(parents,git_oid_allocfmt(git_commit_parent_oid(commit,i)),1);
-    }
-    
-    add_property_string_ex(git_commit_object,"message",sizeof("message"),git_commit_message(commit), 1 TSRMLS_CC);
-    add_property_zval_ex(git_commit_object,"parents",sizeof("parents"),parents TSRMLS_CC);
+    php_git_commit_init(&git_commit_object, (git_commit*)commit, git_revwalk_repository(walker) TSRMLS_CC);
 
     RETURN_ZVAL(git_commit_object,0,1);
 }
