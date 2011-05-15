@@ -93,21 +93,11 @@ ZEND_END_ARG_INFO()
 
 static void php_git_repository_free_storage(php_git_repository_t *obj TSRMLS_DC)
 {
-    zval **data;
-    char *prop_name;
-    int prop_name_len;
-    zend_mangle_property_name(&prop_name, &prop_name_len, "*", 1, "odb", sizeof("odb"), 0);
-    if(zend_hash_find(obj->zo.properties,prop_name,prop_name_len,(void **)&data) == SUCCESS) {
-        zval_ptr_dtor(data);
-        //zend_hash_del(obj->zo.properties,"odb",sizeof("odb"));
-    }
-    efree(prop_name);
-    
+    zend_object_std_dtor(&obj->zo TSRMLS_CC);
     if(obj->repository != NULL){
         git_repository_free(obj->repository);
         obj->repository = NULL;
     }
-    zend_object_std_dtor(&obj->zo TSRMLS_CC);
 
     efree(obj);
 }
@@ -383,7 +373,15 @@ PHP_METHOD(git_repository, __construct)
             RETURN_FALSE;
         }
         myobj->repository = repository;
-        add_property_string_ex(object, "path",sizeof("path"),(char *)repository_path, 1 TSRMLS_CC);
+        
+        zval *path;
+        MAKE_STD_ZVAL(path);
+        char *p_name;
+        long p_len = 0;
+        zend_mangle_property_name(&p_name,&p_len,"*",1,"path",sizeof("path"),0);
+        ZVAL_STRING(path,git_repository_path(repository),1);
+        zend_hash_update(Z_OBJPROP_P(object),p_name,p_len,&path,sizeof(zval *),NULL);
+        efree(p_name);
 
         MAKE_STD_ZVAL(odb);
         object_init_ex(odb,git_odb_class_entry);
@@ -392,6 +390,7 @@ PHP_METHOD(git_repository, __construct)
 
 
         zval *backends;
+        MAKE_STD_ZVAL(backends);
         array_init(backends);
         add_property_zval_ex(odb,"backends",sizeof("backends"),backends TSRMLS_CC);
 
@@ -701,7 +700,16 @@ PHP_METHOD(git_repository, open2)
         RETURN_FALSE;
     }
 
-    add_property_string_ex(getThis(), "path",sizeof("path"),(char *)git_dir, 1 TSRMLS_CC);
+
+    zval *path;
+    MAKE_STD_ZVAL(path);
+    char *p_name;
+    long p_len = 0;
+    zend_mangle_property_name(&p_name,&p_len,"*",1,"path",sizeof("path"),0);
+    ZVAL_STRING(path,git_dir,1);
+    zend_hash_update(Z_OBJPROP_P(getThis()),p_name,p_len,&path,sizeof(zval *),NULL);
+    efree(p_name);
+
     this->repository = repository;
     RETURN_TRUE;
 }
@@ -776,4 +784,5 @@ void php_git_repository_init(TSRMLS_D)
     git_repository_class_entry->create_object = php_git_repository_new;
 
     zend_declare_property_null(git_repository_class_entry, "odb",sizeof("odb")-1,ZEND_ACC_PROTECTED TSRMLS_CC);
+    zend_declare_property_null(git_repository_class_entry, "path",sizeof("path")-1,ZEND_ACC_PROTECTED TSRMLS_CC);
 }
