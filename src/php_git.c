@@ -28,6 +28,77 @@
 #include <string.h>
 #include <time.h>
 
+zval* php_git_read_protected_property(zend_class_entry *scope, zval *object, char *name, int name_length TSRMLS_DC)
+{
+    zval **data;
+    char *key;
+    long *length;
+    zend_mangle_property_name(&key,&length,"*",1,name,name_length,0);
+    if (zend_hash_find(Z_OBJPROP_P(object),key,length,(void **)&data) != SUCCESS) {
+        data = NULL;
+    }
+
+    efree(key);
+    return (zval *)*data;
+}
+
+int php_git_add_protected_property_string_ex(zval *object, char *name, int name_length, char *data, zend_bool duplicate TSRMLS_DC)
+{
+    zval *tmp;
+    char *key;
+    long *length;
+    MAKE_STD_ZVAL(tmp);
+    ZVAL_STRING(tmp,data,duplicate);
+    zend_mangle_property_name(&key,&length,"*",1,name,name_length,0);
+    zend_hash_update(Z_OBJPROP_P(object),key,length,&tmp,sizeof(zval *),NULL);
+    efree(key);
+    
+    return SUCCESS;
+}
+
+int php_git_add_protected_property_zval_ex(zval *object, char *name, int name_length, zval *data TSRMLS_DC)
+{
+    char *key;
+    long *length;
+    zend_mangle_property_name(&key,&length,"*",1,name,name_length,0);
+    zend_hash_update(Z_OBJPROP_P(object),key,length,&data,sizeof(zval *),NULL);
+    efree(key);
+    
+    return SUCCESS;
+}
+
+void php_git_throw_exception(zend_class_entry *exception,int error_code, char *message TSRMLS_DC)
+{
+    if(exception == NULL) {
+        //will be fix soon.
+        exception = spl_ce_RuntimeException;
+    }
+
+    if(message != NULL) {
+        zend_throw_exception_ex(exception, 0 TSRMLS_CC, message);
+    } else {
+        zend_throw_exception_ex(exception, 0 TSRMLS_CC, git_strerror(error_code));
+    }
+}
+
+int php_git_odb_init(zval **object, git_odb *database TSRMLS_DC)
+{
+    zval *backends;
+
+    MAKE_STD_ZVAL(*object);
+    object_init_ex(*object,git_odb_class_entry);
+    php_git_odb_t *odb_t = (php_git_odb_t *) zend_object_store_get_object(*object TSRMLS_CC);
+    odb_t->odb = database;
+
+    MAKE_STD_ZVAL(backends);
+    array_init(backends);
+
+    php_git_add_protected_property_zval_ex(*object,"backends",sizeof("backends"),backends TSRMLS_CC);
+
+    return SUCCESS;
+}
+
+
 PHPAPI zend_class_entry *git_class_entry;
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_string_to_type, 0, 0, 1)

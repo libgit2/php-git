@@ -45,6 +45,12 @@ extern zend_module_entry git_module_entry;
 #define phpext_git_ptr &git_module_entry;
 #define PHP_GIT_NS "Git"
 
+void php_git_throw_exception(zend_class_entry *exception,int error_code, char *message TSRMLS_DC);
+int php_git_add_protected_property_zval_ex(zval *object, char *name, int name_length, zval *data TSRMLS_DC);
+int php_git_add_protected_property_string_ex(zval *object, char *name, int name_length, char *data, zend_bool duplicate TSRMLS_DC);
+int php_git_odb_init(zval **object, git_odb *database TSRMLS_DC);
+zval* php_git_read_protected_property(zend_class_entry *scope, zval *object, char *name, int name_length TSRMLS_DC);
+
 extern PHPAPI zend_class_entry *git_class_entry;
 extern PHPAPI zend_class_entry *git_reference_class_entry;
 extern PHPAPI zend_class_entry *git_reference_manager_class_entry;
