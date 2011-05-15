@@ -483,7 +483,7 @@ PHP_METHOD(git_repository, lookupRef)
     git_oid_to_string(out,GIT_OID_HEXSZ+1,git_reference_oid(refobj->object));
     add_property_string_ex(ref,"oid",sizeof("oid"),out, 1 TSRMLS_CC);
 
-    RETURN_ZVAL(ref,0,0);
+    RETURN_ZVAL(ref,0,1);
 }
 
 PHP_METHOD(git_repository, getReferences)

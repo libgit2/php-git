@@ -178,7 +178,7 @@ PHP_METHOD(git_tree, getIterator)
     obj->tree = this->object;
     obj->repository = this->repository;
     obj->offset = 0;
-    RETURN_ZVAL(iterator,0,0);
+    RETURN_ZVAL(iterator,0,1);
 }
 
 PHP_METHOD(git_tree, getEntry)
@@ -195,7 +195,7 @@ PHP_METHOD(git_tree, getEntry)
 
     entry = git_tree_entry_byindex(this->object,offset);
     create_tree_entry_from_entry(&git_tree_entry, entry,this->repository);
-    RETURN_ZVAL(git_tree_entry,0, 0);
+    RETURN_ZVAL(git_tree_entry,0, 1);
 }
 
 PHP_METHOD(git_tree, getEntries)
@@ -214,7 +214,7 @@ PHP_METHOD(git_tree, getEntries)
         add_next_index_zval(entries,  array_ptr);
     }
 
-    RETURN_ZVAL(entries,0,0);
+    RETURN_ZVAL(entries,0,1);
 }
 
 

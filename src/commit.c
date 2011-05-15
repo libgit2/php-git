@@ -162,7 +162,7 @@ PHP_METHOD(git_commit, getTree)
     tobj->object = tree;
     tobj->repository = this->repository;
 
-    RETURN_ZVAL(git_tree,0,0);
+    RETURN_ZVAL(git_tree,0,1);
 }
 
 PHP_METHOD(git_commit, setAuthor)

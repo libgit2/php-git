@@ -75,7 +75,7 @@ PHP_METHOD(git_tree_iterator, current)
         RETURN_FALSE;
     }
     create_tree_entry_from_entry(&git_tree_entry,entry,this->repository);
-    RETURN_ZVAL(git_tree_entry,0,0);
+    RETURN_ZVAL(git_tree_entry,0,1);
 }
 
 PHP_METHOD(git_tree_iterator, key)

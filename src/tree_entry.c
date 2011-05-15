@@ -142,13 +142,38 @@ PHP_METHOD(git_tree_entry, isBlob)
     }
 }
 
+PHP_METHOD(git_tree_entry, toHeader)
+{
+    php_git_tree_entry_t *this = (php_git_tree_entry_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_odb *odb;
+    git_oid oid;
+    int length;
 
+    char *id = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry, getThis(),"oid",sizeof("oid")-1, 0 TSRMLS_CC));
+
+    git_oid_mkstr(&oid, id);
+    git_otype type;
+    git_odb_read_header(&length,&type,git_repository_database(this->repository),&oid);
+
+    if (type == GIT_OBJ_BLOB) {
+        zval *git_raw_object;
+        MAKE_STD_ZVAL(git_raw_object);
+        object_init_ex(git_raw_object, git_blob_class_entry);
+
+        add_property_string_ex(git_raw_object,"data", sizeof("data"), "", 1 TSRMLS_CC);
+        add_property_long_ex(git_raw_object,"size", sizeof("size"), length TSRMLS_CC);
+        RETURN_ZVAL(git_raw_object,0,1);
+    } else {
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"Git\\Tree\\Entry::toHeader can convert GIT_OBJ_BLOB only for now. unhandled object type %d found.", type);
+    }
+}
 
 PHPAPI function_entry php_git_tree_entry_methods[] = {
     PHP_ME(git_tree_entry, __construct, NULL, ZEND_ACC_PRIVATE)
-    PHP_ME(git_tree_entry, toObject, NULL,                          ZEND_ACC_PUBLIC)
-    PHP_ME(git_tree_entry, isTree,   NULL,                          ZEND_ACC_PUBLIC)
-    PHP_ME(git_tree_entry, isBlob,   NULL,                          ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree_entry, toHeader, NULL,    ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree_entry, toObject, NULL,    ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree_entry, isTree,   NULL,    ZEND_ACC_PUBLIC)
+    PHP_ME(git_tree_entry, isBlob,   NULL,    ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 
