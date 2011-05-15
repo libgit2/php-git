@@ -52,6 +52,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_remove, 0, 0, 1)
     ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_tree_resolve, 0, 0, 1)
+    ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+
 static void php_git_tree_free_storage(php_git_tree_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
@@ -218,7 +223,58 @@ PHP_METHOD(git_tree, getEntries)
 }
 
 
+PHP_METHOD(git_tree, resolve)
+{
+    php_git_tree_t *this = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_tree_entry *entry;
+    git_object *object;
+    git_otype type;
+    char *path;
+    int path_len;
+
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "s", &path, &path_len) == FAILURE){
+        return;
+    }
+
+    git_tree_entry_resolve_byname(&entry, this->object, this->repository, path);
+
+    int ret = git_tree_entry_2object(&object, this->repository, entry);
+
+    type = git_object_type(object);
+    if (type == GIT_OBJ_BLOB) {
+
+        zval *git_raw_object;
+        MAKE_STD_ZVAL(git_raw_object);
+        object_init_ex(git_raw_object, git_blob_class_entry);
+        php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
+        blobobj->object = (git_blob *)object;
+
+        add_property_stringl_ex(git_raw_object,"data", sizeof("data"), (char *)git_blob_rawcontent((git_blob *)object),git_blob_rawsize((git_blob *)object), 1 TSRMLS_CC);
+        RETURN_ZVAL(git_raw_object,0,1);
+    } else if(type == GIT_OBJ_TREE) {
+        git_tree *tree = (git_tree *)object;
+
+        zval *git_tree;
+        MAKE_STD_ZVAL(git_tree);
+        object_init_ex(git_tree, git_tree_class_entry);
+
+        php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
+        tobj->object = tree;
+        tobj->repository = this->repository;
+
+        RETURN_ZVAL(git_tree,0,1);
+
+    } else{
+        zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
+            "Git\\Tree\\Entry::toObject can convert GIT_OBJ_TREE or GIT_OBJ_BLOB. unhandled object type %d found.", git_object_type(object));
+        RETURN_FALSE;
+    }
+
+}
+
 PHPAPI function_entry php_git_tree_methods[] = {
+    PHP_ME(git_tree, resolve,     NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, __construct, arginfo_git_tree__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, getEntry,    arginfo_git_tree_get_entry,  ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, getEntries,  NULL,                        ZEND_ACC_PUBLIC)

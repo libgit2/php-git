@@ -51,6 +51,7 @@ int php_git_add_protected_property_string_ex(zval *object, char *name, int name_
 int php_git_odb_init(zval **object, git_odb *database TSRMLS_DC);
 zval* php_git_read_protected_property(zend_class_entry *scope, zval *object, char *name, int name_length TSRMLS_DC);
 void php_git_commit_init(zval **object, git_commit *commit, git_repository *repository TSRMLS_DC);
+int git_tree_entry_resolve_byname(git_tree_entry **object, git_tree *tree, git_repository* repository, const char *path);
 
 extern PHPAPI zend_class_entry *git_class_entry;
 extern PHPAPI zend_class_entry *git_reference_class_entry;

@@ -129,6 +129,50 @@ void php_git_commit_init(zval **object, git_commit *commit, git_repository *repo
     php_git_add_protected_property_zval_ex(*object,"parents",sizeof("parents"),parents TSRMLS_CC);
 }
 
+int git_tree_entry_resolve_byname(git_tree_entry **object, git_tree *tree, git_repository *repository, const char *path)
+{
+    const git_tree_entry *entry;
+    git_tree *tmp = tree;
+    int attribute, length, offset, position, len;
+    char buffer[256];
+    char *p;
+    offset = 0;
+    position = 0;
+    len = 0;
+    length = strlen(path);
+    p = path;
+
+    int ret = GIT_ERROR;
+
+    while (position < length) {
+        if(path[position] == '/') {
+            memcpy(buffer,p, position-offset);
+            buffer[position-offset] = '\0';
+
+            offset = position+1;
+            p+=offset;
+
+            entry = git_tree_entry_byname(tmp,buffer);
+            attribute = git_tree_entry_attributes(entry);
+            ret = git_tree_entry_2object(&tmp,repository,entry);
+            if(ret != GIT_SUCCESS) {
+                fprintf(stderr,"[Error]:%s\n",git_strerror(ret));
+            }
+        } else if (position == length-1) {
+            memcpy(buffer,p, position+1-offset);
+            buffer[position+1-offset] = '\0';
+
+            entry = git_tree_entry_byname(tmp,buffer);
+            if(ret != GIT_SUCCESS) {
+                fprintf(stderr,"[Error]:%s\n",git_strerror(ret));
+            }
+        }
+        position++;
+    }
+    *object = entry;
+}
+
+
 
 PHPAPI zend_class_entry *git_class_entry;
 
