@@ -363,27 +363,25 @@ PHP_METHOD(git_commit, getParent)
         RETURN_FALSE;
     }
 
+    php_git_commit_init(&zcommit, commit, this->repository TSRMLS_CC);
+
+    RETURN_ZVAL(zcommit,0,1);
+}
+
+PHP_METHOD(git_commit, getId)
+{
+    php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    git_oid *oid = git_commit_id(this->object);
+    char id[GIT_OID_HEXSZ+1] = {0};
     
-    MAKE_STD_ZVAL(zcommit);
-    object_init_ex(zcommit,git_commit_class_entry);
-    obj = (php_git_commit_t *) zend_object_store_get_object(zcommit TSRMLS_CC);
-    obj->object = commit;
-
-    create_signature_from_commit(&author, git_commit_author(obj->object));
-    create_signature_from_commit(&committer, git_commit_committer(obj->object));
+    git_oid_to_string(id,GIT_OID_HEXSZ+1,oid);
     
-    add_property_zval(zcommit,"author", author);
-    add_property_zval(zcommit,"committer", committer);
-
-    RETURN_ZVAL(zcommit,1,0);
-
-    efree(zcommit);
-    efree(author);
-    efree(committer);
+    RETURN_STRING(id,1);
 }
 
 PHPAPI function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, __construct,     arginfo_git_commit__construct,   ZEND_ACC_PUBLIC)
+    PHP_ME(git_commit, getId,           NULL,                            ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setAuthor,       arginfo_git_commit_set_author,   ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setCommitter,    arginfo_git_commit_set_committer,ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setParents,      arginfo_git_commit_set_parents,  ZEND_ACC_PUBLIC)
