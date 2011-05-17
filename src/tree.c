@@ -222,7 +222,7 @@ PHP_METHOD(git_tree, getEntries)
     RETURN_ZVAL(entries,0,1);
 }
 
-
+// probably this method will be deplicated.
 PHP_METHOD(git_tree, resolve)
 {
     php_git_tree_t *this = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
