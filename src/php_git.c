@@ -156,14 +156,14 @@ int git_tree_entry_resolve_byname(git_tree_entry **object, git_tree *tree, git_r
 
             entry = git_tree_entry_byname(tmp,buffer);
             if(entry == NULL) {
-                RETURN_FALSE;
+                return GIT_ERROR;
             }
 
             attribute = git_tree_entry_attributes(entry);
             tmp = NULL;
             ret = git_tree_entry_2object(&tmp,repository,entry);
             if(ret != GIT_SUCCESS) {
-                RETURN_FALSE;
+                return GIT_ERROR;
             }
         } else if (position == length-1) {
             memset(buffer,'\0',256);
@@ -177,7 +177,7 @@ int git_tree_entry_resolve_byname(git_tree_entry **object, git_tree *tree, git_r
             //entry_sort_cmp
             entry = git_tree_entry_byname(tmp,"git2.h");
             if(entry == NULL) {
-                RETURN_FALSE;
+                return GIT_ERROR;
             }
         }
         position++;
