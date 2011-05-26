@@ -302,6 +302,7 @@ PHP_MINIT_FUNCTION(git) {
     git_index_init(TSRMLS_C);
     git_init_signature(TSRMLS_C);
     git_init_walker(TSRMLS_C);
+    git_config_init(TSRMLS_C);
     git_tree_builder_init(TSRMLS_C);
     git_tree_iterator_init(TSRMLS_C);
     git_init_tree(TSRMLS_C);

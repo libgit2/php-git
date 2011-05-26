@@ -73,6 +73,7 @@ extern PHPAPI zend_class_entry *git_blob_class_entry;
 extern PHPAPI zend_class_entry *git_odb_class_entry;
 extern PHPAPI zend_class_entry *git_backend_class_entry;
 extern PHPAPI zend_class_entry *git_rawobject_class_entry;
+extern PHPAPI zend_class_entry *git_config_class_entry;
 
 typedef struct{
     zend_object zo;
@@ -185,6 +186,11 @@ typedef struct{
     zend_object zo;
     git_repository *repository;
 } php_git_reference_manager_t;
+
+typedef struct{
+    zend_object zo;
+    git_config *config
+} php_git_config_t;
 
 
 #endif /* PHP_GIT_H */
