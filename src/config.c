@@ -78,11 +78,13 @@ static int php_git_config_foreach(const char *key, void *data)
     char *value;
 
     git_config_get_string(((git_config_foreach_t *)data)->config,key,&value);
-    
-    current_key = strtok(tmp, ".");
+
+    char *savedptr;
+
+    current_key = php_strtok_r(tmp, ".",&savedptr);
     while (current_key != NULL) {
         uu = current_key;
-        current_key = strtok(NULL, ".");
+        current_key = php_strtok_r(NULL, ".",&savedptr);
         if(current_key != NULL) {
             if(zend_hash_exists(hash,uu,strlen(uu)+1)) {
                 if (zend_hash_find(hash,uu,strlen(uu)+1,(void **)&target_key) == SUCCESS) {
