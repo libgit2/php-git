@@ -292,7 +292,6 @@ PHP_METHOD(git_repository, __construct)
     int ret = 0;
     int arg_len = 0;
     git_repository *repository;
-    git_repository_pathid id;
     zval *object = getThis();
     zval *odb, *backends;
 
@@ -313,7 +312,7 @@ PHP_METHOD(git_repository, __construct)
 
         php_git_odb_init(&odb, git_repository_database(myobj->repository) TSRMLS_CC);
         php_git_add_protected_property_zval_ex(object,"odb",sizeof("odb"),odb TSRMLS_CC);
-        php_git_add_protected_property_string_ex(object,"path",sizeof("path"),git_repository_path(repository,id),1 TSRMLS_CC);
+        php_git_add_protected_property_string_ex(object,"path",sizeof("path"),git_repository_path(repository,GIT_REPO_PATH),1 TSRMLS_CC);
     }else{
         myobj->repository = NULL;
     }
