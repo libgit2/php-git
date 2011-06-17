@@ -250,7 +250,7 @@ PHP_FUNCTION(git_hex_to_raw)
         return;
     }
     
-    git_oid_mkstr(&oid, hex);
+    git_oid_fromstr(&oid, hex);
     RETVAL_STRINGL((&oid)->id,GIT_OID_RAWSZ,1);
 }
 
@@ -266,7 +266,7 @@ PHP_FUNCTION(git_raw_to_hex)
         return;
     }
     
-    git_oid_mkraw(&oid, raw);
+    git_oid_fromraw(&oid, raw);
     git_oid_fmt(out, &oid);
 
     RETVAL_STRINGL(out,GIT_OID_HEXSZ,1);

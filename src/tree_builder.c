@@ -118,7 +118,7 @@ PHP_METHOD(git_tree_builder,add)
         return;
     }
 
-    error = git_oid_mkstr(&id, hash);
+    error = git_oid_fromstr(&id, hash);
     if (error != GIT_SUCCESS) {
         zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"can't create object id.");
         RETURN_FALSE;

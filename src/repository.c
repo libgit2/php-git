@@ -205,7 +205,7 @@ PHP_METHOD(git_repository, getObject)
         return;
     }
     
-    git_oid_mkstr(&oid, hash);
+    git_oid_fromstr(&oid, hash);
     
     php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
     repository = myobj->repository;
@@ -271,7 +271,7 @@ PHP_METHOD(git_repository, getCommit)
         return;
     }
     
-    git_oid_mkstr(&oid, hash);
+    git_oid_fromstr(&oid, hash);
     odb = git_repository_database(this->repository);
     if(!git_odb_exists(odb,&oid)){
         RETURN_FALSE;
@@ -292,6 +292,7 @@ PHP_METHOD(git_repository, __construct)
     int ret = 0;
     int arg_len = 0;
     git_repository *repository;
+    git_repository_pathid id;
     zval *object = getThis();
     zval *odb, *backends;
 
@@ -312,7 +313,7 @@ PHP_METHOD(git_repository, __construct)
 
         php_git_odb_init(&odb, git_repository_database(myobj->repository) TSRMLS_CC);
         php_git_add_protected_property_zval_ex(object,"odb",sizeof("odb"),odb TSRMLS_CC);
-        php_git_add_protected_property_string_ex(object,"path",sizeof("path"),git_repository_path(repository),1 TSRMLS_CC);
+        php_git_add_protected_property_string_ex(object,"path",sizeof("path"),git_repository_path(repository,id),1 TSRMLS_CC);
     }else{
         myobj->repository = NULL;
     }
@@ -339,7 +340,7 @@ PHP_METHOD(git_repository, getTree)
         return;
     }
 
-    git_oid_mkstr(&oid, hash);
+    git_oid_fromstr(&oid, hash);
     php_git_repository_t *myobj = (php_git_repository_t *) zend_object_store_get_object(object TSRMLS_CC);
 
     ret = git_tree_lookup(&tree, myobj->repository, &oid);

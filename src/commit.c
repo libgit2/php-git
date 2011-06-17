@@ -260,7 +260,7 @@ PHP_METHOD(git_commit, write)
 
     git_oid tree_oid;
     char *tree_oid_str = Z_STRVAL_P(zend_read_property(git_commit_class_entry, getThis(),"tree",sizeof("tree")-1, 0 TSRMLS_CC));
-    git_oid_mkstr(&tree_oid, tree_oid_str);
+    git_oid_fromstr(&tree_oid, tree_oid_str);
 
     zval *z_author = zend_read_property(git_commit_class_entry, getThis(),"author",sizeof("author")-1, 0 TSRMLS_CC);
     author = (php_git_signature_t *) zend_object_store_get_object(z_author TSRMLS_CC);
@@ -287,7 +287,7 @@ PHP_METHOD(git_commit, write)
     ) {
         tmp = (git_oid *)malloc(sizeof(git_oid));
         zend_hash_get_current_data_ex(array_hash, (void **)&data, &pointer);
-        git_oid_mkstr(tmp,Z_STRVAL_PP(data));
+        git_oid_fromstr(tmp,Z_STRVAL_PP(data));
 
         *p = tmp;
         p++;

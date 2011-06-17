@@ -232,7 +232,7 @@ PHP_METHOD(git_reference_manager, create)
         RETURN_FALSE;
     }
     
-    git_oid_mkstr(&id, oid);
+    git_oid_fromstr(&id, oid);
     git_odb *odb;
     odb = git_repository_database(this->repository);
     

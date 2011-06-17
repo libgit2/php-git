@@ -138,7 +138,7 @@ PHP_METHOD(git_tree_entry, toHeader)
 
     char *id = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry, getThis(),"oid",sizeof("oid")-1, 0 TSRMLS_CC));
 
-    git_oid_mkstr(&oid, id);
+    git_oid_fromstr(&oid, id);
     git_otype type;
     git_odb_read_header(&length,&type,git_repository_database(this->repository),&oid);
 

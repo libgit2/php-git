@@ -166,7 +166,7 @@ PHP_METHOD(git_reference, setOID)
         return;
     }
 
-    git_oid_mkstr(&out, oid);
+    git_oid_fromstr(&out, oid);
 
     git_reference_set_oid(this->object, &out);
     add_property_string_ex(getThis() ,"oid",sizeof("oid"),oid, 1 TSRMLS_CC);

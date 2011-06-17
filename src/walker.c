@@ -93,7 +93,7 @@ PHP_METHOD(git_walker, hide)
 
     repository = git_revwalk_repository(walker);
     
-    git_oid_mkstr(&oid,hash);
+    git_oid_fromstr(&oid,hash);
 
     git_revwalk_hide(walker,&oid);
 }
@@ -116,7 +116,7 @@ PHP_METHOD(git_walker, push)
     walker = myobj->walker;
     repository = git_revwalk_repository(walker);
     
-    git_oid_mkstr(&oid,hash);
+    git_oid_fromstr(&oid,hash);
     
     git_revwalk_push(walker,&oid);
 }
