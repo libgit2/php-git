@@ -622,7 +622,7 @@ PHP_METHOD(git_repository, getWorkdir)
     char *git_workdir;
 
     if(this->repository != NULL) {
-        git_workdir = git_repository_workdir(this->repository);
+        git_workdir = git_repository_path(this->repository,GIT_REPO_PATH_WORKDIR);
         RETVAL_STRING(git_workdir,1);
     }
 }
