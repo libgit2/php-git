@@ -243,7 +243,7 @@ PHP_METHOD(git_reference_manager, create)
     }
     
     git_reference *reference;
-    int ret = git_reference_create_oid(&reference, this->repository, name, &id);
+    int ret = git_reference_create_oid(&reference, this->repository, name, &id, 0);
     if(ret != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "can't add reference");
