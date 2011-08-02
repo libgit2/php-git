@@ -359,7 +359,7 @@ PHP_METHOD(git_commit, getParent)
     
     ret = git_commit_parent(&commit, this->object,offset);
     if(ret != GIT_SUCCESS){
-        php_error_docref(NULL TSRMLS_CC, E_ERROR, "specified offset not found.");
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "specified offset not found");
         RETURN_FALSE;
     }
 
