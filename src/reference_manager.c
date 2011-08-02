@@ -42,6 +42,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_reference_manager_create, 0, 0, 2)
     ZEND_ARG_INFO(0, name)
     ZEND_ARG_INFO(0, oid)
+    ZEND_ARG_INFO(0, force)
 ZEND_END_ARG_INFO()
 
 static void php_git_reference_manager_free_storage(php_git_reference_manager_t *obj TSRMLS_DC)
@@ -221,9 +222,10 @@ PHP_METHOD(git_reference_manager, create)
     char *oid;
     int oid_len = 0;
     git_oid id;
+    zend_bool force = 0;
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-        "ss", &name, &name_len, &oid, &oid_len) == FAILURE){
+        "ss|b", &name, &name_len, &oid, &oid_len, &force) == FAILURE){
         return;
     }
     if(oid_len != GIT_OID_HEXSZ){
@@ -243,10 +245,10 @@ PHP_METHOD(git_reference_manager, create)
     }
     
     git_reference *reference;
-    int ret = git_reference_create_oid(&reference, this->repository, name, &id, 0);
+    int ret = git_reference_create_oid(&reference, this->repository, name, &id, force);
     if(ret != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
-            "can't add reference");
+            "can't add reference, maybe try setting force to boolean true");
         RETURN_FALSE;
     }
     
