@@ -49,7 +49,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_signature__construct, 0, 0, 3)
     ZEND_ARG_INFO(0, when)
 ZEND_END_ARG_INFO()
 
-PHPAPI function_entry php_git_signature_methods[] = {
+static zend_function_entry php_git_signature_methods[] = {
     PHP_ME(git_signature, __construct, arginfo_git_signature__construct, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };

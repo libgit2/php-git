@@ -123,7 +123,7 @@ PHP_METHOD(git_index_iterator, __construct)
     this->offset = 0;
 }
 
-PHPAPI function_entry php_git_index_iterator_methods[] = {
+static zend_function_entry php_git_index_iterator_methods[] = {
     PHP_ME(git_index_iterator, __construct, arginfo_git_index_iterator__construct,ZEND_ACC_PUBLIC)
     PHP_ME(git_index_iterator, current,     NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_index_iterator, key,         NULL,                        ZEND_ACC_PUBLIC)

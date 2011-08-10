@@ -155,7 +155,7 @@ PHP_METHOD(git_tree_entry, toHeader)
     }
 }
 
-PHPAPI function_entry php_git_tree_entry_methods[] = {
+static zend_function_entry php_git_tree_entry_methods[] = {
     PHP_ME(git_tree_entry, __construct, NULL, ZEND_ACC_PRIVATE)
     PHP_ME(git_tree_entry, toHeader, NULL,    ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_entry, toObject, NULL,    ZEND_ACC_PUBLIC)

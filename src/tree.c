@@ -280,7 +280,7 @@ PHP_METHOD(git_tree, resolve)
 
 }
 
-PHPAPI function_entry php_git_tree_methods[] = {
+static zend_function_entry php_git_tree_methods[] = {
     PHP_ME(git_tree, resolve,     NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, __construct, arginfo_git_tree__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_tree, getEntry,    arginfo_git_tree_get_entry,  ZEND_ACC_PUBLIC)

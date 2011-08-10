@@ -155,7 +155,7 @@ PHP_METHOD(git_odb, addAlternate)
 }
 
 
-PHPAPI function_entry php_git_odb_methods[] = {
+static zend_function_entry php_git_odb_methods[] = {
     PHP_ME(git_odb, __construct, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_odb, addBackend, arginfo_git_odb_add_backend, ZEND_ACC_PUBLIC)
     PHP_ME(git_odb, addAlternate, arginfo_git_odb_add_backend, ZEND_ACC_PUBLIC)

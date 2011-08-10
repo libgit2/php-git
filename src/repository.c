@@ -648,7 +648,7 @@ PHP_METHOD(git_repository, getOdb)
 }
 
 
-PHPAPI function_entry php_git_repository_methods[] = {
+static zend_function_entry php_git_repository_methods[] = {
     PHP_ME(git_repository, __construct,   arginfo_git_construct,      ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getCommit,     arginfo_git_get_commit,     ZEND_ACC_PUBLIC)
     PHP_ME(git_repository, getObject,     arginfo_git_get_object,     ZEND_ACC_PUBLIC)

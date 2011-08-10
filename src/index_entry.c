@@ -56,7 +56,7 @@ zend_object_value php_git_index_entry_new(zend_class_entry *ce TSRMLS_DC)
     return retval;
 }
 
-PHPAPI function_entry php_git_index_entry_methods[] = {
+static zend_function_entry php_git_index_entry_methods[] = {
     {NULL, NULL, NULL}
 };
 

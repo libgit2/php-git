@@ -128,7 +128,7 @@ PHP_METHOD(git_tag, __construct)
 }
 
 
-PHPAPI function_entry php_git_tag_methods[] = {
+static zend_function_entry php_git_tag_methods[] = {
     PHP_ME(git_tag, __construct, arginfo_git_tag__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getMessage,  NULL,                       ZEND_ACC_PUBLIC)
     PHP_ME(git_tag, getName,     NULL,                       ZEND_ACC_PUBLIC)

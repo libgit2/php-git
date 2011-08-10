@@ -349,7 +349,7 @@ PHP_METHOD(git_index, insert)
 }
 */
 
-PHPAPI function_entry php_git_index_methods[] = {
+static zend_function_entry php_git_index_methods[] = {
     //PHP_ME(git_index, __construct, arginfo_git_index__construct,ZEND_ACC_PUBLIC)
     PHP_ME(git_index, getEntry,    arginfo_git_index_get_entry, ZEND_ACC_PUBLIC)
     PHP_ME(git_index, find,        arginfo_git_index_find,      ZEND_ACC_PUBLIC)

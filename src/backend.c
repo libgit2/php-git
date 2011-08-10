@@ -305,7 +305,7 @@ PHP_METHOD(git_backend, __construct)
     this->backend = internal;
 }
 
-PHPAPI function_entry php_git_backend_methods[] = {
+static zend_function_entry php_git_backend_methods[] = {
     PHP_ME(git_backend, __construct, NULL,    ZEND_ACC_PUBLIC)
     PHP_ABSTRACT_ME(git_backend, read,        arginfo_git_backend_read)
     PHP_ABSTRACT_ME(git_backend, read_header, arginfo_git_backend_read_header)

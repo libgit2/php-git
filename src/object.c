@@ -83,7 +83,7 @@ PHP_METHOD(git_object, getType)
     RETVAL_LONG(type);
 }
 
-PHPAPI function_entry php_git_object_methods[] = {
+static zend_function_entry php_git_object_methods[] = {
     PHP_ME(git_object, getId,   NULL,ZEND_ACC_PUBLIC)
     PHP_ME(git_object, getType, NULL,ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}

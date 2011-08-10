@@ -148,7 +148,7 @@ PHP_METHOD(git_config, parseFile)
     RETURN_ZVAL(zconf,0,1);
 }
 
-PHPAPI function_entry php_git_config_methods[] = {
+static zend_function_entry php_git_config_methods[] = {
     PHP_ME(git_config, parseFile, arginfo_git_config_parse_file, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     {NULL,NULL,NULL}
 };

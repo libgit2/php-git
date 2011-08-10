@@ -175,7 +175,7 @@ PHP_METHOD(git_tree_builder,write)
     RETVAL_STRING(out, 1);
 }
 
-PHPAPI function_entry php_git_tree_builder_methods[] = {
+static zend_function_entry php_git_tree_builder_methods[] = {
     PHP_ME(git_tree_builder, __construct, arginfo_git_tree_builder__construct,ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_builder, add,         arginfo_git_tree_builder_add,       ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_builder, remove,      arginfo_git_tree_builder_remove,    ZEND_ACC_PUBLIC)

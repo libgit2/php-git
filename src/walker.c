@@ -168,7 +168,7 @@ PHP_METHOD(git_walker, sort)
     RETURN_TRUE;
 }
 
-PHPAPI function_entry php_git_walker_methods[] = {
+static zend_function_entry php_git_walker_methods[] = {
     PHP_ME(git_walker, __construct, NULL,                    ZEND_ACC_PUBLIC)
     PHP_ME(git_walker, push,        arginfo_git_walker_push, ZEND_ACC_PUBLIC)
     PHP_ME(git_walker, next,        NULL,                    ZEND_ACC_PUBLIC)

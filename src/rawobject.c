@@ -25,7 +25,7 @@
 #include "php_git.h"
 PHPAPI zend_class_entry *git_rawobject_class_entry;
 
-PHPAPI function_entry php_git_rawobject_methods[] = {
+static zend_function_entry php_git_rawobject_methods[] = {
     {NULL, NULL, NULL}
 };
 

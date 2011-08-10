@@ -272,12 +272,12 @@ PHP_FUNCTION(git_raw_to_hex)
     RETVAL_STRINGL(out,GIT_OID_HEXSZ,1);
 }
 
-PHPAPI function_entry php_git_methods[] = {
+static zend_function_entry php_git_methods[] = {
     {NULL, NULL, NULL}
 };
 
 // Git Global Functions
-PHPAPI function_entry php_git_functions[] = {
+static zend_function_entry php_git_functions[] = {
     PHP_FE(git_hex_to_raw, arginfo_git_hex_to_raw)
     PHP_FE(git_raw_to_hex, arginfo_git_raw_to_hex)
     PHP_FE(git_type_to_string, arginfo_git_type_to_string)

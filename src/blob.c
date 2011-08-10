@@ -153,7 +153,7 @@ PHP_METHOD(git_blob, write)
     RETVAL_STRING(oid_str,1);
 }
 
-PHPAPI function_entry php_git_blob_methods[] = {
+static zend_function_entry php_git_blob_methods[] = {
     PHP_ME(git_blob, __construct, arginfo_git_blob__construct,  ZEND_ACC_PUBLIC)
     PHP_ME(git_blob, loadString,  arginfo_git_blob_load_string, ZEND_ACC_PUBLIC)
     PHP_ME(git_blob, loadFile,  arginfo_git_blob_load_file, ZEND_ACC_PUBLIC)

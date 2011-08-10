@@ -279,7 +279,7 @@ PHP_METHOD(git_reference_manager, create)
     RETURN_ZVAL(ref,0,0);
 }
 
-PHPAPI function_entry php_git_reference_manager_methods[] = {
+static zend_function_entry php_git_reference_manager_methods[] = {
     PHP_ME(git_reference_manager, __construct, arginfo_git_reference_manager__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference_manager, getList,     NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference_manager, lookup,   arginfo_git_reference_manager_lookup, ZEND_ACC_PUBLIC)

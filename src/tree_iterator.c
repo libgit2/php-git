@@ -125,7 +125,7 @@ PHP_METHOD(git_tree_iterator, __construct)
 }
 
 
-PHPAPI function_entry php_git_tree_iterator_methods[] = {
+static zend_function_entry php_git_tree_iterator_methods[] = {
     PHP_ME(git_tree_iterator, __construct, arginfo_git_tree_iterator__construct,ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_iterator, current,     NULL,                        ZEND_ACC_PUBLIC)
     PHP_ME(git_tree_iterator, key,         NULL,                        ZEND_ACC_PUBLIC)

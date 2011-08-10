@@ -221,7 +221,7 @@ PHP_METHOD(git_reference, getId)
     RETURN_STRINGL(&out,GIT_OID_HEXSZ, 1);
 }
 
-PHPAPI function_entry php_git_reference_methods[] = {
+static zend_function_entry php_git_reference_methods[] = {
     PHP_ME(git_reference, __construct, arginfo_git_reference__construct, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, getTarget,   NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference, getType,     NULL, ZEND_ACC_PUBLIC)

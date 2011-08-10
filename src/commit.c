@@ -379,7 +379,7 @@ PHP_METHOD(git_commit, getId)
     RETURN_STRING(id,1);
 }
 
-PHPAPI function_entry php_git_commit_methods[] = {
+static zend_function_entry php_git_commit_methods[] = {
     PHP_ME(git_commit, __construct,     arginfo_git_commit__construct,   ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, getId,           NULL,                            ZEND_ACC_PUBLIC)
     PHP_ME(git_commit, setAuthor,       arginfo_git_commit_set_author,   ZEND_ACC_PUBLIC)
