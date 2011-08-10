@@ -189,7 +189,7 @@ typedef struct{
 
 typedef struct{
     zend_object zo;
-    git_config *config
+    git_config *config;
 } php_git_config_t;
 
 

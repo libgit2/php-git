@@ -60,26 +60,20 @@ ZEND_END_ARG_INFO()
 
 typedef struct{
     zval *array;
-    git_config *config
+    git_config *config;
 } git_config_foreach_t;
 
 
 static int php_git_config_foreach(const char *key, void *data)
 {
-    zval *config = ((git_config_foreach_t*)data)->array;
-    HashTable *hash = Z_ARRVAL_P(config);
-    zval **target_key;
-    zval *moe_key;
+    HashTable *hash;
+    zval *config, *moe_key, *moe, **target_key;
+    char *savedptr, *current_key, *uu, *value, *tmp;
 
-    char *tmp = estrdup(key);
-
-    char *current_key;
-    char *uu;
-    char *value;
-
+    config = ((git_config_foreach_t*)data)->array;
+    hash =  Z_ARRVAL_P(config);
+    tmp = estrdup(key);
     git_config_get_string(((git_config_foreach_t *)data)->config,key,&value);
-
-    char *savedptr;
 
     current_key = php_strtok_r(tmp, ".",&savedptr);
     while (current_key != NULL) {
@@ -100,7 +94,6 @@ static int php_git_config_foreach(const char *key, void *data)
     }
     
     if(uu != NULL) {
-        zval *moe;
         MAKE_STD_ZVAL(moe);
         ZVAL_STRING(moe,value,1);
         zval_copy_ctor(&moe);
@@ -108,7 +101,6 @@ static int php_git_config_foreach(const char *key, void *data)
     }
 
     efree(tmp);
-
     return GIT_SUCCESS;
 }
 
@@ -117,7 +109,6 @@ PHP_METHOD(git_config, parseFile)
     git_config_foreach_t t;
     git_config *config;
     zval *zconf;
-
     char *path;
     int path_len = 0;
     int ret = GIT_ERROR;

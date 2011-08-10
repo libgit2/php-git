@@ -91,8 +91,9 @@ ZEND_END_ARG_INFO()
 void php_git_index_entry_create(zval **index, git_index_entry *entry)
 {
     TSRMLS_FETCH();
-    MAKE_STD_ZVAL(*index);
     char oid[GIT_OID_HEXSZ+1] = {0};
+
+    MAKE_STD_ZVAL(*index);
     object_init_ex(*index,git_index_entry_class_entry);
     git_oid_to_string(oid,GIT_OID_HEXSZ+1,&entry->oid);
 
@@ -120,9 +121,8 @@ PHP_METHOD(git_index, count)
 
 PHP_METHOD(git_index, find)
 {
-    int offset = 0;
+    int offset, path_len = 0;
     char *path;
-    int path_len = 0;
     git_index *index = NULL;
     git_index_entry *entry;
     zval *z_git_index_entry;
@@ -169,11 +169,10 @@ PHP_METHOD(git_index, getEntry)
 
 PHP_METHOD(git_index, add)
 {
-    int offset = 0;
-    char *path;
-    int path_len = 0;
-    git_index *index = NULL;
+    int path_len, success, offset  = 0;
     long stage = 0;
+    char *path;
+    git_index *index = NULL;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s|l", &path, &path_len, &stage) == FAILURE){
@@ -183,11 +182,8 @@ PHP_METHOD(git_index, add)
     php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     index = myobj->index;
 
-    //FIXME: examine stage value.
-    // 0 => new file
-    // 1 => deleted ?
-    // 2 => ?
-    int success = git_index_add(index,path,stage);
+    // Todo: check stage status.
+    success = git_index_add(index,path,stage);
     if(success != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "can't add specified index.");
@@ -200,22 +196,22 @@ PHP_METHOD(git_index, add)
 PHP_METHOD(git_index, remove)
 {
     php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    int path_len, offset, result = 0;
     char *path;
-    int path_len = 0;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &path, &path_len) == FAILURE){
         return;
     }
 
-    int offset = git_index_find(this->index,path);
+    offset = git_index_find(this->index,path);
     if(offset < 0){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "specified path does not exist.");
         RETURN_FALSE;
     }
 
-    int result = git_index_remove(this->index, offset);
+    result = git_index_remove(this->index, offset);
     if(result != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "specified offset does not exist.");
@@ -228,8 +224,8 @@ PHP_METHOD(git_index, remove)
 PHP_METHOD(git_index, update)
 {
     php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-
     int success = git_index_write(myobj->index);
+
     if(success != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "can't write index");
@@ -244,8 +240,8 @@ PHP_METHOD(git_index, refresh)
 {
     git_index *index = NULL;
     php_git_index_t *myobj = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    index = myobj->index;
 
+    index = myobj->index;
     git_index_read(index);
 }
 
@@ -267,8 +263,9 @@ PHP_METHOD(git_index, writeTree)
     php_git_index_t *this = (php_git_index_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_oid oid;
     char out[GIT_OID_HEXSZ+1];
+    int ret;
 
-    int ret = git_tree_create_fromindex(&oid, this->index);
+    ret = git_tree_create_fromindex(&oid, this->index);
     if(ret != GIT_SUCCESS) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "can't write tree from index.");

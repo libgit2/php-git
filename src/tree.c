@@ -93,13 +93,15 @@ PHP_METHOD(git_tree, count)
 
 PHP_METHOD(git_tree, path)
 {
-    //TODO
     php_git_tree_t *this= (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     char *path;
-    int path_len= 0;
+    git_tree *tree;
+    int ret, path_len= 0;
     git_tree_entry *entry;
-    int ret = 0;
     git_object *object;
+    php_git_blob_t *blobobj;
+    zval *git_tree, *entries, *git_object;
+    git_oid *tree_oid;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &path, &path_len) == FAILURE){
@@ -120,11 +122,7 @@ PHP_METHOD(git_tree, path)
 
         if(type == GIT_OBJ_TREE) {
             // Todo: refactoring below block
-            git_tree *tree = (git_tree*)object;
-            git_oid *tree_oid;
-            zval *git_tree;
-            zval *entries;
-            zval *entry;
+            tree = object;
 
             MAKE_STD_ZVAL(git_tree);
             MAKE_STD_ZVAL(entries);
@@ -143,10 +141,9 @@ PHP_METHOD(git_tree, path)
 
         }else if(type == GIT_OBJ_BLOB){
             // Todo: refactoring below block
-            zval *git_object;
             MAKE_STD_ZVAL(git_object);
             object_init_ex(git_object, git_blob_class_entry);
-            php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_object TSRMLS_CC);
+            blobobj = (php_git_blob_t *) zend_object_store_get_object(git_object TSRMLS_CC);
             blobobj->object = (git_blob *)object;
 
             add_property_stringl_ex(git_object,"data", sizeof("data"), (char *)git_blob_rawcontent((git_blob *)object),git_blob_rawsize((git_blob *)object), 1 TSRMLS_CC);
@@ -207,13 +204,13 @@ PHP_METHOD(git_tree, getEntries)
 {
     php_git_tree_t *this = (php_git_tree_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_tree_entry *entry;
-    int i;
+    zval *array_ptr,*entries;
+    int i, r;
     
-    int r = git_tree_entrycount(this->object);
-    zval *entries;
+    r = git_tree_entrycount(this->object);
+
     MAKE_STD_ZVAL(entries);
     array_init(entries);
-    zval *array_ptr;
     for(i = 0; i < r; i++){
         create_tree_entry_from_entry(&array_ptr, git_tree_entry_byindex(this->object,i),this->repository);
         add_next_index_zval(entries,  array_ptr);
@@ -229,10 +226,12 @@ PHP_METHOD(git_tree, resolve)
     git_tree_entry *entry;
     git_object *object;
     git_otype type;
-    int ret;
+    git_tree *tree;
+    php_git_tree_t *tobj;
+    int path_len, ret;
     char *path;
-    int path_len;
-
+    zval *git_raw_object, *git_tree;
+    
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &path, &path_len) == FAILURE){
         return;
@@ -251,7 +250,6 @@ PHP_METHOD(git_tree, resolve)
     type = git_object_type(object);
     if (type == GIT_OBJ_BLOB) {
 
-        zval *git_raw_object;
         MAKE_STD_ZVAL(git_raw_object);
         object_init_ex(git_raw_object, git_blob_class_entry);
         php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
@@ -260,13 +258,12 @@ PHP_METHOD(git_tree, resolve)
         add_property_stringl_ex(git_raw_object,"data", sizeof("data"), (char *)git_blob_rawcontent((git_blob *)object),git_blob_rawsize((git_blob *)object), 1 TSRMLS_CC);
         RETURN_ZVAL(git_raw_object,0,1);
     } else if(type == GIT_OBJ_TREE) {
-        git_tree *tree = (git_tree *)object;
+        tree = object;
 
-        zval *git_tree;
         MAKE_STD_ZVAL(git_tree);
         object_init_ex(git_tree, git_tree_class_entry);
 
-        php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
+        tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
         tobj->object = tree;
         tobj->repository = this->repository;
 

@@ -106,10 +106,8 @@ PHP_METHOD(git_tree_builder,add)
 {
     php_git_tree_builder_t *this = (php_git_tree_builder_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     int error = GIT_ERROR;
-    char *path;
-    char *hash;
-    int path_len = 0;
-    int hash_len = 0;
+    char *hash, *path;
+    int hash_len, path_len = 0;
     unsigned int attributes;
     git_oid id;
 

@@ -64,8 +64,8 @@ zend_object_value php_git_object_new(zend_class_entry *ce TSRMLS_DC)
 PHP_METHOD(git_object, getId)
 {
     php_git_object_t *this = (php_git_object_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    char out[GIT_OID_HEXSZ+1] = {0};
     const git_oid *oid;
-    char out[41] = {0};
 
     oid = git_object_id((git_object *)this->object);
     git_oid_to_string(out,GIT_OID_HEXSZ+1,oid);

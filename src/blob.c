@@ -131,6 +131,7 @@ PHP_METHOD(git_blob, loadString)
 PHP_METHOD(git_blob, write)
 {
     php_git_blob_t *this = (php_git_blob_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    char oid_str[GIT_OID_HEXSZ+1] = {0};
     git_oid out;
     int ret = 0;
 
@@ -148,7 +149,6 @@ PHP_METHOD(git_blob, write)
         }
     }
 
-    char oid_str[GIT_OID_HEXSZ+1] = {0};
     git_oid_to_string(oid_str,GIT_OID_HEXSZ+1,&out);
     RETVAL_STRING(oid_str,1);
 }

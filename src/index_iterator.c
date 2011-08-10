@@ -112,12 +112,13 @@ PHP_METHOD(git_index_iterator, __construct)
 {
     php_git_index_iterator_t *this = (php_git_index_iterator_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     zval *php_git_index;
+    php_git_index_t *idx;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "z", &php_git_index) == FAILURE){
         return;
     }
-    php_git_index_t *idx = (php_git_index_t *) zend_object_store_get_object(php_git_index TSRMLS_CC);
+    idx = (php_git_index_t *) zend_object_store_get_object(php_git_index TSRMLS_CC);
 
     this->index = idx->index;
     this->offset = 0;

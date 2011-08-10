@@ -74,6 +74,8 @@ PHP_METHOD(git_reference_manager, __construct)
 {
     php_git_reference_manager_t *this= (php_git_reference_manager_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     zval *repository;
+    php_git_repository_t *repo;
+
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "z", &repository) == FAILURE){
         return;
@@ -83,7 +85,8 @@ PHP_METHOD(git_reference_manager, __construct)
              "argument does not Git\\Repository");
         RETURN_FALSE;
     }
-    php_git_repository_t *repo = (php_git_repository_t *) zend_object_store_get_object(repository TSRMLS_CC);
+
+    repo = (php_git_repository_t *) zend_object_store_get_object(repository TSRMLS_CC);
     if(repo->repository == NULL){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
              "repository didn't ready");
@@ -96,20 +99,19 @@ PHP_METHOD(git_reference_manager, getList)
 {
     php_git_reference_manager_t *this= (php_git_reference_manager_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_strarray *list = malloc(sizeof(git_strarray));
-    int  result;
-    int i = 0;
+    int rr, result, i = 0;
     git_reference *reference;
     zval *references;
     git_rtype type;
+    const char *target;
     char out[GIT_OID_HEXSZ+1] = {0};
+    zval *ref;
 
     git_reference_listall(list,this->repository,GIT_REF_LISTALL);
 
     MAKE_STD_ZVAL(references);
     array_init(references);
     for(i = 0; i < list->count; i++){
-        zval *ref;
-
         // FIXME
         result = git_reference_lookup(&reference, this->repository, list->strings[i]);
         if(result != GIT_SUCCESS) {
@@ -127,11 +129,11 @@ PHP_METHOD(git_reference_manager, getList)
 
         type = git_reference_type(reference);
         if(type == GIT_REF_SYMBOLIC) {
-            const char *target = git_reference_target(reference);
+            target = git_reference_target(reference);
             if(target != NULL) {
                 add_property_string_ex(ref,"target",sizeof("target"),(char *)target, 1 TSRMLS_CC);
             }
-            int rr = git_reference_resolve(&refobj->object,reference);
+            rr = git_reference_resolve(&refobj->object,reference);
             if(rr != GIT_SUCCESS){
                 zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
                     "something wrong");
@@ -142,7 +144,6 @@ PHP_METHOD(git_reference_manager, getList)
         git_oid_to_string(out,GIT_OID_HEXSZ+1,git_reference_oid(refobj->object));
         add_property_string_ex(ref,"oid",sizeof("oid"),out, 1 TSRMLS_CC);
         memset(out,'\0',GIT_OID_HEXSZ+1);
-        //
 
         add_next_index_zval(references, ref);
     }
@@ -167,8 +168,7 @@ PHP_METHOD(git_reference_manager, lookup)
 {
     php_git_reference_manager_t *this = (php_git_reference_manager_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     char *name;
-    int  name_len = 0;
-    int  result;
+    int rr, result, name_len = 0;
     zval *ref;
     char out[GIT_OID_HEXSZ+1] = {0};
     git_oid *oid;
@@ -200,7 +200,7 @@ PHP_METHOD(git_reference_manager, lookup)
         if(target != NULL) {
             add_property_string_ex(ref,"target",sizeof("target"),(char *)target, 1 TSRMLS_CC);
         }
-        int rr = git_reference_resolve(&refobj->object,reference);
+        rr = git_reference_resolve(&refobj->object,reference);
         if(rr != GIT_SUCCESS){
             zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
                 "something wrong");
@@ -220,9 +220,15 @@ PHP_METHOD(git_reference_manager, create)
     char *name;
     int name_len = 0;
     char *oid;
-    int oid_len = 0;
+    int ret,rr, oid_len = 0;
     git_oid id;
     zend_bool force = 0;
+    git_odb *odb;
+    git_reference *reference;
+    char out[GIT_OID_HEXSZ+1] = {0};
+    git_rtype type;
+    zval *ref;
+    const char *target;
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "ss|b", &name, &name_len, &oid, &oid_len, &force) == FAILURE){
@@ -235,7 +241,6 @@ PHP_METHOD(git_reference_manager, create)
     }
     
     git_oid_fromstr(&id, oid);
-    git_odb *odb;
     odb = git_repository_database(this->repository);
     
     if(!git_odb_exists(odb,&id)){
@@ -244,17 +249,13 @@ PHP_METHOD(git_reference_manager, create)
         RETURN_FALSE;
     }
     
-    git_reference *reference;
-    int ret = git_reference_create_oid(&reference, this->repository, name, &id, force);
+    ret = git_reference_create_oid(&reference, this->repository, name, &id, force);
     if(ret != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
             "can't add reference, maybe try setting force to boolean true");
         RETURN_FALSE;
     }
     
-    char out[GIT_OID_HEXSZ+1] = {0};
-    git_rtype type;
-    zval *ref;
     MAKE_STD_ZVAL(ref);
     object_init_ex(ref, git_reference_class_entry);
     php_git_reference_t *refobj  = (php_git_reference_t *) zend_object_store_get_object(ref TSRMLS_CC);
@@ -263,11 +264,11 @@ PHP_METHOD(git_reference_manager, create)
     add_property_string_ex(ref,"name",  sizeof("name"),  name, 1 TSRMLS_CC);
     type = git_reference_type(reference);
     if(type == GIT_REF_SYMBOLIC) {
-        const char *target = git_reference_target(reference);
+        target = git_reference_target(reference);
         if(target != NULL) {
             add_property_string_ex(ref,"target",sizeof("target"),(char *)target, 1 TSRMLS_CC);
         }
-        int rr = git_reference_resolve(&refobj->object,reference);
+        rr = git_reference_resolve(&refobj->object,reference);
         if(rr != GIT_SUCCESS){
             zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
                 "something wrong");

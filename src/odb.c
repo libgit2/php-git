@@ -71,8 +71,8 @@ PHP_METHOD(git_odb, __construct)
     php_git_odb_t *this = (php_git_odb_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_odb *odb;
     zval *backends;
-    
     int ret = 0;
+
     ret = git_odb_new(&this->odb);
     if(ret != GIT_SUCCESS){
         zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,"can't create Git\\ODB");

@@ -102,6 +102,7 @@ PHP_METHOD(git_tree_iterator, valid)
 {
     php_git_tree_iterator_t *this = (php_git_tree_iterator_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     int entry_count = git_tree_entrycount(this->tree);
+
     if(this->offset < entry_count && this->offset >= 0){
         RETURN_TRUE;
     }else{
@@ -113,12 +114,13 @@ PHP_METHOD(git_tree_iterator, __construct)
 {
     php_git_tree_iterator_t *this = (php_git_tree_iterator_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     zval *php_tree_index;
+    php_git_tree_t *tree;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "z", &php_tree_index) == FAILURE){
         return;
     }
-    php_git_tree_t *tree = (php_git_tree_t *) zend_object_store_get_object(php_tree_index TSRMLS_CC);
+    tree = (php_git_tree_t *) zend_object_store_get_object(php_tree_index TSRMLS_CC);
 
     this->tree = tree->object;
     this->offset = 0;

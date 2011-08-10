@@ -63,17 +63,20 @@ zend_object_value php_git_tree_entry_new(zend_class_entry *ce TSRMLS_DC)
 
 PHP_METHOD(git_tree_entry, toObject)
 {
-    php_git_tree_entry_t *this = (php_git_tree_entry_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    php_git_tree_entry_t *this;
     git_object *object;
     git_otype type;
+    zval *git_raw_object, *git_tree;
+    php_git_tree_t *tobj;
+    int ret;
     
-    int ret = git_tree_entry_2object(&object, this->repository, this->entry);
+    this = (php_git_tree_entry_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+    ret = git_tree_entry_2object(&object, this->repository, this->entry);
 
     if(ret == GIT_SUCCESS){
         type = git_object_type(object);
         if (type == GIT_OBJ_BLOB) {
-
-            zval *git_raw_object;
             MAKE_STD_ZVAL(git_raw_object);
             object_init_ex(git_raw_object, git_blob_class_entry);
             php_git_blob_t *blobobj = (php_git_blob_t *) zend_object_store_get_object(git_raw_object TSRMLS_CC);
@@ -82,19 +85,17 @@ PHP_METHOD(git_tree_entry, toObject)
             add_property_stringl_ex(git_raw_object,"data", sizeof("data"), (char *)git_blob_rawcontent((git_blob *)object),git_blob_rawsize((git_blob *)object), 1 TSRMLS_CC);
             RETURN_ZVAL(git_raw_object,0,1);
         } else if(type == GIT_OBJ_TREE) {
-            git_tree *tree = (git_tree *)object;
 
-            zval *git_tree;
             MAKE_STD_ZVAL(git_tree);
             object_init_ex(git_tree, git_tree_class_entry);
 
-            php_git_tree_t *tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
-            tobj->object = tree;
+            tobj = (php_git_tree_t *) zend_object_store_get_object(git_tree TSRMLS_CC);
+            tobj->object = object;
             tobj->repository = this->repository;
 
             RETURN_ZVAL(git_tree,0,1);
 
-        } else{
+        } else {
             zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
                 "Git\\Tree\\Entry::toObject can convert GIT_OBJ_TREE or GIT_OBJ_BLOB. unhandled object type %d found.", git_object_type(object));
             RETURN_FALSE;
@@ -111,6 +112,7 @@ PHP_METHOD(git_tree_entry, isTree)
 {
     php_git_tree_entry_t *this = (php_git_tree_entry_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     int attribute = git_tree_entry_attributes(this->entry);
+
     if(attribute & 040000){
         RETURN_TRUE;
     }else{
@@ -134,16 +136,17 @@ PHP_METHOD(git_tree_entry, toHeader)
     php_git_tree_entry_t *this = (php_git_tree_entry_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_odb *odb;
     git_oid oid;
+    git_otype type;
+    zval *git_raw_object;
     int length;
+    char *id;
 
-    char *id = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry, getThis(),"oid",sizeof("oid")-1, 0 TSRMLS_CC));
+    id = Z_STRVAL_P(zend_read_property(git_tree_entry_class_entry, getThis(),"oid",sizeof("oid")-1, 0 TSRMLS_CC));
 
     git_oid_fromstr(&oid, id);
-    git_otype type;
     git_odb_read_header(&length,&type,git_repository_database(this->repository),&oid);
 
     if (type == GIT_OBJ_BLOB) {
-        zval *git_raw_object;
         MAKE_STD_ZVAL(git_raw_object);
         object_init_ex(git_raw_object, git_blob_class_entry);
 

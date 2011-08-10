@@ -60,20 +60,20 @@ static void php_git_tag_free_storage(php_git_tag_t *obj TSRMLS_DC)
 
 zend_object_value php_git_tag_new(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_object_value retval;
-	php_git_tag_t *obj;
-	zval *tmp;
+    zend_object_value retval;
+    php_git_tag_t *obj;
+    zval *tmp;
 
-	obj = ecalloc(1, sizeof(*obj));
-	zend_object_std_init( &obj->zo, ce TSRMLS_CC );
-	zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+    obj = ecalloc(1, sizeof(*obj));
+    zend_object_std_init( &obj->zo, ce TSRMLS_CC );
+    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(obj, 
+    retval.handle = zend_objects_store_put(obj, 
         (zend_objects_store_dtor_t)zend_objects_destroy_object,
         (zend_objects_free_object_storage_t)php_git_tag_free_storage,
         NULL TSRMLS_CC);
-	retval.handlers = zend_get_std_object_handlers();
-	return retval;
+    retval.handlers = zend_get_std_object_handlers();
+    return retval;
 }
 
 PHP_METHOD(git_tag, getMessage)
@@ -106,6 +106,7 @@ PHP_METHOD(git_tag, __construct)
     php_git_tag_t *this = (php_git_tag_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     php_git_repository_t *r_obj;
     zval *repository;
+    int ret;
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "z", &repository) == FAILURE){
@@ -119,8 +120,7 @@ PHP_METHOD(git_tag, __construct)
         return;
     }
     r_obj = (php_git_repository_t *) zend_object_store_get_object(repository TSRMLS_CC);
-
-    int ret = git_tag_new(&this->object,r_obj->repository);
+    ret = git_tag_new(&this->object,r_obj->repository);
 
     if(ret != GIT_SUCCESS){
         php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't create Git\\Tag.");

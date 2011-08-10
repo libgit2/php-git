@@ -101,6 +101,8 @@ int php_git_odb_init(zval **object, git_odb *database TSRMLS_DC)
 void php_git_commit_init(zval **object, git_commit *commit, git_repository *repository TSRMLS_DC)
 {
     zval *author, *committer;
+    int i, parent_count;
+    zval *parents;
 
     MAKE_STD_ZVAL(*object);
     object_init_ex(*object,git_commit_class_entry);
@@ -112,10 +114,7 @@ void php_git_commit_init(zval **object, git_commit *commit, git_repository *repo
     cobj->object = commit;
     cobj->repository = repository;
 
-
-    int parent_count = git_commit_parentcount(commit);
-    int i;
-    zval *parents;
+    parent_count = git_commit_parentcount(commit);
     MAKE_STD_ZVAL(parents);
     array_init(parents);
     for (i = 0; i < parent_count; i++) {
@@ -134,18 +133,14 @@ int git_tree_entry_resolve_byname(git_tree_entry **object, git_tree *tree, git_r
 {
     const git_tree_entry *entry;
     git_tree *tmp = tree;
-    int attribute, length, offset, position, len;
+    int c, i, attribute, length, offset, position, len = 0;
     char buffer[256];
-    memset(buffer,'\0',256);
     char *p;
-    offset = 0;
-    position = 0;
-    len = 0;
+    int ret = GIT_ERROR;
     length = strlen(path);
     p = path;
 
-    int ret = GIT_ERROR;
-
+    memset(buffer,'\0',256);
     while (position < length) {
         if(path[position] == '/') {
             memcpy(buffer,p, position-offset);
@@ -169,8 +164,8 @@ int git_tree_entry_resolve_byname(git_tree_entry **object, git_tree *tree, git_r
             memset(buffer,'\0',256);
             memcpy(buffer,p, position+1-offset);
 
-            int c = git_tree_entrycount(tmp);
-            int i = 0;
+            c = git_tree_entrycount(tmp);
+            i = 0;
             for(i =0; i < c; i++){
                 git_tree_entry *e = git_tree_entry_byindex(tmp,i);
             }
@@ -242,9 +237,9 @@ PHP_FUNCTION(git_type_to_string)
 PHP_FUNCTION(git_hex_to_raw)
 {
     git_oid oid;
-
     const char *hex = NULL;
     int hex_len = 0;
+
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &hex, &hex_len) == FAILURE){
         return;
@@ -258,7 +253,7 @@ PHP_FUNCTION(git_raw_to_hex)
 {
     git_oid oid;
     const char *raw = NULL;
-    char out[GIT_OID_HEXSZ];
+    char out[GIT_OID_HEXSZ+1];
     int raw_len = 0;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,"s",

@@ -82,13 +82,14 @@ PHP_METHOD(git_walker, hide)
     git_commit *commit;
     git_repository *repository;
     git_oid oid;
+    php_git_walker_t *myobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &hash, &hash_len) == FAILURE){
         return;
     }
 
-    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     walker = myobj->walker;
 
     repository = git_revwalk_repository(walker);
@@ -106,13 +107,14 @@ PHP_METHOD(git_walker, push)
     git_commit *head;
     git_revwalk *walker;
     git_repository *repository;
+    php_git_walker_t *myobj;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "s", &hash, &hash_len) == FAILURE){
         return;
     }
 
-    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     walker = myobj->walker;
     repository = git_revwalk_repository(walker);
     
@@ -126,17 +128,18 @@ PHP_METHOD(git_walker, next)
 {
     zval *git_commit_object;
     char *hash;
-    int hash_len = 0;
+    int ret, hash_len = 0;
     git_oid oid;
     git_commit *commit;
     git_revwalk *walker;
     git_signature *signature;
     zval *parents;
+    php_git_walker_t *myobj;
 
-    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     walker = myobj->walker;
 
-    int ret = git_revwalk_next(&oid,walker);
+    ret = git_revwalk_next(&oid,walker);
     if(ret != GIT_SUCCESS){
         RETURN_FALSE;
     }
@@ -157,13 +160,13 @@ PHP_METHOD(git_walker, reset)
 PHP_METHOD(git_walker, sort)
 {
     int mode = 0;
-
+    php_git_walker_t *myobj;
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "l", &mode) == FAILURE){
         return;
     }
 
-    php_git_walker_t *myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
+    myobj = (php_git_walker_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_revwalk_sorting(myobj->walker, mode);
     RETURN_TRUE;
 }

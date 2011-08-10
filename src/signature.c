@@ -56,10 +56,8 @@ static zend_function_entry php_git_signature_methods[] = {
 
 PHP_METHOD(git_signature, __construct)
 {
-    char *name;
-    char *email;
-    int name_len  = 0;
-    int email_len = 0;
+    char *email, *name;
+    int email_len, name_len  = 0;
     zval *time;
     
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -94,21 +92,20 @@ void git_init_signature(TSRMLS_D)
 void create_signature_from_commit(zval **signature, git_signature *sig)
 {
     TSRMLS_FETCH();
-    zval *datetime;
+    zval *params[1], *datetime, constructor, method, result;
+    php_git_signature_t *object;
+
     MAKE_STD_ZVAL(*signature);
 
     object_init_ex(*signature,git_signature_class_entry);
-    php_git_signature_t *object = (php_git_signature_t *) zend_object_store_get_object(*signature TSRMLS_CC);
+    object = (php_git_signature_t *) zend_object_store_get_object(*signature TSRMLS_CC);
     object->signature = sig;
     
     add_property_string_ex(*signature,"name",sizeof("name"), sig->name,1 TSRMLS_CC);
     add_property_string_ex(*signature,"email",sizeof("email"),sig->email,1 TSRMLS_CC);
 
     MAKE_STD_ZVAL(datetime);
-    zval constructor;
-    zval method;
-    zval result;
-    zval *params[1];
+
     ZVAL_STRING(&constructor,"__construct",0);
     ZVAL_STRING(&method,"setTimestamp", 0);
 
@@ -161,13 +158,10 @@ int php_git_signature_create(zval *object, char *name, int name_len, char *email
 {
     TSRMLS_FETCH();
     php_git_signature_t *this = (php_git_signature_t *) zend_object_store_get_object(object TSRMLS_CC);
+    zval *retval, *offset, func, func2;
     int ret = 0;
-    // Todo: should use `zend_fcall*` instead of `call_user-function` for performance improvement.
 
-    zval *retval;
-    zval *offset;
-    zval func;
-    zval func2;
+    // Todo: should use `zend_fcall*` instead of `call_user-function` for performance improvement.
     ZVAL_STRING(&func,"getTimestamp", 1);
     MAKE_STD_ZVAL(retval);
     ZVAL_NULL(retval);
@@ -177,7 +171,7 @@ int php_git_signature_create(zval *object, char *name, int name_len, char *email
     ZVAL_NULL(offset);
     ZVAL_STRING(&func2,"getOffset", 1);
     call_user_function(NULL,&time,&func2,offset,0,NULL TSRMLS_CC);
-     git_signature_new(&this->signature, name,email,Z_LVAL_P(retval),Z_LVAL_P(offset)/60);
+    git_signature_new(&this->signature, name,email,Z_LVAL_P(retval),Z_LVAL_P(offset)/60);
 
     add_property_string_ex(object,"name", sizeof("name"),  name,  1 TSRMLS_CC);
     add_property_string_ex(object,"email",sizeof("email"), email, 1 TSRMLS_CC);

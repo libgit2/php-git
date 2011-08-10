@@ -93,10 +93,10 @@ zend_object_value php_git_commit_new(zend_class_entry *ce TSRMLS_DC)
 
 PHP_METHOD(git_commit, __construct)
 {
+    zval *object = getThis();
     zval *z_repository;
     git_commit *commit;
     git_repository *repository;
-    zval *object = getThis();
     int ret;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -141,20 +141,19 @@ PHP_METHOD(git_commit, getShortMessage)
 PHP_METHOD(git_commit, getTree)
 {
     php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    git_tree *ref_tree;
-    git_commit_tree(&ref_tree, this->object);
-    const git_oid *oid = 	git_object_id((git_object*)ref_tree);
+    git_tree *ref_tree, *tree;
+    git_oid *tree_oid;
+    zval *git_tree, *entry;
 
-    git_tree *tree;
+    const git_oid *oid = git_object_id((git_object*)ref_tree);
+    git_commit_tree(&ref_tree, this->object);
+
     int ret = git_object_lookup((git_object **)&tree, git_object_owner((git_object*)this->object),oid, GIT_OBJ_TREE);
     if(ret != GIT_SUCCESS) {
         php_error_docref(NULL TSRMLS_CC, E_ERROR, "specified tree not found.");
         return;
     }
 
-    git_oid *tree_oid;
-    zval *git_tree;
-    zval *entry;
 
     MAKE_STD_ZVAL(git_tree);
     object_init_ex(git_tree, git_tree_class_entry);
@@ -232,12 +231,16 @@ PHP_METHOD(git_commit, setParents)
 PHP_METHOD(git_commit, write)
 {
     php_git_commit_t *this = (php_git_commit_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    git_oid oid;
-    php_git_signature_t *author;
-    php_git_signature_t *committer;
+    git_oid oid, tree_oid, **parents, **p, *tmp;
+    php_git_signature_t *author, *committer;
+    zval *z_author, *z_committer, *z_parents, **data;
+    char *update_ref, *message, *tree_oid_str = NULL;
+    char out[GIT_OID_HEXSZ+1];
+    int count, i, update_ref_len = 0;
+    git_reference *ref;
 
-    char *update_ref = NULL;
-    int update_ref_len = 0;
+    HashTable *array_hash;
+    HashPosition pointer;
 
     if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
         "|s", &update_ref,&update_ref_len) == FAILURE){
@@ -245,7 +248,6 @@ PHP_METHOD(git_commit, write)
     }
     
     if(ZEND_NUM_ARGS() == 0) {
-        git_reference *ref;
         if(git_reference_lookup(&ref,this->repository,"HEAD")==GIT_SUCCESS){
             if (git_reference_type(ref) == GIT_REF_SYMBOLIC) {
                 git_reference *ref2;
@@ -258,27 +260,22 @@ PHP_METHOD(git_commit, write)
     }
 
 
-    git_oid tree_oid;
-    char *tree_oid_str = Z_STRVAL_P(zend_read_property(git_commit_class_entry, getThis(),"tree",sizeof("tree")-1, 0 TSRMLS_CC));
+    tree_oid_str = Z_STRVAL_P(zend_read_property(git_commit_class_entry, getThis(),"tree",sizeof("tree")-1, 0 TSRMLS_CC));
     git_oid_fromstr(&tree_oid, tree_oid_str);
 
-    zval *z_author = zend_read_property(git_commit_class_entry, getThis(),"author",sizeof("author")-1, 0 TSRMLS_CC);
+    z_author = zend_read_property(git_commit_class_entry, getThis(),"author",sizeof("author")-1, 0 TSRMLS_CC);
     author = (php_git_signature_t *) zend_object_store_get_object(z_author TSRMLS_CC);
 
-    zval *z_committer = zend_read_property(git_commit_class_entry, getThis(),"committer",sizeof("committer")-1, 0 TSRMLS_CC);
+    z_committer = zend_read_property(git_commit_class_entry, getThis(),"committer",sizeof("committer")-1, 0 TSRMLS_CC);
     committer = (php_git_signature_t *) zend_object_store_get_object(z_committer TSRMLS_CC);
     
-    zval *z_parents = zend_read_property(git_commit_class_entry, getThis(),"parents",sizeof("parents")-1, 0 TSRMLS_CC);
+    z_parents = zend_read_property(git_commit_class_entry, getThis(),"parents",sizeof("parents")-1, 0 TSRMLS_CC);
 
-    int count = zend_hash_num_elements(Z_ARRVAL_P(z_parents));
+    count = zend_hash_num_elements(Z_ARRVAL_P(z_parents));
 
 
-    HashTable *array_hash = Z_ARRVAL_P(z_parents);
-    HashPosition pointer;
-    git_oid *tmp;
-    zval **data;
-    git_oid **p;
-    git_oid **parents = (git_oid**)calloc(count,sizeof(git_oid));
+    array_hash = Z_ARRVAL_P(z_parents);
+    parents = (git_oid**)calloc(count,sizeof(git_oid));
     p = parents;
 
     for (zend_hash_internal_pointer_reset_ex(array_hash, &pointer);
@@ -293,7 +290,7 @@ PHP_METHOD(git_commit, write)
         p++;
     }
     
-    char *message = Z_STRVAL_P(zend_read_property(git_commit_class_entry, getThis(),"message",sizeof("message")-1, 0 TSRMLS_CC));
+    message = Z_STRVAL_P(zend_read_property(git_commit_class_entry, getThis(),"message",sizeof("message")-1, 0 TSRMLS_CC));
     git_commit_create(&oid,
         this->repository,
         update_ref,
@@ -305,10 +302,8 @@ PHP_METHOD(git_commit, write)
         parents
     );
 
-    char out[GIT_OID_HEXSZ+1];
     git_oid_to_string(out,GIT_OID_HEXSZ+1,&oid);
 
-    int i;
     for(i = 0; i < count;i++){
         free(parents[i]);
     }
