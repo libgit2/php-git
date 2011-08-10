@@ -177,7 +177,7 @@ int php_git_signature_create(zval *object, char *name, int name_len, char *email
     ZVAL_NULL(offset);
     ZVAL_STRING(&func2,"getOffset", 1);
     call_user_function(NULL,&time,&func2,offset,0,NULL TSRMLS_CC);
-    this->signature = git_signature_new(name,email,Z_LVAL_P(retval),Z_LVAL_P(offset)/60);
+     git_signature_new(&this->signature, name,email,Z_LVAL_P(retval),Z_LVAL_P(offset)/60);
 
     add_property_string_ex(object,"name", sizeof("name"),  name,  1 TSRMLS_CC);
     add_property_string_ex(object,"email",sizeof("email"), email, 1 TSRMLS_CC);
