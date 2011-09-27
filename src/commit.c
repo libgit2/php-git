@@ -296,6 +296,7 @@ PHP_METHOD(git_commit, write)
         update_ref,
         author->signature,
         committer->signature,
+		NULL, // Message encoding (Should probably fix this at some point)
         message,
         &tree_oid,
         count,
