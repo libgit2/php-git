@@ -144,9 +144,10 @@ PHP_METHOD(git_commit, getTree)
     git_tree *ref_tree, *tree;
     git_oid *tree_oid;
     zval *git_tree, *entry;
+    const git_oid *oid;
 
-    const git_oid *oid = git_object_id((git_object*)ref_tree);
     git_commit_tree(&ref_tree, this->object);
+    oid = git_object_id((git_object*)ref_tree);
 
     int ret = git_object_lookup((git_object **)&tree, git_object_owner((git_object*)this->object),oid, GIT_OBJ_TREE);
     if(ret != GIT_SUCCESS) {
