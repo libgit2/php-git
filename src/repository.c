@@ -308,7 +308,7 @@ PHP_METHOD(git_repository, __construct)
 
         php_git_odb_init(&odb, git_repository_database(myobj->repository) TSRMLS_CC);
         php_git_add_protected_property_zval_ex(object,"odb",sizeof("odb"),odb TSRMLS_CC);
-        php_git_add_protected_property_string_ex(object,"path",sizeof("path"),git_repository_path(repository,GIT_REPO_PATH),1 TSRMLS_CC);
+        php_git_add_protected_property_string_ex(object,"path",sizeof("path"),git_repository_path(repository),1 TSRMLS_CC);
     }else{
         myobj->repository = NULL;
     }
@@ -601,7 +601,7 @@ PHP_METHOD(git_repository, getWorkdir)
     php_git_repository_t *this= (php_git_repository_t *) zend_object_store_get_object(getThis() TSRMLS_CC);    
 
     if(this->repository != NULL) {
-        git_workdir = git_repository_path(this->repository,GIT_REPO_PATH_WORKDIR);
+        git_workdir = git_repository_workdir(this->repository);
         RETVAL_STRING(git_workdir,1);
     }
 }
