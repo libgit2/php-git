@@ -269,17 +269,12 @@ PHP_METHOD(git_repository, getCommit)
     }
     
     git_oid_fromstr(&oid, hash);
-    odb = git_repository_database(this->repository);
-    if(!git_odb_exists(odb,&oid)){
-        RETURN_FALSE;
+    ret = git_object_lookup((git_object **)&blob, this->repository,&oid , GIT_OBJ_COMMIT);
+    if(ret == GIT_SUCCESS){
+        php_git_commit_init(&git_commit_object, (git_commit*)blob, this->repository TSRMLS_CC);
+        RETVAL_ZVAL(git_commit_object,0,1);
     }else{
-        ret = git_object_lookup((git_object **)&blob, this->repository,&oid , GIT_OBJ_COMMIT);
-        if(ret == GIT_SUCCESS){
-            php_git_commit_init(&git_commit_object, (git_commit*)blob, this->repository TSRMLS_CC);
-            RETVAL_ZVAL(git_commit_object,0,1);
-        }else{
-            RETURN_FALSE;
-        }
+        RETURN_FALSE;
     }
 }
 
@@ -306,8 +301,6 @@ PHP_METHOD(git_repository, __construct)
         }
         myobj->repository = repository;
 
-        php_git_odb_init(&odb, git_repository_database(myobj->repository) TSRMLS_CC);
-        php_git_add_protected_property_zval_ex(object,"odb",sizeof("odb"),odb TSRMLS_CC);
         php_git_add_protected_property_string_ex(object,"path",sizeof("path"),git_repository_path(repository),1 TSRMLS_CC);
     }else{
         myobj->repository = NULL;
