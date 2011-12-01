@@ -48,7 +48,7 @@ static void php_git_blob_free_storage(php_git_blob_t *obj TSRMLS_DC)
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
 
     if (obj->object != NULL) {
-        git_object_close(obj->object);
+        git_object_free(obj->object);
         obj->object = NULL;
     }
     if(obj->contents != NULL) {
