@@ -45,6 +45,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_reference_manager_create, 0, 0, 2)
     ZEND_ARG_INFO(0, force)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_reference_manager_get_list, 0, 0, 1)
+    ZEND_ARG_INFO(0, flag)
+ZEND_END_ARG_INFO()
+
 static void php_git_reference_manager_free_storage(php_git_reference_manager_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
@@ -100,6 +104,7 @@ PHP_METHOD(git_reference_manager, getList)
     php_git_reference_manager_t *this= (php_git_reference_manager_t *) zend_object_store_get_object(getThis() TSRMLS_CC);
     git_strarray *list = malloc(sizeof(git_strarray));
     int rr, result, i = 0;
+    int flags = GIT_REF_LISTALL;
     git_reference *reference;
     zval *references;
     git_rtype type;
@@ -107,7 +112,12 @@ PHP_METHOD(git_reference_manager, getList)
     char out[GIT_OID_HEXSZ+1] = {0};
     zval *ref;
 
-    git_reference_listall(list,this->repository,GIT_REF_LISTALL);
+    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+        "|l", &flags) == FAILURE){
+        return;
+    }
+
+    git_reference_listall(list,this->repository,flags);
 
     MAKE_STD_ZVAL(references);
     array_init(references);
@@ -282,7 +292,7 @@ PHP_METHOD(git_reference_manager, create)
 
 static zend_function_entry php_git_reference_manager_methods[] = {
     PHP_ME(git_reference_manager, __construct, arginfo_git_reference_manager__construct, ZEND_ACC_PUBLIC)
-    PHP_ME(git_reference_manager, getList,     NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(git_reference_manager, getList,     arginfo_git_reference_manager_get_list, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference_manager, lookup,   arginfo_git_reference_manager_lookup, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference_manager, pack,        NULL, ZEND_ACC_PUBLIC)
     PHP_ME(git_reference_manager, create,      arginfo_git_reference_manager_create, ZEND_ACC_PUBLIC)
