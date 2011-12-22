@@ -54,6 +54,15 @@ INSTALL
 
 see php-git Wiki: <https://github.com/chobie/php-git/wiki>
 
+== Quick Instructions
+
+* Install libgit2, pcre, and a build chain (Ubuntu: build-essential; Mac: xcode)
+* `git clone git://github.com/libgit2/php-git.git && cd php-git/src`
+* `phpize`
+* `./configure`
+* `make`
+* `sudo make install`
+* Add the extension to your /etc/php.ini
 
 Documents
 =======================================================
