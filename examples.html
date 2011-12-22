@@ -1,0 +1,242 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Examples &mdash; php-git 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="php-git 0.2 documentation" href="index.html" />
+    <link rel="next" title="Git\Backend" href="classes/backend/index.html" />
+    <link rel="prev" title="Predefined Constants" href="constants.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="classes/backend/index.html" title="Git\Backend"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="constants.html" title="Predefined Constants"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">php-git 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Examples</a><ul>
+<li><a class="reference internal" href="#create-new-blob">Create new blob</a></li>
+<li><a class="reference internal" href="#create-new-tree">Create new Tree</a></li>
+<li><a class="reference internal" href="#create-new-commit">Create new Commit</a></li>
+<li><a class="reference internal" href="#get-master-tree">get master tree</a></li>
+<li><a class="reference internal" href="#revision-walking">revision walking</a></li>
+<li><a class="reference internal" href="#custom-backends">custom backends</a></li>
+<li><a class="reference internal" href="#get-available-references">get available references</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="constants.html"
+                        title="previous chapter">Predefined Constants</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="classes/backend/index.html"
+                        title="next chapter">Git\Backend</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<p>php-git examples.these example uses experimental API.</p>
+<div class="section" id="create-new-blob">
+<h2>Create new blob<a class="headerlink" href="#create-new-blob" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-php"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+<span class="nv">$repository</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Repository</span><span class="p">(</span><span class="s2">&quot;/path/to/repository/.git&quot;</span><span class="p">);</span>
+<span class="nv">$blob</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Blob</span><span class="p">(</span><span class="nv">$repository</span><span class="p">);</span>
+<span class="nv">$blob</span><span class="o">-&gt;</span><span class="na">setContent</span><span class="p">(</span><span class="s2">&quot;First Object1&quot;</span><span class="p">);</span>
+<span class="nv">$blobHash</span> <span class="o">=</span> <span class="nv">$blob</span><span class="o">-&gt;</span><span class="na">write</span><span class="p">();</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="classes/blob/set_content.html"><em>GitBlob::setContent</em></a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">maybe this API will change next release.</p>
+</div>
+</div>
+<div class="section" id="create-new-tree">
+<h2>Create new Tree<a class="headerlink" href="#create-new-tree" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-php"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+<span class="nv">$repository</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Repository</span><span class="p">(</span><span class="s2">&quot;/path/to/repository/.git&quot;</span><span class="p">);</span>
+<span class="nv">$tree</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Tree</span><span class="p">(</span><span class="nv">$repository</span><span class="p">);</span>
+<span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">add</span><span class="p">(</span><span class="nv">$hash</span><span class="p">,</span><span class="s2">&quot;README&quot;</span><span class="p">,</span><span class="mi">100644</span><span class="p">);</span>
+<span class="nv">$tree_hash</span> <span class="o">=</span> <span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">write</span><span class="p">();</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="classes/tree/add.html"><em>GitTree::add</em></a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">maybe this API will change next release.</p>
+</div>
+</div>
+<div class="section" id="create-new-commit">
+<h2>Create new Commit<a class="headerlink" href="#create-new-commit" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-php"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+<span class="nv">$repository</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Repository</span><span class="p">(</span><span class="s2">&quot;/path/to/repository/.git&quot;</span><span class="p">);</span>
+<span class="nv">$tree</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Tree</span><span class="p">(</span><span class="nv">$repository</span><span class="p">);</span>
+<span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">add</span><span class="p">(</span><span class="nv">$hash</span><span class="p">,</span><span class="s2">&quot;README&quot;</span><span class="p">,</span><span class="mi">100644</span><span class="p">);</span>
+<span class="nv">$tree_hash</span> <span class="o">=</span> <span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">write</span><span class="p">();</span>
+<span class="nv">$commit</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Commit</span><span class="p">(</span><span class="nv">$repository</span><span class="p">);</span>
+<span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">setAuthor</span><span class="p">(</span><span class="k">new</span> <span class="nx">Git\Signature</span><span class="p">(</span><span class="s2">&quot;Someone&quot;</span><span class="p">,</span><span class="s2">&quot;someone@example.com&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">DateTime</span><span class="p">(</span><span class="s2">&quot;2011-01-01 00:00:00&quot;</span><span class="p">,</span><span class="k">new</span> <span class="nx">DateTimezone</span><span class="p">(</span><span class="s2">&quot;Asia/Tokyo&quot;</span><span class="p">))));</span>
+<span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">setCommitter</span><span class="p">(</span><span class="k">new</span> <span class="nx">Git\Signature</span><span class="p">(</span><span class="s2">&quot;Someone&quot;</span><span class="p">,</span><span class="s2">&quot;someone@example.com&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">DateTime</span><span class="p">(</span><span class="s2">&quot;2011-01-01 00:00:00&quot;</span><span class="p">,</span><span class="k">new</span> <span class="nx">DateTimezone</span><span class="p">(</span><span class="s2">&quot;Asia/Tokyo&quot;</span><span class="p">))));</span>
+<span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">setTree</span><span class="p">(</span><span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">getId</span><span class="p">());</span>
+<span class="c1">// when first commit. you dont call setParent.</span>
+<span class="c1">//$commit-&gt;setParent($last_commit-&gt;getParent()-&gt;getId());</span>
+<span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">setMessage</span><span class="p">(</span><span class="s2">&quot;initial import&quot;</span><span class="p">);</span>
+
+<span class="nv">$master_hash</span> <span class="o">=</span> <span class="nv">$commit</span><span class="o">-&gt;</span><span class="na">write</span><span class="p">();</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="classes/tree/add.html"><em>GitTree::add</em></a>
+<a class="reference internal" href="classes/commit/set_author.html"><em>GitCommit::setAuthor</em></a>
+<a class="reference internal" href="classes/commit/set_committer.html"><em>GitCommit::setCommitter</em></a>
+<a class="reference internal" href="classes/commit/set_tree.html"><em>GitCommit::setTree</em></a>
+<a class="reference internal" href="classes/commit/set_parent.html"><em>GitCommit::setParent</em></a>
+<a class="reference internal" href="classes/commit/set_message.html"><em>GitCommit::setMessage</em></a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">php-git can&#8217;t manage multiple parents now. this will fix next release.</p>
+</div>
+</div>
+<div class="section" id="get-master-tree">
+<h2>get master tree<a class="headerlink" href="#get-master-tree" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-php"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+<span class="nv">$repository</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Repository</span><span class="p">(</span><span class="s2">&quot;/path/to/repository/.git&quot;</span><span class="p">);</span>
+<span class="nv">$master_commit</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getCommit</span><span class="p">(</span><span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">lookupRef</span><span class="p">(</span><span class="s2">&quot;refs/heads/master&quot;</span><span class="p">));</span>
+<span class="nv">$tree</span> <span class="o">=</span> <span class="nv">$master_commit</span><span class="o">-&gt;</span><span class="na">getTree</span><span class="p">();</span>
+<span class="c1">// or $tree-&gt;getEntries()</span>
+<span class="k">foreach</span><span class="p">(</span><span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">getIterator</span><span class="p">()</span> <span class="k">as</span> <span class="nv">$entry</span><span class="p">){</span>
+   <span class="nb">var_dump</span><span class="p">(</span><span class="nv">$entry</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="revision-walking">
+<h2>revision walking<a class="headerlink" href="#revision-walking" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-php"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+<span class="nv">$repository</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Repository</span><span class="p">(</span><span class="s2">&quot;/path/to/repository/.git&quot;</span><span class="p">);</span>
+<span class="nv">$master_commit</span> <span class="o">=</span> <span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">getCommit</span><span class="p">(</span><span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">lookupRef</span><span class="p">(</span><span class="s2">&quot;refs/heads/master&quot;</span><span class="p">));</span>
+<span class="nv">$walker</span> <span class="o">=</span> <span class="nv">$master_commit</span><span class="o">-&gt;</span><span class="na">getWalker</span><span class="p">();</span>
+<span class="nv">$walker</span><span class="o">-&gt;</span><span class="na">push</span><span class="p">(</span><span class="nv">$master_commit</span><span class="o">-&gt;</span><span class="na">getId</span><span class="p">());</span>
+<span class="k">while</span><span class="p">(</span><span class="nv">$commit</span> <span class="o">=</span> <span class="nv">$walker</span><span class="o">-&gt;</span><span class="na">next</span><span class="p">()){</span>
+    <span class="nb">var_dump</span><span class="p">(</span><span class="nv">$commit</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="custom-backends">
+<h2>custom backends<a class="headerlink" href="#custom-backends" title="Permalink to this headline">¶</a></h2>
+<p>see also <a class="reference internal" href="classes/repository/add_backend.html"><em>Git\Repository\addBackend</em></a></p>
+</div>
+<div class="section" id="get-available-references">
+<h2>get available references<a class="headerlink" href="#get-available-references" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">maybe this API will change next release.</p>
+</div>
+<div class="highlight-php"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+<span class="nv">$repository</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Repository</span><span class="p">(</span><span class="s2">&quot;/path/to/repository/.git&quot;</span><span class="p">);</span>
+<span class="nv">$manager</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Reference\Manager</span><span class="p">(</span><span class="nv">$repository</span><span class="p">);</span>
+<span class="nv">$manager</span><span class="o">-&gt;</span><span class="na">getList</span><span class="p">();</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="classes/manager/index.html"><em>Git\Reference\Manager</em></a></p>
+<p>this method gets available all references.if you want gets available branches.you have to check manualy now.</p>
+<div class="highlight-php"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+<span class="nv">$repository</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Repository</span><span class="p">(</span><span class="s2">&quot;/path/to/repository/.git&quot;</span><span class="p">);</span>
+<span class="nv">$manager</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Reference\Manager</span><span class="p">(</span><span class="nv">$repository</span><span class="p">);</span>
+<span class="nv">$branches</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+<span class="k">foreach</span><span class="p">(</span><span class="nv">$manager</span><span class="o">-&gt;</span><span class="na">getList</span><span class="p">()</span> <span class="k">as</span> <span class="nv">$ref</span><span class="p">){</span>
+   <span class="k">if</span><span class="p">(</span><span class="nb">strpos</span><span class="p">(</span><span class="nv">$ref</span><span class="o">-&gt;</span><span class="na">name</span><span class="p">,</span><span class="s2">&quot;refs/heads&quot;</span><span class="p">)){</span>
+       <span class="nv">$brandhes</span><span class="p">[]</span> <span class="nv">$ref</span><span class="p">;</span>
+   <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="classes/backend/index.html" title="Git\Backend"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="constants.html" title="Predefined Constants"
+             >previous</a> |</li>
+        <li><a href="index.html">php-git 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Shuhei Tanuma.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1pre.
+    </div>
+  </body>
+</html>

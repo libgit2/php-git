@@ -1,0 +1,167 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Git\Repository::open2 &mdash; php-git 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="php-git 0.2 documentation" href="../../index.html" />
+    <link rel="up" title="Git\Repository" href="index.html" />
+    <link rel="next" title="Git\Repository::open3" href="open3.html" />
+    <link rel="prev" title="Git\Repository::lookupRef" href="lookup_ref.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="open3.html" title="Git\Repository::open3"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="lookup_ref.html" title="Git\Repository::lookupRef"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">php-git 0.2 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Git\Repository</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Git\Repository::open2</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#return-values">Return Values</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="lookup_ref.html"
+                        title="previous chapter">Git\Repository::lookupRef</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="open3.html"
+                        title="next chapter">Git\Repository::open3</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/classes/repository/open2.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="git-repository-open2">
+<span id="index-0"></span><h1>Git\Repository::open2<a class="headerlink" href="#git-repository-open2" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>public <strong>Git\Repository::open2</strong> (string <em>$git_dir</em>, string <em>$git_object_dir</em>, string <em>$git_index_file</em>, string <em>$git_working_tree</em>)</p>
+</div>
+<div class="section" id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><em>git_dir</em></dt>
+<dd>git repository directory</dd>
+<dt><em>git_object_dir</em></dt>
+<dd>object directory</dd>
+<dt><em>git_index_file</em></dt>
+<dd>index file</dd>
+<dt><em>git_working_tree</em></dt>
+<dd>working tree directory</dd>
+</dl>
+</div>
+<div class="section" id="return-values">
+<h2>Return Values<a class="headerlink" href="#return-values" title="Permalink to this headline">¶</a></h2>
+<p>boolean</p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-php"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="k">use</span> <span class="nx">Git\Repository</span><span class="p">;</span>
+
+<span class="nv">$repo</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Repository</span><span class="p">();</span>
+<span class="nv">$repo</span><span class="o">-&gt;</span><span class="na">open2</span><span class="p">(</span>
+    <span class="s2">&quot;/home/chobie/src/libgit2/.git&quot;</span><span class="p">,</span>        <span class="c1">// git directory</span>
+    <span class="s2">&quot;/home/chobie/src/libgit2/.git/objects&quot;</span><span class="p">,</span><span class="c1">// git object directory</span>
+    <span class="s2">&quot;/home/chobie/src/libgit2/.git/index&quot;</span><span class="p">,</span>  <span class="c1">// git index file</span>
+    <span class="s2">&quot;/home/chobie/src/libgit2/&quot;</span>             <span class="c1">// git working tree</span>
+    <span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="open3.html" title="Git\Repository::open3"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="lookup_ref.html" title="Git\Repository::lookupRef"
+             >previous</a> |</li>
+        <li><a href="../../index.html">php-git 0.2 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Git\Repository</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Shuhei Tanuma.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1pre.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,234 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Git\Repository::addBackend &mdash; php-git 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="php-git 0.2 documentation" href="../../index.html" />
+    <link rel="up" title="Git\Repository" href="index.html" />
+    <link rel="next" title="Git\Repository::getCommit" href="get_commit.html" />
+    <link rel="prev" title="Git\Repository::addAlternate" href="add_alternate.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="get_commit.html" title="Git\Repository::getCommit"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="add_alternate.html" title="Git\Repository::addAlternate"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">php-git 0.2 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Git\Repository</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Git\Repository::addBackend</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#return-values">Return Values</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="add_alternate.html"
+                        title="previous chapter">Git\Repository::addAlternate</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="get_commit.html"
+                        title="next chapter">Git\Repository::getCommit</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/classes/repository/add_backend.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="git-repository-addbackend">
+<span id="index-0"></span><h1>Git\Repository::addBackend<a class="headerlink" href="#git-repository-addbackend" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>public <strong>Git\Repository::addBackend</strong> (<em>$backend</em>, <em>$priority</em>)</p>
+</div>
+<div class="section" id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><em>backend</em></dt>
+<dd>Specifies a class that inherits from <a class="reference internal" href="../backend/index.html"><em>Git\Backend</em></a></dd>
+<dt><em>priority</em></dt>
+<dd>[low] 1 ... 5[high]</dd>
+</dl>
+</div>
+<div class="section" id="return-values">
+<h2>Return Values<a class="headerlink" href="#return-values" title="Permalink to this headline">¶</a></h2>
+<p>void</p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-php"><div class="highlight"><pre><span class="cp">&lt;?php</span>
+<span class="sd">/**</span>
+<span class="sd"> * PHP Memory Backend.</span>
+<span class="sd"> *</span>
+<span class="sd"> * You have to inherits Git\Backend to create own custom backend.</span>
+<span class="sd"> *</span>
+<span class="sd"> */</span>
+<span class="k">class</span> <span class="nc">MemoryBackend</span> <span class="k">extends</span> <span class="nx">\Git\Backend</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$memory</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Read Data</span>
+<span class="sd">     *</span>
+<span class="sd">     * @param string $key  sha1 hash.</span>
+<span class="sd">     * @return Git\RawObject</span>
+<span class="sd">     *</span>
+<span class="sd">     * Note: libgit2 usualy use internal cache.</span>
+<span class="sd">     *       so this method does not call everytime.</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">read</span><span class="p">(</span><span class="nv">$key</span><span class="p">){</span>
+       <span class="k">if</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">exists</span><span class="p">(</span><span class="nv">$key</span><span class="p">)){</span>
+           <span class="nv">$object</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="nv">$key</span><span class="p">);</span>
+           <span class="k">return</span> <span class="nv">$object</span><span class="p">;</span>
+       <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * Read Header</span>
+<span class="sd">     *</span>
+<span class="sd">     * @param string $key  sha1 hash.</span>
+<span class="sd">     * @return Git\RawObject</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">read_header</span><span class="p">(</span><span class="nv">$key</span><span class="p">){</span>
+       <span class="k">if</span><span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">memory</span><span class="p">[</span><span class="nv">$key</span><span class="p">])){</span>
+           <span class="k">return</span> <span class="k">new</span> <span class="nx">\Git\RawObject</span><span class="p">(</span><span class="nv">$obj</span><span class="o">-&gt;</span><span class="na">type</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="nv">$obj</span><span class="o">-&gt;</span><span class="na">len</span><span class="p">);</span>
+       <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * check specified contents.</span>
+<span class="sd">     *</span>
+<span class="sd">     * @param string $key  sha1 hash.</span>
+<span class="sd">     * @return boolean</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">exists</span><span class="p">(</span><span class="nv">$key</span><span class="p">){</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">memory</span><span class="p">[</span><span class="nv">$key</span><span class="p">])){</span>
+            <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+        <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+            <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="sd">/**</span>
+<span class="sd">     * write contents</span>
+<span class="sd">     *</span>
+<span class="sd">     * you have to write key,data,type your storage engine.</span>
+<span class="sd">     *</span>
+<span class="sd">     * @param string $key  sha1 hash.</span>
+<span class="sd">     * @param Git\RawObject $object.</span>
+<span class="sd">     * @return hash</span>
+<span class="sd">     */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">write</span><span class="p">(</span><span class="nv">$object</span><span class="p">){</span>
+        <span class="nv">$key</span> <span class="o">=</span> <span class="nv">$object</span><span class="o">-&gt;</span><span class="na">getId</span><span class="p">();</span>
+        <span class="nv">$std</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\Stdclass</span><span class="p">();</span>
+        <span class="nv">$std</span><span class="o">-&gt;</span><span class="na">data</span> <span class="o">=</span> <span class="nv">$object</span><span class="o">-&gt;</span><span class="na">data</span><span class="p">;</span>
+        <span class="nv">$std</span><span class="o">-&gt;</span><span class="na">type</span> <span class="o">=</span> <span class="nv">$object</span><span class="o">-&gt;</span><span class="na">type</span><span class="p">;</span>
+        <span class="nv">$std</span><span class="o">-&gt;</span><span class="na">len</span> <span class="o">=</span> <span class="nv">$object</span><span class="o">-&gt;</span><span class="na">len</span><span class="p">;</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">memory</span><span class="p">[</span><span class="nv">$key</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$std</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nv">$key</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="nf">free</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nb">unset</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">memory</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="nv">$repository</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Git\Repository</span><span class="p">(</span><span class="s2">&quot;/tmp/example/.git&quot;</span><span class="p">);</span>
+<span class="nv">$repository</span><span class="o">-&gt;</span><span class="na">addBackend</span><span class="p">(</span><span class="k">new</span> <span class="nx">MemoryBackend</span><span class="p">(),</span> <span class="mi">5</span><span class="p">);</span><span class="c1">// higher priority.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="../backend/index.html"><em>Git\Backend</em></a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="get_commit.html" title="Git\Repository::getCommit"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="add_alternate.html" title="Git\Repository::addAlternate"
+             >previous</a> |</li>
+        <li><a href="../../index.html">php-git 0.2 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Git\Repository</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Shuhei Tanuma.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1pre.
+    </div>
+  </body>
+</html>

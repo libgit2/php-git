@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to php-git’s documentation! &mdash; php-git 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="php-git 0.2 documentation" href="#" />
+    <link rel="next" title="Introduction" href="intro.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             accesskey="N">next</a> |</li>
+        <li><a href="#">php-git 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to php-git&#8217;s documentation!</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="next chapter">Introduction</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="welcome-to-php-git-s-documentation">
+<h1>Welcome to php-git&#8217;s documentation!<a class="headerlink" href="#welcome-to-php-git-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>php-git is a set of PHP 5.3+ bindings to the libgit2 linkable C Git library.
+<em>Important Notice</em> this module is EXPERIMENTAL.</p>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Installing/Configuring</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ini.html">Runtime Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html">Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Predefined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#create-new-blob">Create new blob</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#create-new-tree">Create new Tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#create-new-commit">Create new Commit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#get-master-tree">get master tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#revision-walking">revision walking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#custom-backends">custom backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#get-available-references">get available references</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/backend/index.html">Git\Backend</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/backend/__construct.html">Git\Backend::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/backend/exists.html">Git\Backend::exists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/backend/free.html">Git\Backend::free</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/backend/read.html">Git\Backend::read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/backend/read_header.html">Git\Backend::read_header</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/backend/write.html">Git\Backend::write</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/blob/index.html">Git\Blob</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/blob/__construct.html">Git\Blob::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/blob/get_id.html">Git\Blob::getId</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/blob/get_type.html">Git\Blob::getType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/blob/is_blob.html">Git\Blob::isBlob</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/blob/is_tree.html">Git\Blob::isTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/blob/set_content.html">Git\Blob::setContent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/blob/write.html">Git\Blob::write</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/commit/index.html">Git\Commit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/__construct.html">Git\Commit::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/get_author.html">Git\Commit::getAuthor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/get_committer.html">Git\Commit::getCommitter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/get_id.html">Git\Commit::getId</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/get_message.html">Git\Commit::getMessage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/get_parent.html">Git\Commit::getParent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/get_short_message.html">Git\Commit::getShortMessage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/get_tree.html">Git\Commit::getTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/set_author.html">Git\Commit::setAuthor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/set_committer.html">Git\Commit::setCommitter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/set_message.html">Git\Commit::setMessage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/set_parent.html">Git\Commit::setParent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/set_tree.html">Git\Commit::setTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/commit/write.html">Git\Commit::write</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/entry/index.html">Git\Tree\Entry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/entry/__construct.html">Git\Tree\Entry::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/entry/to_object.html">Git\Tree\Entry::toObject</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/git/index.html">Git\Git</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/index/index.html">Git\Index</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/index/add.html">Git\Index::add</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/index/count.html">Git\Index::count</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/index/find.html">Git\Index::find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/index/get_entry.html">Git\Index::getEntry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/index/get_iterator.html">Git\Index::getIterator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/index/refresh.html">Git\Index::refresh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/index/write.html">Git\Index::write</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/manager/index.html">Git\Reference\Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/manager/__construct.html">Git\Reference\Manager::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/manager/create.html">Git\Reference\Manager::create</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/manager/get_list.html">Git\Reference\Manager::getList</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/manager/lookup.html">Git\Reference\Manager::lookup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/manager/pack.html">Git\Reference\Manager::pack</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/object/index.html">Git\Object</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/object/get_id.html">Git\Object::getId</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/object/get_type.html">Git\Object::getType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/object/is_blob.html">Git\Object::isBlob</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/object/is_tree.html">Git\Object::isTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/object/write.html">Git\Object::write</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/odb/index.html">Git\ODB</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/odb/__construct.html">Git\ODB::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/odb/add_alternate.html">Git\ODB::addAlternate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/odb/add_backend.html">Git\ODB::addBackend</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/rawobject/index.html">Git\RawObject</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/rawobject/__construct.html">Git\RawObject::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/rawobject/get_id.html">Git\RawObject::getId</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/reference/index.html">Git\Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/reference/__construct.html">Git\Reference::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/reference/get_id.html">Git\Reference::getId</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/reference/get_name.html">Git\Reference::getName</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/reference/get_target.html">Git\Reference::getTarget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/reference/get_type.html">Git\Reference::getType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/reference/is_blob.html">Git\Reference::isBlob</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/reference/is_tree.html">Git\Reference::isTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/reference/write.html">Git\Reference::write</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/repository/index.html">Git\Repository</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/__construct.html">Git\Repository::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/add_alternate.html">Git\Repository::addAlternate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/add_backend.html">Git\Repository::addBackend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/get_commit.html">Git\Repository::getCommit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/get_index.html">Git\Repository::getIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/get_object.html">Git\Repository::getObject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/get_references.html">Git\Repository::getReferences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/get_tree.html">Git\Repository::getTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/get_walker.html">Git\Repository::getWalker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/init.html">Git\Repository::init</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/lookup_ref.html">Git\Repository::lookupRef</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/open2.html">Git\Repository::open2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/repository/open3.html">Git\Repository::open3</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/revwalk/index.html">Git\Revwalk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/revwalk/__construct.html">Git\Revwalk::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/revwalk/hide.html">Git\Revwalk::hide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/revwalk/next.html">Git\Revwalk::next</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/revwalk/push.html">Git\Revwalk::push</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/revwalk/reset.html">Git\Revwalk::reset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/revwalk/sort.html">Git\Revwalk::sort</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/signature/index.html">Git\Signature</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/signature/__construct.html">Git\Signature::__construct</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/tag/index.html">Git\Tag</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/__construct.html">Git\Tag::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/get_id.html">Git\Tag::getId</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/get_message.html">Git\Tag::getMessage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/get_name.html">Git\Tag::getName</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/get_target.html">Git\Tag::getTarget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/get_type.html">Git\Tag::getType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/is_blob.html">Git\Tag::isBlob</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/is_tree.html">Git\Tag::isTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/set_message.html">Git\Tag::setMessage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/set_name.html">Git\Tag::setName</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/set_target.html">Git\Tag::setTarget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tag/write.html">Git\Tag::write</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classes/tree/index.html">Git\Tree</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/__construct.html">Git\Tree::__construct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/add.html">Git\Tree::add</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/count.html">Git\Tree::count</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/get_entries.html">Git\Tree::getEntries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/get_entry.html">Git\Tree::getEntry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/get_id.html">Git\Tree::getId</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/get_iterator.html">Git\Tree::getIterator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/get_type.html">Git\Tree::getType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/path.html">Git\Tree::path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/remove.html">Git\Tree::remove</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes/tree/write.html">Git\Tree::write</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             >next</a> |</li>
+        <li><a href="#">php-git 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Shuhei Tanuma.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1pre.
+    </div>
+  </body>
+</html>
