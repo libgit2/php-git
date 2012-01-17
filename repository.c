@@ -30,7 +30,7 @@ void php_git2_repository_init(TSRMLS_D);
 static void php_git2_repository_free_storage(php_git2_repository *object TSRMLS_DC)
 {
 	if (object->repository != NULL) {
-		git_reposiotry_free(object->repository);
+		git_repository_free(object->repository);
 		object->repository = NULL;
 	}
 	zend_object_std_dtor(&object->zo TSRMLS_CC);

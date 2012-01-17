@@ -60,7 +60,7 @@ typedef struct{
 	zend_object_std_init(&object->zo, ce TSRMLS_CC);\
 	object_properties_init(&object->zo, ce);
 	\
-	retval.handle = zend_object_store_put(object,\
+	retval.handle = zend_objects_store_put(object,\
 		(zend_objects_store_dtor_t)zend_objects_destroy_object,\
 		(zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
 	NULL TSRMLS_CC);\
@@ -74,7 +74,7 @@ typedef struct{
 	zend_object_std_init(&object->zo, ce TSRMLS_CC);\
 	zend_hash_copy(object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *)); \
 	\
-	retval.handle = zend_object_store_put(object,\
+	retval.handle = zend_objects_store_put(object,\
 		(zend_objects_store_dtor_t)zend_objects_destroy_object,\
 		(zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
 	NULL TSRMLS_CC);\
