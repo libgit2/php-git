@@ -103,6 +103,7 @@ PHP_METHOD(git2_repository, isEmpty)
 		/* @todo: throws an exectpion */
 	}
 }
+/* }}} */
 
 static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC)
