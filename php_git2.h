@@ -52,19 +52,34 @@ typedef struct{
 
 #  define PHP_GIT2_GET_OBJECT(STRUCT_NAME, OBJECT) (STRUCT_NAME *) zend_object_store_get_object(OBJECT TSRMLS_CC);
 
+#  if ZEND_MODULE_API_NO >= 20100525
 #  define PHP_GIT2_STD_CREATE_OBJECT(STRUCT_NAME) \
 	STRUCT_NAME *object;\
-	zval *tmp = NULL;\
 	\
 	object = ecalloc(1, sizeof(*object));\
 	zend_object_std_init(&object->zo, ce TSRMLS_CC);\
-	zend_hash_copy(object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));\
+	object_properties_init(&object->zo, ce);
 	\
 	retval.handle = zend_object_store_put(object,\
 		(zend_objects_store_dtor_t)zend_objects_destroy_object,\
 		(zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
 	NULL TSRMLS_CC);\
 	retval.handlers = zend_get_std_object_handlers();
+#  else
+#  define PHP_GIT2_STD_CREATE_OBJECT(STRUCT_NAME) \
+	STRUCT_NAME *object;\
+	zval *tmp = NULL;\
+	\
+	object = ecalloc(1, sizeof(*object));\
+	zend_object_std_init(&object->zo, ce TSRMLS_CC);\
+	zend_hash_copy(object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *)); \
+	\
+	retval.handle = zend_object_store_put(object,\
+		(zend_objects_store_dtor_t)zend_objects_destroy_object,\
+		(zend_objects_free_object_storage_t) STRUCT_NAME##_free_storage ,\
+	NULL TSRMLS_CC);\
+	retval.handlers = zend_get_std_object_handlers();
+#  endif
 
 static int php_git2_add_protected_property_string_ex(zval *object, char *name, int name_length, char *data, zend_bool duplicate TSRMLS_DC);
 

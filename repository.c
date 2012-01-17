@@ -84,8 +84,29 @@ PHP_METHOD(git2_repository, __construct)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\Repsotiroy::isEmpty()
+*/
+PHP_METHOD(git2_repository, isEmpty)
+{
+	git_repository *repository;
+	php_git2_repository *m_repository;
+
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	if (m_repository->repository != NULL) {
+		if (git_repository_is_empty(m_repository->repository)) {
+			RETURN_TRUE;
+		} else {
+			RETURN_FALSE;
+		}
+	} else {
+		/* @todo: throws an exectpion */
+	}
+}
+
 static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, isEmpty,     NULL,                                ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 

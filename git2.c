@@ -30,7 +30,7 @@ int php_git2_add_protected_property_string_ex(zval *object, char *name, int name
 {
 	zval *tmp;
 	char *key;
-	long *length;
+	int length;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRING(tmp,data,duplicate);
