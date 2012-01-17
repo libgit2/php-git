@@ -3,6 +3,14 @@
 # ignore temporary files
 tmp/*
 
+# ignore tests
+tests/*.php
+tests/*.sh
+tests/*.log
+tests/*.diff
+tests/*.exp
+tests/*.out
+
 # ignore phpized files
 Makefile.global
 acinclude.m4
