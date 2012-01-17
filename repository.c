@@ -49,6 +49,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository___construct, 0,0,1)
 	ZEND_ARG_INFO(0, repository_path)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_init, 0,0,1)
+	ZEND_ARG_INFO(0, isBare)
+ZEND_END_ARG_INFO()
+
 /*
 {{{ proto: Git2\Repsotiroy::__construct(string $path)
 */
@@ -175,12 +179,47 @@ PHP_METHOD(git2_repository, getWorkdir)
 /* }}} */
 
 
+/*
+{{{ proto: Git2\Repsotiroy::init(string $path [, bool isBare])
+*/
+PHP_METHOD(git2_repository, init)
+{
+	char *path;
+	int ret, path_len = 0;
+	zend_bool is_bare = 0;
+	git_repository *repository;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s|b", &path, &path_len, &is_bare) == FAILURE) {
+		return;
+	}
+	
+	ret = git_repository_init(&repository, path, is_bare);
+	if (ret == GIT_SUCCESS) {
+		zval *object;
+		php_git2_repository *m_repository;
+		
+		MAKE_STD_ZVAL(object);
+		object_init_ex(object, git2_repository_class_entry);
+		m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, object);
+		m_repository->repository = repository;
+		
+		RETVAL_ZVAL(object,0,1);
+	} else {
+		/* @todo: throws an runtime exception */
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
 static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, isEmpty,     NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, isBare,      NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, getPath,     NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, getWorkdir,  NULL,                                ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, init,        arginfo_git2_repository_init,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	{NULL,NULL,NULL}
 };
 
