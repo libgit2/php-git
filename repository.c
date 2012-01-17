@@ -105,9 +105,32 @@ PHP_METHOD(git2_repository, isEmpty)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\Repsotiroy::isBare()
+*/
+PHP_METHOD(git2_repository, isBare)
+{
+	git_repository *repository;
+	php_git2_repository *m_repository;
+
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	if (m_repository->repository != NULL) {
+		if (git_repository_is_bare(m_repository->repository) == 1) {
+			RETURN_TRUE;
+		} else {
+			RETURN_FALSE;
+		}
+	} else {
+		/* @todo: throws an exectpion */
+	}
+}
+/* }}} */
+
+
 static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, isEmpty,     NULL,                                ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, isBare,      NULL,                                ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
