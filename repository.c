@@ -150,12 +150,37 @@ PHP_METHOD(git2_repository, getPath)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\Repsotiroy::getWorkdir()
+*/
+PHP_METHOD(git2_repository, getWorkdir)
+{
+	git_repository *repository;
+	php_git2_repository *m_repository;
+	const char *path = NULL;
+	zval *m_path = NULL;
+
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	if (m_repository->repository != NULL) {
+		path = git_repository_workdir(m_repository->repository);
+		if (path != NULL) {
+			MAKE_STD_ZVAL(m_path);
+			ZVAL_STRING(m_path, path, 1);
+			RETVAL_ZVAL(m_path,0,1);
+		}
+	} else {
+		/* @todo: throws an exectpion */
+	}
+}
+/* }}} */
+
 
 static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, isEmpty,     NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, isBare,      NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, getPath,     NULL,                                ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, getWorkdir,  NULL,                                ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
