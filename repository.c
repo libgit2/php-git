@@ -139,9 +139,11 @@ PHP_METHOD(git2_repository, getPath)
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
 	if (m_repository->repository != NULL) {
 		path = git_repository_path(m_repository->repository);
-		MAKE_STD_ZVAL(m_path);
-		ZVAL_STRING(m_path, path, 1);
-		RETVAL_ZVAL(m_path,0,1);
+		if (path != NULL) {
+			MAKE_STD_ZVAL(m_path);
+			ZVAL_STRING(m_path, path, 1);
+			RETVAL_ZVAL(m_path,0,1);
+		}
 	} else {
 		/* @todo: throws an exectpion */
 	}
