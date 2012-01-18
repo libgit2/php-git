@@ -59,6 +59,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_discover, 0,0,3)
 	ZEND_ARG_INFO(0, ceiling_dirs)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_exists, 0,0,1)
+	ZEND_ARG_INFO(0, exists)
+ZEND_END_ARG_INFO()
+
 /*
 {{{ proto: Git2\Repsotiroy::__construct(string $path)
 */
@@ -287,6 +291,40 @@ PHP_METHOD(git2_repository, discover)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\Repsotiroy::exists(string $sha1)
+*/
+PHP_METHOD(git2_repository, exists)
+{
+	char *hash;
+	int hash_len = 0;
+	git_odb *odb;
+	git_oid id;
+	php_git2_repository *m_repository;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &hash, &hash_len) == FAILURE) {
+		return;
+	}
+	
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	if (git_repository_odb(&odb, m_repository->repository) == GIT_SUCCESS) {
+		if (git_oid_fromstr(&id, hash) != GIT_SUCCESS) {
+			RETURN_FALSE;
+		}
+		
+		if (git_odb_exists(odb, &id) == 1) {
+			RETURN_TRUE;
+		} else {
+			RETURN_FALSE;
+		}
+	} else {
+		/* @todo: throws an exception */
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 
 
 static zend_function_entry php_git2_repository_methods[] = {
@@ -299,6 +337,7 @@ static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, headOrphan,  NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, init,        arginfo_git2_repository_init,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(git2_repository, discover,    arginfo_git2_repository_discover,    ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(git2_repository, exists,      arginfo_git2_repository_exists,      ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
