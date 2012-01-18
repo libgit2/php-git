@@ -212,6 +212,52 @@ PHP_METHOD(git2_repository, init)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\Repsotiroy::headDetached()
+	A repository's HEAD is detached when it points directly to a commit instead of a branch.
+*/
+PHP_METHOD(git2_repository, headDetached)
+{
+	git_repository *repository;
+	php_git2_repository *m_repository;
+
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	if (m_repository->repository != NULL) {
+		if (git_repository_head_detached(m_repository->repository) == 1) {
+			RETURN_TRUE;
+		} else {
+			RETURN_FALSE;
+		}
+	} else {
+		/* @todo: throws an exectpion */
+	}
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\Repsotiroy::headOrphan()
+ An orphan branch is one named from HEAD but which doesn't exist in	
+ the refs namespace, because it doesn't have any commit to point to.
+*/                                                                                           the refs namespace, because it doesn't have any commit to point to.
+PHP_METHOD(git2_repository, headOrphan)
+{
+	git_repository *repository;
+	php_git2_repository *m_repository;
+
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	if (m_repository->repository != NULL) {
+		if (git_repository_head_orphan(m_repository->repository) == 1) {
+			RETURN_TRUE;
+		} else {
+			RETURN_FALSE;
+		}
+	} else {
+		/* @todo: throws an exectpion */
+	}
+}
+/* }}} */
+
+
 
 static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC)
@@ -219,6 +265,8 @@ static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, isBare,      NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, getPath,     NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, getWorkdir,  NULL,                                ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, headDetached,NULL,                                ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, headOrphan,  NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, init,        arginfo_git2_repository_init,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	{NULL,NULL,NULL}
 };
