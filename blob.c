@@ -45,7 +45,31 @@ zend_object_value php_git2_blob_new(zend_class_entry *ce TSRMLS_DC)
 }
 
 
+/*
+{{{ proto: Git2\Blob::__toString()
+*/
+PHP_METHOD(git2_blob, __toString)
+{
+	char *data;
+	php_git2_blob *m_blob;
+	
+	m_blob = PHP_GIT2_GET_OBJECT(php_git2_blob, getThis());
+
+	if (m_blob != NULL) {
+		if (m_blob->blob == NULL) {
+			RETURN_FALSE;
+		}
+		
+		RETURN_STRINGL(git_blob_rawcontent(m_blob->blob), git_blob_rawsize(m_blob->blob),1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
 static zend_function_entry php_git2_blob_methods[] = {
+	PHP_ME(git2_blob, __toString, NULL, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 

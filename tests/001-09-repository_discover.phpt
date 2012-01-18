@@ -1,5 +1,5 @@
 --TEST--
-Check for Git2\Repository::headOrphan
+Check for Git2\Repository::discover
 --SKIPIF--
 <?php if (!extension_loaded("git2")) print "skip"; ?>
 --FILE--
