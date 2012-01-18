@@ -34,6 +34,7 @@ if test $PHP_GIT2 != "no"; then
 				commit.c \
 				blob.c \
 				tree.c \
+				signature.c \
 	, $ext_shared)
 
 	ifdef([PHP_ADD_EXTENSION_DEP],

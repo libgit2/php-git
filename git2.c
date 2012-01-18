@@ -28,6 +28,50 @@ extern void php_git2_repository_init(TSRMLS_D);
 extern void php_git2_commit_init(TSRMLS_D);
 extern void php_git2_blob_init(TSRMLS_D);
 extern void php_git2_tree_init(TSRMLS_D);
+extern void php_git2_signature_init(TSRMLS_D);
+
+
+int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsigned int method_len, unsigned int param_count, ...)
+{
+	va_list ap;
+	size_t i;
+	int error = 0;
+	zval **params, *method_name, *ret= NULL;
+	TSRMLS_FETCH();
+	
+	if (param_count > 0) {
+		params = emalloc(sizeof(zval**) * param_count);
+		va_start(ap, param_count);
+		for (i = 0; i < param_count; i ++) {
+			params[i] = va_arg(ap, zval*);
+		}
+		va_end(ap);
+	} else {
+		params = NULL;
+	}
+	
+	MAKE_STD_ZVAL(ret);
+	MAKE_STD_ZVAL(method_name);
+	
+	ZVAL_NULL(ret);
+	ZVAL_STRINGL(method_name, method, method_len, 1);
+
+	error = call_user_function(NULL, &obj, method_name, ret, param_count, params TSRMLS_CC);
+	
+	if (param_count > 0) {
+		for (i = 0; i < param_count; i++) {
+			if (params[i] != NULL) {
+				zval_ptr_dtor(&params[i]);
+			}
+		}
+		efree(params);
+		params = NULL;
+	}
+	*retval = ret;
+	zval_ptr_dtor(&method_name);
+
+	return error;
+}
 
 zval* php_git2_object_new(php_git2_repository *repository, git_object *object TSRMLS_DC)
 {
@@ -91,6 +135,7 @@ PHP_MINIT_FUNCTION(git2)
 	php_git2_commit_init(TSRMLS_C);
 	php_git2_blob_init(TSRMLS_C);
 	php_git2_tree_init(TSRMLS_C);
+	php_git2_signature_init(TSRMLS_C);
 	
 	return SUCCESS;
 }
