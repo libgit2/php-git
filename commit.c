@@ -44,8 +44,81 @@ zend_object_value php_git2_commit_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
+/*
+{{{ proto: Git2\Commit::getMessage()
+*/
+PHP_METHOD(git2_commit, getMessage)
+{
+	char *data;
+	php_git2_commit *m_commit;
+	
+	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
+
+	if (m_commit != NULL) {
+		if (m_commit->commit == NULL) {
+			RETURN_FALSE;
+		}
+		
+		RETURN_STRING(git_commit_message(m_commit->commit),1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\Commit::getMessageEncoding()
+*/
+PHP_METHOD(git2_commit, getMessageEncoding)
+{
+	char *encoding;
+	php_git2_commit *m_commit;
+	
+	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
+
+	if (m_commit != NULL) {
+		if (m_commit->commit == NULL) {
+			RETURN_FALSE;
+		}
+		
+		encoding = git_commit_message_encoding(m_commit->commit);
+		if (encoding != NULL) {
+			RETURN_STRING(encoding,1);
+		} else {
+			RETURN_STRING("UTF-8",1);
+		}
+	} 
+	RETURN_FALSE;
+}
+/* }}} */
+
+
+/*
+{{{ proto: Git2\Commit::parentCount()
+*/
+PHP_METHOD(git2_commit, parentCount)
+{
+	unsigned int parent_count = 0;
+	php_git2_commit *m_commit;
+	
+	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
+
+	if (m_commit != NULL) {
+		if (m_commit->commit == NULL) {
+			RETURN_FALSE;
+		}
+		
+		parent_count = git_commit_parentcount(m_commit->commit);
+		RETURN_LONG(parent_count);
+	}
+	RETURN_FALSE;
+}
+/* }}} */
 
 static zend_function_entry php_git2_commit_methods[] = {
+	PHP_ME(git2_commit, getMessage,         NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_commit, getMessageEncoding, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_commit, parentCount,        NULL, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
