@@ -31,6 +31,9 @@ if test $PHP_GIT2 != "no"; then
 	PHP_SUBST(GIT_SHARED_LIBADD)
 	PHP_NEW_EXTENSION(git2, git2.c \
 				repository.c \
+				commit.c \
+				blob.c \
+				tree.c \
 	, $ext_shared)
 
 	ifdef([PHP_ADD_EXTENSION_DEP],

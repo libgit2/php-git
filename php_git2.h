@@ -43,12 +43,29 @@ extern zend_module_entry git2_module_entry;
 #  define PHP_GIT2_NS "Git2"
 
 extern PHPAPI zend_class_entry *git2_repository_class_entry;
+extern PHPAPI zend_class_entry *git2_commit_class_entry;
+extern PHPAPI zend_class_entry *git2_blob_class_entry;
+extern PHPAPI zend_class_entry *git2_tree_class_entry;
 
 typedef struct{
 	zend_object zo;
 	git_repository *repository;
 } php_git2_repository;
 
+typedef struct{
+	zend_object zo;
+	git_commit *commit;
+} php_git2_commit;
+
+typedef struct{
+	zend_object zo;
+	git_blob *blob;
+} php_git2_blob;
+
+typedef struct{
+	zend_object zo;
+	git_tree *tree;
+} php_git2_tree;
 
 #  define PHP_GIT2_GET_OBJECT(STRUCT_NAME, OBJECT) (STRUCT_NAME *) zend_object_store_get_object(OBJECT TSRMLS_CC);
 
@@ -81,6 +98,7 @@ typedef struct{
 	retval.handlers = zend_get_std_object_handlers();
 #  endif
 
-static int php_git2_add_protected_property_string_ex(zval *object, char *name, int name_length, char *data, zend_bool duplicate TSRMLS_DC);
+extern int php_git2_add_protected_property_string_ex(zval *object, char *name, int name_length, char *data, zend_bool duplicate TSRMLS_DC);
+extern zval* php_git2_object_new(php_git2_repository *repository, git_object *object TSRMLS_DC);
 
 #endif /* PHP_GIT2_H */

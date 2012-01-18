@@ -25,6 +25,49 @@
 #include "php_git2.h"
 
 extern void php_git2_repository_init(TSRMLS_D);
+extern void php_git2_commit_init(TSRMLS_D);
+extern void php_git2_blob_init(TSRMLS_D);
+extern void php_git2_tree_init(TSRMLS_D);
+
+zval* php_git2_object_new(php_git2_repository *repository, git_object *object TSRMLS_DC)
+{
+	zval *result = NULL;
+	MAKE_STD_ZVAL(result);
+	
+	switch (git_object_type(object)) {
+		case GIT_OBJ_COMMIT: {
+			php_git2_commit *m_obj = NULL;
+			
+			object_init_ex(result, git2_commit_class_entry);
+			m_obj = PHP_GIT2_GET_OBJECT(php_git2_commit, result);
+			m_obj->commit = (git_commit*)object;
+			break;
+		}
+		case GIT_OBJ_BLOB: {
+			php_git2_blob *m_obj = NULL;
+			
+			object_init_ex(result, git2_blob_class_entry);
+			m_obj = PHP_GIT2_GET_OBJECT(php_git2_blob, result);
+			m_obj->blob = (git_blob*)object;
+			break;
+		}
+		case GIT_OBJ_TREE: {
+			php_git2_tree *m_obj = NULL;
+			
+			object_init_ex(result, git2_tree_class_entry);
+			m_obj = PHP_GIT2_GET_OBJECT(php_git2_tree, result);
+			m_obj->tree = (git_tree*)object;
+			break;
+		}
+		case GIT_OBJ_TAG: {
+			break;
+		}
+		default:
+			break;
+	}
+	
+	return result;
+}
 
 int php_git2_add_protected_property_string_ex(zval *object, char *name, int name_length, char *data, zend_bool duplicate TSRMLS_DC)
 {
@@ -45,6 +88,9 @@ int php_git2_add_protected_property_string_ex(zval *object, char *name, int name
 PHP_MINIT_FUNCTION(git2)
 {
 	php_git2_repository_init(TSRMLS_C);
+	php_git2_commit_init(TSRMLS_C);
+	php_git2_blob_init(TSRMLS_C);
+	php_git2_tree_init(TSRMLS_C);
 	
 	return SUCCESS;
 }

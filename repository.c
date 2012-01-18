@@ -63,6 +63,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_exists, 0,0,1)
 	ZEND_ARG_INFO(0, exists)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_lookup, 0,0,1)
+	ZEND_ARG_INFO(0, lookup)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
 /*
 {{{ proto: Git2\Repsotiroy::__construct(string $path)
 */
@@ -283,7 +288,7 @@ PHP_METHOD(git2_repository, discover)
 		return;
 	}
 	
-	if (git_repository_discover(&path_buffer,path_size,start_path,(int)across_fs, ceiling_dirs) == GIT_SUCCESS) {
+	if (git_repository_discover(path_buffer,path_size,(const char *)start_path,(int)across_fs, (const char *)ceiling_dirs) == GIT_SUCCESS) {
 		RETVAL_STRING(path_buffer, 1);
 	} else {
 		RETURN_FALSE;
@@ -326,6 +331,47 @@ PHP_METHOD(git2_repository, exists)
 /* }}} */
 
 
+/*
+{{{ proto: Git2\Repsotiroy::lookup(string $sha1[, int type = GIT_OBJ_ANY])
+*/
+PHP_METHOD(git2_repository, lookup)
+{
+	char *hash;
+	int error, hash_len = 0;
+	git_odb *odb;
+	git_oid id;
+	git_object *object;
+	long type = GIT_OBJ_ANY;
+	php_git2_repository *m_repository;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s|l", &hash, &hash_len, type) == FAILURE) {
+		return;
+	}
+	
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	if (git_repository_odb(&odb, m_repository->repository) == GIT_SUCCESS) {
+		zval *result = NULL;
+		
+		if (git_oid_fromstrn(&id, hash, hash_len) != GIT_SUCCESS) {
+			RETURN_FALSE;
+		}
+		
+		if (hash_len < GIT_OID_HEXSZ) {
+			error = git_object_lookup_prefix(&object, m_repository->repository, &id, hash_len, (git_otype)type);
+		} else {
+			error = git_object_lookup(&object, m_repository->repository, &id, (git_otype)type);
+		}
+		
+		result = php_git2_object_new(m_repository, object TSRMLS_CC);
+		RETVAL_ZVAL(result,0,1);
+	} else {
+		/* @todo: throws an exception */
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 
 static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC)
@@ -338,6 +384,13 @@ static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, init,        arginfo_git2_repository_init,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(git2_repository, discover,    arginfo_git2_repository_discover,    ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(git2_repository, exists,      arginfo_git2_repository_exists,      ZEND_ACC_PUBLIC)
+#ifdef lookup
+#undef lookup
+#endif
+	PHP_ME(git2_repository, lookup,      arginfo_git2_repository_lookup,      ZEND_ACC_PUBLIC)
+#ifndef lookup
+#define lookup php_lookup
+#endif
 	{NULL,NULL,NULL}
 };
 
