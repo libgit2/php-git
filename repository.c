@@ -53,6 +53,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_init, 0,0,1)
 	ZEND_ARG_INFO(0, isBare)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_discover, 0,0,3)
+	ZEND_ARG_INFO(0, path)
+	ZEND_ARG_INFO(0, across_fs)
+	ZEND_ARG_INFO(0, ceiling_dirs)
+ZEND_END_ARG_INFO()
+
 /*
 {{{ proto: Git2\Repsotiroy::__construct(string $path)
 */
@@ -238,7 +244,7 @@ PHP_METHOD(git2_repository, headDetached)
 {{{ proto: Git2\Repsotiroy::headOrphan()
  An orphan branch is one named from HEAD but which doesn't exist in	
  the refs namespace, because it doesn't have any commit to point to.
-*/                                                                                           the refs namespace, because it doesn't have any commit to point to.
+*/                                                                                           
 PHP_METHOD(git2_repository, headOrphan)
 {
 	git_repository *repository;
@@ -257,6 +263,30 @@ PHP_METHOD(git2_repository, headOrphan)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\Repsotiroy::discover(string $path[, bool across_fs, string ceiling_dirs])
+*/
+PHP_METHOD(git2_repository, discover)
+{
+	char path_buffer[1024] = {0};
+	size_t path_size = 1024;
+	zend_bool across_fs = 1;
+	char *start_path, *ceiling_dirs = NULL;
+	int start_path_len, ceiling_dirs_len = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s|bs", &start_path, &start_path_len, &across_fs, &ceiling_dirs, & ceiling_dirs_len) == FAILURE) {
+		return;
+	}
+	
+	if (git_repository_discover(&path_buffer,path_size,start_path,(int)across_fs, ceiling_dirs) == GIT_SUCCESS) {
+		RETVAL_STRING(path_buffer, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 
 
 static zend_function_entry php_git2_repository_methods[] = {
@@ -268,6 +298,7 @@ static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, headDetached,NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, headOrphan,  NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, init,        arginfo_git2_repository_init,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(git2_repository, discover,    arginfo_git2_repository_discover,    ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	{NULL,NULL,NULL}
 };
 
