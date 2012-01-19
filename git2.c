@@ -97,10 +97,22 @@ zval* php_git2_object_new(php_git2_repository *repository, git_object *object TS
 		}
 		case GIT_OBJ_TREE: {
 			php_git2_tree *m_obj = NULL;
+			unsigned int *numbers = 0;
+			int i = 0;
+			
 			
 			object_init_ex(result, git2_tree_class_entry);
 			m_obj = PHP_GIT2_GET_OBJECT(php_git2_tree, result);
 			m_obj->tree = (git_tree*)object;
+			numbers = git_tree_entrycount(m_obj->tree);
+			for (i = 0;i < numbers; i++) {
+				const char *entry_name = {0};
+				const git_tree_entry *entry;
+				entry = git_tree_entry_byindex(m_obj->tree, i);
+				entry_name = git_tree_entry_name(entry);
+				fprintf(stderr,"entry_name: %s\n", entry_name);
+				
+			}
 			break;
 		}
 		case GIT_OBJ_TAG: {
