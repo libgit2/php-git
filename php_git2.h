@@ -46,6 +46,8 @@ extern PHPAPI zend_class_entry *git2_repository_class_entry;
 extern PHPAPI zend_class_entry *git2_commit_class_entry;
 extern PHPAPI zend_class_entry *git2_blob_class_entry;
 extern PHPAPI zend_class_entry *git2_tree_class_entry;
+extern PHPAPI zend_class_entry *git2_tree_builder_class_entry;
+extern PHPAPI zend_class_entry *git2_tree_entry_class_entry;
 extern PHPAPI zend_class_entry *git2_tree_signature_entry;
 
 typedef struct{
@@ -67,6 +69,17 @@ typedef struct{
 	zend_object zo;
 	git_tree *tree;
 } php_git2_tree;
+
+typedef struct{
+	zend_object zo;
+	git_tree_entry *entry;
+} php_git2_tree_entry;
+
+typedef struct{
+	zend_object zo;
+	git_treebuilder *builder;
+} php_git2_tree_builder;
+
 
 typedef struct{
 	zend_object zo;

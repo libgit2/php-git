@@ -28,6 +28,7 @@ extern void php_git2_repository_init(TSRMLS_D);
 extern void php_git2_commit_init(TSRMLS_D);
 extern void php_git2_blob_init(TSRMLS_D);
 extern void php_git2_tree_init(TSRMLS_D);
+extern void php_git2_tree_builder_init(TSRMLS_D);
 extern void php_git2_signature_init(TSRMLS_D);
 
 
@@ -99,20 +100,38 @@ zval* php_git2_object_new(php_git2_repository *repository, git_object *object TS
 			php_git2_tree *m_obj = NULL;
 			unsigned int *numbers = 0;
 			int i = 0;
-			
+			zval *m_array;
 			
 			object_init_ex(result, git2_tree_class_entry);
 			m_obj = PHP_GIT2_GET_OBJECT(php_git2_tree, result);
 			m_obj->tree = (git_tree*)object;
 			numbers = git_tree_entrycount(m_obj->tree);
+			MAKE_STD_ZVAL(m_array);
+			array_init(m_array);
+			
 			for (i = 0;i < numbers; i++) {
 				const char *entry_name = {0};
+				const char entry_oid[GIT_OID_HEXSZ+1] = {0};
 				const git_tree_entry *entry;
+				const git_oid *oid = NULL;
+				zval *m_entry = NULL;
+				
 				entry = git_tree_entry_byindex(m_obj->tree, i);
 				entry_name = git_tree_entry_name(entry);
-				fprintf(stderr,"entry_name: %s\n", entry_name);
+				oid = git_tree_entry_id(entry);
+				git_oid_fmt(entry_oid, oid);
 				
+				MAKE_STD_ZVAL(m_entry);
+				object_init_ex(m_entry, git2_tree_entry_class_entry);
+				add_property_stringl_ex(m_entry, "name", sizeof("name"), entry_name, strlen(entry_name), 1 TSRMLS_CC);
+				add_property_stringl_ex(m_entry, "oid", sizeof("oid"), entry_oid, strlen(entry_oid), 1 TSRMLS_CC);
+				add_property_long_ex(m_entry, "attributes", sizeof("attributes"), git_tree_entry_attributes(entry) TSRMLS_CC);
+				add_next_index_zval(m_array, m_entry);
 			}
+			
+			add_property_zval_ex(result, "entries",sizeof("entries"),m_array TSRMLS_CC);
+			zval_ptr_dtor(&m_array);
+			
 			break;
 		}
 		case GIT_OBJ_TAG: {
@@ -147,6 +166,8 @@ PHP_MINIT_FUNCTION(git2)
 	php_git2_commit_init(TSRMLS_C);
 	php_git2_blob_init(TSRMLS_C);
 	php_git2_tree_init(TSRMLS_C);
+	php_git2_tree_builder_init(TSRMLS_C);
+	php_git2_tree_entry_init(TSRMLS_C);
 	php_git2_signature_init(TSRMLS_C);
 	
 	return SUCCESS;

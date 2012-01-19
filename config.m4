@@ -34,6 +34,8 @@ if test $PHP_GIT2 != "no"; then
 				commit.c \
 				blob.c \
 				tree.c \
+				tree_builder.c \
+				tree_entry.c \
 				signature.c \
 	, $ext_shared)
 
