@@ -93,7 +93,7 @@ PHP_METHOD(git2_repository, __construct)
 		}
 		
 		m_repository->repository = repository;
-		php_git_add_protected_property_string_ex(getThis(),
+		php_git2_add_protected_property_string_ex(getThis(),
 			"path",sizeof("path"),
 			git_repository_path(repository),
 		1 TSRMLS_CC);
