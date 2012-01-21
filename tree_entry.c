@@ -44,8 +44,52 @@ zend_object_value php_git2_tree_entry_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_entry___construct, 0,0,1)
+	ZEND_ARG_INFO(0, entry)
+ZEND_END_ARG_INFO()
+
+/*
+{{{ proto: Git2\TreeEntry::__construct([array $entry])
+*/
+PHP_METHOD(git2_tree_entry, __construct)
+{
+	zval *z_entry= NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"|z", &z_entry) == FAILURE) {
+		return;
+	}
+
+	if (z_entry != NULL) {
+		zval **zvalue = NULL;
+		zval *zvaluep = NULL;
+		
+		if (zend_hash_find(Z_ARRVAL_P(z_entry),"name",sizeof("name"),(void **)&zvalue) != FAILURE) {
+			zvaluep = *zvalue;
+			add_property_string_ex(getThis(), "name",sizeof("name"),Z_STRVAL_P(zvaluep) ,1 TSRMLS_CC);
+			zvalue = NULL;
+			zvaluep = NULL;
+		}
+		if (zend_hash_find(Z_ARRVAL_P(z_entry),"attributes",sizeof("attributes"),(void **)&zvalue) != FAILURE) {
+			zvaluep = *zvalue;
+			add_property_long_ex(getThis(), "attributes",sizeof("attributes"),Z_LVAL_P(zvaluep) TSRMLS_CC);
+			zvalue = NULL;
+			zvaluep = NULL;
+		}
+		if (zend_hash_find(Z_ARRVAL_P(z_entry),"oid",sizeof("oid"),(void **)&zvalue) != FAILURE) {
+			zvaluep = *zvalue;
+			add_property_string_ex(getThis(), "oid",sizeof("oid"),Z_STRVAL_P(zvaluep),1 TSRMLS_CC);
+			zvalue = NULL;
+			zvaluep = NULL;
+		}
+	}
+}
+/* }}} */
+
+
 
 static zend_function_entry php_git2_tree_entry_methods[] = {
+	PHP_ME(git2_tree_entry, __construct, arginfo_git2_tree_entry___construct, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
