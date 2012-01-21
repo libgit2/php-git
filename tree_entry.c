@@ -29,7 +29,6 @@ PHPAPI zend_class_entry *git2_tree_entry_class_entry;
 static void php_git2_tree_entry_free_storage(php_git2_tree_entry *object TSRMLS_DC)
 {
 	if (object->entry != NULL) {
-		git_tree_entry_free(object->entry);
 		object->entry = NULL;
 	}
 	zend_object_std_dtor(&object->zo TSRMLS_CC);

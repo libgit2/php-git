@@ -106,6 +106,7 @@ zval* php_git2_object_new(php_git2_repository *repository, git_object *object TS
 			object_init_ex(result, git2_tree_class_entry);
 			m_obj = PHP_GIT2_GET_OBJECT(php_git2_tree, result);
 			m_obj->tree = (git_tree*)object;
+			m_obj->repository = repository->repository;
 			numbers = git_tree_entrycount(m_obj->tree);
 			MAKE_STD_ZVAL(m_array);
 			array_init(m_array);

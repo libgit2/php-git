@@ -70,6 +70,8 @@ typedef struct{
 typedef struct{
 	zend_object zo;
 	git_tree *tree;
+	unsigned int offset;
+	git_repository *repository;
 } php_git2_tree;
 
 typedef struct{
@@ -162,6 +164,26 @@ static inline php_git2_create_signature_from_commit(zval **object, git_commit *c
 	add_property_zval(ret,"time",date);
 	zval_ptr_dtor(&date);
 	*object = ret;
+}
+
+static inline void create_tree_entry_from_entry(zval **object, git_tree_entry *entry, git_repository *repository)
+{
+	TSRMLS_FETCH();
+	char buf[GIT_OID_HEXSZ] = {0};
+	const git_oid *oid;
+	php_git2_tree_entry *m_entry;
+
+	MAKE_STD_ZVAL(*object);
+	object_init_ex(*object, git2_tree_entry_class_entry);
+	m_entry = PHP_GIT2_GET_OBJECT(php_git2_tree_entry, *object);
+
+	m_entry->entry = entry;
+	oid = git_tree_entry_id(entry);
+	git_oid_to_string(buf,GIT_OID_HEXSZ,oid);
+
+	add_property_string(*object, "name", (char *)git_tree_entry_name(entry), 1);
+	add_property_string(*object, "oid", buf, 1);
+	add_property_long(*object, "attributes", git_tree_entry_attributes(entry));
 }
 
 #endif /* PHP_GIT2_H */

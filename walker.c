@@ -260,7 +260,7 @@ PHP_METHOD(git2_walker, valid)
 		RETURN_FALSE;
 	}
 }
-
+/* }}} */
 
 static zend_function_entry php_git2_walker_methods[] = {
 	PHP_ME(git2_walker, __construct, arginfo_git2_walker___construct, ZEND_ACC_PUBLIC)
