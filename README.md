@@ -37,3 +37,34 @@ $repo = new Git2\Repository($path);
 ````
 
 ## Object Access
+
+## Commit
+
+````
+<?php
+date_default_timezone_set('Asia/Tokyo');
+$repo = Git2\Repository::init("/path/to/repo",true);
+
+$author = new Git2\Signature("Shuhei Tanuma","chobieee@gmail.com",new DateTime());
+
+$bld = new Git2\TreeBuilder();
+$bld->insert(new Git2\TreeEntry(array(
+	"name" => "README.txt",
+	"oid" => "63542fbea05732b78711479a31557bd1b0aa2116",
+	"attributes" => octdec('100644'),
+)));
+$tree = $bld->write($repo);
+
+$parent = "";
+$parents = array();
+for ($i = 0; $i< 10;$i++){
+	$parent = Git2\Commit::create($repo, array(
+		"author"    => $author,
+		"committer" => $author,
+		"message"   => "Hello World: {$i}",
+		"tree"      => $tree,
+		"parents"   => $parents,
+	));
+	$parents = array($parent);
+}
+````

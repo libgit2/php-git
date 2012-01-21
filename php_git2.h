@@ -133,7 +133,7 @@ extern int php_git2_call_user_function_v(zval **retval, zval *obj, char *method,
 extern inline void php_git2_create_signature(zval *object, char *name, int name_len, char *email, int email_len, zval *date TSRMLS_DC);
 
 
-static inline php_git2_create_signature_from_commit(zval **object, php_git2_commit *commit, int type TSRMLS_DC)
+static inline php_git2_create_signature_from_commit(zval **object, git_commit *commit, int type TSRMLS_DC)
 {
 	zval *ret;
 	zval *z_signature, *date;

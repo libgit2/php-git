@@ -30,7 +30,10 @@ PHPAPI zend_class_entry *git2_signature_class_entry;
 
 inline void php_git2_create_signature(zval *object, char *name, int name_len, char *email, int email_len, zval *date TSRMLS_DC)
 {
-	zval *z_name, *z_email = NULL;
+	zval *r_timestamp,*r_offset, *z_name, *z_email = NULL;
+	php_git2_signature *m_signature;
+	long timestamp, offset = 0;
+	int error = 0;
 	
 	MAKE_STD_ZVAL(z_name);
 	MAKE_STD_ZVAL(z_email);
@@ -40,7 +43,18 @@ inline void php_git2_create_signature(zval *object, char *name, int name_len, ch
 	add_property_zval_ex(object, "name", sizeof("name") ,z_name TSRMLS_CC);
 	add_property_zval_ex(object, "email",sizeof("email"),z_email TSRMLS_CC);
 	add_property_zval_ex(object, "time", sizeof("time") ,date TSRMLS_CC);
+	
+	m_signature = PHP_GIT2_GET_OBJECT(php_git2_signature, object);
 
+	error = php_git2_call_user_function_v(&r_timestamp, date, "getTimeStamp", sizeof("getTimeStamp")-1, 0);
+	timestamp = Z_LVAL_P(r_timestamp);
+	php_git2_call_user_function_v(&r_offset, date, "getOffset", sizeof("getOffset")-1, 0);
+	offset = Z_LVAL_P(r_offset);
+	
+	git_signature_new(&m_signature->signature, name,email,(git_time_t)timestamp,offset / 60);
+
+	zval_ptr_dtor(&r_timestamp);
+	zval_ptr_dtor(&r_offset);
 	zval_ptr_dtor(&z_email);
 	zval_ptr_dtor(&z_name);
 }
