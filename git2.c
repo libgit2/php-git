@@ -30,6 +30,7 @@ extern void php_git2_blob_init(TSRMLS_D);
 extern void php_git2_tree_init(TSRMLS_D);
 extern void php_git2_tree_builder_init(TSRMLS_D);
 extern void php_git2_signature_init(TSRMLS_D);
+extern void php_git2_walker_init(TSRMLS_D);
 
 
 int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsigned int method_len, unsigned int param_count, ...)
@@ -169,6 +170,7 @@ PHP_MINIT_FUNCTION(git2)
 	php_git2_tree_builder_init(TSRMLS_C);
 	php_git2_tree_entry_init(TSRMLS_C);
 	php_git2_signature_init(TSRMLS_C);
+	php_git2_walker_init(TSRMLS_C);
 	
 	return SUCCESS;
 }
