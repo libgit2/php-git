@@ -44,28 +44,39 @@ zend_object_value php_git2_tree_builder_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_builder___construct, 0,0,0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_builder___construct, 0,0,1)
+	ZEND_ARG_INFO(0, tree)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_builder_insert, 0,0,0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_builder_insert, 0,0,1)
 	ZEND_ARG_INFO(0, entry)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_builder_remove, 0,0,0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_builder_write, 0,0,0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_builder_remove, 0,0,1)
+	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
 /*
-{{{ proto: Git2\TreeBuilder::__construct()
+{{{ proto: Git2\TreeBuilder::__construct([Git2\Tree $tree])
 */
 PHP_METHOD(git2_tree_builder, __construct)
 {
 	git_treebuilder *builder;
+	zval *z_tree = NULL;
+	git_tree *tree = NULL;
+	php_git2_tree *m_tree;
 	php_git2_tree_builder *m_builder;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"|O", &z_tree, git2_tree_class_entry) == FAILURE) {
+		return;
+	}
+	if (z_tree != NULL) {
+		m_tree = PHP_GIT2_GET_OBJECT(php_git2_tree, z_tree);
+		tree = m_tree->tree;
+	}
 	
-	git_treebuilder_create(&builder, NULL);
+	git_treebuilder_create(&builder, tree);
 	m_builder = PHP_GIT2_GET_OBJECT(php_git2_tree_builder, getThis());
 	m_builder->builder = builder;
 }
@@ -84,27 +95,40 @@ PHP_METHOD(git2_tree_builder, insert)
 	char *name;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"z", &m_entry) == FAILURE) {
+		"O", &m_entry, git2_tree_entry_class_entry) == FAILURE) {
 		return;
 	}
 
 	z_name       =  zend_read_property(git2_tree_entry_class_entry, m_entry,"name",sizeof("name")-1, 0 TSRMLS_CC);
 	z_oid        =  zend_read_property(git2_tree_entry_class_entry, m_entry,"oid",sizeof("oid")-1, 0 TSRMLS_CC);
 	z_attributes =  zend_read_property(git2_tree_entry_class_entry, m_entry,"attributes",sizeof("attributes")-1, 0 TSRMLS_CC);
+	m_builder    = PHP_GIT2_GET_OBJECT(php_git2_tree_builder, getThis());
 	
 	name = Z_STRVAL_P(z_name);
 	attributes = (unsigned int)Z_LVAL_P(z_attributes);
 	
-	git_oid_fromstrn(&oid, Z_STRVAL_P(z_name), Z_STRLEN_P(z_name));
+	git_oid_fromstrn(&oid, Z_STRVAL_P(z_oid), Z_STRLEN_P(z_oid));
 	error = git_treebuilder_insert(NULL, m_builder->builder, name, &oid, attributes);
 }
 /* }}} */
 
 /*
-{{{ proto: Git2\TreeBuilder::remove()
+{{{ proto: Git2\TreeBuilder::remove(string $name)
 */
 PHP_METHOD(git2_tree_builder, remove)
 {
+	char *name;
+	int name_len = 0;
+	php_git2_tree_builder *m_builder;
+	int error = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &name, &name_len) == FAILURE) {
+		return;
+	}
+	m_builder    = PHP_GIT2_GET_OBJECT(php_git2_tree_builder, getThis());
+
+	RETURN_LONG(git_treebuilder_remove(m_builder->builder, name));
 }
 /* }}} */
 
@@ -113,6 +137,28 @@ PHP_METHOD(git2_tree_builder, remove)
 */
 PHP_METHOD(git2_tree_builder, write)
 {
+	git_oid oid;
+	php_git2_repository *m_repository;
+	php_git2_tree_builder *m_builder;
+	char oid_out[GIT_OID_HEXSZ+1] = {0};
+	zval *repository;
+	int error = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"O", &repository, git2_repository_class_entry) == FAILURE) {
+		return;
+	}
+	
+	m_builder    = PHP_GIT2_GET_OBJECT(php_git2_tree_builder, getThis());
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_tree_builder, repository);
+	
+	error = git_treebuilder_write(&oid, m_repository->repository, m_builder->builder);
+	if (error != GIT_SUCCESS) {
+		RETURN_FALSE;
+	}
+	
+	git_oid_fmt(oid_out, &oid);
+	RETURN_STRINGL(oid_out,GIT_OID_HEXSZ,1);
 }
 /* }}} */
 
@@ -121,6 +167,10 @@ PHP_METHOD(git2_tree_builder, write)
 */
 PHP_METHOD(git2_tree_builder, clear)
 {
+	php_git2_tree_builder *m_builder;
+	m_builder = PHP_GIT2_GET_OBJECT(php_git2_tree_builder, getThis());
+	
+	git_treebuilder_clear(m_builder->builder);
 }
 /* }}} */
 
@@ -129,7 +179,8 @@ static zend_function_entry php_git2_tree_builder_methods[] = {
 	PHP_ME(git2_tree_builder, insert,      arginfo_git2_tree_builder_insert, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree_builder, remove,      arginfo_git2_tree_builder_remove, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree_builder, clear,       NULL,                             ZEND_ACC_PUBLIC)
-	PHP_ME(git2_tree_builder, write,       arginfo_git2_tree_builder_write,  ZEND_ACC_PUBLIC)
+	PHP_ME(git2_tree_builder, write,       NULL,                             ZEND_ACC_PUBLIC)
+	/* @todo: filter */
 	{NULL,NULL,NULL}
 };
 
