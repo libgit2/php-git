@@ -10,7 +10,7 @@ $commit = $repo->lookup("ab68c54212af15d3545c41057e3a8f2f9ff6fd0d");
 if ($commit instanceof Git2\Commit) {
 	echo "OK" . PHP_EOL;
 } else {
-	echo "NG" . PHP_EOL;
+	echo "FAIL" . PHP_EOL;
 }
 --EXPECT--
 OK

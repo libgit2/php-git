@@ -10,7 +10,7 @@ $tree = $repo->lookup("67dc4302383b2715f4e0b8c41840eb05b1873697");
 if ($tree instanceof Git2\Tree) {
 	echo "OK" . PHP_EOL;
 } else {
-	echo "NG" . PHP_EOL;
+	echo "FAIL" . PHP_EOL;
 }
 --EXPECT--
 OK

@@ -9,7 +9,7 @@ $repo = new Git2\Repository($path);
 if ($repo->headOrphan()) {
 	echo "OK" . PHP_EOL;
 } else {
-	echo "NG" . PHP_EOL;
+	echo "FAIL" . PHP_EOL;
 }
 --EXPECT--
 OK

@@ -9,7 +9,7 @@ $discovered = Git2\Repository::discover($path);
 if ($discovered == __DIR__ . "/mock/001-01/") {
 	echo "OK" . PHP_EOL;
 } else {
-	echo "NG" . PHP_EOL;
+	echo "FAIL" . PHP_EOL;
 }
 --EXPECT--
 OK

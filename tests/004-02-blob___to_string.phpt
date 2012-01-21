@@ -10,7 +10,7 @@ $blob = $repo->lookup("557db03de997c86a4a028e1ebd3a1ceb225be238");
 if ($blob instanceof Git2\Blob) {
 	echo $blob->__toString();
 } else {
-	echo "NG" . PHP_EOL;
+	echo "FAIL" . PHP_EOL;
 }
 --EXPECT--
 Hello World

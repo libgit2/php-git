@@ -27,7 +27,7 @@ if (file_exists($bare_path)) {
 		if (file_exists($bare_path . "/{$file}")) {
 			echo "OK" . PHP_EOL;
 		} else {
-			echo "NG: missing {$file}" . PHP_EOL;
+			echo "FAIL: missing {$file}" . PHP_EOL;
 		}
 	}
 
@@ -59,7 +59,7 @@ if (file_exists($normal_path)) {
 		if (file_exists($normal_path . "/{$file}")) {
 			echo "OK" . PHP_EOL;
 		} else {
-			echo "NG: missing {$file}" . PHP_EOL;
+			echo "FAIL: missing {$file}" . PHP_EOL;
 		}
 	}
 

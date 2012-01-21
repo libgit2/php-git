@@ -6,7 +6,7 @@ Check for Git2\Repository::isEmpty
 <?php
 $repo = new Git2\Repository(__DIR__ . "/mock/001-02");
 if ($repo->isEmpty()) {
-	echo "NG" . PHP_EOL;
+	echo "FAIL" . PHP_EOL;
 } else {
 	echo "OK" . PHP_EOL;
 }
