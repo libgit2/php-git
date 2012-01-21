@@ -115,10 +115,60 @@ PHP_METHOD(git2_commit, parentCount)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\Commit::getAuthor()
+*/
+PHP_METHOD(git2_commit, getAuthor)
+{
+	unsigned int parent_count = 0;
+	php_git2_commit *m_commit;
+	zval *z_signature, *date;
+	
+	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
+
+	if (m_commit != NULL) {
+		if (m_commit->commit == NULL) {
+			RETURN_FALSE;
+		}
+
+		php_git2_create_signature_from_commit(&z_signature, m_commit->commit, 0 TSRMLS_CC);
+		RETVAL_ZVAL(z_signature, 0, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\Commit::getCommitter()
+*/
+PHP_METHOD(git2_commit, getCommitter)
+{
+	unsigned int parent_count = 0;
+	php_git2_commit *m_commit;
+	zval *z_signature, *date;
+	
+	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
+
+	if (m_commit != NULL) {
+		if (m_commit->commit == NULL) {
+			RETURN_FALSE;
+		}
+
+		php_git2_create_signature_from_commit(&z_signature, m_commit->commit,1 TSRMLS_CC);
+		RETVAL_ZVAL(z_signature, 0, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 static zend_function_entry php_git2_commit_methods[] = {
 	PHP_ME(git2_commit, getMessage,         NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, getMessageEncoding, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, parentCount,        NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_commit, getAuthor,          NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_commit, getCommitter,       NULL, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 

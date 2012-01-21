@@ -28,6 +28,24 @@
 
 PHPAPI zend_class_entry *git2_signature_class_entry;
 
+inline void php_git2_create_signature(zval *object, char *name, int name_len, char *email, int email_len, zval *date TSRMLS_DC)
+{
+	zval *z_name, *z_email = NULL;
+	
+	MAKE_STD_ZVAL(z_name);
+	MAKE_STD_ZVAL(z_email);
+	ZVAL_STRINGL(z_name,name,name_len,1);
+	ZVAL_STRINGL(z_email,email,email_len,1);
+
+	add_property_zval_ex(object, "name", sizeof("name") ,z_name TSRMLS_CC);
+	add_property_zval_ex(object, "email",sizeof("email"),z_email TSRMLS_CC);
+	add_property_zval_ex(object, "time", sizeof("time") ,date TSRMLS_CC);
+
+	zval_ptr_dtor(&z_email);
+	zval_ptr_dtor(&z_name);
+}
+
+
 static void php_git2_signature_free_storage(php_git2_signature *object TSRMLS_DC)
 {
 	if (object->signature != NULL) {
@@ -51,23 +69,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_signature___construct, 0,0,3)
 	ZEND_ARG_INFO(0, email)
 	ZEND_ARG_INFO(0, date)
 ZEND_END_ARG_INFO()
-
-void php_git2_create_signature(zval *object, char *name, int name_len, char *email, int email_len, zval *date TSRMLS_DC)
-{
-	zval *z_name, *z_email = NULL;
-	
-	MAKE_STD_ZVAL(z_name);
-	MAKE_STD_ZVAL(z_email);
-	ZVAL_STRINGL(z_name,name,name_len,1);
-	ZVAL_STRINGL(z_email,email,email_len,1);
-
-	add_property_zval_ex(object, "name", sizeof("name") ,z_name TSRMLS_CC);
-	add_property_zval_ex(object, "email",sizeof("email"),z_email TSRMLS_CC);
-	add_property_zval_ex(object, "time", sizeof("time") ,date TSRMLS_CC);
-
-	zval_ptr_dtor(&z_email);
-	zval_ptr_dtor(&z_name);
-}
 
 /*
 {{{ proto: Git2\Signature::__construct(string $name, string $email, \DateTime $time)

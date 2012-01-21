@@ -34,6 +34,7 @@
 
 #  include "php.h"
 #  include "ext/spl/spl_exceptions.h"
+#  include <date/php_date.h>
 #  include <git2.h>
 #  include <git2/odb_backend.h>
 
@@ -48,8 +49,8 @@ extern PHPAPI zend_class_entry *git2_blob_class_entry;
 extern PHPAPI zend_class_entry *git2_tree_class_entry;
 extern PHPAPI zend_class_entry *git2_tree_builder_class_entry;
 extern PHPAPI zend_class_entry *git2_tree_entry_class_entry;
-extern PHPAPI zend_class_entry *git2_tree_signature_entry;
-extern PHPAPI zend_class_entry *git2_walker_entry;
+extern PHPAPI zend_class_entry *git2_signature_class_entry;
+extern PHPAPI zend_class_entry *git2_walker_class_entry;
 
 typedef struct{
 	zend_object zo;
@@ -128,5 +129,39 @@ typedef struct{
 extern int php_git2_add_protected_property_string_ex(zval *object, char *name, int name_length, char *data, zend_bool duplicate TSRMLS_DC);
 extern zval* php_git2_object_new(php_git2_repository *repository, git_object *object TSRMLS_DC);
 extern int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsigned int method_len, unsigned int param_count, ...);
+
+extern inline void php_git2_create_signature(zval *object, char *name, int name_len, char *email, int email_len, zval *date TSRMLS_DC);
+
+
+static inline php_git2_create_signature_from_commit(zval **object, php_git2_commit *commit, int type TSRMLS_DC)
+{
+	zval *ret;
+	zval *z_signature, *date;
+	char time_str[12] = {0};
+	git_signature *author;
+	php_git2_signature *m_signature;
+
+	if (type == 0) {
+		author = git_commit_author(commit);
+	} else {
+		author = git_commit_committer(commit);
+	}
+
+	MAKE_STD_ZVAL(ret);
+	MAKE_STD_ZVAL(date);
+
+	object_init_ex(ret,git2_signature_class_entry);
+	m_signature = PHP_GIT2_GET_OBJECT(php_git2_signature, ret);
+	add_property_string_ex(ret,"name",sizeof("name"), author->name,1 TSRMLS_CC);
+	add_property_string_ex(ret,"email",sizeof("email"),author->email,1 TSRMLS_CC);
+
+	php_date_instantiate(php_date_get_date_ce(), date TSRMLS_CC);
+	snprintf(time_str,12,"%c%ld",'@',author->when.time);
+	php_date_initialize(zend_object_store_get_object(date TSRMLS_CC), time_str, strlen(time_str), NULL, NULL, 0 TSRMLS_CC);
+
+	add_property_zval(ret,"time",date);
+	zval_ptr_dtor(&date);
+	*object = ret;
+}
 
 #endif /* PHP_GIT2_H */
