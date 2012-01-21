@@ -68,3 +68,16 @@ for ($i = 0; $i< 10;$i++){
 	$parents = array($parent);
 }
 ````
+
+## Revision Walking
+
+````
+$repo = new Git2\Repository($path);
+$walker = new Git2\Walker($repo);
+/* specify HEAD oid */
+$walker->push("6e20138dc38f9f626107f1cd3ef0f9838c43defe");
+
+foreach ($walker as $oid => $commit) {
+        printf("oid: %s\n", $oid);
+        printf("message: %s\n", $commit->getMessage());
+}
