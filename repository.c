@@ -63,8 +63,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_exists, 0,0,1)
 	ZEND_ARG_INFO(0, exists)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_write, 0,0,1)
-	ZEND_ARG_INFO(0, write)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_write, 0,0,2)
+	ZEND_ARG_INFO(0, contents)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_hash, 0,0,2)
+	ZEND_ARG_INFO(0, contents)
+	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_lookup, 0,0,1)
@@ -414,6 +420,34 @@ PHP_METHOD(git2_repository, write)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\Repsotiroy::hash(string $contents, int $type)
+*/
+PHP_METHOD(git2_repository, hash)
+{
+	char *contents;
+	int contents_len = 0;
+	long type = 0;
+	git_odb *odb;
+	git_oid oid;
+	char *oid_out[GIT_OID_HEXSZ+1];
+	int error = 0;
+	php_git2_repository *m_repository;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"sl", &contents, &contents_len, &type) == FAILURE) {
+		return;
+	}
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	
+	error  = git_repository_odb(&odb, m_repository->repository);
+	error = git_odb_hash(&oid, contents,contents_len, type);
+	
+	git_oid_fmt(oid_out, &oid);
+	RETURN_STRINGL(oid_out,GIT_OID_HEXSZ,1);
+}
+/* }}} */
+
 
 static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC)
@@ -426,6 +460,7 @@ static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, init,        arginfo_git2_repository_init,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(git2_repository, discover,    arginfo_git2_repository_discover,    ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(git2_repository, exists,      arginfo_git2_repository_exists,      ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, hash,       arginfo_git2_repository_hash,       ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, write,       arginfo_git2_repository_write,       ZEND_ACC_PUBLIC)
 #ifdef lookup
 #undef lookup
