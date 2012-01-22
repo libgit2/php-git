@@ -125,6 +125,29 @@ PHP_METHOD(git2_reference, getName)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\Reference::resolve()
+*/
+PHP_METHOD(git2_reference, resolve)
+{
+	git_reference *resolved;
+	php_git2_reference *m_reference;
+	zval *object;
+	int error;
+	
+	m_reference = PHP_GIT2_GET_OBJECT(php_git2_reference, getThis());
+	error = git_reference_resolve(&resolved, m_reference->reference);
+	
+	MAKE_STD_ZVAL(object);
+	object_init_ex(object, git2_reference_class_entry);
+	m_reference = PHP_GIT2_GET_OBJECT(php_git2_reference, object);
+	m_reference->reference = resolved;
+	
+	RETURN_ZVAL(object, 0, 1);
+}
+/* }}} */
+
+
 
 typedef struct {
 	unsigned int type;
@@ -192,8 +215,8 @@ PHP_METHOD(git2_reference, each)
 static zend_function_entry php_git2_reference_methods[] = {
 	PHP_ME(git2_reference, getTarget, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_reference, getName,   NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_reference, resolve,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_reference, each,      arginfo_git2_reference_each, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-
 #ifdef lookup
 #undef lookup
 #endif
