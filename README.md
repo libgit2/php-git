@@ -38,6 +38,17 @@ $repo = new Git2\Repository($path);
 
 ## Object Access
 
+## Tree Access
+
+````
+$repo = new Git2\Repository($path);
+$tree = $repo->lookup(tree sha); // specify tree sha
+
+foreach ($tree as $oid => $entry) {
+        var_dump($entry);
+}
+````
+
 ## Commit
 
 ````
