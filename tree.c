@@ -56,7 +56,7 @@ zend_object_value php_git2_tree_new(zend_class_entry *ce TSRMLS_DC)
 PHP_METHOD(git2_tree, current)
 {
 	php_git2_tree *m_tree;
-	git_tree_entry *entry;
+	const git_tree_entry *entry;
 	zval *z_entry;
 
 	m_tree     = PHP_GIT2_GET_OBJECT(php_git2_tree, getThis());

@@ -38,6 +38,7 @@ if test $PHP_GIT2 != "no"; then
 				tree_entry.c \
 				signature.c \
 				walker.c \
+				reference.c \
 	, $ext_shared)
 
 	ifdef([PHP_ADD_EXTENSION_DEP],

@@ -51,6 +51,7 @@ extern PHPAPI zend_class_entry *git2_tree_builder_class_entry;
 extern PHPAPI zend_class_entry *git2_tree_entry_class_entry;
 extern PHPAPI zend_class_entry *git2_signature_class_entry;
 extern PHPAPI zend_class_entry *git2_walker_class_entry;
+extern PHPAPI zend_class_entry *git2_reference_class_entry;
 
 typedef struct{
 	zend_object zo;
@@ -88,6 +89,11 @@ typedef struct{
 	zend_object zo;
 	git_signature *signature;
 } php_git2_signature;
+
+typedef struct{
+	zend_object zo;
+	git_reference *reference;
+} php_git2_reference;
 
 typedef struct{
 	zend_object zo;
@@ -129,7 +135,7 @@ typedef struct{
 #  endif
 
 extern int php_git2_add_protected_property_string_ex(zval *object, char *name, int name_length, char *data, zend_bool duplicate TSRMLS_DC);
-extern zval* php_git2_object_new(php_git2_repository *repository, git_object *object TSRMLS_DC);
+extern zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_DC);
 extern int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsigned int method_len, unsigned int param_count, ...);
 
 extern inline void php_git2_create_signature(zval *object, char *name, int name_len, char *email, int email_len, zval *date TSRMLS_DC);
@@ -140,7 +146,7 @@ static inline php_git2_create_signature_from_commit(zval **object, git_commit *c
 	zval *ret;
 	zval *z_signature, *date;
 	char time_str[12] = {0};
-	git_signature *author;
+	const git_signature *author;
 	php_git2_signature *m_signature;
 
 	if (type == 0) {

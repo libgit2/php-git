@@ -49,6 +49,21 @@ foreach ($tree as $oid => $entry) {
 }
 ````
 
+## Ref Management
+
+````
+$ref = Git2\Reference::lookup($repo, "refs/heads/master");
+  sha = $ref->getTarget();
+  str = $ref->getName();
+````
+
+````
+foreach (Git2\Reference::each($repo) as $ref) {
+  echo $ref->getName() . PHP_EOL;
+}
+````
+
+
 ## Commit
 
 ````

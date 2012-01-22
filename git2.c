@@ -31,6 +31,7 @@ extern void php_git2_tree_init(TSRMLS_D);
 extern void php_git2_tree_builder_init(TSRMLS_D);
 extern void php_git2_signature_init(TSRMLS_D);
 extern void php_git2_walker_init(TSRMLS_D);
+extern void php_git2_reference_init(TSRMLS_D);
 
 
 int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsigned int method_len, unsigned int param_count, ...)
@@ -75,7 +76,7 @@ int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsign
 	return error;
 }
 
-zval* php_git2_object_new(php_git2_repository *repository, git_object *object TSRMLS_DC)
+zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_DC)
 {
 	zval *result = NULL;
 	MAKE_STD_ZVAL(result);
@@ -106,7 +107,7 @@ zval* php_git2_object_new(php_git2_repository *repository, git_object *object TS
 			object_init_ex(result, git2_tree_class_entry);
 			m_obj = PHP_GIT2_GET_OBJECT(php_git2_tree, result);
 			m_obj->tree = (git_tree*)object;
-			m_obj->repository = repository->repository;
+			m_obj->repository = repository;
 			numbers = git_tree_entrycount(m_obj->tree);
 			MAKE_STD_ZVAL(m_array);
 			array_init(m_array);
@@ -172,6 +173,7 @@ PHP_MINIT_FUNCTION(git2)
 	php_git2_tree_entry_init(TSRMLS_C);
 	php_git2_signature_init(TSRMLS_C);
 	php_git2_walker_init(TSRMLS_C);
+	php_git2_reference_init(TSRMLS_C);
 	
 	return SUCCESS;
 }

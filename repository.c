@@ -367,7 +367,7 @@ PHP_METHOD(git2_repository, lookup)
 			error = git_object_lookup(&object, m_repository->repository, &id, (git_otype)type);
 		}
 		
-		result = php_git2_object_new(m_repository, object TSRMLS_CC);
+		result = php_git2_object_new(m_repository->repository, object TSRMLS_CC);
 		RETVAL_ZVAL(result,0,1);
 	} else {
 		/* @todo: throws an exception */

@@ -239,7 +239,7 @@ PHP_METHOD(git2_walker, rewind)
 	git_revwalk_reset(m_walker->walker);
 	if (m_walker->current == NULL) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
-		"does not specify interested hash before calling Git2\Walker::rewind.");
+		"does not specify interested hash before calling Git2\\Walker::rewind.");
 		RETURN_FALSE;
 	}
 	git_revwalk_push(m_walker->walker, m_walker->current);
