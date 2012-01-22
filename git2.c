@@ -174,6 +174,7 @@ PHP_MINIT_FUNCTION(git2)
 	php_git2_signature_init(TSRMLS_C);
 	php_git2_walker_init(TSRMLS_C);
 	php_git2_reference_init(TSRMLS_C);
+	php_git2_index_init(TSRMLS_C);
 	
 	return SUCCESS;
 }
