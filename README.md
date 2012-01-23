@@ -1,83 +1,109 @@
-php-git
-=======================================================
+# PHP-Git2 - libgit2 bindings in PHP
 
-php-git is a set of PHP 5.3+ bindings to the libgit2 linkable C Git library.
+php-git2 is a PHP bindings to the libgit2 linkable C Git library. 
+this extension are re-writing php-git as that code too dirty.
 
-How Can I Contribute?
-=======================================================
+# Installing And Running
 
-* fork our repository.
+````
+git clone https://github.com/chobie/php-git2.git
+cd php-git2
+phpize
+./configure
+make
+sudo make Install
+````
 
-<https://github.com/libgit2/php-git>
+# API
 
-* create topic branch on your repository (contributors looking issue
-themselves)
+## Repository Access
 
-e.g. fix-repository-xxxx-bug, fix-barerepository-detection-bug.
+````php
+$repo = new Git2\Repository($path);
+/*
+  bool = $repo->isExist(string sha1)
+  Git2\Object = $repo->read(string sha1)
+  string sha1 = $repo->hash(string content, long type)
+  string sha1 = $repo->write(string content, long type)
+  bool = $repo->isBare()
+  bool = $repo->isEmpty()
+  bool = $repo->headDetached()
+  bool = $repo->headOrphan()
+  string path = Git2\Repository::discover("/Users/chobie/projects/work/repo/lib/subdir");
+  // => /Users/chobie/projects/work/repo/.git
 
-  topic branch desirable minimum change.
+  Git2\Repository = Git2\Repository::init(string $path, bool isBare)
+*/
+````
 
-  or post probrem to Github issues feature.
-  https://github.com/libgit2/php-git/issues
+## Object Access
 
-  then i'll fix as possible.
+## Tree Access
 
-* send a pull request to me. i'll check and response in a few days.
+````
+$repo = new Git2\Repository($path);
+$tree = $repo->lookup(tree sha); // specify tree sha
 
+foreach ($tree as $oid => $entry) {
+        var_dump($entry);
+}
+````
 
-Current Development Status
-=======================================================
+## Ref Management
 
-*first Alpha development*.
-(development started at 2010-12-30)
+````
+$ref = Git2\Reference::lookup($repo, "refs/heads/master");
+  sha = $ref->getTarget();
+  str = $ref->getName();
+````
 
-*notice* do not use this extenstion on any production server. this extension not fully tested.
-
-*1st alpha development release: (2011/1/17)
-just work on php. not fully tested. classes and methods may changed.
-
-*2nd alpha development release: (2011/2)
-added some unit test. libgit2 feature fully support.
-(i'm busy my work, 1 or 2 week delayed)
-
-i'll follow libgit2 changes as possible as :)
-
-DEPENDENCIES
-=======================================================
-
-* libgit2
-* php5
-* pcre
-
-INSTALL
-=======================================================
-
-see php-git Wiki: <https://github.com/chobie/php-git/wiki>
-
-
-Documents
-=======================================================
-
-see php-git Documents: <http://php-git.chobie.co/>
-
-you can build with sphinx.
-
-  cd docs
-  make html
-
-AUTHORS
-=======================================================
-
-* Shuhei Tanuma <chobieee@gmail.com>
-
-LICENSE
-=======================================================
-
-MIT Licence.
+````
+foreach (Git2\Reference::each($repo) as $ref) {
+  echo $ref->getName() . PHP_EOL;
+}
+````
 
 
-Links
-=======================================================
+## Commit
 
-* libgit2: <https://github.com/libgit2/libgit2>
-* php-git documents: <http://php-git.chobie.co>
+````
+<?php
+date_default_timezone_set('Asia/Tokyo');
+$repo = Git2\Repository::init("/path/to/repo",true);
+
+$author = new Git2\Signature("Shuhei Tanuma","chobieee@gmail.com",new DateTime());
+
+$bld = new Git2\TreeBuilder();
+$bld->insert(new Git2\TreeEntry(array(
+	"name" => "README.txt",
+	"oid" => "63542fbea05732b78711479a31557bd1b0aa2116",
+	"attributes" => octdec('100644'),
+)));
+$tree = $bld->write($repo);
+
+$parent = "";
+$parents = array();
+for ($i = 0; $i< 10;$i++){
+	$parent = Git2\Commit::create($repo, array(
+		"author"    => $author,
+		"committer" => $author,
+		"message"   => "Hello World: {$i}",
+		"tree"      => $tree,
+		"parents"   => $parents,
+	));
+	$parents = array($parent);
+}
+````
+
+## Revision Walking
+
+````
+$repo = new Git2\Repository($path);
+$walker = new Git2\Walker($repo);
+/* specify HEAD oid */
+$walker->push("6e20138dc38f9f626107f1cd3ef0f9838c43defe");
+
+foreach ($walker as $oid => $commit) {
+        printf("oid: %s\n", $oid);
+        printf("message: %s\n", $commit->getMessage());
+}
