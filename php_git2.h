@@ -106,6 +106,7 @@ typedef struct{
 typedef struct{
 	zend_object zo;
 	git_index *index;
+	unsigned int offset;
 } php_git2_index;
 
 

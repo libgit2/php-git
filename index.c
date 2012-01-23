@@ -23,6 +23,8 @@
  */
 
 #include "php_git2.h"
+#include <spl/spl_array.h>
+#include <zend_interfaces.h>
 
 PHPAPI zend_class_entry *git2_index_class_entry;
 
@@ -70,8 +72,89 @@ PHP_METHOD(git2_index, __construct)
 
 
 
+/* Iterator Implementation */
+
+/*
+{{{ proto: Git2\Tree::current()
+*/
+PHP_METHOD(git2_index, current)
+{
+	php_git2_index *m_index;
+	const git_index_entry *entry;
+	zval *z_entry;
+
+	m_index     = PHP_GIT2_GET_OBJECT(php_git2_index, getThis());
+	entry = git_index_get(m_index->index, m_index->offset);
+	if (entry == NULL) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+			"specified offset does not exist. %d");
+		RETURN_FALSE;
+	}
+	fprintf(stderr,"path: %s\n",entry->path);
+	//create_tree_entry_from_entry(&z_entry, entry ,m_index->repository);
+	//RETURN_ZVAL(z_entry, 0, 1);
+}
+
+/*
+{{{ proto: Git2\Tree::key()
+*/
+PHP_METHOD(git2_index, key)
+{
+	php_git2_index *m_index;
+
+	m_index     = PHP_GIT2_GET_OBJECT(php_git2_index, getThis());
+	RETURN_LONG(m_index->offset);
+}
+
+/*
+{{{ proto: Git2\Tree::valid()
+*/
+PHP_METHOD(git2_index, next)
+{
+	php_git2_index *m_index;
+
+	m_index     = PHP_GIT2_GET_OBJECT(php_git2_index, getThis());
+	m_index->offset++;
+}
+
+/*
+{{{ proto: Git2\Tree::rewind()
+*/
+PHP_METHOD(git2_index, rewind)
+{
+	php_git2_index *m_index;
+
+	m_index     = PHP_GIT2_GET_OBJECT(php_git2_index, getThis());
+	m_index->offset = 0;
+}
+
+/*
+{{{ proto: Git2\Index::valid()
+*/
+PHP_METHOD(git2_index, valid)
+{
+	php_git2_index *m_index;
+	int entry_count = 0;
+	
+	m_index     = PHP_GIT2_GET_OBJECT(php_git2_index, getThis());
+	entry_count = git_index_entrycount(m_index->index);
+	if (m_index->offset < entry_count && m_index->offset >= 0) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
 static zend_function_entry php_git2_index_methods[] = {
 	PHP_ME(git2_index, __construct, arginfo_git2_index___construct, ZEND_ACC_PUBLIC)
+	/* Iterator Implementation */
+	PHP_ME(git2_index, current,     NULL,                           ZEND_ACC_PUBLIC)
+	PHP_ME(git2_index, key,         NULL,                           ZEND_ACC_PUBLIC)
+	PHP_ME(git2_index, next,        NULL,                           ZEND_ACC_PUBLIC)
+	PHP_ME(git2_index, rewind,      NULL,                           ZEND_ACC_PUBLIC)
+	PHP_ME(git2_index, valid,       NULL,                           ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
@@ -82,4 +165,5 @@ void php_git2_index_init(TSRMLS_D)
 	INIT_NS_CLASS_ENTRY(ce, PHP_GIT2_NS, "Index", php_git2_index_methods);
 	git2_index_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	git2_index_class_entry->create_object = php_git2_index_new;
+	zend_class_implements(git2_index_class_entry TSRMLS_CC, 1, spl_ce_Iterator);
 }
