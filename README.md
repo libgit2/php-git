@@ -3,11 +3,16 @@
 php-git2 is a PHP bindings to the libgit2 linkable C Git library. 
 this extension are re-writing php-git as that code too dirty.
 
+# Important Notice
+
+php-git changed it's API drastically. this changes doesn't care about compatibility between old one.
+please check tests cases.
+
 # Installing And Running
 
 ````
-git clone https://github.com/chobie/php-git2.git
-cd php-git2
+git clone https://github.com/libgit2/php-git.git
+cd php-git
 phpize
 ./configure
 make
@@ -83,16 +88,14 @@ $tree = $bld->write($repo);
 
 $parent = "";
 $parents = array();
-for ($i = 0; $i< 10;$i++){
-	$parent = Git2\Commit::create($repo, array(
-		"author"    => $author,
-		"committer" => $author,
-		"message"   => "Hello World: {$i}",
-		"tree"      => $tree,
-		"parents"   => $parents,
-	));
-	$parents = array($parent);
-}
+$parent = Git2\Commit::create($repo, array(
+	"author"    => $author,
+	"committer" => $author,
+	"message"   => "Hello World",
+	"tree"      => $tree,
+	"parents"   => $parents,
+));
+$parents = array($parent);
 ````
 
 ## Revision Walking
