@@ -71,6 +71,37 @@ PHP_METHOD(git2_index, __construct)
 /* }}} */
 
 
+/*
+{{{ proto: Git2\Index::count()
+*/
+PHP_METHOD(git2_index, count)
+{
+	php_git2_index *m_index;
+	
+	m_index     = PHP_GIT2_GET_OBJECT(php_git2_index, getThis());
+	RETURN_LONG(git_index_entrycount(m_index->index));
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\Index::writeTree()
+*/
+PHP_METHOD(git2_index, writeTree)
+{
+	php_git2_index *m_index;
+	git_oid tree_oid;
+	char oid_out[GIT_OID_HEXSZ] = {0};
+	int error = 0;
+	
+	m_index     = PHP_GIT2_GET_OBJECT(php_git2_index, getThis());
+	error = git_tree_create_fromindex(&tree_oid, m_index->index);
+
+	git_oid_fmt(oid_out, &tree_oid);
+	RETVAL_STRINGL(oid_out,GIT_OID_HEXSZ,1);
+}
+/* }}} */
+
+
 
 /* Iterator Implementation */
 
@@ -90,9 +121,9 @@ PHP_METHOD(git2_index, current)
 			"specified offset does not exist. %d");
 		RETURN_FALSE;
 	}
-	fprintf(stderr,"path: %s\n",entry->path);
-	//create_tree_entry_from_entry(&z_entry, entry ,m_index->repository);
-	//RETURN_ZVAL(z_entry, 0, 1);
+	
+	php_git2_create_index_entry(&z_entry, entry TSRMLS_CC);
+	RETURN_ZVAL(z_entry, 0, 1);
 }
 
 /*
@@ -149,12 +180,14 @@ PHP_METHOD(git2_index, valid)
 
 static zend_function_entry php_git2_index_methods[] = {
 	PHP_ME(git2_index, __construct, arginfo_git2_index___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_index, count,       NULL,                           ZEND_ACC_PUBLIC)
 	/* Iterator Implementation */
 	PHP_ME(git2_index, current,     NULL,                           ZEND_ACC_PUBLIC)
 	PHP_ME(git2_index, key,         NULL,                           ZEND_ACC_PUBLIC)
 	PHP_ME(git2_index, next,        NULL,                           ZEND_ACC_PUBLIC)
 	PHP_ME(git2_index, rewind,      NULL,                           ZEND_ACC_PUBLIC)
 	PHP_ME(git2_index, valid,       NULL,                           ZEND_ACC_PUBLIC)
+	PHP_ME(git2_index, writeTree,   NULL,                           ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 

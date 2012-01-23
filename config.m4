@@ -40,6 +40,7 @@ if test $PHP_GIT2 != "no"; then
 				walker.c \
 				reference.c \
 				index.c \
+				index_entry.c \
 	, $ext_shared)
 
 	ifdef([PHP_ADD_EXTENSION_DEP],

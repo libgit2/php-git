@@ -53,6 +53,7 @@ extern PHPAPI zend_class_entry *git2_signature_class_entry;
 extern PHPAPI zend_class_entry *git2_walker_class_entry;
 extern PHPAPI zend_class_entry *git2_reference_class_entry;
 extern PHPAPI zend_class_entry *git2_index_class_entry;
+extern PHPAPI zend_class_entry *git2_index_entry_class_entry;
 
 typedef struct{
 	zend_object zo;
@@ -108,6 +109,11 @@ typedef struct{
 	git_index *index;
 	unsigned int offset;
 } php_git2_index;
+
+typedef struct{
+	zend_object zo;
+	git_index_entry *entry;
+} php_git2_index_entry;
 
 
 #  define PHP_GIT2_GET_OBJECT(STRUCT_NAME, OBJECT) (STRUCT_NAME *) zend_object_store_get_object(OBJECT TSRMLS_CC);
@@ -197,6 +203,31 @@ static inline void create_tree_entry_from_entry(zval **object, git_tree_entry *e
 	add_property_string(*object, "name", (char *)git_tree_entry_name(entry), 1);
 	add_property_string(*object, "oid", buf, 1);
 	add_property_long(*object, "attributes", git_tree_entry_attributes(entry));
+}
+
+static inline void php_git2_create_index_entry(zval **object, git_index_entry *entry TSRMLS_DC)
+{
+	zval *tmp = NULL;
+	char oid_out[GIT_OID_HEXSZ] = {0};
+	
+	MAKE_STD_ZVAL(tmp);
+	object_init_ex(tmp, git2_index_entry_class_entry);
+	git_oid_fmt(oid_out, &entry->oid);
+
+	add_property_string_ex(tmp, "path", sizeof("path"), entry->path, 1 TSRMLS_CC);
+	add_property_stringl_ex(tmp, "oid", sizeof("oid"), oid_out,GIT_OID_HEXSZ, 1 TSRMLS_CC);
+	add_property_long(tmp, "dev", entry->dev);
+	add_property_long(tmp, "ino", entry->ino);
+	add_property_long(tmp, "mode", entry->mode);
+	add_property_long(tmp, "uid", entry->uid);
+	add_property_long(tmp, "gid", entry->gid);
+	add_property_long(tmp, "file_size", entry->file_size);
+	add_property_long(tmp, "flags", entry->flags);
+	add_property_long(tmp, "flags_extended", entry->flags_extended);
+	add_property_long(tmp, "ctime", entry->ctime.seconds);
+	add_property_long(tmp, "mtime", entry->mtime.seconds);
+	
+	*object = tmp;
 }
 
 #endif /* PHP_GIT2_H */
