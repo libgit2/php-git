@@ -60,6 +60,52 @@ typedef struct{
 	git_config *config;
 } php_git2_config_foreach_t;
 
+static int php_git2_config_resolve(zval **result, const char *var_name, zval *m_config)
+{
+	TSRMLS_FETCH();
+	HashTable *hash;
+	zval *entry, *tmp_result, **target_offset;
+	char *current_key, *tmp_value, *savedptr, *k;
+	int error = 0;
+	
+	entry = zend_read_property(git2_config_class_entry, m_config,"configs",sizeof("configs")-1, 0 TSRMLS_CC);
+	
+	tmp_value = estrdup(var_name);
+	current_key = php_strtok_r(tmp_value, ".", &savedptr);
+	while (current_key != NULL) {
+		k  = current_key;
+		current_key = php_strtok_r(NULL, ".", &savedptr);
+		
+		if (current_key != NULL && k != NULL) {
+			if (zend_hash_exists(Z_ARRVAL_P(entry), k, strlen(k)+1)) {
+				if (zend_hash_find(Z_ARRVAL_P(entry), k, strlen(k)+1, (void **)&target_offset) == SUCCESS) {
+					entry = *target_offset;
+				}
+			} else {
+				target_offset = NULL;
+			}
+		} else {
+			if (k != NULL) {
+				if (zend_hash_find(Z_ARRVAL_P(entry), k, strlen(k)+1, (void **)&target_offset) != SUCCESS) {
+					target_offset = NULL;
+				}
+			}
+		}
+	}
+	efree(tmp_value);
+	
+	if (target_offset != NULL) {
+		MAKE_STD_ZVAL(tmp_result);
+		ZVAL_ZVAL(tmp_result, *target_offset,1,0);
+	} else {
+		MAKE_STD_ZVAL(tmp_result);
+		ZVAL_NULL(tmp_result);
+	}
+	*result = tmp_result;
+	
+	return error;
+}
+
 static int php_git2_config_foreach(const char *var_name, const char *value, void *payload)
 {
 	HashTable *hash;
@@ -150,15 +196,19 @@ PHP_METHOD(git2_config, get)
 	int error, key_len = 0;
 	const char *value;
 	php_git2_config *m_config;
+	zval *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &key, &key_len) == FAILURE) {
 		return;
 	}
 	
-	m_config = PHP_GIT2_GET_OBJECT(php_git2_config, getThis());
-	error = git_config_get_string(m_config->config, key, &value);
-	RETVAL_STRING(value, 1);
+	if (key_len < 1) {
+		RETURN_FALSE;
+	}
+	
+	php_git2_config_resolve(&result, (const char *)key, getThis());
+	RETVAL_ZVAL(result,0,1);
 }
 /* }}} */
 
