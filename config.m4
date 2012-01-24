@@ -41,6 +41,7 @@ if test $PHP_GIT2 != "no"; then
 				reference.c \
 				index.c \
 				index_entry.c \
+				config.c \
 	, $ext_shared)
 
 	ifdef([PHP_ADD_EXTENSION_DEP],
