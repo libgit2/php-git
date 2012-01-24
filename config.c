@@ -55,6 +55,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_config_get, 0,0,1)
 	ZEND_ARG_INFO(0, get)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_config_store, 0,0,2)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_config_delete, 0,0,1)
+	ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO()
+
 typedef struct{
 	zval *result;
 	git_config *config;
@@ -151,6 +160,32 @@ static int php_git2_config_foreach(const char *var_name, const char *value, void
 	return GIT_SUCCESS;
 }
 
+static int php_git2_config_reload(zval *object, unsigned short dtor TSRMLS_DC)
+{
+	zval *entry;
+	php_git2_config_foreach_t payload;
+	php_git2_config *m_config;
+	int error = 0;
+	
+	m_config = PHP_GIT2_GET_OBJECT(php_git2_config, object);
+	entry = zend_read_property(git2_config_class_entry, object,"configs",sizeof("configs")-1, 1 TSRMLS_CC);
+	if (entry != NULL) {
+		zval_ptr_dtor(&entry);
+		entry = NULL;
+	}
+
+	MAKE_STD_ZVAL(entry);
+	array_init(entry);
+
+	payload.config = m_config->config;
+	payload.result = entry;
+	error = git_config_foreach(m_config->config,&php_git2_config_foreach,&payload);
+	add_property_zval(object, "configs", entry);
+	if (dtor == 1) {
+		zval_ptr_dtor(&entry);
+	}
+}
+
 /*
 {{{ proto: Git2\Config::__construct(string $path)
 */
@@ -174,15 +209,11 @@ PHP_METHOD(git2_config, __construct)
 	m_config = PHP_GIT2_GET_OBJECT(php_git2_config, getThis());
 	m_config->config = config;
 	
-	/* @todo: think solution */
-	MAKE_STD_ZVAL(config_array);
-	array_init(config_array);
-	
-	payload.config = config;
-	payload.result = config_array;
-	error = git_config_foreach(config,&php_git2_config_foreach,&payload);
-	add_property_zval(getThis(), "configs", config_array);
-	zval_ptr_dtor(&config_array);
+	php_git2_config_reload(getThis(), 1 TSRMLS_CC);
+	/**
+	 * @todo: support global config
+	 * php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC);
+	 */
 }
 /* }}} */
 
@@ -213,9 +244,80 @@ PHP_METHOD(git2_config, get)
 /* }}} */
 
 
+/*
+{{{ proto: Git2\Config::store(string $key, mixed $value)
+*/
+PHP_METHOD(git2_config, store)
+{
+	char *key;
+	int error, key_len = 0;
+	zval *result, *value, *entry;
+	php_git2_config *m_config;
+	php_git2_config_foreach_t payload;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"sz", &key, &key_len, &value) == FAILURE) {
+		return;
+	}
+	
+	if (key_len < 1) {
+		RETURN_FALSE;
+	}
+	
+	m_config = PHP_GIT2_GET_OBJECT(php_git2_config, getThis());
+	
+	switch (Z_TYPE_P(value)) {
+		case IS_STRING:
+			error = git_config_set_string(m_config->config, key, Z_STRVAL_P(value));
+			break;
+		case IS_BOOL:
+			error = git_config_set_bool(m_config->config, key, Z_BVAL_P(value));
+			break;
+		case IS_LONG:
+			error = git_config_set_int32(m_config->config, key, Z_LVAL_P(value));
+			break;
+		default:
+			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+				"Git2\\Config::store must pass string or bool or long value");
+			RETURN_FALSE;
+	}
+
+	php_git2_config_reload(getThis(),0 TSRMLS_CC);
+}
+/* }}} */
+
+
+/*
+{{{ proto: Git2\Config::delete(string $key)
+*/
+PHP_METHOD(git2_config, delete)
+{
+	char *key;
+	int error, key_len = 0;
+	zval *result, *entry;
+	php_git2_config *m_config;
+	php_git2_config_foreach_t payload;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &key, &key_len) == FAILURE) {
+		return;
+	}
+	
+	if (key_len < 1) {
+		RETURN_FALSE;
+	}
+	
+	m_config = PHP_GIT2_GET_OBJECT(php_git2_config, getThis());
+	git_config_delete(m_config->config, key);
+	php_git2_config_reload(getThis(), 0 TSRMLS_CC);
+}
+/* }}} */
+
 static zend_function_entry php_git2_config_methods[] = {
 	PHP_ME(git2_config, __construct, arginfo_git2_config___construct, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_config, get,         arginfo_git2_config_get,         ZEND_ACC_PUBLIC)
+	PHP_ME(git2_config, store,       arginfo_git2_config_store,       ZEND_ACC_PUBLIC)
+	PHP_ME(git2_config, delete,      arginfo_git2_config_delete,      ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
