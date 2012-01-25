@@ -134,6 +134,7 @@ foreach ($walker as $oid => $commit) {
         printf("oid: %s\n", $oid);
         printf("message: %s\n", $commit->getMessage());
 }
+````
 
 ## Config access
 
