@@ -161,3 +161,8 @@ will be add.
 * James Titcumb
 * Ryusuke SEKIYAMA
 * Shuhei Tanuma
+
+
+## LICENSE
+
+MIT License
