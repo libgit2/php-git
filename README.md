@@ -10,14 +10,28 @@ please check tests cases.
 
 # Installing And Running
 
+you need to install libgit2 before make php-git.
+
+````
+git clone https://github.com/libgit2/libgit2.git
+cd libgit2
+mkdir build
+cd build
+cmake ..
+cmake --build
+sudo cmake --build . --target install
+````
+
 ````
 git clone https://github.com/libgit2/php-git.git
 cd php-git
 phpize
 ./configure
 make
-sudo make Install
+make test
+sudo make install
 ````
+new php-git features almost tested.
 
 # API
 
@@ -43,13 +57,23 @@ $repo = new Git2\Repository($path);
 
 ## Object Access
 
+### create new blob
+
+````
+$oid = Git2\Blob::create($repo, "Hello World");
+````
+
 ## Tree Access
 
 ````
 $repo = new Git2\Repository($path);
 $tree = $repo->lookup(tree sha); // specify tree sha
-
 foreach ($tree as $oid => $entry) {
+/*
+  bool $entry->isTree();
+  bool $entry->isBlob();
+  bool $entry->isSubmodule();
+*/
         var_dump($entry);
 }
 ````
@@ -110,3 +134,30 @@ foreach ($walker as $oid => $commit) {
         printf("oid: %s\n", $oid);
         printf("message: %s\n", $commit->getMessage());
 }
+
+## Config access
+
+````
+$config = new Git2\Config("path/to/git/config");
+$config->get("core.bare");
+$config->store("core.bare","1");
+````
+
+## Reflog
+will be add.
+
+## Remote access
+
+will be add.
+
+## Author
+* Shuhei Tanuma
+
+## Contributors
+
+* Anthony Van de Gejuchte
+* Cameron Eagans
+* Graham Weldon
+* James Titcumb
+* Ryusuke SEKIYAMA
+* Shuhei Tanuma
