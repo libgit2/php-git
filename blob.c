@@ -50,6 +50,50 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_blob_create, 0,0,2)
 ZEND_END_ARG_INFO()
 
 
+/*
+{{{ proto: Git2\Blob::getContent()
+*/
+PHP_METHOD(git2_blob, getContent)
+{
+	char *data;
+	php_git2_blob *m_blob;
+	
+	m_blob = PHP_GIT2_GET_OBJECT(php_git2_blob, getThis());
+
+	if (m_blob != NULL) {
+		if (m_blob->blob == NULL) {
+			RETURN_FALSE;
+		}
+		
+		RETURN_STRINGL(git_blob_rawcontent(m_blob->blob), git_blob_rawsize(m_blob->blob),1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+/*
+{{{ proto: Git2\Blob::getSize()
+*/
+PHP_METHOD(git2_blob, getSize)
+{
+	char *data;
+	php_git2_blob *m_blob;
+	
+	m_blob = PHP_GIT2_GET_OBJECT(php_git2_blob, getThis());
+
+	if (m_blob != NULL) {
+		if (m_blob->blob == NULL) {
+			RETURN_FALSE;
+		}
+		
+		RETURN_LONG(git_blob_rawsize(m_blob->blob));
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
 
 /*
 {{{ proto: Git2\Blob::__toString()
@@ -108,6 +152,8 @@ PHP_METHOD(git2_blob, create)
 
 
 static zend_function_entry php_git2_blob_methods[] = {
+	PHP_ME(git2_blob, getContent, NULL,                     ZEND_ACC_PUBLIC)
+	PHP_ME(git2_blob, getSize,    NULL,                     ZEND_ACC_PUBLIC)
 	PHP_ME(git2_blob, __toString, NULL,                     ZEND_ACC_PUBLIC)
 	PHP_ME(git2_blob, create,     arginfo_git2_blob_create, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	{NULL,NULL,NULL}
