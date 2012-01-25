@@ -85,10 +85,69 @@ PHP_METHOD(git2_tree_entry, __construct)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\TreeEntry::isTree()
+*/
+PHP_METHOD(git2_tree_entry, isTree)
+{
+	zval *value;
+	long attribute = 0;
+
+	value = zend_read_property(git2_tree_entry_class_entry, getThis(), "attributes", sizeof("attributes")-1, 0 TSRMLS_CC);
+	attribute = Z_LVAL_P(value);
+
+	if(attribute & 040000){
+		RETURN_TRUE;
+	}else{
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\TreeEntry::isBlob()
+*/
+PHP_METHOD(git2_tree_entry, isBlob)
+{
+	zval *value;
+	long attribute = 0;
+
+	value = zend_read_property(git2_tree_entry_class_entry, getThis(), "attributes", sizeof("attributes")-1, 0 TSRMLS_CC);
+	attribute = Z_LVAL_P(value);
+
+	if(!(attribute & 040000) && attribute != 0160000){
+		RETURN_TRUE;
+	}else{
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\TreeEntry::isSubmodule()
+*/
+PHP_METHOD(git2_tree_entry, isSubmodule)
+{
+	zval *value;
+	long attribute = 0;
+
+	value = zend_read_property(git2_tree_entry_class_entry, getThis(), "attributes", sizeof("attributes")-1, 0 TSRMLS_CC);
+	attribute = Z_LVAL_P(value);
+
+	if(attribute == 0160000){
+		RETURN_TRUE;
+	}else{
+		RETURN_FALSE;
+	}
+}
+/* }}} */
 
 
 static zend_function_entry php_git2_tree_entry_methods[] = {
 	PHP_ME(git2_tree_entry, __construct, arginfo_git2_tree_entry___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_tree_entry, isTree,      NULL,                                ZEND_ACC_PUBLIC)
+	PHP_ME(git2_tree_entry, isBlob,      NULL,                                ZEND_ACC_PUBLIC)
+	PHP_ME(git2_tree_entry, isSubmodule, NULL,                                ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
