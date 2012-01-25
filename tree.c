@@ -47,6 +47,54 @@ zend_object_value php_git2_tree_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_diff, 0,0,2)
+	ZEND_ARG_INFO(0, old)
+	ZEND_ARG_INFO(0, new)
+ZEND_END_ARG_INFO()
+
+
+static int php_git2_tree_diff_cb(const git_tree_diff_data *ptr, void *data)
+{
+/*
+typedef struct {
+        unsigned int old_attr;
+        unsigned int new_attr;
+        git_oid old_oid;
+        git_oid new_oid;
+        git_status_t status;
+        const char *path;
+} git_tree_diff_data;
+*/
+	fprintf(stderr,"path:%s\n",ptr->path);
+}
+	
+typedef struct{
+	zval *old;
+	zval *new;
+	zval *result;
+} php_git2_tree_diff_cb_t;
+/*
+{{{ proto: Git2\Tree::diff($old, $new)
+	@todo: think this behavior
+*/
+PHP_METHOD(git2_tree, diff)
+{
+	zval *old, *new;
+	php_git2_tree *m_old, *m_new;
+	php_git2_tree_diff_cb_t payload;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"OO", &old, git2_tree_class_entry, &new, git2_tree_class_entry) == FAILURE) {
+		return;
+	}
+	
+	m_old = PHP_GIT2_GET_OBJECT(php_git2_tree, old);
+	m_new = PHP_GIT2_GET_OBJECT(php_git2_tree, new);
+
+	git_tree_diff(git_tree_id(m_old->tree),git_tree_id(m_new->tree), &php_git2_tree_diff_cb, &payload);
+}
+/* }}} */
+
 
 /* Iterator Implementation */
 
@@ -69,6 +117,7 @@ PHP_METHOD(git2_tree, current)
 	create_tree_entry_from_entry(&z_entry, entry ,m_tree->repository);
 	RETURN_ZVAL(z_entry, 0, 1);
 }
+/* }}} */
 
 /*
 {{{ proto: Git2\Tree::key()
@@ -123,6 +172,7 @@ PHP_METHOD(git2_tree, valid)
 
 
 static zend_function_entry php_git2_tree_methods[] = {
+	PHP_ME(git2_tree, diff,        arginfo_git2_tree_diff,          ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	/* Iterator Implementation */
 	PHP_ME(git2_tree, current,     NULL,                            ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree, key,         NULL,                            ZEND_ACC_PUBLIC)
