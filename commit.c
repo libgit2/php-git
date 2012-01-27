@@ -169,6 +169,31 @@ PHP_METHOD(git2_commit, getCommitter)
 /* }}} */
 
 /*
+{{{ proto: Git2\Commit::getOid()
+*/
+PHP_METHOD(git2_commit, getOid)
+{
+	unsigned int parent_count = 0;
+	php_git2_commit *m_commit;
+	char oid_out[GIT_OID_HEXSZ] = {0};
+	git_oid oid;
+	
+	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
+
+	if (m_commit != NULL) {
+		if (m_commit->commit == NULL) {
+			RETURN_FALSE;
+		}
+
+		git_oid_fmt(oid_out, git_commit_id(m_commit->commit));
+		RETVAL_STRINGL(oid_out,GIT_OID_HEXSZ,1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/*
 {{{ proto: Git2\Commit::create(Git2\Repository $repo, array $data)
 */
 PHP_METHOD(git2_commit, create)
@@ -304,6 +329,7 @@ static zend_function_entry php_git2_commit_methods[] = {
 	PHP_ME(git2_commit, parentCount,        NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, getAuthor,          NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, getCommitter,       NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_commit, getOid,             NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, create,             arginfo_git2_commit_create, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
