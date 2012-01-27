@@ -323,6 +323,37 @@ PHP_METHOD(git2_commit, create)
 }
 /* }}} */
 
+
+/*
+{{{ proto: Git2\Commit::getTree()
+*/
+PHP_METHOD(git2_commit, getTree)
+{
+	php_git2_commit *m_commit;
+	git_oid *oid, *id;
+	git_otype type = GIT_OBJ_TREE;
+	git_object *object;
+	zval *result;
+	int error = 0;
+	
+	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
+
+	if (m_commit != NULL) {
+		if (m_commit->commit == NULL) {
+			RETURN_FALSE;
+		}
+
+		oid = git_commit_tree_oid(m_commit->commit);
+		error = git_object_lookup(&object, git_object_owner((git_object *)m_commit->commit), oid, type);
+		result = php_git2_object_new(git_object_owner((git_object *)m_commit->commit), object TSRMLS_CC);
+		RETVAL_ZVAL(result,0,1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
 static zend_function_entry php_git2_commit_methods[] = {
 	PHP_ME(git2_commit, getMessage,         NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, getMessageEncoding, NULL, ZEND_ACC_PUBLIC)
@@ -330,6 +361,7 @@ static zend_function_entry php_git2_commit_methods[] = {
 	PHP_ME(git2_commit, getAuthor,          NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, getCommitter,       NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, getOid,             NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_commit, getTree,            NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, create,             arginfo_git2_commit_create, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
