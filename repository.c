@@ -96,11 +96,7 @@ PHP_METHOD(git2_repository, __construct)
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
 	if (repository_path_len > 0) {
 		ret = git_repository_open(&repository, repository_path);
-		
-		if (ret != GIT_SUCCESS) {
-			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, git_strerror(ret));
-			RETURN_FALSE;
-		}
+		php_git2_exception_check(ret TSRMLS_CC);
 		
 		m_repository->repository = repository;
 		php_git2_add_protected_property_string_ex(getThis(),
@@ -231,7 +227,7 @@ PHP_METHOD(git2_repository, init)
 		
 		RETVAL_ZVAL(object,0,1);
 	} else {
-		/* @todo: throws an runtime exception */
+		php_git2_exception_check(ret TSRMLS_CC);
 		RETURN_FALSE;
 	}
 }

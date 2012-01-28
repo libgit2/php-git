@@ -242,4 +242,11 @@ static inline void php_git2_create_index_entry(zval **object, git_index_entry *e
 	*object = tmp;
 }
 
+static inline void php_git2_exception_check(int errorcode TSRMLS_DC)
+{
+	if (errorcode < 0)
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC,"%s\n(error code %d)", git_lasterror(), errorcode);
+	git_clearerror();
+}
+
 #endif /* PHP_GIT2_H */
