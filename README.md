@@ -147,6 +147,10 @@ foreach ($walker as $oid => $commit) {
 $config = new Git2\Config("path/to/git/config");
 $config->get("core.bare");
 $config->store("core.bare","1");
+
+// Git2\Config supports read / write dimension.
+$config['core.bare']
+$config['core.bare'] = 1;
 ````
 
 ## Reflog
