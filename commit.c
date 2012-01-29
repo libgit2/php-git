@@ -223,6 +223,9 @@ PHP_METHOD(git2_commit, create)
 	if (zend_hash_find(hash,"author",sizeof("author"),(void **)&value_pp) != FAILURE) {
 		z_author = *value_pp;
 		m_author = PHP_GIT2_GET_OBJECT(php_git2_signature,z_author);
+	} else {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,"key 'author' required");
+		return;
 	}
 
 	if (zend_hash_find(hash,"committer",sizeof("committer"),(void **)&value_pp) != FAILURE) {
@@ -243,6 +246,9 @@ PHP_METHOD(git2_commit, create)
 			m_tree = PHP_GIT2_GET_OBJECT(php_git2_tree, z_tree);
 			tree = m_tree->tree;
 		}
+	} else {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,"key 'tree' required");
+		return;
 	}
 
 	if (zend_hash_find(hash,"parents",sizeof("parents"),(void **)&value_pp) != FAILURE) {
@@ -259,6 +265,9 @@ PHP_METHOD(git2_commit, create)
 
 	if (zend_hash_find(hash,"message",sizeof("message"),(void **)&value_pp) != FAILURE) {
 		message = Z_STRVAL_PP(value_pp);
+	} else {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,"key 'message' required");
+		return;
 	}
 
 	if (zend_hash_find(hash,"encoding",sizeof("encoding"),(void **)&value_pp) != FAILURE) {
