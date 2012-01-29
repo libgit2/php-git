@@ -27,6 +27,7 @@
 #include <zend_interfaces.h>
 
 PHPAPI zend_class_entry *git2_config_class_entry;
+static zend_object_handlers git2_config_object_handlers;
 
 static void php_git2_config_free_storage(php_git2_config *object TSRMLS_DC)
 {
@@ -38,11 +39,102 @@ static void php_git2_config_free_storage(php_git2_config *object TSRMLS_DC)
 	efree(object);
 }
 
+/* @todo refactoring */
+static int php_git2_config_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC)
+{
+	zend_object_handlers *standard;
+	HashTable *hash;
+	zval *entry, *tmp_result, **target_offset;
+	char *current_key, *tmp_value, *savedptr, *k;
+	int error = 0;
+	
+	entry = zend_read_property(git2_config_class_entry, object,"configs",sizeof("configs")-1, 0 TSRMLS_CC);
+	
+	tmp_value = estrdup(Z_STRVAL_P(member));
+	current_key = php_strtok_r(tmp_value, ".", &savedptr);
+	while (current_key != NULL) {
+		k  = current_key;
+		current_key = php_strtok_r(NULL, ".", &savedptr);
+		
+		if (current_key != NULL && k != NULL) {
+			if (zend_hash_exists(Z_ARRVAL_P(entry), k, strlen(k)+1)) {
+				if (zend_hash_find(Z_ARRVAL_P(entry), k, strlen(k)+1, (void **)&target_offset) == SUCCESS) {
+					entry = *target_offset;
+				}
+			} else {
+				target_offset = NULL;
+			}
+		} else {
+			if (k != NULL) {
+				if (zend_hash_find(Z_ARRVAL_P(entry), k, strlen(k)+1, (void **)&target_offset) != SUCCESS) {
+					target_offset = NULL;
+				}
+			}
+		}
+	}
+	efree(tmp_value);
+	
+	if (target_offset != NULL) {
+		return 1;
+	} else {
+		return 0;
+	}
+	
+	standard = zend_get_std_object_handlers();
+	return standard->has_dimension(object, member, check_empty TSRMLS_CC);
+}
+
+/* @todo refactoring */
+static zval* php_git2_config_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
+{
+	zend_object_handlers *standard;
+	HashTable *hash;
+	zval *entry, *tmp_result, **target_offset;
+	char *current_key, *tmp_value, *savedptr, *k;
+	int error = 0;
+	
+	entry = zend_read_property(git2_config_class_entry, object,"configs",sizeof("configs")-1, 0 TSRMLS_CC);
+	
+	tmp_value = estrdup(Z_STRVAL_P(offset));
+	current_key = php_strtok_r(tmp_value, ".", &savedptr);
+	while (current_key != NULL) {
+		k  = current_key;
+		current_key = php_strtok_r(NULL, ".", &savedptr);
+		
+		if (current_key != NULL && k != NULL) {
+			if (zend_hash_exists(Z_ARRVAL_P(entry), k, strlen(k)+1)) {
+				if (zend_hash_find(Z_ARRVAL_P(entry), k, strlen(k)+1, (void **)&target_offset) == SUCCESS) {
+					entry = *target_offset;
+				}
+			} else {
+				target_offset = NULL;
+			}
+		} else {
+			if (k != NULL) {
+				if (zend_hash_find(Z_ARRVAL_P(entry), k, strlen(k)+1, (void **)&target_offset) != SUCCESS) {
+					target_offset = NULL;
+				}
+			}
+		}
+	}
+	efree(tmp_value);
+	
+	if (target_offset != NULL) {
+		tmp_result = *target_offset;
+	} else {
+		MAKE_STD_ZVAL(tmp_result);
+		ZVAL_NULL(tmp_result);
+	}
+	return tmp_result;
+}
+
+
 zend_object_value php_git2_config_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
 
 	PHP_GIT2_STD_CREATE_OBJECT(php_git2_config);
+	retval.handlers = &git2_config_object_handlers;
 	return retval;
 }
 
@@ -328,4 +420,8 @@ void php_git2_config_init(TSRMLS_D)
 	INIT_NS_CLASS_ENTRY(ce, PHP_GIT2_NS, "Config", php_git2_config_methods);
 	git2_config_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	git2_config_class_entry->create_object = php_git2_config_new;
+	memcpy(&git2_config_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+
+	git2_config_object_handlers.read_dimension = php_git2_config_read_dimension;
+	git2_config_object_handlers.has_dimension = php_git2_config_has_dimension;
 }
