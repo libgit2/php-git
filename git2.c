@@ -35,6 +35,7 @@ extern void php_git2_reference_init(TSRMLS_D);
 extern void php_git2_config_init(TSRMLS_D);
 extern void php_git2_remote_init(TSRMLS_D);
 extern void php_git2_tag_init(TSRMLS_D);
+extern void php_git2_odb_init(TSRMLS_D);
 
 
 int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsigned int method_len, unsigned int param_count, ...)
@@ -155,6 +156,21 @@ zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_
 	return result;
 }
 
+zval* php_git_read_protected_property(zend_class_entry *scope, zval *object, char *name, int name_length TSRMLS_DC)
+{
+	zval **data;
+	char *key;
+	long *length;
+	
+	zend_mangle_property_name(&key,&length,"*",1,name,name_length,0);
+	if (zend_hash_find(Z_OBJPROP_P(object),key,length,(void **)&data) != SUCCESS) {
+	    data = NULL;
+	}
+
+	efree(key);
+	return *data;
+}
+
 int php_git2_add_protected_property_string_ex(zval *object, char *name, int name_length, char *data, zend_bool duplicate TSRMLS_DC)
 {
 	zval *tmp;
@@ -163,6 +179,22 @@ int php_git2_add_protected_property_string_ex(zval *object, char *name, int name
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRING(tmp,data,duplicate);
+	zend_mangle_property_name(&key, &length, "*",1,name,name_length,0);
+	zend_hash_update(Z_OBJPROP_P(object),key,length,&tmp,sizeof(zval *),NULL);
+	efree(key);
+
+	return SUCCESS;
+}
+
+int php_git2_add_protected_property_zval_ex(zval *object, char *name, int name_length, zval *data, zend_bool duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	char *key;
+	int length;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_ZVAL(tmp,data,duplicate,0);
+	
 	zend_mangle_property_name(&key, &length, "*",1,name,name_length,0);
 	zend_hash_update(Z_OBJPROP_P(object),key,length,&tmp,sizeof(zval *),NULL);
 	efree(key);
@@ -187,6 +219,7 @@ PHP_MINIT_FUNCTION(git2)
 	php_git2_config_init(TSRMLS_C);
 	php_git2_remote_init(TSRMLS_C);
 	php_git2_tag_init(TSRMLS_C);
+	php_git2_odb_init(TSRMLS_C);
 	
 	return SUCCESS;
 }

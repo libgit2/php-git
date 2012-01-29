@@ -44,6 +44,7 @@ if test $PHP_GIT2 != "no"; then
 				config.c \
 				remote.c \
 				tag.c \
+				odb.c \
 	, $ext_shared)
 
 	ifdef([PHP_ADD_EXTENSION_DEP],

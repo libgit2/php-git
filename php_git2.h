@@ -57,6 +57,7 @@ extern PHPAPI zend_class_entry *git2_index_entry_class_entry;
 extern PHPAPI zend_class_entry *git2_config_class_entry;
 extern PHPAPI zend_class_entry *git2_remote_class_entry;
 extern PHPAPI zend_class_entry *git2_tag_class_entry;
+extern PHPAPI zend_class_entry *git2_odb_class_entry;
 
 typedef struct{
 	zend_object zo;
@@ -133,6 +134,11 @@ typedef struct{
 	git_tag *tag;
 } php_git2_tag;
 
+typedef struct{
+	zend_object zo;
+	git_odb *odb;
+} php_git2_odb;
+
 
 #  define PHP_GIT2_GET_OBJECT(STRUCT_NAME, OBJECT) (STRUCT_NAME *) zend_object_store_get_object(OBJECT TSRMLS_CC);
 
@@ -165,7 +171,10 @@ typedef struct{
 	retval.handlers = zend_get_std_object_handlers();
 #  endif
 
+
+extern zval* php_git_read_protected_property(zend_class_entry *scope, zval *object, char *name, int name_length TSRMLS_DC);
 extern int php_git2_add_protected_property_string_ex(zval *object, char *name, int name_length, char *data, zend_bool duplicate TSRMLS_DC);
+extern int php_git2_add_protected_property_zval_ex(zval *object, char *name, int name_length, zval *data, zend_bool duplicate TSRMLS_DC);
 extern zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_DC);
 extern int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsigned int method_len, unsigned int param_count, ...);
 
