@@ -96,7 +96,7 @@ PHP_METHOD(git2_repository, __construct)
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
 	if (repository_path_len > 0) {
 		ret = git_repository_open(&repository, repository_path);
-		php_git2_exception_check(ret TSRMLS_CC);
+		PHP_GIT2_EXCEPTION_CHECK(ret);
 		
 		m_repository->repository = repository;
 		php_git2_add_protected_property_string_ex(getThis(),

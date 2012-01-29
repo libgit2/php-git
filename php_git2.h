@@ -56,6 +56,7 @@ extern PHPAPI zend_class_entry *git2_index_class_entry;
 extern PHPAPI zend_class_entry *git2_index_entry_class_entry;
 extern PHPAPI zend_class_entry *git2_config_class_entry;
 extern PHPAPI zend_class_entry *git2_remote_class_entry;
+extern PHPAPI zend_class_entry *git2_tag_class_entry;
 
 typedef struct{
 	zend_object zo;
@@ -126,6 +127,11 @@ typedef struct{
 	zend_object zo;
 	git_remote *remote;
 } php_git2_remote;
+
+typedef struct{
+	zend_object zo;
+	git_tag *tag;
+} php_git2_tag;
 
 
 #  define PHP_GIT2_GET_OBJECT(STRUCT_NAME, OBJECT) (STRUCT_NAME *) zend_object_store_get_object(OBJECT TSRMLS_CC);
@@ -242,11 +248,21 @@ static inline void php_git2_create_index_entry(zval **object, git_index_entry *e
 	*object = tmp;
 }
 
+#define PHP_GIT2_EXCEPTION_CHECK(errorcode) \
+	if (errorcode < 0) { \
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC,"%s\n(error code %d)", git_lasterror(), errorcode); \
+		git_clearerror(); \
+		return; \
+	} \
+
 static inline void php_git2_exception_check(int errorcode TSRMLS_DC)
 {
-	if (errorcode < 0)
+	if (errorcode < 0) {
 		zend_throw_exception_ex(NULL, 0 TSRMLS_CC,"%s\n(error code %d)", git_lasterror(), errorcode);
-	git_clearerror();
+		fprintf(stderr,"moe");
+		git_clearerror();
+		return;
+	}
 }
 
 #endif /* PHP_GIT2_H */

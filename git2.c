@@ -34,6 +34,7 @@ extern void php_git2_walker_init(TSRMLS_D);
 extern void php_git2_reference_init(TSRMLS_D);
 extern void php_git2_config_init(TSRMLS_D);
 extern void php_git2_remote_init(TSRMLS_D);
+extern void php_git2_tag_init(TSRMLS_D);
 
 
 int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsigned int method_len, unsigned int param_count, ...)
@@ -140,6 +141,11 @@ zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_
 			break;
 		}
 		case GIT_OBJ_TAG: {
+			php_git2_tag *m_obj = NULL;
+			
+			object_init_ex(result, git2_tag_class_entry);
+			m_obj = PHP_GIT2_GET_OBJECT(php_git2_tag, result);
+			m_obj->tag = (git_tag*)object;
 			break;
 		}
 		default:
@@ -180,6 +186,7 @@ PHP_MINIT_FUNCTION(git2)
 	php_git2_index_init(TSRMLS_C);
 	php_git2_config_init(TSRMLS_C);
 	php_git2_remote_init(TSRMLS_C);
+	php_git2_tag_init(TSRMLS_C);
 	
 	return SUCCESS;
 }
