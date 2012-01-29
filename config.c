@@ -51,6 +51,10 @@ static int php_git2_config_has_dimension(zval *object, zval *member, int check_e
 	
 	entry = zend_read_property(git2_config_class_entry, object,"configs",sizeof("configs")-1, 0 TSRMLS_CC);
 	
+	if (Z_STRLEN_P(member) < 1) {
+		return 0;
+	}
+	
 	tmp_value = estrdup(Z_STRVAL_P(member));
 	current_key = php_strtok_r(tmp_value, ".", &savedptr);
 	while (current_key != NULL) {
@@ -95,6 +99,10 @@ static zval* php_git2_config_read_dimension(zval *object, zval *offset, int type
 	int error = 0;
 	
 	entry = zend_read_property(git2_config_class_entry, object,"configs",sizeof("configs")-1, 0 TSRMLS_CC);
+
+	if (Z_STRLEN_P(offset) < 1) {
+		return 0;
+	}
 	
 	tmp_value = estrdup(Z_STRVAL_P(offset));
 	current_key = php_strtok_r(tmp_value, ".", &savedptr);
@@ -123,8 +131,7 @@ static zval* php_git2_config_read_dimension(zval *object, zval *offset, int type
 	if (target_offset != NULL) {
 		tmp_result = *target_offset;
 	} else {
-		MAKE_STD_ZVAL(tmp_result);
-		ZVAL_NULL(tmp_result);
+		tmp_result = 0;
 	}
 	return tmp_result;
 }
