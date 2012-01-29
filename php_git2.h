@@ -250,7 +250,7 @@ static inline void php_git2_create_index_entry(zval **object, git_index_entry *e
 
 #define PHP_GIT2_EXCEPTION_CHECK(errorcode) \
 	if (errorcode < 0) { \
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC,"%s\n(error code %d)", git_lasterror(), errorcode); \
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC,"%s\n(error code %d) at %s:%d", git_lasterror(), errorcode, __FILE__, __LINE__); \
 		git_clearerror(); \
 		return; \
 	} \
