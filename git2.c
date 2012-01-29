@@ -85,6 +85,14 @@ zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_
 	MAKE_STD_ZVAL(result);
 	
 	switch (git_object_type(object)) {
+		case GIT_OBJ_TAG: {
+			php_git2_tag *m_obj = NULL;
+			
+			object_init_ex(result, git2_tag_class_entry);
+			m_obj = PHP_GIT2_GET_OBJECT(php_git2_tag, result);
+			m_obj->tag = (git_tag*)object;
+			break;
+		}
 		case GIT_OBJ_COMMIT: {
 			php_git2_commit *m_obj = NULL;
 			
@@ -138,14 +146,6 @@ zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_
 			add_property_zval_ex(result, "entries",sizeof("entries"),m_array TSRMLS_CC);
 			zval_ptr_dtor(&m_array);
 			
-			break;
-		}
-		case GIT_OBJ_TAG: {
-			php_git2_tag *m_obj = NULL;
-			
-			object_init_ex(result, git2_tag_class_entry);
-			m_obj = PHP_GIT2_GET_OBJECT(php_git2_tag, result);
-			m_obj->tag = (git_tag*)object;
 			break;
 		}
 		default:
