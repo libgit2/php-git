@@ -26,7 +26,7 @@
 
 PHPAPI zend_class_entry *git2_repository_class_entry;
 void php_git2_repository_init(TSRMLS_D);
-
+static zend_object_handlers git2_repository_object_handlers;
 
 static void php_git2_repository_free_storage(php_git2_repository *object TSRMLS_DC)
 {
@@ -43,6 +43,7 @@ zend_object_value php_git2_repository_new(zend_class_entry *ce TSRMLS_DC)
 	zend_object_value retval;
 
 	PHP_GIT2_STD_CREATE_OBJECT(php_git2_repository);
+	retval.handlers = &git2_repository_object_handlers;
 	return retval;
 }
 
@@ -474,4 +475,8 @@ void php_git2_repository_init(TSRMLS_D)
 	INIT_NS_CLASS_ENTRY(ce, PHP_GIT2_NS, "Repository", php_git2_repository_methods);
 	git2_repository_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	git2_repository_class_entry->create_object = php_git2_repository_new;
+
+	memcpy(&git2_repository_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	git2_repository_object_handlers.clone_obj = NULL;
+
 }
