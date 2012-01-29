@@ -61,6 +61,11 @@ $repo = new Git2\Repository($path);
 
 ````
 $oid = Git2\Blob::create($repo, "Hello World");
+/*
+  $blob = $repo->lookup($oid);
+  int $blob->getSize();
+  string $blob->getContent();
+*/
 ````
 
 ## Tree Access
