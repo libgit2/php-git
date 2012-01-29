@@ -49,8 +49,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_remote___construct, 0,0,2)
 	ZEND_ARG_INFO(0, url)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_remote_connect, 0,0,1)
-	ZEND_ARG_INFO(0, direction)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_remote_fetch, 0,0,1)
 ZEND_END_ARG_INFO()
 
 /*
@@ -87,33 +86,89 @@ PHP_METHOD(git2_remote, __construct)
 }
 /* }}} */
 
+
+static int php_git2_rename_packfile(char *packname, git_indexer *idx)
+{
+	char path[GIT_PATH_MAX], oid[GIT_OID_HEXSZ + 1], *slash;
+	int ret;
+
+	strcpy(path,packname);
+	slash = strrchr(path, '/');
+
+	if (!slash) {
+		return GIT_EINVALIDARGS;
+	}
+
+	memset(oid, 0x0, sizeof(oid));
+	git_oid_fmt(oid, git_indexer_hash(idx));
+	ret = sprintf(slash + 1, "pack-%s.pack", oid);
+	if(ret < 0) {
+	  return GIT_EOSERR;
+	}
+
+	return rename(packname, path);
+}
+
+static int show_ref__cb(git_remote_head *head, void *payload)
+{
+	char oid[GIT_OID_HEXSZ + 1] = {0};
+	git_oid_fmt(oid, &head->oid);
+	printf("%s\t%s\n", oid, head->name);
+	return GIT_SUCCESS;
+}
+
 /*
-{{{ proto: Git2\Remote::connect(int type)
+{{{ proto: Git2\Remote::fetch()
 */
-PHP_METHOD(git2_remote, connect)
+PHP_METHOD(git2_remote, fetch)
 {
 	php_git2_remote *m_remote;
+	git_indexer *idx = NULL;
+	git_indexer_stats stats;
+	char *packname = NULL;
 	int error = 0;
 	long direction = 0;
 	
 	m_remote = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
 
+/*
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &direction) == FAILURE) {
 		return;
 	}
-	
-	if (direction == 0) {
-		direction = GIT_DIR_FETCH;
-	}
+*/
+	direction = GIT_DIR_FETCH;
 	
 	error = git_remote_connect(m_remote->remote, direction);
+	error = git_remote_ls(m_remote->remote, &show_ref__cb, NULL);
+	error = git_remote_download(&packname, m_remote->remote);
+
+	if (packname != NULL) {
+		// Create a new instance indexer
+		error = git_indexer_new(&idx, packname);
+		PHP_GIT2_EXCEPTION_CHECK(error);
+
+		error = git_indexer_run(idx, &stats);
+		PHP_GIT2_EXCEPTION_CHECK(error);
+
+		error = git_indexer_write(idx);
+		PHP_GIT2_EXCEPTION_CHECK(error);
+
+		error = php_git2_rename_packfile(packname, idx);
+		PHP_GIT2_EXCEPTION_CHECK(error);
+	}
+
+	error = git_remote_update_tips(m_remote->remote);
+	PHP_GIT2_EXCEPTION_CHECK(error);
+
+	free(packname);
+	git_indexer_free(idx);
 }
 /* }}} */
 
 static zend_function_entry php_git2_remote_methods[] = {
 	PHP_ME(git2_remote, __construct, arginfo_git2_remote___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-	PHP_ME(git2_remote, connect, arginfo_git2_remote_connect, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_remote, fetch, arginfo_git2_remote_fetch, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
