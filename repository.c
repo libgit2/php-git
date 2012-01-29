@@ -308,7 +308,7 @@ PHP_METHOD(git2_repository, discover)
 PHP_METHOD(git2_repository, exists)
 {
 	char *hash;
-	int hash_len = 0;
+	int error, hash_len = 0;
 	git_odb *odb;
 	git_oid id;
 	php_git2_repository *m_repository;
@@ -319,18 +319,16 @@ PHP_METHOD(git2_repository, exists)
 	}
 	
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
-	if (git_repository_odb(&odb, m_repository->repository) == GIT_SUCCESS) {
-		if (git_oid_fromstr(&id, hash) != GIT_SUCCESS) {
-			RETURN_FALSE;
-		}
-		
-		if (git_odb_exists(odb, &id) == 1) {
-			RETURN_TRUE;
-		} else {
-			RETURN_FALSE;
-		}
+	error = git_repository_odb(&odb, m_repository->repository);
+	PHP_GIT2_EXCEPTION_CHECK(error);
+
+	if (git_oid_fromstr(&id, hash) != GIT_SUCCESS) {
+		RETURN_FALSE;
+	}
+	
+	if (git_odb_exists(odb, &id) == 1) {
+		RETURN_TRUE;
 	} else {
-		/* @todo: throws an exception */
 		RETURN_FALSE;
 	}
 }
@@ -349,6 +347,7 @@ PHP_METHOD(git2_repository, lookup)
 	git_object *object;
 	long type = GIT_OBJ_ANY;
 	php_git2_repository *m_repository;
+	zval *result = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s|l", &hash, &hash_len, type) == FAILURE) {
@@ -356,25 +355,21 @@ PHP_METHOD(git2_repository, lookup)
 	}
 	
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
-	if (git_repository_odb(&odb, m_repository->repository) == GIT_SUCCESS) {
-		zval *result = NULL;
-		
-		if (git_oid_fromstrn(&id, hash, hash_len) != GIT_SUCCESS) {
-			RETURN_FALSE;
-		}
-		
-		if (hash_len < GIT_OID_HEXSZ) {
-			error = git_object_lookup_prefix(&object, m_repository->repository, &id, hash_len, (git_otype)type);
-		} else {
-			error = git_object_lookup(&object, m_repository->repository, &id, (git_otype)type);
-		}
-		
-		result = php_git2_object_new(m_repository->repository, object TSRMLS_CC);
-		RETVAL_ZVAL(result,0,1);
-	} else {
-		/* @todo: throws an exception */
+	error = git_repository_odb(&odb, m_repository->repository);
+	PHP_GIT2_EXCEPTION_CHECK(error);
+
+	if (git_oid_fromstrn(&id, hash, hash_len) != GIT_SUCCESS) {
 		RETURN_FALSE;
 	}
+	
+	if (hash_len < GIT_OID_HEXSZ) {
+		error = git_object_lookup_prefix(&object, m_repository->repository, &id, hash_len, (git_otype)type);
+	} else {
+		error = git_object_lookup(&object, m_repository->repository, &id, (git_otype)type);
+	}
+	
+	result = php_git2_object_new(m_repository->repository, object TSRMLS_CC);
+	RETVAL_ZVAL(result,0,1);
 }
 /* }}} */
 
@@ -400,16 +395,16 @@ PHP_METHOD(git2_repository, write)
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
 	
 	error  = git_repository_odb(&odb, m_repository->repository);
-	/* @todo: error check */
+	PHP_GIT2_EXCEPTION_CHECK(error);
 	
 	error = git_odb_open_wstream(&stream, odb, contents_len, (git_otype)type);
-	/* @todo: error check */
+	PHP_GIT2_EXCEPTION_CHECK(error);
 		
 	error = stream->write(stream, contents, contents_len);
-	/* @todo: error check */
+	PHP_GIT2_EXCEPTION_CHECK(error);
 
 	error = stream->finalize_write(&oid, stream);
-	/* @todo: error check */
+	PHP_GIT2_EXCEPTION_CHECK(error);
 	
 	git_oid_fmt(oid_out, &oid);
 	RETURN_STRINGL(oid_out,GIT_OID_HEXSZ,1);
@@ -437,7 +432,10 @@ PHP_METHOD(git2_repository, hash)
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
 	
 	error  = git_repository_odb(&odb, m_repository->repository);
+	PHP_GIT2_EXCEPTION_CHECK(error);
+
 	error = git_odb_hash(&oid, contents,contents_len, type);
+	PHP_GIT2_EXCEPTION_CHECK(error);
 	
 	git_oid_fmt(oid_out, &oid);
 	RETURN_STRINGL(oid_out,GIT_OID_HEXSZ,1);
