@@ -112,7 +112,7 @@ PHP_METHOD(git2_signature, __construct)
 
 
 static zend_function_entry php_git2_signature_methods[] = {
-	PHP_ME(git2_signature, __construct, arginfo_git2_signature___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_signature, __construct, arginfo_git2_signature___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	{NULL,NULL,NULL}
 };
 

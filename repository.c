@@ -27,6 +27,7 @@
 PHPAPI zend_class_entry *git2_repository_class_entry;
 void php_git2_repository_init(TSRMLS_D);
 
+
 static void php_git2_repository_free_storage(php_git2_repository *object TSRMLS_DC)
 {
 	if (object->repository != NULL) {
@@ -444,7 +445,7 @@ PHP_METHOD(git2_repository, hash)
 
 
 static zend_function_entry php_git2_repository_methods[] = {
-	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(git2_repository, isEmpty,     NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, isBare,      NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, getPath,     NULL,                                ZEND_ACC_PUBLIC)

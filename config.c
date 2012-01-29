@@ -314,7 +314,7 @@ PHP_METHOD(git2_config, delete)
 /* }}} */
 
 static zend_function_entry php_git2_config_methods[] = {
-	PHP_ME(git2_config, __construct, arginfo_git2_config___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_config, __construct, arginfo_git2_config___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(git2_config, get,         arginfo_git2_config_get,         ZEND_ACC_PUBLIC)
 	PHP_ME(git2_config, store,       arginfo_git2_config_store,       ZEND_ACC_PUBLIC)
 	PHP_ME(git2_config, delete,      arginfo_git2_config_delete,      ZEND_ACC_PUBLIC)

@@ -179,7 +179,7 @@ PHP_METHOD(git2_index, valid)
 
 
 static zend_function_entry php_git2_index_methods[] = {
-	PHP_ME(git2_index, __construct, arginfo_git2_index___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_index, __construct, arginfo_git2_index___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(git2_index, count,       NULL,                           ZEND_ACC_PUBLIC)
 	/* Iterator Implementation */
 	PHP_ME(git2_index, current,     NULL,                           ZEND_ACC_PUBLIC)

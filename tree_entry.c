@@ -144,7 +144,7 @@ PHP_METHOD(git2_tree_entry, isSubmodule)
 
 
 static zend_function_entry php_git2_tree_entry_methods[] = {
-	PHP_ME(git2_tree_entry, __construct, arginfo_git2_tree_entry___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_tree_entry, __construct, arginfo_git2_tree_entry___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(git2_tree_entry, isTree,      NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree_entry, isBlob,      NULL,                                ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree_entry, isSubmodule, NULL,                                ZEND_ACC_PUBLIC)

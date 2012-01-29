@@ -112,7 +112,7 @@ PHP_METHOD(git2_remote, connect)
 /* }}} */
 
 static zend_function_entry php_git2_remote_methods[] = {
-	PHP_ME(git2_remote, __construct, arginfo_git2_remote___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_remote, __construct, arginfo_git2_remote___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(git2_remote, connect, arginfo_git2_remote_connect, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };

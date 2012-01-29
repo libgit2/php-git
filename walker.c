@@ -263,7 +263,7 @@ PHP_METHOD(git2_walker, valid)
 /* }}} */
 
 static zend_function_entry php_git2_walker_methods[] = {
-	PHP_ME(git2_walker, __construct, arginfo_git2_walker___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_walker, __construct, arginfo_git2_walker___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(git2_walker, sorting,     arginfo_git2_walker_sorting,     ZEND_ACC_PUBLIC)
 	PHP_ME(git2_walker, push,        arginfo_git2_walker_push,        ZEND_ACC_PUBLIC)
 	PHP_ME(git2_walker, hide,        arginfo_git2_walker_hide,        ZEND_ACC_PUBLIC)

@@ -175,7 +175,7 @@ PHP_METHOD(git2_tree_builder, clear)
 /* }}} */
 
 static zend_function_entry php_git2_tree_builder_methods[] = {
-	PHP_ME(git2_tree_builder, __construct, arginfo_git2_tree_builder___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_tree_builder, __construct, arginfo_git2_tree_builder___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(git2_tree_builder, insert,      arginfo_git2_tree_builder_insert, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree_builder, remove,      arginfo_git2_tree_builder_remove, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree_builder, clear,       NULL,                             ZEND_ACC_PUBLIC)
