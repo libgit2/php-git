@@ -28,30 +28,6 @@ PHPAPI zend_class_entry *git2_repository_class_entry;
 void php_git2_repository_init(TSRMLS_D);
 static zend_object_handlers git2_repository_object_handlers;
 
-
-static zval *php_git2_repository_read_property(zval *object, zval *member, int type TSRMLS_DC)
-{
-	zval *retval;
-	zval **data = NULL;
-	char *key, *prop_key = NULL;
-	int key_len, prop_key_len = 0;
-	
-	prop_key = Z_STRVAL_P(member);
-	prop_key_len = Z_STRLEN_P(member);
-	
-	zend_mangle_property_name(&key, &key_len, "*", 1, prop_key, prop_key_len, 0);
-	if (zend_hash_find(Z_OBJPROP_P(object),key,key_len,(void **)&data) != SUCCESS) {
-		retval = &EG(uninitialized_zval);
-	} else {
-		ALLOC_INIT_ZVAL(retval);
-		Z_SET_REFCOUNT_P(retval, 0);
-		ZVAL_ZVAL(retval,*data,1,0);
-	}
-	efree(key);
-	
-	return retval;
-}
-
 static void php_git2_repository_free_storage(php_git2_repository *object TSRMLS_DC)
 {
 	if (object->repository != NULL) {
@@ -105,6 +81,28 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_lookup, 0,0,1)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+static int php_git2_repository_initialize(zval *object, git_repository *repository TSRMLS_DC)
+{
+	zval *odb;
+	php_git2_repository *m_repository;
+	
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, object);
+	m_repository->repository = repository;
+
+	MAKE_STD_ZVAL(odb);
+	object_init_ex(odb,git2_odb_class_entry);
+	php_git2_add_protected_property_string_ex(object,
+		"path",sizeof("path")-1,
+		git_repository_path(repository),
+	1 TSRMLS_CC);
+
+	php_git2_add_protected_property_zval_ex(object,
+		"odb",sizeof("odb")-1,
+		odb,
+	1 TSRMLS_CC);
+	zval_ptr_dtor(&odb);
+}
+
 /*
 {{{ proto: Git2\Repsotiroy::__construct(string $path)
 */
@@ -121,25 +119,11 @@ PHP_METHOD(git2_repository, __construct)
 		return;
 	}
 
-	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
 	if (repository_path_len > 0) {
 		ret = git_repository_open(&repository, repository_path);
 		PHP_GIT2_EXCEPTION_CHECK(ret);
 		
-		m_repository->repository = repository;
-		MAKE_STD_ZVAL(odb);
-		object_init_ex(odb,git2_odb_class_entry);
-		
-		php_git2_add_protected_property_string_ex(getThis(),
-			"path",sizeof("path")-1,
-			git_repository_path(repository),
-		1 TSRMLS_CC);
-
-		php_git2_add_protected_property_zval_ex(getThis(),
-			"odb",sizeof("odb")-1,
-			odb,
-		1 TSRMLS_CC);
-		zval_ptr_dtor(&odb);
+		php_git2_repository_initialize(getThis(), repository TSRMLS_CC);
 	} else {
 		m_repository->repository = NULL;
 	}
@@ -255,12 +239,10 @@ PHP_METHOD(git2_repository, init)
 	ret = git_repository_init(&repository, path, is_bare);
 	if (ret == GIT_SUCCESS) {
 		zval *object;
-		php_git2_repository *m_repository;
 		
 		MAKE_STD_ZVAL(object);
 		object_init_ex(object, git2_repository_class_entry);
-		m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, object);
-		m_repository->repository = repository;
+		php_git2_repository_initialize(object, repository TSRMLS_CC);
 		
 		RETVAL_ZVAL(object,0,1);
 	} else {
@@ -513,6 +495,4 @@ void php_git2_repository_init(TSRMLS_D)
 
 	memcpy(&git2_repository_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	git2_repository_object_handlers.clone_obj = NULL;
-	git2_repository_object_handlers.read_property = php_git2_repository_read_property;
-
 }
