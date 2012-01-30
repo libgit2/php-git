@@ -28,6 +28,30 @@ PHPAPI zend_class_entry *git2_repository_class_entry;
 void php_git2_repository_init(TSRMLS_D);
 static zend_object_handlers git2_repository_object_handlers;
 
+
+static zval *php_git2_repository_read_property(zval *object, zval *member, int type TSRMLS_DC)
+{
+	zval *retval;
+	zval **data = NULL;
+	char *key, *prop_key = NULL;
+	int key_len, prop_key_len = 0;
+	
+	prop_key = Z_STRVAL_P(member);
+	prop_key_len = Z_STRLEN_P(member);
+	
+	zend_mangle_property_name(&key, &key_len, "*", 1, prop_key, prop_key_len, 0);
+	if (zend_hash_find(Z_OBJPROP_P(object),key,key_len,(void **)&data) != SUCCESS) {
+		retval = &EG(uninitialized_zval);
+	} else {
+		ALLOC_INIT_ZVAL(retval);
+		Z_SET_REFCOUNT_P(retval, 0);
+		ZVAL_ZVAL(retval,*data,1,0);
+	}
+	efree(key);
+	
+	return retval;
+}
+
 static void php_git2_repository_free_storage(php_git2_repository *object TSRMLS_DC)
 {
 	if (object->repository != NULL) {
@@ -489,6 +513,6 @@ void php_git2_repository_init(TSRMLS_D)
 
 	memcpy(&git2_repository_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	git2_repository_object_handlers.clone_obj = NULL;
-	//git2_repository_object_handlers.read_property = php_git2_repository_read_property;
+	git2_repository_object_handlers.read_property = php_git2_repository_read_property;
 
 }
