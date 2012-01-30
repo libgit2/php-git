@@ -104,6 +104,28 @@ PHP_METHOD(git2_odb, exists)
 */
 PHP_METHOD(git2_odb, read)
 {
+	char *hash;
+	int error, hash_len = 0;
+	git_odb *odb;
+	git_oid id;
+	git_odb_object *object;
+	php_git2_odb *m_odb;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &hash, &hash_len) == FAILURE) {
+		return;
+	}
+	
+	m_odb = PHP_GIT2_GET_OBJECT(php_git2_odb, getThis());
+	if (git_oid_fromstr(&id, hash) != GIT_SUCCESS) {
+		RETURN_FALSE;
+	}
+	
+	error = git_odb_read(&object,m_odb->odb, &id);
+	PHP_GIT2_EXCEPTION_CHECK(error);
+
+	fprintf(stderr,"%s",git_odb_object_data(object));
+	
 }
 /* }}} */
 
