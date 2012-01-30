@@ -91,15 +91,8 @@ static int php_git2_repository_initialize(zval *object, git_repository *reposito
 
 	MAKE_STD_ZVAL(odb);
 	object_init_ex(odb,git2_odb_class_entry);
-	php_git2_add_protected_property_string_ex(object,
-		"path",sizeof("path")-1,
-		git_repository_path(repository),
-	1 TSRMLS_CC);
-
-	php_git2_add_protected_property_zval_ex(object,
-		"odb",sizeof("odb")-1,
-		odb,
-	1 TSRMLS_CC);
+	add_property_string(object, "path", git_repository_path(repository),1);
+	add_property_zval(object, "odb", odb);
 	zval_ptr_dtor(&odb);
 }
 
