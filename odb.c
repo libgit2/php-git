@@ -25,6 +25,7 @@
 #include "php_git2.h"
 
 PHPAPI zend_class_entry *git2_odb_class_entry;
+static zend_object_handlers git2_odb_object_handlers;
 
 static void php_git2_odb_free_storage(php_git2_odb *object TSRMLS_DC)
 {
@@ -41,17 +42,96 @@ zend_object_value php_git2_odb_new(zend_class_entry *ce TSRMLS_DC)
 	zend_object_value retval;
 
 	PHP_GIT2_STD_CREATE_OBJECT(php_git2_odb);
+	retval.handlers = &git2_odb_object_handlers;
 	return retval;
 }
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_odb_hash, 0,0,2)
+	ZEND_ARG_INFO(0, contents)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_odb_write, 0,0,2)
+	ZEND_ARG_INFO(0, contents)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_odb_exists, 0,0,1)
+	ZEND_ARG_INFO(0, oid)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_odb_read, 0,0,1)
+	ZEND_ARG_INFO(0, oid)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_odb_add_alternate, 0,0,2)
+	ZEND_ARG_INFO(0, backend)
+	ZEND_ARG_INFO(0, priority)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_odb_add_backend, 0,0,2)
+	ZEND_ARG_INFO(0, backend)
+	ZEND_ARG_INFO(0, priority)
+ZEND_END_ARG_INFO()
+
+/*
+{{{ proto: Git2\ODB::hash(string $contents, int $type)
+*/
+PHP_METHOD(git2_odb, hash)
+{
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\ODB::write(string $contents, int $type)
+*/
+PHP_METHOD(git2_odb, write)
+{
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\ODB::exists($oid)
+*/
+PHP_METHOD(git2_odb, exists)
+{
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\ODB::read($oid)
+*/
+PHP_METHOD(git2_odb, read)
+{
+}
+/* }}} */
+
+
+/*
+{{{ proto: Git2\ODB::addAlternate(Git2\Backend $backend, $priority)
+*/
+PHP_METHOD(git2_odb, addAlternate)
+{
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\ODB::addBackend(Git2\Backend $backend, $priority)
+*/
+PHP_METHOD(git2_odb, addBackend)
+{
+}
+/* }}} */
+
+
 static zend_function_entry php_git2_odb_methods[] = {
-	//PHP_ME(git2_odb, __construct, NULL, ZEND_ACC_PUBLIC);
-	//PHP_ME(git2_odb, hash, NULL, ZEND_ACC_PUBLIC);
-	//PHP_ME(git2_odb, write, NULL, ZEND_ACC_PUBLIC);
-	//PHP_ME(git2_odb, exists, NULL, ZEND_ACC_PUBLIC);
-	//PHP_ME(git2_odb, read, NULL, ZEND_ACC_PUBLIC);
-	//PHP_ME(git2_odb, addAlternate, NULL, ZEND_ACC_PUBLIC);
-	//PHP_ME(git2_odb, addBackend, NULL, ZEND_ACC_PUBLIC);
+	PHP_ME(git2_odb, hash,         arginfo_git2_odb_hash,          ZEND_ACC_PUBLIC)
+	PHP_ME(git2_odb, write,        arginfo_git2_odb_write,         ZEND_ACC_PUBLIC)
+	PHP_ME(git2_odb, exists,       arginfo_git2_odb_exists,        ZEND_ACC_PUBLIC)
+	PHP_ME(git2_odb, read,         arginfo_git2_odb_read,          ZEND_ACC_PUBLIC)
+	PHP_ME(git2_odb, addAlternate, arginfo_git2_odb_add_alternate, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_odb, addBackend,   arginfo_git2_odb_add_backend,   ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
@@ -62,4 +142,7 @@ void php_git2_odb_init(TSRMLS_D)
 	INIT_NS_CLASS_ENTRY(ce, PHP_GIT2_NS, "ODB", php_git2_odb_methods);
 	git2_odb_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	git2_odb_class_entry->create_object = php_git2_odb_new;
+
+	memcpy(&git2_odb_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	git2_odb_object_handlers.clone_obj = NULL;
 }

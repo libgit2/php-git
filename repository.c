@@ -85,12 +85,16 @@ static int php_git2_repository_initialize(zval *object, git_repository *reposito
 {
 	zval *odb;
 	php_git2_repository *m_repository;
+	php_git2_odb *m_odb;
 	
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, object);
 	m_repository->repository = repository;
 
 	MAKE_STD_ZVAL(odb);
 	object_init_ex(odb,git2_odb_class_entry);
+	m_odb = PHP_GIT2_GET_OBJECT(php_git2_odb, odb);
+	git_repository_odb(&m_odb->odb,repository);
+	
 	add_property_string(object, "path", git_repository_path(repository),1);
 	add_property_zval(object, "odb", odb);
 	zval_ptr_dtor(&odb);
