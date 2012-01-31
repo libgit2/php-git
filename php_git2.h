@@ -151,6 +151,10 @@ typedef struct{
 	git_odb_backend *backend;
 } php_git2_backend;
 
+typedef struct{
+	git_odb_backend parent;
+} php_git2_backend_internal;
+
 
 #  define PHP_GIT2_GET_OBJECT(STRUCT_NAME, OBJECT) (STRUCT_NAME *) zend_object_store_get_object(OBJECT TSRMLS_CC);
 
