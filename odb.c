@@ -109,7 +109,9 @@ PHP_METHOD(git2_odb, read)
 	git_odb *odb;
 	git_oid id;
 	git_odb_object *object;
+	zval *raw;
 	php_git2_odb *m_odb;
+	php_git2_raw *m_raw;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &hash, &hash_len) == FAILURE) {
@@ -123,9 +125,13 @@ PHP_METHOD(git2_odb, read)
 	
 	error = git_odb_read(&object,m_odb->odb, &id);
 	PHP_GIT2_EXCEPTION_CHECK(error);
-
-	fprintf(stderr,"%s",git_odb_object_data(object));
 	
+	MAKE_STD_ZVAL(raw);
+	object_init_ex(raw, git2_raw_class_entry);
+	m_raw = PHP_GIT2_GET_OBJECT(php_git2_raw, raw);
+	m_raw->object = object;
+
+	RETVAL_ZVAL(raw, 0, 1);
 }
 /* }}} */
 
