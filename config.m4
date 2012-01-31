@@ -45,7 +45,7 @@ if test $PHP_GIT2 != "no"; then
 				remote.c \
 				tag.c \
 				odb.c \
-				raw.c \
+				odb_object.c \
 				backend.c \
 	, $ext_shared)
 

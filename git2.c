@@ -36,6 +36,7 @@ extern void php_git2_config_init(TSRMLS_D);
 extern void php_git2_remote_init(TSRMLS_D);
 extern void php_git2_tag_init(TSRMLS_D);
 extern void php_git2_odb_init(TSRMLS_D);
+extern void php_git2_odb_object_init(TSRMLS_D);
 
 
 int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsigned int method_len, unsigned int param_count, ...)
@@ -220,7 +221,7 @@ PHP_MINIT_FUNCTION(git2)
 	php_git2_remote_init(TSRMLS_C);
 	php_git2_tag_init(TSRMLS_C);
 	php_git2_odb_init(TSRMLS_C);
-	php_git2_raw_init(TSRMLS_C);
+	php_git2_odb_object_init(TSRMLS_C);
 	php_git2_backend_init(TSRMLS_C);
 	
 	return SUCCESS;

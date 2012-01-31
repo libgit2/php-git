@@ -58,7 +58,7 @@ extern PHPAPI zend_class_entry *git2_config_class_entry;
 extern PHPAPI zend_class_entry *git2_remote_class_entry;
 extern PHPAPI zend_class_entry *git2_tag_class_entry;
 extern PHPAPI zend_class_entry *git2_odb_class_entry;
-extern PHPAPI zend_class_entry *git2_raw_class_entry;
+extern PHPAPI zend_class_entry *git2_odb_object_class_entry;
 extern PHPAPI zend_class_entry *git2_backend_class_entry;
 
 typedef struct{
@@ -144,7 +144,7 @@ typedef struct{
 typedef struct{
 	zend_object zo;
 	git_odb_object *object;
-} php_git2_raw;
+} php_git2_odb_object;
 
 typedef struct{
 	zend_object zo;

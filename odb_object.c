@@ -24,10 +24,10 @@
 
 #include "php_git2.h"
 
-PHPAPI zend_class_entry *git2_raw_class_entry;
-static zend_object_handlers git2_raw_object_handlers;
+PHPAPI zend_class_entry *git2_odb_object_class_entry;
+static zend_object_handlers git2_odb_object_object_handlers;
 
-static void php_git2_raw_free_storage(php_git2_raw *object TSRMLS_DC)
+static void php_git2_odb_object_free_storage(php_git2_odb_object *object TSRMLS_DC)
 {
 	if (object->object != NULL) {
 		git_odb_object_free(object->object);
@@ -37,24 +37,24 @@ static void php_git2_raw_free_storage(php_git2_raw *object TSRMLS_DC)
 	efree(object);
 }
 
-zend_object_value php_git2_raw_new(zend_class_entry *ce TSRMLS_DC)
+zend_object_value php_git2_odb_object_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
 
-	PHP_GIT2_STD_CREATE_OBJECT(php_git2_raw);
-	retval.handlers = &git2_raw_object_handlers;
+	PHP_GIT2_STD_CREATE_OBJECT(php_git2_odb_object);
+	retval.handlers = &git2_odb_object_object_handlers;
 	return retval;
 }
 
-static int php_git2_raw_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+static int php_git2_odb_object_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
 	zval *retval;
 	zend_class_entry *ce;
-	php_git2_raw *m_raw;
+	php_git2_odb_object *m_raw;
 
 	switch (type) {
 		case IS_STRING:
-			m_raw = PHP_GIT2_GET_OBJECT(php_git2_raw, readobj);
+			m_raw = PHP_GIT2_GET_OBJECT(php_git2_odb_object, readobj);
 			INIT_PZVAL(writeobj);
 			ZVAL_STRINGL(writeobj,git_odb_object_data(m_raw->object),git_odb_object_size(m_raw->object),1);
 			return SUCCESS;
@@ -92,12 +92,12 @@ static int php_git2_raw_cast_object_tostring(zval *readobj, zval *writeobj, int 
 /*
 {{{ proto: Git2\raw::getContent()
 */
-PHP_METHOD(git2_raw, getContent)
+PHP_METHOD(git2_odb_object, getContent)
 {
-	php_git2_raw *m_raw;
+	php_git2_odb_object *m_raw;
 	git_otype type;
 	
-	m_raw = PHP_GIT2_GET_OBJECT(php_git2_raw,getThis());
+	m_raw = PHP_GIT2_GET_OBJECT(php_git2_odb_object,getThis());
 	RETVAL_STRINGL(git_odb_object_data(m_raw->object),git_odb_object_size(m_raw->object),1);
 }
 /* }}} */
@@ -106,12 +106,12 @@ PHP_METHOD(git2_raw, getContent)
 /*
 {{{ proto: Git2\raw::getType()
 */
-PHP_METHOD(git2_raw, getType)
+PHP_METHOD(git2_odb_object, getType)
 {
-	php_git2_raw *m_raw;
+	php_git2_odb_object *m_raw;
 	git_otype type;
 	
-	m_raw = PHP_GIT2_GET_OBJECT(php_git2_raw,getThis());
+	m_raw = PHP_GIT2_GET_OBJECT(php_git2_odb_object,getThis());
 	
 	type = git_odb_object_type(m_raw->object);
 	RETURN_LONG(type);
@@ -119,21 +119,21 @@ PHP_METHOD(git2_raw, getType)
 /* }}} */
 
 
-static zend_function_entry php_git2_raw_methods[] = {
-	PHP_ME(git2_raw, getContent, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(git2_raw, getType, NULL, ZEND_ACC_PUBLIC)
+static zend_function_entry php_git2_odb_object_methods[] = {
+	PHP_ME(git2_odb_object, getContent, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_odb_object, getType, NULL, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
-void php_git2_raw_init(TSRMLS_D)
+void php_git2_odb_object_init(TSRMLS_D)
 {
 	zend_class_entry ce;
 	
-	INIT_NS_CLASS_ENTRY(ce, PHP_GIT2_NS, "Raw", php_git2_raw_methods);
-	git2_raw_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-	git2_raw_class_entry->create_object = php_git2_raw_new;
+	INIT_NS_CLASS_ENTRY(ce, PHP_GIT2_NS, "ODBObject", php_git2_odb_object_methods);
+	git2_odb_object_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	git2_odb_object_class_entry->create_object = php_git2_odb_object_new;
 
-	memcpy(&git2_raw_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	git2_raw_object_handlers.clone_obj = NULL;
-	git2_raw_object_handlers.cast_object = php_git2_raw_cast_object_tostring;
+	memcpy(&git2_odb_object_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	git2_odb_object_object_handlers.clone_obj = NULL;
+	git2_odb_object_object_handlers.cast_object = php_git2_odb_object_cast_object_tostring;
 }
