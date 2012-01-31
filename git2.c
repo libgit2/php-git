@@ -221,6 +221,7 @@ PHP_MINIT_FUNCTION(git2)
 	php_git2_tag_init(TSRMLS_C);
 	php_git2_odb_init(TSRMLS_C);
 	php_git2_raw_init(TSRMLS_C);
+	php_git2_backend_init(TSRMLS_C);
 	
 	return SUCCESS;
 }

@@ -46,6 +46,7 @@ if test $PHP_GIT2 != "no"; then
 				tag.c \
 				odb.c \
 				raw.c \
+				backend.c \
 	, $ext_shared)
 
 	ifdef([PHP_ADD_EXTENSION_DEP],
