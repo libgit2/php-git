@@ -27,23 +27,59 @@
 PHPAPI zend_class_entry *git2_backend_class_entry;
 static zend_object_handlers git2_backend_object_handlers;
 
-static int php_git2_backend_exists(git_odb_backend *backend, const git_oid *oid)
+static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid)
 {
+	TSRMLS_FETCH();
+	zval *retval, *param;
+	php_git2_backend_internal *backend;
+	
+	MAKE_STD_ZVAL(param);
+	MAKE_STD_ZVAL(retval);
+	backend = (php_git2_backend_internal *)_backend;
+
+	zend_call_method_with_1_params(&backend->self, git2_backend_class_entry, NULL, "exists", &retval, param);
+	
+	zval_ptr_dotr(&param);
+	zval_ptr_dotr(&retval);
+	
+	return GIT_SUCCESS;
 }
+
 static int php_git2_backend_write(git_oid *id, git_odb_backend *_backend, const void *buffer, size_t size, git_otype type)
 {
+	TSRMLS_FETCH();
+	php_git2_backend_internal *backend = (php_git2_backend_internal *)_backend;
+
+	return GIT_SUCCESS;
 }
+
 static int php_git2_backend_read(void **buffer,size_t size, git_otype *type, git_odb_backend *_backend, const git_oid *id)
 {
+	TSRMLS_FETCH();
+	php_git2_backend_internal *backend;
+	return GIT_SUCCESS;
 }
+
 static int php_git2_backend_read_header(size_t size, git_otype *type, git_odb_backend *_backend, const git_oid *id)
 {
+	TSRMLS_FETCH();
+	php_git2_backend_internal *backend = (php_git2_backend_internal *)_backend;
+
+	return GIT_SUCCESS;
 }
+
 static int php_git2_backend_read_prefix(git_oid *id,void ** buffer, size_t * size, git_otype * type,struct git_odb_backend * _backend,const git_oid * oid,unsigned int length)
 {
+	TSRMLS_FETCH();
+	php_git2_backend_internal *backend = (php_git2_backend_internal *)_backend;
+
+	return GIT_SUCCESS;
 }
-static void php_git2_backend_free(git_odb_backend *backend)
+
+static void php_git2_backend_free(git_odb_backend *_backend)
 {
+	TSRMLS_FETCH();
+	php_git2_backend_internal *backend = (php_git2_backend_internal *)_backend;
 }
 
 static void php_git2_backend_free_storage(php_git2_backend *object TSRMLS_DC)

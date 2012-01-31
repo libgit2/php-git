@@ -153,6 +153,7 @@ typedef struct{
 
 typedef struct{
 	git_odb_backend parent;
+	zval *self;
 } php_git2_backend_internal;
 
 
