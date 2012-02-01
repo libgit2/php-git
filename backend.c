@@ -32,21 +32,21 @@ static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid
 {
 	TSRMLS_FETCH();
 	zval *retval, *param;
-	php_git2_backend_internal *backend;
+	php_git2_backend_internal *m_backend;
 	int result = GIT_ERROR;
 	
 	MAKE_STD_ZVAL(param);
-	MAKE_STD_ZVAL(retval);
-	backend = (php_git2_backend_internal *)_backend;
+	m_backend = (php_git2_backend_internal*)_backend;
+	
 
-	zend_call_method_with_1_params(&backend->self, git2_backend_class_entry, NULL, "exists", &retval, param);
+	zend_call_method_with_1_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "exists", &retval, param);
 	
 	if (Z_BVAL_P(retval)) {
 		result = GIT_SUCCESS;
 	}
 	
-	zval_ptr_dotr(&param);
-	zval_ptr_dotr(&retval);
+	zval_ptr_dtor(&param);
+	zval_ptr_dtor(&retval);
 	
 	return result;
 }
@@ -112,7 +112,8 @@ zend_object_value php_git2_backend_new(zend_class_entry *ce TSRMLS_DC)
 	internal->parent.write       = &php_git2_backend_write;
 	internal->parent.exists      = &php_git2_backend_exists;
 	internal->parent.free        = &php_git2_backend_free;
-	
+	internal->self = &retval;
+
 	object->backend = internal;
 	
 	retval.handlers = &git2_backend_object_handlers;
@@ -146,7 +147,23 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_backend_exists, 0,0,1)
 	ZEND_ARG_INFO(0, oid)
 ZEND_END_ARG_INFO()
 
+
+/*
+{{{ proto: Git2\Backend::__construct()
+*/
+PHP_METHOD(git2_backend, __construct)
+{
+	php_git2_backend *m_backend;
+	php_git2_backend_internal * m_internal;
+	m_backend = PHP_GIT2_GET_OBJECT(php_git2_backend, getThis());
+	
+	m_internal = (php_git2_backend_internal*)m_backend->backend;
+	m_internal->self = getThis();
+}
+/* }}} */
+
 static zend_function_entry php_git2_backend_methods[] = {
+	PHP_ME(git2_backend, __construct, NULL, ZEND_ACC_PUBLIC)
 	/* int (* read)(void **, size_t *, git_otype *,struct git_odb_backend *,const git_oid *); */
 	PHP_ABSTRACT_ME(git2_backend, read, arginfo_git2_backend_read) 
 	/* int (* read_prefix)(git_oid *,void **, size_t *, git_otype *,struct git_odb_backend *,const git_oid *,unsigned int); */
