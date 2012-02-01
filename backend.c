@@ -61,25 +61,116 @@ static int php_git2_backend_write(git_oid *id, git_odb_backend *_backend, const 
 static int php_git2_backend_read(void **buffer,size_t *size, git_otype *type, git_odb_backend *_backend, const git_oid *id)
 {
 	TSRMLS_FETCH();
-	php_git2_backend_internal *backend;
-	return GIT_SUCCESS;
+	zval *retval, *z_oid, *z_type;
+	php_git2_backend_internal *m_backend;
+	int result = GIT_ERROR;
+	
+	MAKE_STD_ZVAL(z_oid);
+	MAKE_STD_ZVAL(z_type);
+	m_backend = (php_git2_backend_internal*)_backend;
+	
+	zend_call_method_with_2_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "read", &retval, z_oid, z_type);
+	if (Z_TYPE_P(retval) == IS_ARRAY) {
+		HashTable *hash;
+		zval **value_pp, *data, *z_size;
+
+		hash = Z_ARRVAL_P(retval);
+
+		if (zend_hash_find(hash,"data",sizeof("data"),(void **)&value_pp) != FAILURE) {
+			data = *value_pp;
+		}
+
+		if (zend_hash_find(hash,"size",sizeof("size"),(void **)&value_pp) != FAILURE) {
+			size = *value_pp;
+		}
+		
+		*buffer = estrndup(Z_STRVAL_P(data),Z_STRLEN_P(data));
+		*size = Z_LVAL_P(z_size);
+		
+	}
+	zval_ptr_dtor(&z_oid);
+	zval_ptr_dtor(&z_type);
+	zval_ptr_dtor(&retval);
+	
+	return result;
 }
 
 
 static int php_git2_backend_read_header(size_t *size, git_otype *type, git_odb_backend *_backend, const git_oid *id)
 {
 	TSRMLS_FETCH();
-	php_git2_backend_internal *backend = (php_git2_backend_internal *)_backend;
+	zval *retval, *z_oid, *z_type;
+	php_git2_backend_internal *m_backend;
+	int result = GIT_ERROR;
+	
+	MAKE_STD_ZVAL(z_oid);
+	MAKE_STD_ZVAL(z_type);
+	m_backend = (php_git2_backend_internal*)_backend;
+	
+	zend_call_method_with_2_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "readHeader", &retval, z_oid, z_type);
+	if (Z_TYPE_P(retval) == IS_ARRAY) {
+		HashTable *hash;
+		zval **value_pp, *data, *z_size;
 
-	return GIT_SUCCESS;
+		hash = Z_ARRVAL_P(retval);
+
+		if (zend_hash_find(hash,"data",sizeof("data"),(void **)&value_pp) != FAILURE) {
+			data = *value_pp;
+		}
+
+		if (zend_hash_find(hash,"size",sizeof("size"),(void **)&value_pp) != FAILURE) {
+			z_size = *value_pp;
+		}
+		
+		*size = Z_LVAL_P(z_size);
+		
+	}
+	zval_ptr_dtor(&z_oid);
+	zval_ptr_dtor(&z_type);
+	zval_ptr_dtor(&retval);
+	
+	return result;
 }
 
 static int php_git2_backend_read_prefix(git_oid *id,void ** buffer, size_t * size, git_otype * type,struct git_odb_backend * _backend,const git_oid * oid,unsigned int length)
 {
 	TSRMLS_FETCH();
-	php_git2_backend_internal *backend = (php_git2_backend_internal *)_backend;
+	zval *retval, *z_oid, *z_type;
+	php_git2_backend_internal *m_backend;
+	int result = GIT_ERROR;
+	
+	MAKE_STD_ZVAL(z_oid);
+	MAKE_STD_ZVAL(z_type);
+	m_backend = (php_git2_backend_internal*)_backend;
+	
+	zend_call_method_with_2_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "readPrefix", &retval, z_oid, z_type);
+	if (Z_TYPE_P(retval) == IS_ARRAY) {
+		HashTable *hash;
+		zval **value_pp, *data, *z_size;
 
-	return GIT_SUCCESS;
+		hash = Z_ARRVAL_P(retval);
+
+		if (zend_hash_find(hash,"data",sizeof("data"),(void **)&value_pp) != FAILURE) {
+			data = *value_pp;
+		}
+
+		if (zend_hash_find(hash,"size",sizeof("size"),(void **)&value_pp) != FAILURE) {
+			size = *value_pp;
+		}
+
+		//if (zend_hash_find(hash,"oid",sizeof("oid"),(void **)&value_pp) != FAILURE) {
+			//oid = *value_pp;
+		//}
+		
+		*buffer = estrndup(Z_STRVAL_P(data),Z_STRLEN_P(data));
+		*size = Z_LVAL_P(z_size);
+		
+	}
+	zval_ptr_dtor(&z_oid);
+	zval_ptr_dtor(&z_type);
+	zval_ptr_dtor(&retval);
+	
+	return result;
 }
 
 static void php_git2_backend_free(struct git_odb_backend *_backend)
