@@ -23,6 +23,7 @@
  */
 
 #include "php_git2.h"
+#include <Zend/zend_interfaces.h>
 
 PHPAPI zend_class_entry *git2_backend_class_entry;
 static zend_object_handlers git2_backend_object_handlers;
