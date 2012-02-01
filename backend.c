@@ -33,9 +33,12 @@ static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid
 	TSRMLS_FETCH();
 	zval *retval, *param;
 	php_git2_backend_internal *m_backend;
-	int result = GIT_ERROR;
+	const char out[GIT_OID_HEXSZ+1] = {0};
+	int result = -1;
 	
 	MAKE_STD_ZVAL(param);
+	git_oid_fmt(out, oid);
+	ZVAL_STRING(param, out, 1);
 	m_backend = (php_git2_backend_internal*)_backend;
 	
 	zend_call_method_with_1_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "exists", &retval, param);
@@ -47,7 +50,7 @@ static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid
 	zval_ptr_dtor(&param);
 	zval_ptr_dtor(&retval);
 	
-	return result;
+	return (result == GIT_SUCCESS);
 }
 
 static int php_git2_backend_write(git_oid *id, git_odb_backend *_backend, const void *buffer, size_t size, git_otype type)
@@ -61,12 +64,17 @@ static int php_git2_backend_write(git_oid *id, git_odb_backend *_backend, const 
 static int php_git2_backend_read(void **buffer,size_t *size, git_otype *type, git_odb_backend *_backend, const git_oid *id)
 {
 	TSRMLS_FETCH();
-	zval *retval, *z_oid, *z_type;
+	zval *retval, *z_oid, *z_type = NULL;
 	php_git2_backend_internal *m_backend;
+	const char out[GIT_OID_HEXSZ+1] = {0};
 	int result = GIT_ERROR;
-	
+
 	MAKE_STD_ZVAL(z_oid);
 	MAKE_STD_ZVAL(z_type);
+	git_oid_fmt(out, id);
+
+	ZVAL_STRING(z_oid, out, 1);
+	ZVAL_LONG(z_type, type);
 	m_backend = (php_git2_backend_internal*)_backend;
 	
 	zend_call_method_with_2_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "read", &retval, z_oid, z_type);
@@ -101,10 +109,13 @@ static int php_git2_backend_read_header(size_t *size, git_otype *type, git_odb_b
 	TSRMLS_FETCH();
 	zval *retval, *z_oid, *z_type;
 	php_git2_backend_internal *m_backend;
+	const char out[GIT_OID_HEXSZ] = {0};
 	int result = GIT_ERROR;
 	
 	MAKE_STD_ZVAL(z_oid);
 	MAKE_STD_ZVAL(z_type);
+	git_oid_fmt(out, id);
+	ZVAL_STRING(z_oid, out, 1);
 	m_backend = (php_git2_backend_internal*)_backend;
 	
 	zend_call_method_with_2_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "readHeader", &retval, z_oid, z_type);
@@ -137,10 +148,13 @@ static int php_git2_backend_read_prefix(git_oid *id,void ** buffer, size_t * siz
 	TSRMLS_FETCH();
 	zval *retval, *z_oid, *z_type;
 	php_git2_backend_internal *m_backend;
+	const char out[GIT_OID_HEXSZ+1] = {0};
 	int result = GIT_ERROR;
 	
 	MAKE_STD_ZVAL(z_oid);
 	MAKE_STD_ZVAL(z_type);
+	git_oid_fmt(out, id);
+	ZVAL_STRING(z_oid, out, 1);
 	m_backend = (php_git2_backend_internal*)_backend;
 	
 	zend_call_method_with_2_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "readPrefix", &retval, z_oid, z_type);
@@ -158,13 +172,13 @@ static int php_git2_backend_read_prefix(git_oid *id,void ** buffer, size_t * siz
 			size = *value_pp;
 		}
 
-		//if (zend_hash_find(hash,"oid",sizeof("oid"),(void **)&value_pp) != FAILURE) {
-			//oid = *value_pp;
-		//}
+		if (zend_hash_find(hash,"oid",sizeof("oid"),(void **)&value_pp) != FAILURE) {
+			z_oid = *value_pp;
+		}
 		
 		*buffer = estrndup(Z_STRVAL_P(data),Z_STRLEN_P(data));
 		*size = Z_LVAL_P(z_size);
-		
+		git_oid_fromstr(id, Z_STRVAL_P(z_oid));
 	}
 	zval_ptr_dtor(&z_oid);
 	zval_ptr_dtor(&z_type);
@@ -180,14 +194,13 @@ static void php_git2_backend_free(struct git_odb_backend *_backend)
 	php_git2_backend_internal *m_backend;
 	m_backend = (php_git2_backend_internal*)_backend;
 	
-	zend_call_method_with_0_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "free", &retval);
-	zval_ptr_dtor(&retval);
+	//zend_call_method_with_0_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "free", &retval);
+	//zval_ptr_dtor(&retval);
 }
 
 static void php_git2_backend_free_storage(php_git2_backend *object TSRMLS_DC)
 {
 	if (object->backend != NULL) {
-		efree(object->backend);
 		object->backend = NULL;
 	}
 	zend_object_std_dtor(&object->zo TSRMLS_CC);
@@ -201,7 +214,8 @@ zend_object_value php_git2_backend_new(zend_class_entry *ce TSRMLS_DC)
 
 	PHP_GIT2_STD_CREATE_OBJECT(php_git2_backend);
 
-	internal = ecalloc(1,sizeof(php_git2_backend_internal));
+	/* php_git2_backend_internal free'd by odb_backend. do not use ecalloc here. */
+	internal = calloc(1,sizeof(php_git2_backend_internal));
 	internal->parent.read        = &php_git2_backend_read;
 	internal->parent.read_prefix = &php_git2_backend_read_prefix;
 	internal->parent.read_header = &php_git2_backend_read_header;
