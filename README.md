@@ -124,7 +124,6 @@ $parent = Git2\Commit::create($repo, array(
 	"tree"      => $tree,
 	"parents"   => $parents,
 ));
-$parents = array($parent);
 ````
 
 ## Revision Walking
@@ -153,12 +152,30 @@ $config['core.bare']
 $config['core.bare'] = 1;
 ````
 
+## ODB operation
+
+````
+$repo = Git2\Repository::init("/path/to/repo",true);
+$odb = $repo->odb // read only property
+string $odb->read(sha1) // returns uncompressed git raw data.
+string $odb->hash(string contents, int type)// same as Git2\Repository::hash
+string $odb->write(string contents, int type)// same as Git2\Repository::write
+bool $odb->exists(sha1)// same as Git2\Repository::exists
+````
+
 ## Reflog
 will be add.
 
-## Remote access
+## Remote access (Experimental)
 
-will be add.
+this API will be change.
+
+````
+$repo = new Git2\Repository("/path/to/.git");
+$remote = new Git2\Remote($repo,"http://github.com/libgit2/php-git.git");
+// for now, remote can fetch files only. that does not update references.
+$remote->fetch();
+````
 
 ## Author
 * Shuhei Tanuma
