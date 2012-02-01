@@ -38,7 +38,6 @@ static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid
 	MAKE_STD_ZVAL(param);
 	m_backend = (php_git2_backend_internal*)_backend;
 	
-
 	zend_call_method_with_1_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "exists", &retval, param);
 	
 	if (Z_BVAL_P(retval)) {
@@ -86,7 +85,12 @@ static int php_git2_backend_read_prefix(git_oid *id,void ** buffer, size_t * siz
 static void php_git2_backend_free(struct git_odb_backend *_backend)
 {
 	TSRMLS_FETCH();
-	php_git2_backend_internal *backend = (php_git2_backend_internal *)_backend;
+	zval *retval;
+	php_git2_backend_internal *m_backend;
+	m_backend = (php_git2_backend_internal*)_backend;
+	
+	zend_call_method_with_0_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "free", &retval);
+	zval_ptr_dtor(&retval);
 }
 
 static void php_git2_backend_free_storage(php_git2_backend *object TSRMLS_DC)
@@ -158,6 +162,8 @@ PHP_METHOD(git2_backend, __construct)
 	m_backend = PHP_GIT2_GET_OBJECT(php_git2_backend, getThis());
 	
 	m_internal = (php_git2_backend_internal*)m_backend->backend;
+	
+	/* i'd like to move below line to php_git2_backend_new but i don't have a good idea */
 	m_internal->self = getThis();
 }
 /* }}} */
