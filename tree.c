@@ -91,7 +91,7 @@ PHP_METHOD(git2_tree, diff)
 	m_old = PHP_GIT2_GET_OBJECT(php_git2_tree, old);
 	m_new = PHP_GIT2_GET_OBJECT(php_git2_tree, new);
 
-	git_tree_diff(git_tree_id(m_old->tree),git_tree_id(m_new->tree), &php_git2_tree_diff_cb, &payload);
+	git_tree_diff(m_old->tree,m_new->tree, &php_git2_tree_diff_cb, &payload);
 }
 /* }}} */
 
@@ -114,7 +114,7 @@ PHP_METHOD(git2_tree, current)
 			"specified offset does not exist. %d");
 		RETURN_FALSE;
 	}
-	create_tree_entry_from_entry(&z_entry, entry ,m_tree->repository);
+	create_tree_entry_from_entry(&z_entry, (git_tree_entry *)entry ,m_tree->repository);
 	RETURN_ZVAL(z_entry, 0, 1);
 }
 /* }}} */

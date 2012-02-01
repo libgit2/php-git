@@ -59,14 +59,15 @@ static int php_git2_backend_write(git_oid *id, git_odb_backend *_backend, const 
 	return GIT_SUCCESS;
 }
 
-static int php_git2_backend_read(void **buffer,size_t size, git_otype *type, git_odb_backend *_backend, const git_oid *id)
+static int php_git2_backend_read(void **buffer,size_t *size, git_otype *type, git_odb_backend *_backend, const git_oid *id)
 {
 	TSRMLS_FETCH();
 	php_git2_backend_internal *backend;
 	return GIT_SUCCESS;
 }
 
-static int php_git2_backend_read_header(size_t size, git_otype *type, git_odb_backend *_backend, const git_oid *id)
+
+static int php_git2_backend_read_header(size_t *size, git_otype *type, git_odb_backend *_backend, const git_oid *id)
 {
 	TSRMLS_FETCH();
 	php_git2_backend_internal *backend = (php_git2_backend_internal *)_backend;
@@ -82,7 +83,7 @@ static int php_git2_backend_read_prefix(git_oid *id,void ** buffer, size_t * siz
 	return GIT_SUCCESS;
 }
 
-static void php_git2_backend_free(git_odb_backend *_backend)
+static void php_git2_backend_free(struct git_odb_backend *_backend)
 {
 	TSRMLS_FETCH();
 	php_git2_backend_internal *backend = (php_git2_backend_internal *)_backend;
@@ -112,9 +113,8 @@ zend_object_value php_git2_backend_new(zend_class_entry *ce TSRMLS_DC)
 	internal->parent.write       = &php_git2_backend_write;
 	internal->parent.exists      = &php_git2_backend_exists;
 	internal->parent.free        = &php_git2_backend_free;
-	internal->self = &retval;
 
-	object->backend = internal;
+	object->backend = (struct git_odb_backend*)internal;
 	
 	retval.handlers = &git2_backend_object_handlers;
 

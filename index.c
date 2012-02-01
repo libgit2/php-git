@@ -122,7 +122,7 @@ PHP_METHOD(git2_index, current)
 		RETURN_FALSE;
 	}
 	
-	php_git2_create_index_entry(&z_entry, entry TSRMLS_CC);
+	php_git2_create_index_entry(&z_entry, (git_index_entry *)entry TSRMLS_CC);
 	RETURN_ZVAL(z_entry, 0, 1);
 }
 

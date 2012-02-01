@@ -85,7 +85,7 @@ PHP_METHOD(git2_odb, hash)
 	long type = 0;
 	git_odb *odb;
 	git_oid oid;
-	char *oid_out[GIT_OID_HEXSZ+1];
+	char oid_out[GIT_OID_HEXSZ+1];
 	int error = 0;
 	php_git2_odb *m_odb;
 	
@@ -114,7 +114,7 @@ PHP_METHOD(git2_odb, write)
 	git_odb_stream *stream;
 	git_odb *odb;
 	git_oid oid;
-	char *oid_out[GIT_OID_HEXSZ+1];
+	char oid_out[GIT_OID_HEXSZ+1];
 	int error = 0;
 	php_git2_odb *m_odb;
 	

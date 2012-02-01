@@ -113,7 +113,7 @@ zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_
 		}
 		case GIT_OBJ_TREE: {
 			php_git2_tree *m_obj = NULL;
-			unsigned int *numbers = 0;
+			unsigned int numbers = 0;
 			int i = 0;
 			zval *m_array;
 			
@@ -127,7 +127,7 @@ zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_
 			
 			for (i = 0;i < numbers; i++) {
 				const char *entry_name = {0};
-				const char entry_oid[GIT_OID_HEXSZ+1] = {0};
+				char entry_oid[GIT_OID_HEXSZ+1] = {0};
 				const git_tree_entry *entry;
 				const git_oid *oid = NULL;
 				zval *m_entry = NULL;
@@ -139,9 +139,9 @@ zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_
 				
 				MAKE_STD_ZVAL(m_entry);
 				object_init_ex(m_entry, git2_tree_entry_class_entry);
-				add_property_stringl_ex(m_entry, "name", sizeof("name"), entry_name, strlen(entry_name), 1 TSRMLS_CC);
-				add_property_stringl_ex(m_entry, "oid", sizeof("oid"), entry_oid, strlen(entry_oid), 1 TSRMLS_CC);
-				add_property_long_ex(m_entry, "attributes", sizeof("attributes"), git_tree_entry_attributes(entry) TSRMLS_CC);
+				add_property_stringl_ex(m_entry, "name", sizeof("name")-1, (const char *)entry_name, strlen(entry_name), 1 TSRMLS_CC);
+				add_property_stringl_ex(m_entry, "oid", sizeof("oid")-1, (const char *)entry_oid, strlen(entry_oid), 1 TSRMLS_CC);
+				add_property_long_ex(m_entry, "attributes", sizeof("attributes")-1, git_tree_entry_attributes(entry) TSRMLS_CC);
 				add_next_index_zval(m_array, m_entry);
 			}
 			
@@ -161,7 +161,7 @@ zval* php_git_read_protected_property(zend_class_entry *scope, zval *object, cha
 {
 	zval **data;
 	char *key;
-	long *length;
+	int length;
 	
 	zend_mangle_property_name(&key,&length,"*",1,name,name_length,0);
 	if (zend_hash_find(Z_OBJPROP_P(object),key,length,(void **)&data) != SUCCESS) {

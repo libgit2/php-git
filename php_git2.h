@@ -148,7 +148,7 @@ typedef struct{
 
 typedef struct{
 	zend_object zo;
-	git_odb_backend *backend;
+	struct git_odb_backend *backend;
 } php_git2_backend;
 
 typedef struct{

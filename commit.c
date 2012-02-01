@@ -257,7 +257,7 @@ PHP_METHOD(git2_commit, create)
 
 	if (zend_hash_find(hash,"ref",sizeof("ref"),(void **)&value_pp) != FAILURE) {
 		ref = emalloc(sizeof(char)*Z_STRLEN_PP(value_pp)+1);
-		sprintf(ref, Z_STRVAL_PP(value_pp));
+		sprintf(ref, "%s", Z_STRVAL_PP(value_pp));
 	} else {
 		ref = emalloc(sizeof(char)*5);
 		sprintf(ref,"HEAD");
@@ -272,7 +272,7 @@ PHP_METHOD(git2_commit, create)
 
 	if (zend_hash_find(hash,"encoding",sizeof("encoding"),(void **)&value_pp) != FAILURE) {
 		encoding = emalloc(sizeof(char)*Z_STRLEN_PP(value_pp)+1);
-		sprintf(encoding, Z_STRVAL_PP(value_pp));
+		sprintf(encoding, "%s",Z_STRVAL_PP(value_pp));
 	} else {
 		encoding = emalloc(sizeof(char)*6);
 		sprintf(encoding,"UTF-8");
@@ -339,7 +339,8 @@ PHP_METHOD(git2_commit, create)
 PHP_METHOD(git2_commit, getTree)
 {
 	php_git2_commit *m_commit;
-	git_oid *oid, *id;
+	const git_oid *oid;
+	git_oid *id;
 	git_otype type = GIT_OBJ_TREE;
 	git_object *object;
 	zval *result;

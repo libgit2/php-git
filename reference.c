@@ -99,7 +99,7 @@ PHP_METHOD(git2_reference, getTarget)
 	m_reference = PHP_GIT2_GET_OBJECT(php_git2_reference, getThis());
 	
 	if (git_reference_type(m_reference->reference) == GIT_REF_OID) {
-		git_oid *oid;
+		const git_oid *oid;
 		char oid_out[GIT_OID_HEXSZ] = {0};
 		
 		oid = git_reference_oid(m_reference->reference);

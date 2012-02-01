@@ -129,7 +129,7 @@ PHP_METHOD(git2_remote, fetch)
 	int error = 0;
 	long direction = 0;
 	
-	m_remote = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	m_remote = PHP_GIT2_GET_OBJECT(php_git2_remote, getThis());
 
 /*
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
