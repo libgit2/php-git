@@ -90,6 +90,7 @@ static void php_git2_backend_free(git_odb_backend *_backend)
 static void php_git2_backend_free_storage(php_git2_backend *object TSRMLS_DC)
 {
 	if (object->backend != NULL) {
+		efree(object->backend);
 		object->backend = NULL;
 	}
 	zend_object_std_dtor(&object->zo TSRMLS_CC);
@@ -99,7 +100,6 @@ static void php_git2_backend_free_storage(php_git2_backend *object TSRMLS_DC)
 zend_object_value php_git2_backend_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
-	php_git2_backend *m_backend;
 	php_git2_backend_internal *internal;
 
 	PHP_GIT2_STD_CREATE_OBJECT(php_git2_backend);
@@ -112,7 +112,7 @@ zend_object_value php_git2_backend_new(zend_class_entry *ce TSRMLS_DC)
 	internal->parent.exists      = &php_git2_backend_exists;
 	internal->parent.free        = &php_git2_backend_free;
 	
-	m_backend->backend = internal;
+	object->backend = internal;
 	
 	retval.handlers = &git2_backend_object_handlers;
 
@@ -134,7 +134,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_backend_read_header, 0,0,2)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 	
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_backend_write, 0,0,2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_backend_write, 0,0,4)
 	ZEND_ARG_INFO(0, oid)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, size)
