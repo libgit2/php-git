@@ -285,7 +285,6 @@ static inline void php_git2_exception_check(int errorcode TSRMLS_DC)
 {
 	if (errorcode < 0) {
 		zend_throw_exception_ex(NULL, 0 TSRMLS_CC,"%s\n(error code %d)", git_lasterror(), errorcode);
-		fprintf(stderr,"moe");
 		git_clearerror();
 		return;
 	}
