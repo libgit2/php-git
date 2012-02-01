@@ -218,6 +218,24 @@ PHP_METHOD(git2_odb, addAlternate)
 */
 PHP_METHOD(git2_odb, addBackend)
 {
+	zval *backend = NULL;
+	php_git2_backend *m_backend;
+	php_git2_odb *m_odb;
+	long priority = 5;
+	int error = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"Ol", &backend, git2_backend_class_entry, &priority) == FAILURE) {
+		return;
+	}
+	
+	m_odb = PHP_GIT2_GET_OBJECT(php_git2_odb, getThis());
+	m_backend = PHP_GIT2_GET_OBJECT(php_git2_backend, backend);
+	
+	error = git_odb_add_backend(m_odb->odb, m_backend->backend, priority);
+	PHP_GIT2_EXCEPTION_CHECK(error);
+	
+	RETURN_TRUE;
 }
 /* }}} */
 

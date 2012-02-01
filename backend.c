@@ -32,6 +32,7 @@ static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid
 	TSRMLS_FETCH();
 	zval *retval, *param;
 	php_git2_backend_internal *backend;
+	int result = GIT_ERROR;
 	
 	MAKE_STD_ZVAL(param);
 	MAKE_STD_ZVAL(retval);
@@ -39,10 +40,14 @@ static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid
 
 	zend_call_method_with_1_params(&backend->self, git2_backend_class_entry, NULL, "exists", &retval, param);
 	
+	if (Z_BVAL_P(retval)) {
+		result = GIT_SUCCESS;
+	}
+	
 	zval_ptr_dotr(&param);
 	zval_ptr_dotr(&retval);
 	
-	return GIT_SUCCESS;
+	return result;
 }
 
 static int php_git2_backend_write(git_oid *id, git_odb_backend *_backend, const void *buffer, size_t size, git_otype type)
