@@ -108,6 +108,33 @@ PHP_METHOD(git2_odb, hash)
 */
 PHP_METHOD(git2_odb, write)
 {
+	char *contents;
+	int contents_len = 0;
+	long type = 0;
+	git_odb_stream *stream;
+	git_odb *odb;
+	git_oid oid;
+	char *oid_out[GIT_OID_HEXSZ+1];
+	int error = 0;
+	php_git2_odb *m_odb;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"sl", &contents, &contents_len, &type) == FAILURE) {
+		return;
+	}
+	m_odb = PHP_GIT2_GET_OBJECT(php_git2_odb, getThis());
+		
+	error = git_odb_open_wstream(&stream, m_odb->odb, contents_len, (git_otype)type);
+	PHP_GIT2_EXCEPTION_CHECK(error);
+		
+	error = stream->write(stream, contents, contents_len);
+	PHP_GIT2_EXCEPTION_CHECK(error);
+
+	error = stream->finalize_write(&oid, stream);
+	PHP_GIT2_EXCEPTION_CHECK(error);
+	
+	git_oid_fmt(oid_out, &oid);
+	RETURN_STRINGL(oid_out,GIT_OID_HEXSZ,1);
 }
 /* }}} */
 
