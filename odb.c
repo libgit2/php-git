@@ -80,6 +80,26 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(git2_odb, hash)
 {
+	char *contents;
+	int contents_len = 0;
+	long type = 0;
+	git_odb *odb;
+	git_oid oid;
+	char *oid_out[GIT_OID_HEXSZ+1];
+	int error = 0;
+	php_git2_odb *m_odb;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"sl", &contents, &contents_len, &type) == FAILURE) {
+		return;
+	}
+	m_odb = PHP_GIT2_GET_OBJECT(php_git2_odb, getThis());
+	
+	error = git_odb_hash(&oid, contents,contents_len, type);
+	PHP_GIT2_EXCEPTION_CHECK(error);
+	
+	git_oid_fmt(oid_out, &oid);
+	RETURN_STRINGL(oid_out,GIT_OID_HEXSZ,1);
 }
 /* }}} */
 
@@ -96,6 +116,28 @@ PHP_METHOD(git2_odb, write)
 */
 PHP_METHOD(git2_odb, exists)
 {
+	char *hash;
+	int error, hash_len = 0;
+	git_odb *odb;
+	git_oid id;
+	php_git2_odb *m_odb;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &hash, &hash_len) == FAILURE) {
+		return;
+	}
+	
+	m_odb = PHP_GIT2_GET_OBJECT(php_git2_odb, getThis());
+
+	if (git_oid_fromstr(&id, hash) != GIT_SUCCESS) {
+		RETURN_FALSE;
+	}
+	
+	if (git_odb_exists(m_odb->odb, &id) == 1) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
