@@ -55,10 +55,37 @@ static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid
 
 static int php_git2_backend_write(git_oid *id, git_odb_backend *_backend, const void *buffer, size_t size, git_otype type)
 {
+	zval *z_id, *z_buffer, *z_size, *z_type, *retval, **value;
+	int error = GIT_ERROR;
+	char t_id[GIT_OID_HEXSZ] = {0};
 	TSRMLS_FETCH();
-	php_git2_backend_internal *backend = (php_git2_backend_internal *)_backend;
+	php_git2_backend_internal *backend;
+	
+	MAKE_STD_ZVAL(z_id);
+	MAKE_STD_ZVAL(z_buffer);
+	MAKE_STD_ZVAL(z_size);
+	MAKE_STD_ZVAL(z_type);
+	backend = (php_git2_backend_internal *)_backend;
+	
+	git_oid_fmt(t_id, id);
+	ZVAL_STRINGL(z_id, t_id, GIT_OID_HEXSZ,1);
+	ZVAL_STRINGL(z_buffer, buffer, size, 1);
+	ZVAL_LONG(z_size, size);
+	ZVAL_LONG(z_type, type);
+	
+	php_git2_call_user_function_v(&retval, backend->self, "write", sizeof("write")-1,4,z_id,z_buffer,z_size,z_type);
+	
+	zval_ptr_dtor(&z_id);
+	zval_ptr_dtor(&z_buffer);
+	zval_ptr_dtor(&z_size);
+	zval_ptr_dtor(&z_type);
+	
+	if (Z_TYPE_P(retval) == IS_BOOL && Z_BVAL_P(retval)) {
+		error = GIT_SUCCESS;
+	}
+	zval_ptr_dtor(&retval);
 
-	return GIT_SUCCESS;
+	return error;
 }
 
 static int php_git2_backend_read(void **buffer,size_t *size, git_otype *type, git_odb_backend *_backend, const git_oid *id)
