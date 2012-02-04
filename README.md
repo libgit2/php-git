@@ -157,7 +157,7 @@ $config['core.bare'] = 1;
 ````
 $repo = Git2\Repository::init("/path/to/repo",true);
 $odb = $repo->odb // read only property
-string $odb->read(sha1) // returns uncompressed git raw data.
+Git\OdbObject $odb->read(sha1) // returns uncompressed git raw data.
 string $odb->hash(string contents, int type)// same as Git2\Repository::hash
 string $odb->write(string contents, int type)// same as Git2\Repository::write
 bool $odb->exists(sha1)// same as Git2\Repository::exists
