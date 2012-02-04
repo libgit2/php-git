@@ -194,8 +194,10 @@ static void php_git2_backend_free(struct git_odb_backend *_backend)
 	php_git2_backend_internal *m_backend;
 	m_backend = (php_git2_backend_internal*)_backend;
 	
-	//zend_call_method_with_0_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "free", &retval);
-	//zval_ptr_dtor(&retval);
+	zend_call_method_with_0_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "free", &retval);
+	zval_ptr_dtor(&retval);
+	
+	zval_ptr_dtor(&m_backend->self);
 }
 
 static void php_git2_backend_free_storage(php_git2_backend *object TSRMLS_DC)
@@ -270,6 +272,7 @@ PHP_METHOD(git2_backend, __construct)
 	
 	/* i'd like to move below line to php_git2_backend_new but i don't have a good idea */
 	m_internal->self = getThis();
+	Z_ADDREF_P(m_internal->self);
 }
 /* }}} */
 
