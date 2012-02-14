@@ -204,49 +204,11 @@ PHP_METHOD(git2_odb, read)
 }
 /* }}} */
 
-
-/*
-{{{ proto: Git2\ODB::addAlternate(Git2\Backend $backend, $priority)
-*/
-PHP_METHOD(git2_odb, addAlternate)
-{
-}
-/* }}} */
-
-/*
-{{{ proto: Git2\ODB::addBackend(Git2\Backend $backend, $priority)
-*/
-PHP_METHOD(git2_odb, addBackend)
-{
-	zval *backend = NULL;
-	php_git2_backend *m_backend;
-	php_git2_odb *m_odb;
-	long priority = 5;
-	int error = 0;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"Ol", &backend, git2_backend_class_entry, &priority) == FAILURE) {
-		return;
-	}
-	
-	m_odb = PHP_GIT2_GET_OBJECT(php_git2_odb, getThis());
-	m_backend = PHP_GIT2_GET_OBJECT(php_git2_backend, backend);
-	
-	error = git_odb_add_backend(m_odb->odb, m_backend->backend, priority);
-	PHP_GIT2_EXCEPTION_CHECK(error);
-	
-	RETURN_TRUE;
-}
-/* }}} */
-
-
 static zend_function_entry php_git2_odb_methods[] = {
 	PHP_ME(git2_odb, hash,         arginfo_git2_odb_hash,          ZEND_ACC_PUBLIC)
 	PHP_ME(git2_odb, write,        arginfo_git2_odb_write,         ZEND_ACC_PUBLIC)
 	PHP_ME(git2_odb, exists,       arginfo_git2_odb_exists,        ZEND_ACC_PUBLIC)
 	PHP_ME(git2_odb, read,         arginfo_git2_odb_read,          ZEND_ACC_PUBLIC)
-	PHP_ME(git2_odb, addAlternate, arginfo_git2_odb_add_alternate, ZEND_ACC_PUBLIC)
-	PHP_ME(git2_odb, addBackend,   arginfo_git2_odb_add_backend,   ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
