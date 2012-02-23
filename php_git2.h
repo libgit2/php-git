@@ -165,7 +165,7 @@ typedef struct{
 	\
 	object = ecalloc(1, sizeof(*object));\
 	zend_object_std_init(&object->zo, ce TSRMLS_CC);\
-	object_properties_init(&object->zo, ce);
+	object_properties_init(&object->zo, ce);\
 	\
 	retval.handle = zend_objects_store_put(object,\
 		(zend_objects_store_dtor_t)zend_objects_destroy_object,\
