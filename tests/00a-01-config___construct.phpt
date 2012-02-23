@@ -13,14 +13,14 @@ object(Git2\Config)#1 (1) {
   array(1) {
     ["core"]=>
     array(4) {
-      ["repositoryformatversion"]=>
-      string(1) "0"
-      ["filemode"]=>
-      string(4) "true"
       ["bare"]=>
+      string(4) "true"
+      ["filemode"]=>
       string(4) "true"
       ["ignorecase"]=>
       string(4) "true"
+      ["repositoryformatversion"]=>
+      string(1) "0"
     }
   }
 }
