@@ -52,6 +52,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_diff, 0,0,2)
 	ZEND_ARG_INFO(0, new)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_get_subtree, 0,0,1)
+	ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO()
+
 
 static int php_git2_tree_diff_cb(const git_tree_diff_data *ptr, void *data)
 {
@@ -171,6 +175,128 @@ PHP_METHOD(git2_tree, valid)
 /* }}} */
 
 
+static int get_subtree(git_tree **result, git_tree *root, char *path)
+{
+	char *p, *k, *current_key, *tmp_value, *savedptr = NULL;
+	git_tree_entry *entry;
+	git_tree *target,*tmp_result;
+	int error = 0;
+	
+	target = root;
+	p = (char *)strchr(path, '/');
+	
+	if (p == NULL) {
+		entry = git_tree_entry_byname(target, path);
+		if (entry) {
+			git_otype type;
+			type = git_tree_entry_type((const git_tree_entry*)entry);
+			if (type == GIT_OBJ_TREE) {
+				return git_tree_lookup(
+					result,
+					git_object_owner((const git_object *)target),
+					git_tree_entry_id(entry)
+				);
+			} else {
+				*result = NULL;
+				return -1;
+			}
+		} else {
+			return -1;
+		}
+	}
+
+	tmp_value = estrdup(path);
+	current_key = php_strtok_r(tmp_value, "/", &savedptr);
+	
+	while (current_key != NULL && target != NULL) {
+		k  = current_key;
+		
+		if (current_key != NULL && k != NULL) {
+			entry = git_tree_entry_byname(target, current_key);
+			if (entry && git_tree_entry_type((const git_tree_entry*)entry) == GIT_OBJ_TREE) {
+				error = git_tree_lookup(
+					&tmp_result,
+					git_object_owner((const git_object *)target),
+					git_tree_entry_id(entry)
+				);
+				
+				if (error == GIT_SUCCESS) {
+					target = tmp_result;
+				} else {
+					return -1;
+				}
+			} else {
+				target = NULL;
+				current_key = NULL;
+			}
+		} else {
+			if (k != NULL) {
+				entry = git_tree_entry_byname(target, current_key);
+				if (entry && git_tree_entry_type((const git_tree_entry*)entry) == GIT_OBJ_TREE) {
+					error = git_tree_lookup(
+						&tmp_result,
+						git_object_owner((const git_object *)target),
+						git_object_id((const git_object *)entry)
+					);
+					
+					if (error == GIT_SUCCESS) {
+						target = tmp_result;
+					} else {
+						return -1;
+					}
+				} else {
+					target = NULL;
+					current_key = NULL;
+				}
+			}
+		}
+		
+		current_key = php_strtok_r(NULL, "/", &savedptr);
+	}
+	efree(tmp_value);
+	
+	if (target && target != root) {
+		*result = target;
+		return 0;
+	} else {
+		return -1;
+	}
+}
+
+/*
+{{{ proto: Git2\Tree Git2\Tree::getSubtree($path)
+*/
+PHP_METHOD(git2_tree, getSubtree)
+{
+	char *path = NULL;
+	int error, path_len = 0;
+	git_tree *subtree;
+	php_git2_tree *object;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &path, &path_len) == FAILURE) {
+		return;
+	}
+	
+	object = PHP_GIT2_GET_OBJECT(php_git2_tree, getThis());
+	
+	/* note: this method does not use git_tree_getsubtree as that function follows dirname(3) style.
+	 * this method returns specified subtree or false.
+	*/
+	error = get_subtree(&subtree, object->tree, path);
+	if (error == GIT_SUCCESS) {
+		zval *result;
+		
+		result = php_git2_object_new(git_object_owner((git_object *)object->tree), (git_object *)subtree TSRMLS_CC);
+		RETVAL_ZVAL(result, 0, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+
 static zend_function_entry php_git2_tree_methods[] = {
 	PHP_ME(git2_tree, diff,        arginfo_git2_tree_diff,          ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	/* Iterator Implementation */
@@ -179,6 +305,7 @@ static zend_function_entry php_git2_tree_methods[] = {
 	PHP_ME(git2_tree, next,        NULL,                            ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree, rewind,      NULL,                            ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree, valid,       NULL,                            ZEND_ACC_PUBLIC)
+	PHP_ME(git2_tree, getSubtree,  arginfo_git2_tree_get_subtree,   ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
