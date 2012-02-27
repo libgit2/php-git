@@ -139,9 +139,9 @@ zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_
 				
 				MAKE_STD_ZVAL(m_entry);
 				object_init_ex(m_entry, git2_tree_entry_class_entry);
-				add_property_stringl_ex(m_entry, "name", sizeof("name")-1, (const char *)entry_name, strlen(entry_name), 1 TSRMLS_CC);
-				add_property_stringl_ex(m_entry, "oid", sizeof("oid")-1, (const char *)entry_oid, strlen(entry_oid), 1 TSRMLS_CC);
-				add_property_long_ex(m_entry, "attributes", sizeof("attributes")-1, git_tree_entry_attributes(entry) TSRMLS_CC);
+				add_property_stringl_ex(m_entry, "name", sizeof("name"), (const char *)entry_name, strlen(entry_name), 1 TSRMLS_CC);
+				add_property_stringl_ex(m_entry, "oid", sizeof("oid"), (const char *)entry_oid, strlen(entry_oid), 1 TSRMLS_CC);
+				add_property_long_ex(m_entry, "attributes", sizeof("attributes"), git_tree_entry_attributes(entry) TSRMLS_CC);
 				add_next_index_zval(m_array, m_entry);
 			}
 			
