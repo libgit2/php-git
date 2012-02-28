@@ -126,6 +126,26 @@ PHP_METHOD(git2_reference, getName)
 /* }}} */
 
 /*
+{{{ proto: Git2\Reference::getBaseName()
+*/
+PHP_METHOD(git2_reference, getBaseName)
+{
+	git_reference *ref;
+	zval *result;
+	const char *name = NULL;
+	const *basename = NULL;
+	php_git2_reference *m_reference;
+	size_t len;
+	
+	m_reference = PHP_GIT2_GET_OBJECT(php_git2_reference, getThis());
+	
+	name  = git_reference_name(m_reference->reference);
+	php_basename(name, strlen(name), NULL, 0, &basename, &len TSRMLS_CC);
+	RETVAL_STRINGL(basename, len, 0);
+}
+/* }}} */
+
+/*
 {{{ proto: Git2\Reference::resolve()
 */
 PHP_METHOD(git2_reference, resolve)
@@ -249,6 +269,7 @@ PHP_METHOD(git2_reference, each)
 static zend_function_entry php_git2_reference_methods[] = {
 	PHP_ME(git2_reference, getTarget, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_reference, getName,   NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_reference, getBaseName,NULL,ZEND_ACC_PUBLIC)
 	PHP_ME(git2_reference, resolve,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_reference, each,      arginfo_git2_reference_each, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 #ifdef lookup
