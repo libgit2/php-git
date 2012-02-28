@@ -218,7 +218,9 @@ PHP_METHOD(git2_reference, each)
 	php_git2_ref_foreach_cb_t opaque;
 	int error, filter_len = 0;
 	unsigned int list_flags = GIT_REF_LISTALL;
-	zend_fcall_info fci;
+	zend_fcall_info fci = {
+		0,NULL,NULL,NULL,NULL,0,NULL,NULL
+	};
 	zend_fcall_info_cache fci_cache;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -228,7 +230,7 @@ PHP_METHOD(git2_reference, each)
 	
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, repository);
 	opaque.type = 0;
-	if (&fci != NULL) {
+	if (fci.size != 0) {
 		opaque.type = 1;
 		opaque.fci = &fci;
 		opaque.fci_cache = &fci_cache;
