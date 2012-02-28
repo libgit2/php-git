@@ -49,6 +49,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_commit_create, 0,0,2)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_commit_get_parent, 0,0,1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
 /*
 {{{ proto: Git2\Commit::getMessage()
 */
@@ -363,6 +367,113 @@ PHP_METHOD(git2_commit, getTree)
 }
 /* }}} */
 
+/*
+{{{ proto: Git2\Commit::getParents()
+*/
+PHP_METHOD(git2_commit, getParents)
+{
+	php_git2_commit *m_commit;
+	unsigned int parent_count = 0;
+	int error, i = 0;
+	zval *result;
+	
+	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
+
+	if (m_commit != NULL) {
+		if (m_commit->commit == NULL) {
+			RETURN_FALSE;
+		}
+
+		parent_count = git_commit_parentcount(m_commit->commit);
+		MAKE_STD_ZVAL(result);
+		array_init(result);
+		for (i = 0; i < parent_count; i++) {
+			git_commit *parent = NULL;
+			zval *tmp = NULL;
+			
+			error = git_commit_parent(&parent, m_commit->commit, i);
+			if (error == GIT_SUCCESS) {
+				tmp = php_git2_object_new(git_object_owner((git_object *)m_commit->commit), parent TSRMLS_CC);
+				add_next_index_zval(result, tmp);
+			}
+		}
+		
+		RETVAL_ZVAL(result,0,1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\Commit::getParent([int index])
+*/
+PHP_METHOD(git2_commit, getParent)
+{
+	php_git2_commit *m_commit;
+	unsigned int parent_count = 0;
+	int error, i = 0;
+	long index = 0;
+	zval *result;
+	git_commit *parent = NULL;
+
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"|l", &index) == FAILURE) {
+		return;
+	}
+
+	
+	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
+
+	if (m_commit != NULL) {
+		if (m_commit->commit == NULL) {
+			RETURN_FALSE;
+		}
+
+		parent_count = git_commit_parentcount(m_commit->commit);
+		if (index > (parent_count-1) || index < 0) {
+			/* @todo: throws invalidargument exception */
+			RETURN_FALSE;
+		}
+		
+		error = git_commit_parent(&parent, m_commit->commit, (unsigned int)index);
+		if (error == GIT_SUCCESS) {
+			result = php_git2_object_new(git_object_owner((git_object *)m_commit->commit), parent TSRMLS_CC);
+			RETVAL_ZVAL(result,0,1);
+		}
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/*
+{{{ proto: Git2\Commit::getParentCount()
+*/
+PHP_METHOD(git2_commit, getParentCount)
+{
+	php_git2_commit *m_commit;
+	unsigned int parent_count = 0;
+	int error, i = 0;
+	zval *result;
+	git_commit *parent = NULL;
+
+	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
+
+	if (m_commit != NULL) {
+		if (m_commit->commit == NULL) {
+			RETURN_FALSE;
+		}
+		
+		parent_count = git_commit_parentcount(m_commit->commit);
+		RETURN_LONG(parent_count);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 
 static zend_function_entry php_git2_commit_methods[] = {
 	PHP_ME(git2_commit, getMessage,         NULL, ZEND_ACC_PUBLIC)
@@ -372,6 +483,9 @@ static zend_function_entry php_git2_commit_methods[] = {
 	PHP_ME(git2_commit, getCommitter,       NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, getOid,             NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, getTree,            NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_commit, getParentCount,     NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_commit, getParent,          arginfo_git2_commit_get_parent, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_commit, getParents,         NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_commit, create,             arginfo_git2_commit_create, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
