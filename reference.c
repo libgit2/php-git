@@ -153,6 +153,8 @@ typedef struct {
 	unsigned int type;
 	git_repository *repository;
 	zval *result;
+	zend_fcall_info *fci;
+	zend_fcall_info_cache *fci_cache;
 } php_git2_ref_foreach_cb_t;
 
 static int php_git2_ref_foreach_cb(const char *name, void *opaque)
@@ -174,7 +176,31 @@ static int php_git2_ref_foreach_cb(const char *name, void *opaque)
 	if (payload->type == 0) {
 		add_next_index_zval(payload->result, ref);
 	} else {
-		/* for lambda callback */
+		zval *str, *result, *params = NULL;
+		MAKE_STD_ZVAL(params);
+		MAKE_STD_ZVAL(str);
+		ZVAL_STRING(str, name, 1);
+		array_init(params);
+		add_next_index_zval(params, str);
+		
+		zend_fcall_info_args(payload->fci, params TSRMLS_CC);
+		payload->fci->retval_ptr_ptr = &result;
+
+		if (zend_call_function(payload->fci, payload->fci_cache TSRMLS_CC) == SUCCESS &&
+			payload->fci->retval_ptr_ptr && *payload->fci->retval_ptr_ptr) {
+		}
+
+		if (Z_BVAL_PP(payload->fci->retval_ptr_ptr)) {
+			add_next_index_zval(payload->result, ref);
+		} else {
+			zval_ptr_dtor(&ref);
+		}
+		
+		zend_fcall_info_args_clear(payload->fci, 1);
+		zval_ptr_dtor(&str);
+		zval_ptr_dtor(&result);
+		zval_ptr_dtor(&params);
+		
 	}
 
 	return GIT_SUCCESS;
@@ -192,19 +218,25 @@ PHP_METHOD(git2_reference, each)
 	php_git2_ref_foreach_cb_t opaque;
 	int error, filter_len = 0;
 	unsigned int list_flags = GIT_REF_LISTALL;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"O|sz", &repository, git2_repository_class_entry, &filter, &filter_len, &callback) == FAILURE) {
+		"O|sf", &repository, git2_repository_class_entry, &filter, &filter_len, &fci, &fci_cache) == FAILURE) {
 		return;
 	}
 	
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, repository);
 	opaque.type = 0;
+	if (&fci != NULL) {
+		opaque.type = 1;
+		opaque.fci = &fci;
+		opaque.fci_cache = &fci_cache;
+	}
 	opaque.repository = m_repository->repository;
 	MAKE_STD_ZVAL(opaque.result);
 	array_init(opaque.result);
 	
-	/* @todo: closure support */
 	git_reference_foreach(m_repository->repository, list_flags, &php_git2_ref_foreach_cb, (void *)&opaque);
 	
 	RETVAL_ZVAL(opaque.result,0,1);
