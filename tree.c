@@ -56,6 +56,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_get_subtree, 0,0,1)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_get_entry_by_name, 0,0,1)
+	ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO()
+
 
 static int php_git2_tree_diff_cb(const git_tree_diff_data *ptr, void *data)
 {
@@ -296,6 +300,35 @@ PHP_METHOD(git2_tree, getSubtree)
 /* }}} */
 
 
+/*
+{{{ proto: Git2\Tree Git2\Tree::getEntryByName($name)
+*/
+PHP_METHOD(git2_tree, getEntryByName)
+{
+	char *path = NULL;
+	int path_len = 0;
+	php_git2_tree *object;
+	const git_tree_entry *entry = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &path, &path_len) == FAILURE) {
+		return;
+	}
+	
+	object = PHP_GIT2_GET_OBJECT(php_git2_tree, getThis());
+	
+	entry = git_tree_entry_byname(object->tree, (const char *)path);
+	if (entry) {
+		zval *result;
+		
+		create_tree_entry_from_entry(&result, (git_tree_entry *)entry ,git_object_owner((git_object *)object->tree));
+		RETVAL_ZVAL(result, 0, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 
 static zend_function_entry php_git2_tree_methods[] = {
 	PHP_ME(git2_tree, diff,        arginfo_git2_tree_diff,          ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
@@ -306,6 +339,7 @@ static zend_function_entry php_git2_tree_methods[] = {
 	PHP_ME(git2_tree, rewind,      NULL,                            ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree, valid,       NULL,                            ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree, getSubtree,  arginfo_git2_tree_get_subtree,   ZEND_ACC_PUBLIC)
+	PHP_ME(git2_tree, getEntryByName,arginfo_git2_tree_get_entry_by_name, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
