@@ -80,9 +80,30 @@ PHP_METHOD(git2_tag, getMessage)
 }
 /* }}} */
 
+
+/*
+{{{ proto: Git2\Tag::getBaseName()
+*/
+PHP_METHOD(git2_tag, getBaseName)
+{
+	zval *result;
+	const char *name = NULL;
+	const *basename = NULL;
+	php_git2_tag *m_tag;
+	size_t len;
+	
+	m_tag = PHP_GIT2_GET_OBJECT(php_git2_tag, getThis());
+	
+	name  = git_tag_name(m_tag->tag);
+	php_basename(name, strlen(name), NULL, 0, &basename, &len TSRMLS_CC);
+	RETVAL_STRINGL(basename, len, 0);
+}
+/* }}} */
+
 static zend_function_entry php_git2_tag_methods[] = {
 	PHP_ME(git2_tag, getTarget, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tag, getMessage, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_tag, getBaseName, NULL, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
