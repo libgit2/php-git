@@ -44,7 +44,24 @@ zend_object_value php_git2_tag_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
+PHP_METHOD(git2_tag, getTarget)
+{
+	php_git2_tag *m_tag;
+	git_object *object;
+	zval *result;
+	int error = 0;
+	
+	m_tag = PHP_GIT2_GET_OBJECT(php_git2_tag, getThis());
+	
+	error = git_tag_target(&object, m_tag->tag);
+	if (error == GIT_SUCCESS) {
+		result = php_git2_object_new((git_repository*)git_object_owner((git_object*)m_tag->tag), object TSRMLS_CC);
+		RETVAL_ZVAL(result,0,1);
+	}
+}
+
 static zend_function_entry php_git2_tag_methods[] = {
+	PHP_ME(git2_tag, getTarget, NULL, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
