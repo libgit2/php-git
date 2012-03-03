@@ -60,8 +60,21 @@ PHP_METHOD(git2_tag, getTarget)
 	}
 }
 
+PHP_METHOD(git2_tag, getMessage)
+{
+	php_git2_tag *m_tag;
+	const char *message;
+	zval *result;
+	int error = 0;
+	
+	m_tag = PHP_GIT2_GET_OBJECT(php_git2_tag, getThis());
+	message = git_tag_message(m_tag->tag);
+	RETURN_STRING(message,1);
+}
+
 static zend_function_entry php_git2_tag_methods[] = {
 	PHP_ME(git2_tag, getTarget, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_tag, getMessage, NULL, ZEND_ACC_PUBLIC)
 	{NULL,NULL,NULL}
 };
 
