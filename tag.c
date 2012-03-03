@@ -44,6 +44,9 @@ zend_object_value php_git2_tag_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
+/*
+{{{ proto: Git2\Tag::getTarget()
+*/
 PHP_METHOD(git2_tag, getTarget)
 {
 	php_git2_tag *m_tag;
@@ -59,7 +62,11 @@ PHP_METHOD(git2_tag, getTarget)
 		RETVAL_ZVAL(result,0,1);
 	}
 }
+/* }}} */
 
+/*
+{{{ proto: Git2\Tag::getMessage()
+*/
 PHP_METHOD(git2_tag, getMessage)
 {
 	php_git2_tag *m_tag;
@@ -71,6 +78,7 @@ PHP_METHOD(git2_tag, getMessage)
 	message = git_tag_message(m_tag->tag);
 	RETURN_STRING(message,1);
 }
+/* }}} */
 
 static zend_function_entry php_git2_tag_methods[] = {
 	PHP_ME(git2_tag, getTarget, NULL, ZEND_ACC_PUBLIC)
