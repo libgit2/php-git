@@ -18,7 +18,7 @@ cd libgit2
 mkdir build
 cd build
 cmake ..
-cmake --build
+cmake --build .
 sudo cmake --build . --target install
 ````
 
