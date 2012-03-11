@@ -242,7 +242,7 @@ static inline void create_tree_entry_from_entry(zval **object, git_tree_entry *e
 
 	m_entry->entry = entry;
 	oid = git_tree_entry_id(entry);
-	git_oid_to_string(buf,GIT_OID_HEXSZ,oid);
+	git_oid_tostr(buf,GIT_OID_HEXSZ,oid);
 
 	add_property_string(*object, "name", (char *)git_tree_entry_name(entry), 1);
 	add_property_string(*object, "oid", buf, 1);
