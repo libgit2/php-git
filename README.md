@@ -29,7 +29,9 @@ phpize
 ./configure
 make
 make test
+# please create a ticket on the Github if test failed
 sudo make install
+# add `extension=git2.so` to your php.ini
 ````
 new php-git features almost tested.
 
@@ -188,7 +190,8 @@ $remote->fetch();
 * James Titcumb
 * Ryusuke SEKIYAMA
 * Shuhei Tanuma
-
+* Vasileios Georgitzikis
+* tsteiner
 
 ## LICENSE
 
