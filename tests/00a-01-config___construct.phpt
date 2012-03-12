@@ -6,21 +6,6 @@ Check for Git2\Config::__construct
 <?php
 $path = __DIR__ . '/fixtures/testrepo.git/config';
 $config = new Git2\Config($path);
-var_dump($config);
+var_dump($config instanceof Git2\Config);
 --EXPECT--
-object(Git2\Config)#1 (1) {
-  ["configs"]=>
-  array(1) {
-    ["core"]=>
-    array(4) {
-      ["bare"]=>
-      string(4) "true"
-      ["filemode"]=>
-      string(4) "true"
-      ["ignorecase"]=>
-      string(4) "true"
-      ["repositoryformatversion"]=>
-      string(1) "0"
-    }
-  }
-}
+bool(true)
