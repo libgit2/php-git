@@ -246,7 +246,7 @@ static inline php_git2_create_signature_from_commit(zval **object, git_commit *c
 		zval_ptr_dtor(&tmp);
 	}
 #else
-	php_git2_date_initialize(zend_object_store_get_object(date TSRMLS_CC), time_str, strlen(time_str), NULL, NULL, 0 TSRMLS_CC);
+	php_date_initialize(zend_object_store_get_object(date TSRMLS_CC), time_str, strlen(time_str), NULL, NULL, 0 TSRMLS_CC);
 #endif
 
 	add_property_zval(ret,"time",date);
