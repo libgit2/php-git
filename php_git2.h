@@ -34,6 +34,7 @@
 
 #  include "php.h"
 #  include "ext/spl/spl_exceptions.h"
+#  include <date/lib/timelib.h>
 #  include <date/php_date.h>
 #  include <git2.h>
 #  include <git2/odb_backend.h>
@@ -197,14 +198,106 @@ extern int php_git2_call_user_function_v(zval **retval, zval *obj, char *method,
 
 extern inline void php_git2_create_signature(zval *object, char *name, int name_len, char *email, int email_len, zval *date TSRMLS_DC);
 
+static timelib_tzdb *php_date_global_timezone_db;
+#define GIT2_DATE_TIMEZONEDB      php_date_global_timezone_db ? php_date_global_timezone_db : timelib_builtin_db()
+
+static int php_git2_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC)
+{
+#if PHP_VERSION_ID <= 50304
+	timelib_time   *now;
+	timelib_tzinfo *tzi;
+	timelib_error_container *err = NULL;
+	int type = TIMELIB_ZONETYPE_ID, new_dst;
+	char *new_abbr;
+	timelib_sll     new_offset;
+	
+	if (dateobj->time) {
+		timelib_time_dtor(dateobj->time);
+	}
+	if (format) {
+		dateobj->time = timelib_parse_from_format(format, time_str_len ? time_str : "", time_str_len ? time_str_len : 0, &err, GIT2_DATE_TIMEZONEDB);
+	} else {
+		dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, &err, GIT2_DATE_TIMEZONEDB);
+	}
+
+	/* update last errors and warnings */
+	update_errors_warnings(err TSRMLS_CC);
+
+
+	if (ctor && err && err->error_count) {
+		/* spit out the first library error message, at least */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
+			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
+	}
+	if (err && err->error_count) {
+		return 0;
+	}
+
+	if (timezone_object) {
+		php_timezone_obj *tzobj;
+
+		tzobj = (php_timezone_obj *) zend_object_store_get_object(timezone_object TSRMLS_CC);
+		switch (tzobj->type) {
+			case TIMELIB_ZONETYPE_ID:
+				tzi = tzobj->tzi.tz;
+				break;
+			case TIMELIB_ZONETYPE_OFFSET:
+				new_offset = tzobj->tzi.utc_offset;
+				break;
+			case TIMELIB_ZONETYPE_ABBR:
+				new_offset = tzobj->tzi.z.utc_offset;
+				new_dst    = tzobj->tzi.z.dst;
+				new_abbr   = strdup(tzobj->tzi.z.abbr);
+				break;
+		}
+		type = tzobj->type;
+	} else if (dateobj->time->tz_info) {
+		tzi = dateobj->time->tz_info;
+	} else {
+		tzi = get_timezone_info(TSRMLS_C);
+	}
+
+	now = timelib_time_ctor();
+	now->zone_type = type;
+	switch (type) {
+		case TIMELIB_ZONETYPE_ID:
+			now->tz_info = tzi;
+			break;
+		case TIMELIB_ZONETYPE_OFFSET:
+			now->z = new_offset;
+			break;
+		case TIMELIB_ZONETYPE_ABBR:
+			now->z = new_offset;
+			now->dst = new_dst;
+			now->tz_abbr = new_abbr;
+			break;
+	}
+	timelib_unixtime2local(now, (timelib_sll) time(NULL));
+
+	timelib_fill_holes(dateobj->time, now, TIMELIB_NO_CLONE);
+	timelib_update_ts(dateobj->time, tzi);
+
+	dateobj->time->have_relative = 0;
+
+	timelib_time_dtor(now);
+
+	return 1;
+#else
+	return php_date_initialize(dateobj, time_str, time_str_len, format, timezone_object, ctor TSRMLS_CC);
+#endif
+}
 
 static zval* php_git2_date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 {
+#if PHP_VERSION_ID <= 50304
 	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, pce);
 	Z_SET_REFCOUNT_P(object, 1);
 	Z_UNSET_ISREF_P(object);
 	return object;
+#else
+	return php_date_instantiate(pce, object TSRMLS_CC);
+#endif
 }
 
 static inline php_git2_create_signature_from_commit(zval **object, git_commit *commit, int type TSRMLS_DC)
@@ -231,7 +324,7 @@ static inline php_git2_create_signature_from_commit(zval **object, git_commit *c
 
 	php_git2_date_instantiate(php_date_get_date_ce(), date TSRMLS_CC);
 	snprintf(time_str,12,"%c%ld",'@',author->when.time);
-	php_date_initialize(zend_object_store_get_object(date TSRMLS_CC), time_str, strlen(time_str), NULL, NULL, 0 TSRMLS_CC);
+	php_git2_date_initialize(zend_object_store_get_object(date TSRMLS_CC), time_str, strlen(time_str), NULL, NULL, 0 TSRMLS_CC);
 
 	add_property_zval(ret,"time",date);
 	zval_ptr_dtor(&date);
