@@ -198,6 +198,15 @@ extern int php_git2_call_user_function_v(zval **retval, zval *obj, char *method,
 extern inline void php_git2_create_signature(zval *object, char *name, int name_len, char *email, int email_len, zval *date TSRMLS_DC);
 
 
+static zval* php_git2_date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
+{
+	Z_TYPE_P(object) = IS_OBJECT;
+	object_init_ex(object, pce);
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_UNSET_ISREF_P(object);
+	return object;
+}
+
 static inline php_git2_create_signature_from_commit(zval **object, git_commit *commit, int type TSRMLS_DC)
 {
 	zval *ret;
@@ -220,7 +229,7 @@ static inline php_git2_create_signature_from_commit(zval **object, git_commit *c
 	add_property_string_ex(ret,"name",sizeof("name"), author->name,1 TSRMLS_CC);
 	add_property_string_ex(ret,"email",sizeof("email"),author->email,1 TSRMLS_CC);
 
-	php_date_instantiate(php_date_get_date_ce(), date TSRMLS_CC);
+	php_git2_date_instantiate(php_date_get_date_ce(), date TSRMLS_CC);
 	snprintf(time_str,12,"%c%ld",'@',author->when.time);
 	php_date_initialize(zend_object_store_get_object(date TSRMLS_CC), time_str, strlen(time_str), NULL, NULL, 0 TSRMLS_CC);
 
