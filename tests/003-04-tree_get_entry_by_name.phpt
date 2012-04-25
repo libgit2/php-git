@@ -14,7 +14,7 @@ object(Git2\TreeEntry)#5 (3) {
   ["name"]=>
   string(6) "README"
   ["oid"]=>
-  string(39) "557db03de997c86a4a028e1ebd3a1ceb225be23"
+  string(40) "557db03de997c86a4a028e1ebd3a1ceb225be238"
   ["attributes"]=>
   int(33188)
 }

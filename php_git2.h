@@ -257,7 +257,7 @@ static inline php_git2_create_signature_from_commit(zval **object, git_commit *c
 static inline void create_tree_entry_from_entry(zval **object, git_tree_entry *entry, git_repository *repository)
 {
 	TSRMLS_FETCH();
-	char buf[GIT_OID_HEXSZ] = {0};
+	char buf[GIT_OID_HEXSZ+1] = {0};
 	const git_oid *oid;
 	php_git2_tree_entry *m_entry;
 
@@ -267,7 +267,7 @@ static inline void create_tree_entry_from_entry(zval **object, git_tree_entry *e
 
 	m_entry->entry = entry;
 	oid = git_tree_entry_id(entry);
-	git_oid_tostr(buf,GIT_OID_HEXSZ,oid);
+	git_oid_tostr(buf,GIT_OID_HEXSZ+1,oid);
 
 	add_property_string(*object, "name", (char *)git_tree_entry_name(entry), 1);
 	add_property_string(*object, "oid", buf, 1);
