@@ -42,7 +42,7 @@ echo PHP_EOL;
 printf("%s\n", $commit->getMessage());
 `rm -rf {$path}`;
 --EXPECT--
-commit_id: 239442d8e6cdbd904e150e25778cc45024b60d51
+commit_id: 850e8fd947badfe89add66c0d8bf033231ae9b9d
 author: Shuhei Tanuma
 email: chobieee@gmail.com
 time: 1327164747
