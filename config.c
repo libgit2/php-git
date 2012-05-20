@@ -226,7 +226,7 @@ static int php_git2_config_foreach(const char *var_name, const char *value, void
 	
 	hash = Z_ARRVAL_P(opaque->result);
 	
-	error = git_config_get_string(opaque->config, var_name, &config_value);
+	error = git_config_get_string(&config_value, opaque->config, var_name);
 
 	tmp_value = estrdup(var_name);
 	current_key = php_strtok_r(tmp_value, ".", &savedptr);
@@ -335,7 +335,8 @@ PHP_METHOD(git2_config, __construct)
 	}
 	
 	error = git_config_open_ondisk(&config, path);
-	/* @todo: automatic convert types */
+
+		/* @todo: automatic convert types */
 	m_config = PHP_GIT2_GET_OBJECT(php_git2_config, getThis());
 	m_config->config = config;
 	
