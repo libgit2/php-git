@@ -44,13 +44,13 @@ static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid
 	zend_call_method_with_1_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "exists", &retval, param);
 	
 	if (Z_BVAL_P(retval)) {
-		result = GIT_SUCCESS;
+		result = GIT_OK;
 	}
 	
 	zval_ptr_dtor(&param);
 	zval_ptr_dtor(&retval);
 	
-	return (result == GIT_SUCCESS);
+	return (result == GIT_OK);
 }
 
 static int php_git2_backend_write(git_oid *id, git_odb_backend *_backend, const void *buffer, size_t size, git_otype type)
@@ -81,7 +81,7 @@ static int php_git2_backend_write(git_oid *id, git_odb_backend *_backend, const 
 	zval_ptr_dtor(&z_type);
 	
 	if (Z_TYPE_P(retval) == IS_BOOL && Z_BVAL_P(retval)) {
-		error = GIT_SUCCESS;
+		error = GIT_OK;
 	}
 	zval_ptr_dtor(&retval);
 

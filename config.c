@@ -257,7 +257,7 @@ static int php_git2_config_foreach(const char *var_name, const char *value, void
 	}
 	efree(tmp_value);
 	
-	return GIT_SUCCESS;
+	return GIT_OK;
 }
 
 static int php_git2_config_reload(zval *object, unsigned short dtor TSRMLS_DC)

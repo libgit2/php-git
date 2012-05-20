@@ -156,7 +156,7 @@ PHP_METHOD(git2_odb, exists)
 	
 	m_odb = PHP_GIT2_GET_OBJECT(php_git2_odb, getThis());
 
-	if (git_oid_fromstr(&id, hash) != GIT_SUCCESS) {
+	if (git_oid_fromstr(&id, hash) != GIT_OK) {
 		RETURN_FALSE;
 	}
 	
@@ -188,7 +188,7 @@ PHP_METHOD(git2_odb, read)
 	}
 	
 	m_odb = PHP_GIT2_GET_OBJECT(php_git2_odb, getThis());
-	if (git_oid_fromstr(&id, hash) != GIT_SUCCESS) {
+	if (git_oid_fromstr(&id, hash) != GIT_OK) {
 		RETURN_FALSE;
 	}
 	

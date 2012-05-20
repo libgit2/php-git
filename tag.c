@@ -57,7 +57,7 @@ PHP_METHOD(git2_tag, getTarget)
 	m_tag = PHP_GIT2_GET_OBJECT(php_git2_tag, getThis());
 	
 	error = git_tag_target(&object, m_tag->tag);
-	if (error == GIT_SUCCESS) {
+	if (error == GIT_OK) {
 		result = php_git2_object_new((git_repository*)git_object_owner((git_object*)m_tag->tag), object TSRMLS_CC);
 		RETVAL_ZVAL(result,0,1);
 	}

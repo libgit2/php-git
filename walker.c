@@ -92,7 +92,7 @@ PHP_METHOD(git2_walker, __construct)
 	
 	error = git_revwalk_new(&m_walker->walker, m_repository->repository);
 	
-	if (error != GIT_SUCCESS) {
+	if (error != GIT_OK) {
 		/* @todo error handling */
 	}
 	m_walker->repository = m_repository->repository;
@@ -222,7 +222,7 @@ PHP_METHOD(git2_walker, next)
 
 	m_walker     = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
 	error = git_revwalk_next(m_walker->current, m_walker->walker);
-	if (error != GIT_SUCCESS) {
+	if (error != GIT_OK) {
 		efree(m_walker->current);
 		m_walker->current = NULL;
 	}

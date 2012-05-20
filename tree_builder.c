@@ -153,7 +153,7 @@ PHP_METHOD(git2_tree_builder, write)
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, repository);
 	
 	error = git_treebuilder_write(&oid, m_repository->repository, m_builder->builder);
-	if (error != GIT_SUCCESS) {
+	if (error != GIT_OK) {
 		RETURN_FALSE;
 	}
 	

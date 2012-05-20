@@ -223,7 +223,7 @@ static int php_git2_ref_foreach_cb(const char *name, void *opaque)
 		
 	}
 
-	return GIT_SUCCESS;
+	return GIT_OK;
 }
 
 /*

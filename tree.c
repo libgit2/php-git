@@ -47,11 +47,6 @@ zend_object_value php_git2_tree_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_diff, 0,0,2)
-	ZEND_ARG_INFO(0, old)
-	ZEND_ARG_INFO(0, new)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_get_subtree, 0,0,1)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
@@ -60,49 +55,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_tree_get_entry_by_name, 0,0,1)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
-
-static int php_git2_tree_diff_cb(const git_tree_diff_data *ptr, void *data)
-{
-/*
-typedef struct {
-        unsigned int old_attr;
-        unsigned int new_attr;
-        git_oid old_oid;
-        git_oid new_oid;
-        git_status_t status;
-        const char *path;
-} git_tree_diff_data;
-*/
-	fprintf(stderr,"path:%s\n",ptr->path);
-}
 	
-typedef struct{
-	zval *old;
-	zval *new;
-	zval *result;
-} php_git2_tree_diff_cb_t;
-/*
-{{{ proto: Git2\Tree::diff($old, $new)
-	@todo: think this behavior
-*/
-PHP_METHOD(git2_tree, diff)
-{
-	zval *old, *new;
-	php_git2_tree *m_old, *m_new;
-	php_git2_tree_diff_cb_t payload;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"OO", &old, git2_tree_class_entry, &new, git2_tree_class_entry) == FAILURE) {
-		return;
-	}
-	
-	m_old = PHP_GIT2_GET_OBJECT(php_git2_tree, old);
-	m_new = PHP_GIT2_GET_OBJECT(php_git2_tree, new);
-
-	git_tree_diff(m_old->tree,m_new->tree, &php_git2_tree_diff_cb, &payload);
-}
-/* }}} */
-
 
 /* Iterator Implementation */
 
@@ -224,7 +177,7 @@ static int get_subtree(git_tree **result, git_tree *root, char *path)
 					git_tree_entry_id(entry)
 				);
 				
-				if (error == GIT_SUCCESS) {
+				if (error == GIT_OK) {
 					target = tmp_result;
 				} else {
 					return -1;
@@ -243,7 +196,7 @@ static int get_subtree(git_tree **result, git_tree *root, char *path)
 						git_object_id((const git_object *)entry)
 					);
 					
-					if (error == GIT_SUCCESS) {
+					if (error == GIT_OK) {
 						target = tmp_result;
 					} else {
 						return -1;
@@ -288,7 +241,7 @@ PHP_METHOD(git2_tree, getSubtree)
 	 * this method returns specified subtree or false.
 	*/
 	error = get_subtree(&subtree, object->tree, path);
-	if (error == GIT_SUCCESS) {
+	if (error == GIT_OK) {
 		zval *result;
 		
 		result = php_git2_object_new(git_object_owner((git_object *)object->tree), (git_object *)subtree TSRMLS_CC);
@@ -331,7 +284,6 @@ PHP_METHOD(git2_tree, getEntryByName)
 
 
 static zend_function_entry php_git2_tree_methods[] = {
-	PHP_ME(git2_tree, diff,        arginfo_git2_tree_diff,          ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	/* Iterator Implementation */
 	PHP_ME(git2_tree, current,     NULL,                            ZEND_ACC_PUBLIC)
 	PHP_ME(git2_tree, key,         NULL,                            ZEND_ACC_PUBLIC)

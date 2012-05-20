@@ -392,7 +392,7 @@ PHP_METHOD(git2_commit, getParents)
 			zval *tmp = NULL;
 			
 			error = git_commit_parent(&parent, m_commit->commit, i);
-			if (error == GIT_SUCCESS) {
+			if (error == GIT_OK) {
 				tmp = php_git2_object_new(git_object_owner((git_object *)m_commit->commit), parent TSRMLS_CC);
 				add_next_index_zval(result, tmp);
 			}
@@ -438,7 +438,7 @@ PHP_METHOD(git2_commit, getParent)
 		}
 		
 		error = git_commit_parent(&parent, m_commit->commit, (unsigned int)index);
-		if (error == GIT_SUCCESS) {
+		if (error == GIT_OK) {
 			result = php_git2_object_new(git_object_owner((git_object *)m_commit->commit), parent TSRMLS_CC);
 			RETVAL_ZVAL(result,0,1);
 		}

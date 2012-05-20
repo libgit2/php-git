@@ -37,6 +37,7 @@
 #  include "ext/spl/spl_exceptions.h"
 #  include <date/php_date.h>
 #  include <git2.h>
+#  include <git2/errors.h>
 #  include <git2/odb_backend.h>
 
 extern zend_module_entry git2_module_entry;

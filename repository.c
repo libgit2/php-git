@@ -234,7 +234,7 @@ PHP_METHOD(git2_repository, init)
 	}
 	
 	ret = git_repository_init(&repository, path, is_bare);
-	if (ret == GIT_SUCCESS) {
+	if (ret == GIT_OK) {
 		zval *object;
 		
 		MAKE_STD_ZVAL(object);
@@ -310,7 +310,7 @@ PHP_METHOD(git2_repository, discover)
 		return;
 	}
 	
-	if (git_repository_discover(path_buffer,path_size,(const char *)start_path,(int)across_fs, (const char *)ceiling_dirs) == GIT_SUCCESS) {
+	if (git_repository_discover(path_buffer,path_size,(const char *)start_path,(int)across_fs, (const char *)ceiling_dirs) == GIT_OK) {
 		RETVAL_STRING(path_buffer, 1);
 	} else {
 		RETURN_FALSE;
@@ -338,7 +338,7 @@ PHP_METHOD(git2_repository, exists)
 	error = git_repository_odb(&odb, m_repository->repository);
 	PHP_GIT2_EXCEPTION_CHECK(error);
 
-	if (git_oid_fromstr(&id, hash) != GIT_SUCCESS) {
+	if (git_oid_fromstr(&id, hash) != GIT_OK) {
 		RETURN_FALSE;
 	}
 	
@@ -374,7 +374,7 @@ PHP_METHOD(git2_repository, lookup)
 	error = git_repository_odb(&odb, m_repository->repository);
 	PHP_GIT2_EXCEPTION_CHECK(error);
 
-	if (git_oid_fromstrn(&id, hash, hash_len) != GIT_SUCCESS) {
+	if (git_oid_fromstrn(&id, hash, hash_len) != GIT_OK) {
 		RETURN_FALSE;
 	}
 	

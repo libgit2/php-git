@@ -73,12 +73,14 @@ PHP_METHOD(git2_remote, __construct)
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, repository);
 	m_remote = PHP_GIT2_GET_OBJECT(php_git2_remote, getThis());
 	if (git_remote_valid_url(path)) {
-		error = git_remote_new(
+/* TODO
+			error = git_remote_new(
 			&remote,
 			m_repository->repository,
 			path,
 			NULL
 		);
+		*/
 	} else {
 		error = git_remote_load(&remote,m_repository->repository, path);
 	}
@@ -96,14 +98,14 @@ static int php_git2_rename_packfile(char *packname, git_indexer *idx)
 	slash = strrchr(path, '/');
 
 	if (!slash) {
-		return GIT_EINVALIDARGS;
+		return -1;
 	}
 
 	memset(oid, 0x0, sizeof(oid));
 	git_oid_fmt(oid, git_indexer_hash(idx));
 	ret = sprintf(slash + 1, "pack-%s.pack", oid);
 	if(ret < 0) {
-	  return GIT_EOSERR;
+	  return -2;
 	}
 
 	return rename(packname, path);
@@ -114,7 +116,7 @@ static int show_ref__cb(git_remote_head *head, void *payload)
 	char oid[GIT_OID_HEXSZ + 1] = {0};
 	git_oid_fmt(oid, &head->oid);
 	printf("%s\t%s\n", oid, head->name);
-	return GIT_SUCCESS;
+	return GIT_OK;
 }
 
 /*
@@ -141,7 +143,7 @@ PHP_METHOD(git2_remote, fetch)
 	
 	error = git_remote_connect(m_remote->remote, direction);
 	error = git_remote_ls(m_remote->remote, &show_ref__cb, NULL);
-	error = git_remote_download(&packname, m_remote->remote);
+	//error = git_remote_download(&packname, m_remote->remote);
 
 	if (packname != NULL) {
 		// Create a new instance indexer
@@ -158,7 +160,7 @@ PHP_METHOD(git2_remote, fetch)
 		PHP_GIT2_EXCEPTION_CHECK(error);
 	}
 
-	error = git_remote_update_tips(m_remote->remote);
+	//error = git_remote_update_tips(m_remote->remote);
 	PHP_GIT2_EXCEPTION_CHECK(error);
 
 	free(packname);
