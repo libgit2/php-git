@@ -34,6 +34,7 @@
 
 #  include "php.h"
 #  include "Zend/zend_interfaces.h"
+#  include "Zend/zend_exceptions.h"
 #  include "ext/spl/spl_exceptions.h"
 #  include <date/php_date.h>
 #  include <git2.h>
@@ -212,10 +213,9 @@ static zval* php_git2_date_instantiate(zend_class_entry *pce, zval *object TSRML
 #endif
 }
 
-static inline php_git2_create_signature_from_commit(zval **object, git_commit *commit, int type TSRMLS_DC)
+static void inline php_git2_create_signature_from_commit(zval **object, git_commit *commit, int type TSRMLS_DC)
 {
-	zval *ret;
-	zval *z_signature, *date;
+	zval *ret, *date;
 	char time_str[12] = {0};
 	const git_signature *author;
 	php_git2_signature *m_signature;

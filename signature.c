@@ -90,7 +90,7 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(git2_signature, __construct)
 {
 	char *name, *email;
-	int error, name_len, email_len = 0;
+	int name_len, email_len = 0;
 	zval *date = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,

@@ -71,8 +71,6 @@ PHP_METHOD(git2_tag, getMessage)
 {
 	php_git2_tag *m_tag;
 	const char *message;
-	zval *result;
-	int error = 0;
 	
 	m_tag = PHP_GIT2_GET_OBJECT(php_git2_tag, getThis());
 	message = git_tag_message(m_tag->tag);
@@ -86,9 +84,8 @@ PHP_METHOD(git2_tag, getMessage)
 */
 PHP_METHOD(git2_tag, getBaseName)
 {
-	zval *result;
 	const char *name = NULL;
-	const *basename = NULL;
+	char *basename = NULL;
 	php_git2_tag *m_tag;
 	size_t len;
 	

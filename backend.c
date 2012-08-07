@@ -33,7 +33,7 @@ static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid
 	TSRMLS_FETCH();
 	zval *retval, *param;
 	php_git2_backend_internal *m_backend;
-	const char out[GIT_OID_HEXSZ+1] = {0};
+	char out[GIT_OID_HEXSZ+1] = {0};
 	int result = -1;
 	
 	MAKE_STD_ZVAL(param);
@@ -93,7 +93,7 @@ static int php_git2_backend_read(void **buffer,size_t *size, git_otype *type, gi
 	TSRMLS_FETCH();
 	zval *retval, *z_oid, *z_type = NULL;
 	php_git2_backend_internal *m_backend;
-	const char out[GIT_OID_HEXSZ+1] = {0};
+	char out[GIT_OID_HEXSZ+1] = {0};
 	int result = GIT_ERROR;
 
 	MAKE_STD_ZVAL(z_oid);

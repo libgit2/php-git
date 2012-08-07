@@ -123,7 +123,7 @@ PHP_METHOD(git2_tree, valid)
 	
 	m_tree     = PHP_GIT2_GET_OBJECT(php_git2_tree, getThis());
 	entry_count = git_tree_entrycount(m_tree->tree);
-	if (m_tree->offset < entry_count && m_tree->offset >= 0) {
+	if (m_tree->offset < entry_count) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

@@ -106,7 +106,6 @@ PHP_METHOD(git2_walker, sorting)
 {
 	php_git2_walker *m_walker;
 	long mode = GIT_SORT_NONE;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"l", &mode) == FAILURE) {
@@ -126,7 +125,6 @@ PHP_METHOD(git2_walker, push)
 	php_git2_walker *m_walker;
 	char *sha;
 	int sha_len = 0;
-	int error = 0;
 	git_oid oid;
 
 	/* @todo: also supports Git2\Commit object */
@@ -152,7 +150,6 @@ PHP_METHOD(git2_walker, hide)
 	php_git2_walker *m_walker;
 	char *sha;
 	int sha_len = 0;
-	int error = 0;
 	git_oid oid;
 
 	/* @todo: also supports Git2\Commit object */

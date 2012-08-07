@@ -59,11 +59,9 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(git2_reference, lookup)
 {
 	char *path;
-	char oid_out[GIT_OID_HEXSZ] = {0};
 	int error, path_len = 0;
 	git_reference *ref;
 	zval *repository, *object;
-	git_oid *oid;
 	php_git2_repository *m_repository;
 	php_git2_reference *m_reference;
 
@@ -93,7 +91,6 @@ PHP_METHOD(git2_reference, lookup)
 */
 PHP_METHOD(git2_reference, getTarget)
 {
-	git_reference *ref;
 	php_git2_reference *m_reference;
 	
 	m_reference = PHP_GIT2_GET_OBJECT(php_git2_reference, getThis());
@@ -116,7 +113,6 @@ PHP_METHOD(git2_reference, getTarget)
 */
 PHP_METHOD(git2_reference, getName)
 {
-	git_reference *ref;
 	php_git2_reference *m_reference;
 	
 	m_reference = PHP_GIT2_GET_OBJECT(php_git2_reference, getThis());
@@ -130,10 +126,8 @@ PHP_METHOD(git2_reference, getName)
 */
 PHP_METHOD(git2_reference, getBaseName)
 {
-	git_reference *ref;
-	zval *result;
+	char *basename = NULL;
 	const char *name = NULL;
-	const *basename = NULL;
 	php_git2_reference *m_reference;
 	size_t len;
 	
@@ -231,12 +225,11 @@ static int php_git2_ref_foreach_cb(const char *name, void *opaque)
 */
 PHP_METHOD(git2_reference, each)
 {
-	git_reference *ref;
-	zval *repository,*callback = NULL;
+	zval *repository = NULL;
 	php_git2_repository *m_repository;
 	char *filter;
 	php_git2_ref_foreach_cb_t opaque;
-	int error, filter_len = 0;
+	int filter_len = 0;
 	unsigned int list_flags = GIT_REF_LISTALL;
 	zend_fcall_info fci = {
 		0,NULL,NULL,NULL,NULL,0,NULL,NULL

@@ -58,7 +58,6 @@ ZEND_END_ARG_INFO()
 PHP_METHOD(git2_remote, __construct)
 {
 	char *path;
-	git_config *config;
 	int error, path_len = 0;
 	zval *repository;
 	php_git2_repository *m_repository;

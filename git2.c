@@ -23,21 +23,25 @@
  */
 
 #include "php_git2.h"
+#include "ext/standard/info.h"
 
-extern void php_git2_repository_init(TSRMLS_D);
-extern void php_git2_commit_init(TSRMLS_D);
-extern void php_git2_blob_init(TSRMLS_D);
-extern void php_git2_tree_init(TSRMLS_D);
-extern void php_git2_tree_builder_init(TSRMLS_D);
-extern void php_git2_signature_init(TSRMLS_D);
-extern void php_git2_walker_init(TSRMLS_D);
-extern void php_git2_reference_init(TSRMLS_D);
-extern void php_git2_config_init(TSRMLS_D);
-extern void php_git2_remote_init(TSRMLS_D);
-extern void php_git2_tag_init(TSRMLS_D);
-extern void php_git2_odb_init(TSRMLS_D);
-extern void php_git2_odb_object_init(TSRMLS_D);
-
+void php_git2_repository_init(TSRMLS_D);
+void php_git2_commit_init(TSRMLS_D);
+void php_git2_blob_init(TSRMLS_D);
+void php_git2_tree_init(TSRMLS_D);
+void php_git2_tree_builder_init(TSRMLS_D);
+void php_git2_signature_init(TSRMLS_D);
+void php_git2_walker_init(TSRMLS_D);
+void php_git2_reference_init(TSRMLS_D);
+void php_git2_config_init(TSRMLS_D);
+void php_git2_remote_init(TSRMLS_D);
+void php_git2_tag_init(TSRMLS_D);
+void php_git2_odb_init(TSRMLS_D);
+void php_git2_odb_object_init(TSRMLS_D);
+void php_git2_tree_entry_init(TSRMLS_D);
+void php_git2_index_entry_init(TSRMLS_D);
+void php_git2_backend_init(TSRMLS_D);
+void php_git2_index_init(TSRMLS_D);
 
 int php_git2_call_user_function_v(zval **retval, zval *obj, char *method, unsigned int method_len, unsigned int param_count, ...)
 {
@@ -150,6 +154,12 @@ zval* php_git2_object_new(git_repository *repository, git_object *object TSRMLS_
 			
 			break;
 		}
+		case GIT_OBJ_BAD:
+		case GIT_OBJ_ANY:
+		case GIT_OBJ__EXT1:
+		case GIT_OBJ__EXT2:
+		case GIT_OBJ_OFS_DELTA:
+		case GIT_OBJ_REF_DELTA:
 		default:
 			break;
 	}

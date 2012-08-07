@@ -58,7 +58,6 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(git2_commit, getMessage)
 {
-	char *data;
 	php_git2_commit *m_commit;
 	
 	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
@@ -129,9 +128,8 @@ PHP_METHOD(git2_commit, parentCount)
 */
 PHP_METHOD(git2_commit, getAuthor)
 {
-	unsigned int parent_count = 0;
 	php_git2_commit *m_commit;
-	zval *z_signature, *date;
+	zval *z_signature;
 	
 	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
 
@@ -153,9 +151,8 @@ PHP_METHOD(git2_commit, getAuthor)
 */
 PHP_METHOD(git2_commit, getCommitter)
 {
-	unsigned int parent_count = 0;
 	php_git2_commit *m_commit;
-	zval *z_signature, *date;
+	zval *z_signature;
 	
 	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
 
@@ -177,10 +174,8 @@ PHP_METHOD(git2_commit, getCommitter)
 */
 PHP_METHOD(git2_commit, getOid)
 {
-	unsigned int parent_count = 0;
 	php_git2_commit *m_commit;
 	char oid_out[GIT_OID_HEXSZ] = {0};
-	git_oid oid;
 	
 	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
 
@@ -210,7 +205,6 @@ PHP_METHOD(git2_commit, create)
 	const git_commit **parents = NULL;
 	git_commit **free_list = NULL;
 	git_tree *tree;
-	git_signature *author, *committer;
 	git_oid commit_oid;
 	char *message, *encoding, *ref, oid_out[GIT_OID_HEXSZ];
 	int parent_count, i, error = 0;
@@ -344,7 +338,6 @@ PHP_METHOD(git2_commit, getTree)
 {
 	php_git2_commit *m_commit;
 	const git_oid *oid;
-	git_oid *id;
 	git_otype type = GIT_OBJ_TREE;
 	git_object *object;
 	zval *result;
@@ -412,7 +405,7 @@ PHP_METHOD(git2_commit, getParent)
 {
 	php_git2_commit *m_commit;
 	unsigned int parent_count = 0;
-	int error, i = 0;
+	int error = 0;
 	long index = 0;
 	zval *result;
 	git_commit *parent = NULL;
@@ -455,9 +448,6 @@ PHP_METHOD(git2_commit, getParentCount)
 {
 	php_git2_commit *m_commit;
 	unsigned int parent_count = 0;
-	int error, i = 0;
-	zval *result;
-	git_commit *parent = NULL;
 
 	m_commit = PHP_GIT2_GET_OBJECT(php_git2_commit, getThis());
 

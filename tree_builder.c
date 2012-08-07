@@ -120,7 +120,6 @@ PHP_METHOD(git2_tree_builder, remove)
 	char *name;
 	int name_len = 0;
 	php_git2_tree_builder *m_builder;
-	int error = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &name, &name_len) == FAILURE) {

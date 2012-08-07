@@ -98,6 +98,8 @@ static int php_git2_repository_initialize(zval *object, git_repository *reposito
 	add_property_string(object, "path", git_repository_path(repository),1);
 	add_property_zval(object, "odb", odb);
 	zval_ptr_dtor(&odb);
+	
+	return 0;
 }
 
 /*
@@ -109,7 +111,6 @@ PHP_METHOD(git2_repository, __construct)
 	int repository_path_len, ret = 0;
 	git_repository *repository;
 	php_git2_repository *m_repository;
-	zval *odb;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"|s", &repository_path, &repository_path_len) == FAILURE) {
@@ -132,7 +133,6 @@ PHP_METHOD(git2_repository, __construct)
 */
 PHP_METHOD(git2_repository, isEmpty)
 {
-	git_repository *repository;
 	php_git2_repository *m_repository;
 
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
@@ -153,7 +153,6 @@ PHP_METHOD(git2_repository, isEmpty)
 */
 PHP_METHOD(git2_repository, isBare)
 {
-	git_repository *repository;
 	php_git2_repository *m_repository;
 
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
@@ -174,7 +173,6 @@ PHP_METHOD(git2_repository, isBare)
 */
 PHP_METHOD(git2_repository, getPath)
 {
-	git_repository *repository;
 	php_git2_repository *m_repository;
 	const char *path = NULL;
 	zval *m_path = NULL;
@@ -198,7 +196,6 @@ PHP_METHOD(git2_repository, getPath)
 */
 PHP_METHOD(git2_repository, getWorkdir)
 {
-	git_repository *repository;
 	php_git2_repository *m_repository;
 	const char *path = NULL;
 	zval *m_path = NULL;
@@ -255,7 +252,6 @@ PHP_METHOD(git2_repository, init)
 */
 PHP_METHOD(git2_repository, headDetached)
 {
-	git_repository *repository;
 	php_git2_repository *m_repository;
 
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
@@ -278,7 +274,6 @@ PHP_METHOD(git2_repository, headDetached)
 */                                                                                           
 PHP_METHOD(git2_repository, headOrphan)
 {
-	git_repository *repository;
 	php_git2_repository *m_repository;
 
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());

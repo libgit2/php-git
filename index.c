@@ -169,7 +169,7 @@ PHP_METHOD(git2_index, valid)
 	
 	m_index     = PHP_GIT2_GET_OBJECT(php_git2_index, getThis());
 	entry_count = git_index_entrycount(m_index->index);
-	if (m_index->offset < entry_count && m_index->offset >= 0) {
+	if (m_index->offset < entry_count) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

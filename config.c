@@ -44,10 +44,8 @@ static void php_git2_config_free_storage(php_git2_config *object TSRMLS_DC)
 static int php_git2_config_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC)
 {
 	zend_object_handlers *standard;
-	HashTable *hash;
-	zval *entry, *tmp_result, **target_offset;
+	zval *entry, **target_offset;
 	char *current_key, *tmp_value, *savedptr, *k;
-	int error = 0;
 	
 	entry = zend_read_property(git2_config_class_entry, object,"configs",sizeof("configs")-1, 0 TSRMLS_CC);
 	
@@ -92,8 +90,6 @@ static int php_git2_config_has_dimension(zval *object, zval *member, int check_e
 /* @todo refactoring */
 static zval* php_git2_config_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 {
-	zend_object_handlers *standard;
-	HashTable *hash;
 	zval *entry, *tmp_result, **target_offset;
 	char *current_key, *tmp_value, *savedptr, *k;
 	int error = 0;
@@ -172,7 +168,6 @@ typedef struct{
 static int php_git2_config_resolve(zval **result, const char *var_name, zval *m_config)
 {
 	TSRMLS_FETCH();
-	HashTable *hash;
 	zval *entry, *tmp_result, **target_offset;
 	char *current_key, *tmp_value, *savedptr, *k;
 	int error = 0;
@@ -289,8 +284,7 @@ static int php_git2_config_reload(zval *object, unsigned short dtor TSRMLS_DC)
 static void php_git2_config_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
 {
 	char *key;
-	int error, key_len = 0;
-	zval *result, *entry;
+	int error = 0;
 	php_git2_config *m_config;
 
 	m_config = PHP_GIT2_GET_OBJECT(php_git2_config, object);
@@ -325,8 +319,6 @@ PHP_METHOD(git2_config, __construct)
 	git_config *config;
 	int error, path_len = 0;
 	php_git2_config *m_config;
-	zval *config_array;
-	php_git2_config_foreach_t payload;
 
 	/* @todo: supports array for reading multiple configs */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -354,10 +346,7 @@ PHP_METHOD(git2_config, __construct)
 PHP_METHOD(git2_config, get)
 {
 	char *key;
-	git_config *config;
-	int error, key_len = 0;
-	const char *value;
-	php_git2_config *m_config;
+	int key_len = 0;
 	zval *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -382,9 +371,8 @@ PHP_METHOD(git2_config, store)
 {
 	char *key;
 	int error, key_len = 0;
-	zval *result, *value, *entry;
+	zval *value;
 	php_git2_config *m_config;
-	php_git2_config_foreach_t payload;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sz", &key, &key_len, &value) == FAILURE) {
@@ -424,10 +412,8 @@ PHP_METHOD(git2_config, store)
 PHP_METHOD(git2_config, delete)
 {
 	char *key;
-	int error, key_len = 0;
-	zval *result, *entry;
+	int key_len = 0;
 	php_git2_config *m_config;
-	php_git2_config_foreach_t payload;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &key, &key_len) == FAILURE) {

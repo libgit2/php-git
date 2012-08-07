@@ -55,7 +55,6 @@ ZEND_END_ARG_INFO()
 */
 PHP_METHOD(git2_blob, getContent)
 {
-	char *data;
 	php_git2_blob *m_blob;
 	
 	m_blob = PHP_GIT2_GET_OBJECT(php_git2_blob, getThis());
@@ -78,7 +77,6 @@ PHP_METHOD(git2_blob, getContent)
 */
 PHP_METHOD(git2_blob, getSize)
 {
-	char *data;
 	php_git2_blob *m_blob;
 	
 	m_blob = PHP_GIT2_GET_OBJECT(php_git2_blob, getThis());
@@ -100,7 +98,6 @@ PHP_METHOD(git2_blob, getSize)
 */
 PHP_METHOD(git2_blob, __toString)
 {
-	char *data;
 	php_git2_blob *m_blob;
 	
 	m_blob = PHP_GIT2_GET_OBJECT(php_git2_blob, getThis());

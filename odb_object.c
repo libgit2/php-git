@@ -48,7 +48,6 @@ zend_object_value php_git2_odb_object_new(zend_class_entry *ce TSRMLS_DC)
 
 static int php_git2_odb_object_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
-	zval *retval;
 	zend_class_entry *ce;
 	php_git2_odb_object *m_raw;
 
@@ -95,7 +94,6 @@ static int php_git2_odb_object_cast_object_tostring(zval *readobj, zval *writeob
 PHP_METHOD(git2_odb_object, getContent)
 {
 	php_git2_odb_object *m_raw;
-	git_otype type;
 	
 	m_raw = PHP_GIT2_GET_OBJECT(php_git2_odb_object,getThis());
 	RETVAL_STRINGL(git_odb_object_data(m_raw->object),git_odb_object_size(m_raw->object),1);
