@@ -13,26 +13,21 @@ please check tests cases.
 you need to install libgit2 before make php-git.
 
 ````
-git clone https://github.com/libgit2/libgit2.git
+git clone https://github.com/libgit2/php-git.git --recursive
 cd libgit2
-mkdir build
-cd build
+mkdir build && cd build
 cmake ..
-cmake --build .
-sudo cmake --build . --target install
-````
-
-````
-git clone https://github.com/libgit2/php-git.git
-cd php-git
+cmake -DBUILD_SHARED_LIBS=OFF -build .
+make
+cd ../../
 phpize
 ./configure
 make
-make test
-# please create a ticket on the Github if test failed
+make install
 sudo make install
 # add `extension=git2.so` to your php.ini
 ````
+
 new php-git features almost tested.
 
 # API
