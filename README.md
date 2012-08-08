@@ -37,8 +37,8 @@ new php-git features almost tested.
 ````php
 $repo = new Git2\Repository($path);
 /*
-  bool = $repo->isExist(string sha1)
-  Git2\Object = $repo->read(string sha1)
+  bool = $repo->exists(string sha1)
+  Git2\Object = $repo->lookup(string sha1)
   string sha1 = $repo->hash(string content, long type)
   string sha1 = $repo->write(string content, long type)
   bool = $repo->isBare()
