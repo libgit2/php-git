@@ -103,7 +103,7 @@ static int php_git2_repository_initialize(zval *object, git_repository *reposito
 }
 
 /*
-{{{ proto: Git2\Repsotiroy::__construct(string $path)
+{{{ proto: Git2\Repository::__construct(string $path)
 */
 PHP_METHOD(git2_repository, __construct)
 {
@@ -129,7 +129,7 @@ PHP_METHOD(git2_repository, __construct)
 /* }}} */
 
 /*
-{{{ proto: Git2\Repsotiroy::isEmpty()
+{{{ proto: Git2\Repository::isEmpty()
 */
 PHP_METHOD(git2_repository, isEmpty)
 {
@@ -149,7 +149,7 @@ PHP_METHOD(git2_repository, isEmpty)
 /* }}} */
 
 /*
-{{{ proto: Git2\Repsotiroy::isBare()
+{{{ proto: Git2\Repository::isBare()
 */
 PHP_METHOD(git2_repository, isBare)
 {
@@ -169,7 +169,7 @@ PHP_METHOD(git2_repository, isBare)
 /* }}} */
 
 /*
-{{{ proto: Git2\Repsotiroy::getPath()
+{{{ proto: Git2\Repository::getPath()
 */
 PHP_METHOD(git2_repository, getPath)
 {
@@ -192,7 +192,7 @@ PHP_METHOD(git2_repository, getPath)
 /* }}} */
 
 /*
-{{{ proto: Git2\Repsotiroy::getWorkdir()
+{{{ proto: Git2\Repository::getWorkdir()
 */
 PHP_METHOD(git2_repository, getWorkdir)
 {
@@ -216,7 +216,7 @@ PHP_METHOD(git2_repository, getWorkdir)
 
 
 /*
-{{{ proto: Git2\Repsotiroy::init(string $path [, bool isBare])
+{{{ proto: Git2\Repository::init(string $path [, bool isBare])
 */
 PHP_METHOD(git2_repository, init)
 {
@@ -247,7 +247,7 @@ PHP_METHOD(git2_repository, init)
 /* }}} */
 
 /*
-{{{ proto: Git2\Repsotiroy::headDetached()
+{{{ proto: Git2\Repository::headDetached()
 	A repository's HEAD is detached when it points directly to a commit instead of a branch.
 */
 PHP_METHOD(git2_repository, headDetached)
@@ -268,7 +268,7 @@ PHP_METHOD(git2_repository, headDetached)
 /* }}} */
 
 /*
-{{{ proto: Git2\Repsotiroy::headOrphan()
+{{{ proto: Git2\Repository::headOrphan()
  An orphan branch is one named from HEAD but which doesn't exist in	
  the refs namespace, because it doesn't have any commit to point to.
 */                                                                                           
@@ -290,7 +290,7 @@ PHP_METHOD(git2_repository, headOrphan)
 /* }}} */
 
 /*
-{{{ proto: Git2\Repsotiroy::discover(string $path[, bool across_fs, string ceiling_dirs])
+{{{ proto: Git2\Repository::discover(string $path[, bool across_fs, string ceiling_dirs])
 */
 PHP_METHOD(git2_repository, discover)
 {
@@ -314,7 +314,7 @@ PHP_METHOD(git2_repository, discover)
 /* }}} */
 
 /*
-{{{ proto: Git2\Repsotiroy::exists(string $sha1)
+{{{ proto: Git2\Repository::exists(string $sha1)
 */
 PHP_METHOD(git2_repository, exists)
 {
@@ -347,7 +347,7 @@ PHP_METHOD(git2_repository, exists)
 
 
 /*
-{{{ proto: Git2\Repsotiroy::lookup(string $sha1[, int type = GIT_OBJ_ANY])
+{{{ proto: Git2\Repository::lookup(string $sha1[, int type = GIT_OBJ_ANY])
 */
 PHP_METHOD(git2_repository, lookup)
 {
@@ -385,7 +385,7 @@ PHP_METHOD(git2_repository, lookup)
 /* }}} */
 
 /*
-{{{ proto: Git2\Repsotiroy::write(string $contents, int $type)
+{{{ proto: Git2\Repository::write(string $contents, int $type)
 */
 PHP_METHOD(git2_repository, write)
 {
@@ -423,7 +423,7 @@ PHP_METHOD(git2_repository, write)
 /* }}} */
 
 /*
-{{{ proto: Git2\Repsotiroy::hash(string $contents, int $type)
+{{{ proto: Git2\Repository::hash(string $contents, int $type)
 */
 PHP_METHOD(git2_repository, hash)
 {
