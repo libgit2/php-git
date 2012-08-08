@@ -246,6 +246,19 @@ PHP_MINFO_FUNCTION(git2)
 	php_info_print_table_end();
 }
 
+PHP_RINIT_FUNCTION(git2)
+{
+	git_threads_init();
+	
+	return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(git2)
+{
+	git_threads_shutdown();
+	return SUCCESS;
+}
+
 zend_module_entry git2_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
@@ -254,8 +267,8 @@ zend_module_entry git2_module_entry = {
 	NULL,				/* Functions */
 	PHP_MINIT(git2),	/* MINIT */
 	NULL,				/* MSHUTDOWN */
-	NULL,				/* RINIT */
-	NULL,				/* RSHUTDOWN */
+	PHP_RINIT(git2),	/* RINIT */
+	PHP_RSHUTDOWN(git2),/* RSHUTDOWN */
 	PHP_MINFO(git2),	/* MFINFO */
 #if ZEND_MODULE_API_NO >= 20010901
 	PHP_GIT2_EXTVER,
