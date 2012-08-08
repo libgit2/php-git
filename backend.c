@@ -55,10 +55,9 @@ static int php_git2_backend_exists(git_odb_backend *_backend, const git_oid *oid
 
 static int php_git2_backend_write(git_oid *id, git_odb_backend *_backend, const void *buffer, size_t size, git_otype type)
 {
-	zval *z_id, *z_buffer, *z_size, *z_type, *retval, **value;
+	zval *z_id, *z_buffer, *z_size, *z_type, *retval;
 	int error = GIT_ERROR;
 	char t_id[GIT_OID_HEXSZ] = {0};
-	TSRMLS_FETCH();
 	php_git2_backend_internal *backend;
 	
 	MAKE_STD_ZVAL(z_id);
@@ -101,7 +100,7 @@ static int php_git2_backend_read(void **buffer,size_t *size, git_otype *type, gi
 	git_oid_fmt(out, id);
 
 	ZVAL_STRING(z_oid, out, 1);
-	ZVAL_LONG(z_type, type);
+	ZVAL_LONG(z_type, (long)type);
 	m_backend = (php_git2_backend_internal*)_backend;
 	
 	zend_call_method_with_2_params(&m_backend->self, Z_OBJCE_P(m_backend->self), NULL, "read", &retval, z_oid, z_type);
@@ -116,7 +115,7 @@ static int php_git2_backend_read(void **buffer,size_t *size, git_otype *type, gi
 		}
 
 		if (zend_hash_find(hash,"size",sizeof("size"),(void **)&value_pp) != FAILURE) {
-			size = *value_pp;
+			z_size = *value_pp;
 		}
 		
 		*buffer = estrndup(Z_STRVAL_P(data),Z_STRLEN_P(data));
@@ -136,7 +135,7 @@ static int php_git2_backend_read_header(size_t *size, git_otype *type, git_odb_b
 	TSRMLS_FETCH();
 	zval *retval, *z_oid, *z_type;
 	php_git2_backend_internal *m_backend;
-	const char out[GIT_OID_HEXSZ] = {0};
+	char out[GIT_OID_HEXSZ] = {0};
 	int result = GIT_ERROR;
 	
 	MAKE_STD_ZVAL(z_oid);
@@ -170,12 +169,12 @@ static int php_git2_backend_read_header(size_t *size, git_otype *type, git_odb_b
 	return result;
 }
 
-static int php_git2_backend_read_prefix(git_oid *id,void ** buffer, size_t * size, git_otype * type,struct git_odb_backend * _backend,const git_oid * oid,unsigned int length)
+static int php_git2_backend_read_prefix(git_oid *id, void ** buffer, size_t * size, git_otype * type, struct git_odb_backend * _backend, const git_oid * oid, size_t length)
 {
 	TSRMLS_FETCH();
 	zval *retval, *z_oid, *z_type;
 	php_git2_backend_internal *m_backend;
-	const char out[GIT_OID_HEXSZ+1] = {0};
+	char out[GIT_OID_HEXSZ+1] = {0};
 	int result = GIT_ERROR;
 	
 	MAKE_STD_ZVAL(z_oid);
@@ -196,7 +195,7 @@ static int php_git2_backend_read_prefix(git_oid *id,void ** buffer, size_t * siz
 		}
 
 		if (zend_hash_find(hash,"size",sizeof("size"),(void **)&value_pp) != FAILURE) {
-			size = *value_pp;
+			z_size = *value_pp;
 		}
 
 		if (zend_hash_find(hash,"oid",sizeof("oid"),(void **)&value_pp) != FAILURE) {

@@ -135,7 +135,7 @@ PHP_METHOD(git2_tree, valid)
 static int get_subtree(git_tree **result, git_tree *root, char *path)
 {
 	char *p, *k, *current_key, *tmp_value, *savedptr = NULL;
-	git_tree_entry *entry;
+	const git_tree_entry *entry;
 	git_tree *target,*tmp_result;
 	int error = 0;
 	

@@ -92,7 +92,6 @@ static zval* php_git2_config_read_dimension(zval *object, zval *offset, int type
 {
 	zval *entry, *tmp_result, **target_offset;
 	char *current_key, *tmp_value, *savedptr, *k;
-	int error = 0;
 	
 	entry = zend_read_property(git2_config_class_entry, object,"configs",sizeof("configs")-1, 0 TSRMLS_CC);
 
@@ -279,6 +278,8 @@ static int php_git2_config_reload(zval *object, unsigned short dtor TSRMLS_DC)
 	if (dtor == 1) {
 		zval_ptr_dtor(&entry);
 	}
+	
+	return 0;
 }
 
 static void php_git2_config_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)

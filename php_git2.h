@@ -36,6 +36,7 @@
 #  include "Zend/zend_interfaces.h"
 #  include "Zend/zend_exceptions.h"
 #  include "ext/spl/spl_exceptions.h"
+#  include "ext/standard/php_string.h"
 #  include <date/php_date.h>
 #  include <git2.h>
 #  include <git2/errors.h>
