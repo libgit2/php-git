@@ -25,8 +25,8 @@ if test $PHP_GIT2 != "no"; then
 
 	PHP_ADD_INCLUDE([$ext_srcdir/libgit2/include])
 
-        CFLAGS=" $CFLAGS -Wunused-variable -Wpointer-sign -Wimplicit-function-declaration -Winline -Wunused-macros -Wredundant-decls -Wstrict-aliasing=2 -Wswitch-enum -Wdeclaration-after-statement -Wl,libgit2/build/libgit2.a"
-        PHP_SUBST([CFLAGS])
+	CFLAGS=" $CFLAGS -Wunused-variable -Wpointer-sign -Wimplicit-function-declaration -Winline -Wunused-macros -Wredundant-decls -Wstrict-aliasing=2 -Wswitch-enum -Wdeclaration-after-statement -Wl,libgit2/build/libgit2.a"
+	PHP_SUBST([CFLAGS])
 
 	ifdef([PHP_ADD_EXTENSION_DEP],
 	[
