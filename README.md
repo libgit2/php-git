@@ -183,6 +183,7 @@ $remote->fetch();
 * Cameron Eagans
 * Graham Weldon
 * James Titcumb
+* Matthieu Moquet
 * Ryusuke SEKIYAMA
 * Shuhei Tanuma
 * Vasileios Georgitzikis
