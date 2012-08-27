@@ -76,6 +76,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_hash, 0,0,2)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_get_merge_base, 0,0,2)
+	ZEND_ARG_INFO(0, one)
+	ZEND_ARG_INFO(0, two)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_lookup, 0,0,1)
 	ZEND_ARG_INFO(0, lookup)
 	ZEND_ARG_INFO(0, type)
@@ -347,6 +352,44 @@ PHP_METHOD(git2_repository, exists)
 
 
 /*
+{{{ proto: Git2\Repository::getMergeBase(string $oid_one, string $oid_two)
+*/
+PHP_METHOD(git2_repository, getMergeBase)
+{
+	char *one, *two, oid_out[GIT_OID_HEXSZ];
+	int error, one_len = 0, two_len = 0;
+	git_oid out, one_id, two_id;
+	php_git2_repository *m_repository;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"ss", &one, &one_len, &two, &two_len) == FAILURE) {
+		return;
+	}
+	
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+
+	if (git_oid_fromstrn(&one_id, one, one_len) != GIT_OK) {
+		RETURN_FALSE;
+	}
+
+	if (git_oid_fromstrn(&two_id, two, two_len) != GIT_OK) {
+		RETURN_FALSE;
+	}
+
+	error = git_merge_base(&out, m_repository->repository, &one_id, &two_id);
+	if (error == GIT_OK) {
+		git_oid_fmt(oid_out, &out);
+		RETURN_STRINGL(oid_out, GIT_OID_HEXSZ, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+
+
+/*
 {{{ proto: Git2\Repository::lookup(string $sha1[, int type = GIT_OBJ_ANY])
 */
 PHP_METHOD(git2_repository, lookup)
@@ -465,8 +508,9 @@ static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, init,        arginfo_git2_repository_init,        ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(git2_repository, discover,    arginfo_git2_repository_discover,    ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(git2_repository, exists,      arginfo_git2_repository_exists,      ZEND_ACC_PUBLIC)
-	PHP_ME(git2_repository, hash,       arginfo_git2_repository_hash,       ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, hash,        arginfo_git2_repository_hash,       ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, write,       arginfo_git2_repository_write,       ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, getMergeBase,arginfo_git2_repository_get_merge_base,ZEND_ACC_PUBLIC)
 #ifdef lookup
 #undef lookup
 #endif
