@@ -25,11 +25,76 @@
 #include "php_git2.h"
 #include <spl/spl_array.h>
 #include <zend_interfaces.h>
-	
+
 PHPAPI zend_class_entry *git2_walker_class_entry;
+
+static const double resize_factor = 1.75;
+static const unsigned int minimum_size = 8;
+
+typedef struct{
+	git_oid oid;
+	unsigned int interested;
+} php_git2_revwalk_element;
+
+int php_git2_vector_init(php_git2_vector *v, size_t initial_size)
+{
+	assert(v);
+	memset(v, 0x0, sizeof(php_git2_vector));
+
+	if (initial_size == 0) {
+		initial_size = minimum_size;
+	}
+
+	v->_alloc_size = initial_size;
+	v->length = 0;
+
+	v->contents = emalloc(v->_alloc_size * sizeof(void *));
+}
+
+static int php_git2_resize_vector(php_git2_vector *v)
+{
+	v->_alloc_size = ((unsigned int)(v->_alloc_size * resize_factor)) + 1;
+	if (v->_alloc_size < minimum_size)
+		v->_alloc_size = minimum_size;
+
+	v->contents = erealloc(v->contents, v->_alloc_size * sizeof(void *));
+
+	return 0;
+}
+
+int php_git2_vector_insert(php_git2_vector *v, void *element)
+{
+	assert(v);
+
+	if (v->length >= v->_alloc_size && php_git2_resize_vector(v) < 0) {
+		return -1;
+	}
+
+	v->contents[v->length++] = element;
+	return 0;
+}
+
+void php_git2_vector_clear(php_git2_vector *v)
+{
+	assert(v);
+	v->length = 0;
+}
+
+void php_git2_vector_free(php_git2_vector *v)
+{
+	assert(v);
+
+	efree(v->contents);
+	v->contents = NULL;
+
+	v->length = 0;
+	v->_alloc_size = 0;
+}
+
 
 static void php_git2_walker_free_storage(php_git2_walker *object TSRMLS_DC)
 {
+	int i = 0;
 	if (object->walker != NULL) {
 		git_revwalk_free(object->walker);
 		object->walker = NULL;
@@ -38,6 +103,11 @@ static void php_git2_walker_free_storage(php_git2_walker *object TSRMLS_DC)
 		efree(object->current);
 		object->current = NULL;
 	}
+
+	for (i = 0; i < object->vector.length; i++) {
+		efree(object->vector.contents[i]);
+	}
+	php_git2_vector_free(&object->vector);
 
 	/* the repository will be free'd by Git2\Repository */
 	object->repository = NULL;
@@ -51,8 +121,11 @@ zend_object_value php_git2_walker_new(zend_class_entry *ce TSRMLS_DC)
 	zend_object_value retval;
 
 	PHP_GIT2_STD_CREATE_OBJECT(php_git2_walker);
+	object->dirty = 0;
 
 	object->current = emalloc(sizeof(git_oid));
+	php_git2_vector_init(&object->vector, 8);
+
 	return retval;
 }
 
@@ -93,8 +166,9 @@ PHP_METHOD(git2_walker, __construct)
 	error = git_revwalk_new(&m_walker->walker, m_repository->repository);
 	
 	if (error != GIT_OK) {
-		/* @todo error handling */
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "can't create a Git2\\Walker instance.");
 	}
+	
 	m_walker->repository = m_repository->repository;
 }
 /* }}} */
@@ -124,8 +198,8 @@ PHP_METHOD(git2_walker, push)
 {
 	php_git2_walker *m_walker;
 	char *sha;
-	int sha_len = 0;
-	git_oid oid;
+	int sha_len = 0, error = 0;
+	php_git2_revwalk_element *elm;
 
 	/* @todo: also supports Git2\Commit object */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -134,11 +208,17 @@ PHP_METHOD(git2_walker, push)
 	}
 	
 	m_walker     = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
+	elm = emalloc(sizeof(php_git2_revwalk_element));
+	elm->interested = 1;
 	
-	git_oid_fromstrn(&oid, sha, sha_len);
-	git_revwalk_reset(m_walker->walker);
-	git_revwalk_push(m_walker->walker, &oid);
-	memcpy(m_walker->current, &oid, sizeof(git_oid));
+	git_oid_fromstrn(&elm->oid, sha, sha_len);
+	error = git_revwalk_push(m_walker->walker, &elm->oid);
+	
+	if (error != GIT_OK) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Git2\\Walker::push failed.");
+	}
+
+	php_git2_vector_insert(&m_walker->vector, elm);
 }
 /* }}} */
 
@@ -149,8 +229,9 @@ PHP_METHOD(git2_walker, hide)
 {
 	php_git2_walker *m_walker;
 	char *sha;
-	int sha_len = 0;
+	int sha_len = 0, error = 0;
 	git_oid oid;
+	php_git2_revwalk_element *elm;
 
 	/* @todo: also supports Git2\Commit object */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -159,8 +240,16 @@ PHP_METHOD(git2_walker, hide)
 	}
 	
 	m_walker     = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
-	git_oid_fromstrn(&oid, sha, sha_len);
-	git_revwalk_hide(m_walker->walker, &oid);
+	elm = emalloc(sizeof(php_git2_revwalk_element));
+	elm->interested = 0;
+
+	git_oid_fromstrn(&elm->oid, sha, sha_len);
+	error = git_revwalk_hide(m_walker->walker, &elm->oid);
+
+	if (error != GIT_OK) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Git2\\Walker::push failed.");
+	}
+	php_git2_vector_insert(&m_walker->vector, elm);
 }
 /* }}} */
 
@@ -171,9 +260,18 @@ PHP_METHOD(git2_walker, hide)
 PHP_METHOD(git2_walker, reset)
 {
 	php_git2_walker *m_walker;
+	int i = 0;
 
-	m_walker     = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
+	m_walker = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
 	git_revwalk_reset(m_walker->walker);
+	m_walker->dirty = 0;
+	
+	for (i = 0; i < m_walker->vector.length; i++) {
+		php_git2_revwalk_element *elm = m_walker->vector.contents[i];
+		efree(elm);
+	}
+	
+	php_git2_vector_clear(&m_walker->vector);
 }
 /* }}} */
 
@@ -191,9 +289,10 @@ PHP_METHOD(git2_walker, current)
 	int error = 0;
 
 	m_walker     = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
-	error = git_object_lookup(&object, m_walker->repository, m_walker->current, GIT_OBJ_COMMIT);
+	
+	error  = git_object_lookup(&object, m_walker->repository, m_walker->current, GIT_OBJ_COMMIT);
 	result = php_git2_object_new(m_walker->repository, object TSRMLS_CC);
-	RETVAL_ZVAL(result,0,1);
+	RETVAL_ZVAL(result, 0, 1);
 }
 
 /*
@@ -203,22 +302,26 @@ PHP_METHOD(git2_walker, key)
 {
 	char out[GIT_OID_HEXSZ] = {0};
 	php_git2_walker *m_walker;
+	int error = 0;
 
-	m_walker     = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
+	m_walker = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
 	git_oid_fmt(out, m_walker->current);
-	RETURN_STRINGL(out,GIT_OID_HEXSZ,1);
+
+	RETURN_STRINGL(out, GIT_OID_HEXSZ, 1);
 }
 
 /*
-{{{ proto: Git2\Walker::valid()
+{{{ proto: Git2\Walker::next()
 */
 PHP_METHOD(git2_walker, next)
 {
 	php_git2_walker *m_walker;
 	int error = 0;
 
-	m_walker     = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
+	m_walker = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
 	error = git_revwalk_next(m_walker->current, m_walker->walker);
+	m_walker->dirty = 1;
+
 	if (error != GIT_OK) {
 		efree(m_walker->current);
 		m_walker->current = NULL;
@@ -231,16 +334,42 @@ PHP_METHOD(git2_walker, next)
 PHP_METHOD(git2_walker, rewind)
 {
 	php_git2_walker *m_walker;
+	int i = 0, error = 0;
+	m_walker = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
+	
+	if (m_walker->dirty) {
+		git_revwalk_reset(m_walker->walker);
+		
+		for (i = 0; i < m_walker->vector.length; i++) {
+			php_git2_revwalk_element *elm = m_walker->vector.contents[i];
+			
+			if (elm->interested) {
+				error = git_revwalk_push(m_walker->walker, &elm->oid);
+			} else {
+				error = git_revwalk_hide(m_walker->walker, &elm->oid);
+			}
 
-	m_walker     = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
-	git_revwalk_reset(m_walker->walker);
-	if (m_walker->current == NULL) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
-		"does not specify interested hash before calling Git2\\Walker::rewind.");
-		RETURN_FALSE;
+			if (error != GIT_OK) {
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Git2\\Walker::rewind failed. probably you pushed or hided invalied oid.");
+			}
+		}
+		
+		if (m_walker->current == NULL) {
+			m_walker->current = emalloc(sizeof(git_oid));
+		}
+
+		assert(m_walker->current);
+		error = git_revwalk_next(m_walker->current, m_walker->walker);
+		m_walker->dirty = 1;
+	} else {
+		error = git_revwalk_next(m_walker->current, m_walker->walker);
+		m_walker->dirty = 1;
+		
+		if (error != GIT_OK) {
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Git2\\Walker::rewind failed. probably you pushed or hided invalied oid.");
+		}
 	}
-	git_revwalk_push(m_walker->walker, m_walker->current);
-	git_revwalk_next(m_walker->current, m_walker->walker);
+
 }
 
 /*
@@ -249,8 +378,8 @@ PHP_METHOD(git2_walker, rewind)
 PHP_METHOD(git2_walker, valid)
 {
 	php_git2_walker *m_walker;
-	
 	m_walker     = PHP_GIT2_GET_OBJECT(php_git2_walker, getThis());
+	
 	if (m_walker->current != NULL) {
 		RETURN_TRUE;
 	} else {

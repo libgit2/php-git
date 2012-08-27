@@ -107,11 +107,19 @@ typedef struct{
 	git_reference *reference;
 } php_git2_reference;
 
+typedef struct php_git2_vector{
+	size_t _alloc_size;
+	size_t length;
+	void **contents;
+} php_git2_vector;
+
 typedef struct{
 	zend_object zo;
 	git_revwalk *walker;
 	git_oid *current;
+	php_git2_vector vector;
 	git_repository *repository;
+	int dirty;
 } php_git2_walker;
 
 typedef struct{
