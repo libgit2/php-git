@@ -43,6 +43,13 @@ zend_object_value php_git2_reference_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_reference_create, 0,0,4)
+	ZEND_ARG_INFO(0, repository)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, target)
+	ZEND_ARG_INFO(0, force)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_reference_lookup, 0,0,2)
 	ZEND_ARG_INFO(0, repository)
 	ZEND_ARG_INFO(0, path)
@@ -162,6 +169,50 @@ PHP_METHOD(git2_reference, resolve)
 /* }}} */
 
 
+/*
+{{{ proto: Git2\Reference::create(Git2\Repository $repo, string $name, string $oid_or_symbolic_ref[, bool $force = false])
+*/
+PHP_METHOD(git2_reference, create)
+{
+	zval *repository = NULL;
+	php_git2_repository *m_repository;
+	php_git2_reference *m_reference;
+	char *name, *target;
+	int error = 0, target_len = 0, name_len = 0;
+	zend_bool force = 0;
+	git_reference *ref;
+	git_oid oid;
+	zval *object;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"Oss|b", &repository, git2_repository_class_entry, &name, &name_len, &target, &target_len, &force) == FAILURE) {
+		return;
+	}
+	
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, repository);
+
+	if (git_oid_fromstr(&oid, target) == GIT_OK) {
+		error = git_reference_create_oid(&ref, m_repository->repository, name, &oid, (int)force);
+	} else {
+		error = git_reference_create_symbolic(&ref, m_repository->repository, name, target, (int)force);
+	}
+	
+	if (error != GIT_OK) {
+		const git_error *err;
+
+		err = giterr_last();
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Git2\\Refernce::create failed: %s (%d)", err->message, err->klass);
+	}
+
+	MAKE_STD_ZVAL(object);
+	object_init_ex(object, git2_reference_class_entry);
+	m_reference = PHP_GIT2_GET_OBJECT(php_git2_reference, object);
+	m_reference->reference = ref;
+
+	RETURN_ZVAL(object, 0, 1);
+}
+/* }}} */
+
 
 typedef struct {
 	unsigned int type;
@@ -264,6 +315,7 @@ static zend_function_entry php_git2_reference_methods[] = {
 	PHP_ME(git2_reference, getName,   NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(git2_reference, getBaseName,NULL,ZEND_ACC_PUBLIC)
 	PHP_ME(git2_reference, resolve,   NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_reference, create,    arginfo_git2_reference_create, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(git2_reference, each,      arginfo_git2_reference_each, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 #ifdef lookup
 #undef lookup
