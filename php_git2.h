@@ -281,7 +281,7 @@ static inline void create_tree_entry_from_entry(zval **object, git_tree_entry *e
 
 	add_property_string(*object, "name", (char *)git_tree_entry_name(entry), 1);
 	add_property_string(*object, "oid", buf, 1);
-	add_property_long(*object, "attributes", git_tree_entry_attributes(entry));
+	add_property_long(*object, "attributes", git_tree_entry_filemode(entry));
 }
 
 static inline void php_git2_create_index_entry(zval **object, git_index_entry *entry TSRMLS_DC)

@@ -86,6 +86,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_lookup, 0,0,1)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git2_repository_checkout, 0,0,0)
+ZEND_END_ARG_INFO()
+
 static int php_git2_repository_initialize(zval *object, git_repository *repository TSRMLS_DC)
 {
 	zval *odb;
@@ -497,6 +500,33 @@ PHP_METHOD(git2_repository, hash)
 /* }}} */
 
 
+/*
+{{{ proto: Git2\Repository::checkout(Git2\Tree $tree[, int $opts, zval $stats)
+	TODO: implement this
+*/
+PHP_METHOD(git2_repository, checkout)
+{
+/*
+	php_git2_repository *m_repository;
+	php_git2_tree *m_tree;
+	zval *tree;
+	int error = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"O", &tree, git2_tree_class_entry) == FAILURE) {
+		return;
+	}
+	
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	m_tree = PHP_GIT2_GET_OBJECT(php_git2_tree, tree);
+	
+	error = git_checkout_tree(m_repository->repository, m_tree->tree, NULL, NULL);
+	RETURN_LONG(error);
+*/
+}
+/* }}} */
+
+
 static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(git2_repository, isEmpty,     NULL,                                ZEND_ACC_PUBLIC)
@@ -511,6 +541,7 @@ static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, hash,        arginfo_git2_repository_hash,       ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, write,       arginfo_git2_repository_write,       ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, getMergeBase,arginfo_git2_repository_get_merge_base,ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, checkout,    arginfo_git2_repository_checkout, ZEND_ACC_PUBLIC)
 #ifdef lookup
 #undef lookup
 #endif
