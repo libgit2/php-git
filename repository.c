@@ -23,6 +23,7 @@
  */
 
 #include "php_git2.h"
+#include "ext/standard/php_smart_str.h"
 
 PHPAPI zend_class_entry *git2_repository_class_entry;
 void php_git2_repository_init(TSRMLS_D);
@@ -527,6 +528,52 @@ PHP_METHOD(git2_repository, checkout)
 /* }}} */
 
 
+static int printer(
+	void *data,
+	const git_diff_delta *delta,
+	const git_diff_range *range,
+	char usage,
+	const char *line,
+	size_t line_len)
+{
+	smart_str *string = (smart_str*)data;
+	
+	smart_str_appendl(string, line, strlen(line));
+	return 0;
+}
+
+/*
+{{{ proto: Git2\Repository::diff(Git2\Tree $a, Git2\Tree $b, $options = NULL)
+	Experimental
+*/
+PHP_METHOD(git2_repository, diff)
+{
+	zval *old, *new;
+	php_git2_tree *m_old, *m_new;
+	php_git2_repository *m_repository;
+	git_diff_list *list;
+	smart_str string = {0};
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"OO", &old, git2_tree_class_entry, &new, git2_tree_class_entry) == FAILURE) {
+		return;
+	}
+
+	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, getThis());
+	m_old = PHP_GIT2_GET_OBJECT(php_git2_tree, old);
+	m_new = PHP_GIT2_GET_OBJECT(php_git2_tree, new);
+
+	git_diff_tree_to_tree(m_repository->repository, NULL, m_old->tree, m_new->tree, &list);
+	
+	git_diff_print_compact(list, &string, printer);
+	smart_str_0(&string);
+	git_diff_list_free(list);
+	
+	RETVAL_STRING(string.c, 0);
+}
+/* }}} */
+
+
 static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, __construct, arginfo_git2_repository___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(git2_repository, isEmpty,     NULL,                                ZEND_ACC_PUBLIC)
@@ -542,6 +589,7 @@ static zend_function_entry php_git2_repository_methods[] = {
 	PHP_ME(git2_repository, write,       arginfo_git2_repository_write,       ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, getMergeBase,arginfo_git2_repository_get_merge_base,ZEND_ACC_PUBLIC)
 	PHP_ME(git2_repository, checkout,    arginfo_git2_repository_checkout, ZEND_ACC_PUBLIC)
+	PHP_ME(git2_repository, diff,    NULL, ZEND_ACC_PUBLIC)
 #ifdef lookup
 #undef lookup
 #endif
