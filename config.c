@@ -209,10 +209,10 @@ static int php_git2_config_resolve(zval **result, const char *var_name, zval *m_
 	return error;
 }
 
-static int php_git2_config_foreach(const char *var_name, const char *value, void *payload)
+static int php_git2_config_foreach(const git_config_entry * entry, void *payload)
 {
 	HashTable *hash;
-	zval *entry, **target_offset;
+	zval *zentry, **target_offset;
 	const char *config_value;
 	char *current_key, *tmp_value, *savedptr, *k;
 	php_git2_config_foreach_t *opaque = (php_git2_config_foreach_t *)payload;
@@ -220,9 +220,9 @@ static int php_git2_config_foreach(const char *var_name, const char *value, void
 	
 	hash = Z_ARRVAL_P(opaque->result);
 	
-	error = git_config_get_string(&config_value, opaque->config, var_name);
+	error = git_config_get_string(&config_value, opaque->config, entry->name);
 
-	tmp_value = estrdup(var_name);
+	tmp_value = estrdup(entry->name);
 	current_key = php_strtok_r(tmp_value, ".", &savedptr);
 	while (current_key != NULL) {
 		k  = current_key;
@@ -234,20 +234,24 @@ static int php_git2_config_foreach(const char *var_name, const char *value, void
 					hash = Z_ARRVAL_P(*target_offset);
 				}
 			} else {
-				MAKE_STD_ZVAL(entry);
-				array_init(entry);
-				zend_hash_add(hash, k, strlen(k)+1, (void **)&entry, sizeof(entry), NULL);
-				hash = Z_ARRVAL_P(entry);
+				MAKE_STD_ZVAL(zentry);
+				array_init(zentry);
+				zend_hash_add(hash, k, strlen(k)+1, (void **)&zentry, sizeof(zentry), NULL);
+				hash = Z_ARRVAL_P(zentry);
 			}
 		}
 	}
 	
 	if (k != NULL) {
-		MAKE_STD_ZVAL(entry);
-		ZVAL_STRING(entry, config_value, 1);
-		zend_hash_add(hash, k, strlen(k)+1, (void **)&entry, sizeof(entry), NULL);
-		Z_ADDREF_P(entry);
-		zval_ptr_dtor(&entry);
+		MAKE_STD_ZVAL(zentry);
+		if (config_value) {
+			ZVAL_STRING(zentry, config_value, 1);
+		} else {
+			ZVAL_NULL(zentry);
+		}
+		zend_hash_add(hash, k, strlen(k)+1, (void **)&zentry, sizeof(zentry), NULL);
+		Z_ADDREF_P(zentry);
+		zval_ptr_dtor(&zentry);
 	}
 	efree(tmp_value);
 	
@@ -273,7 +277,7 @@ static int php_git2_config_reload(zval *object, unsigned short dtor TSRMLS_DC)
 
 	payload.config = m_config->config;
 	payload.result = entry;
-	error = git_config_foreach(m_config->config,&php_git2_config_foreach,&payload);
+	error = git_config_foreach(m_config->config, &php_git2_config_foreach, &payload);
 	add_property_zval(object, "configs", entry);
 	if (dtor == 1) {
 		zval_ptr_dtor(&entry);

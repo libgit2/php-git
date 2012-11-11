@@ -125,7 +125,7 @@ PHP_METHOD(git2_remote, fetch)
 {
 	php_git2_remote *m_remote;
 	git_indexer *idx = NULL;
-	git_indexer_stats stats;
+	git_transfer_progress stats;
 	char *packname = NULL;
 	int error = 0;
 	long direction = 0;
