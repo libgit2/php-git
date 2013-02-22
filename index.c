@@ -94,7 +94,7 @@ PHP_METHOD(git2_index, writeTree)
 	int error = 0;
 	
 	m_index     = PHP_GIT2_GET_OBJECT(php_git2_index, getThis());
-	error = git_tree_create_fromindex(&tree_oid, m_index->index);
+	error = git_index_write_tree(&tree_oid, m_index->index);
 
 	git_oid_fmt(oid_out, &tree_oid);
 	RETVAL_STRINGL(oid_out,GIT_OID_HEXSZ,1);
@@ -115,7 +115,7 @@ PHP_METHOD(git2_index, current)
 	zval *z_entry;
 
 	m_index     = PHP_GIT2_GET_OBJECT(php_git2_index, getThis());
-	entry = git_index_get(m_index->index, m_index->offset);
+	entry = git_index_get_byindex(m_index->index, m_index->offset);
 	if (entry == NULL) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
 			"specified offset does not exist. %d");
