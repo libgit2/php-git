@@ -1,16 +1,16 @@
 # PHP-Git2 - libgit2 bindings in PHP
 
-php-git2 is a PHP bindings to the libgit2 linkable C Git library. 
-this extension are re-writing php-git as that code too dirty.
+php-git2 is a PHP binding to the libgit2 linkable C Git library.
+This extension is a re-writing of php-git as that code was too dirty.
 
 # Important Notice
 
-php-git changed it's API drastically. this changes doesn't care about compatibility between old one.
-please check tests cases.
+php-git changed it's API drastically. These changes do not care about backward
+compatiblity. Please take a look at the tests for examples of the new API.
 
 # Installing And Running
 
-you need to install libgit2 before make php-git.
+You need to install libgit2 before you can make php-git.
 
 ````
 git clone https://github.com/libgit2/php-git.git --recursive
@@ -28,7 +28,7 @@ sudo make install
 # add `extension=git2.so` to your php.ini
 ````
 
-new php-git features almost tested.
+New php-git features are almost tested.
 
 # API
 
@@ -161,11 +161,11 @@ bool $odb->exists(sha1)// same as Git2\Repository::exists
 ````
 
 ## Reflog
-will be add.
+Will be added.
 
 ## Remote access (Experimental)
 
-this API will be change.
+This API will be changed.
 
 ````
 $repo = new Git2\Repository("/path/to/.git");
