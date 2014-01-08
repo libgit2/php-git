@@ -99,18 +99,17 @@ PHP_METHOD(git2_reference, lookup)
 PHP_METHOD(git2_reference, getTarget)
 {
 	php_git2_reference *m_reference;
-	
+	const git_oid *oid;
+	char oid_out[GIT_OID_HEXSZ] = {0};
+
 	m_reference = PHP_GIT2_GET_OBJECT(php_git2_reference, getThis());
-	
+
 	if (git_reference_type(m_reference->reference) == GIT_REF_OID) {
-		const git_oid *oid;
-		char oid_out[GIT_OID_HEXSZ] = {0};
-		
-		oid = git_reference_oid(m_reference->reference);
+		oid = git_reference_target(m_reference->reference);
 		git_oid_fmt(oid_out, oid);
 		RETVAL_STRINGL(oid_out,GIT_OID_HEXSZ,1);
 	} else {
-		RETVAL_STRING(git_reference_target(m_reference->reference),1);
+		RETVAL_STRING(git_reference_symbolic_target(m_reference->reference), 1);
 	}
 }
 /* }}} */
@@ -192,9 +191,9 @@ PHP_METHOD(git2_reference, create)
 	m_repository = PHP_GIT2_GET_OBJECT(php_git2_repository, repository);
 
 	if (git_oid_fromstr(&oid, target) == GIT_OK) {
-		error = git_reference_create_oid(&ref, m_repository->repository, name, &oid, (int)force);
+		error = git_reference_create(&ref, m_repository->repository, name, &oid, (int)force);
 	} else {
-		error = git_reference_create_symbolic(&ref, m_repository->repository, name, target, (int)force);
+		error = git_reference_symbolic_create(&ref, m_repository->repository, name, target, (int)force);
 	}
 	
 	if (error != GIT_OK) {
@@ -303,7 +302,7 @@ PHP_METHOD(git2_reference, each)
 	MAKE_STD_ZVAL(opaque.result);
 	array_init(opaque.result);
 	
-	git_reference_foreach(m_repository->repository, list_flags, &php_git2_ref_foreach_cb, (void *)&opaque);
+	git_reference_foreach(m_repository->repository, &php_git2_ref_foreach_cb, (void *)&opaque);
 	
 	RETVAL_ZVAL(opaque.result,0,1);
 }

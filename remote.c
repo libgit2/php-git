@@ -88,7 +88,7 @@ PHP_METHOD(git2_remote, __construct)
 /* }}} */
 
 
-static int php_git2_rename_packfile(char *packname, git_indexer *idx)
+static int php_git2_rename_packfile(char *packname, git_indexer_stream *idx)
 {
 	char path[GIT_PATH_MAX], oid[GIT_OID_HEXSZ + 1], *slash;
 	int ret;
@@ -101,7 +101,7 @@ static int php_git2_rename_packfile(char *packname, git_indexer *idx)
 	}
 
 	memset(oid, 0x0, sizeof(oid));
-	git_oid_fmt(oid, git_indexer_hash(idx));
+	git_oid_fmt(oid, git_indexer_stream_hash(idx));
 	ret = sprintf(slash + 1, "pack-%s.pack", oid);
 	if(ret < 0) {
 	  return -2;
@@ -124,7 +124,7 @@ static int show_ref__cb(git_remote_head *head, void *payload)
 PHP_METHOD(git2_remote, fetch)
 {
 	php_git2_remote *m_remote;
-	git_indexer *idx = NULL;
+	git_indexer_stream *idx = NULL;
 	git_transfer_progress stats;
 	char *packname = NULL;
 	int error = 0;
@@ -138,31 +138,31 @@ PHP_METHOD(git2_remote, fetch)
 		return;
 	}
 */
-	direction = GIT_DIR_FETCH;
+	direction = GIT_DIRECTION_FETCH;
 	
 	error = git_remote_connect(m_remote->remote, direction);
 	error = git_remote_ls(m_remote->remote, &show_ref__cb, NULL);
 	//error = git_remote_download(&packname, m_remote->remote);
 
-	if (packname != NULL) {
+	/*if (packname != NULL) {
 		// Create a new instance indexer
-		error = git_indexer_new(&idx, packname);
+		error = git_indexer_stream_new(&idx, packname);
 		PHP_GIT2_EXCEPTION_CHECK(error);
 
-		error = git_indexer_run(idx, &stats);
+		error = git_indexer_stream_run(idx, &stats);
 		PHP_GIT2_EXCEPTION_CHECK(error);
 
-		error = git_indexer_write(idx);
+		error = git_indexer_stream_write(idx);
 		PHP_GIT2_EXCEPTION_CHECK(error);
 
 		error = php_git2_rename_packfile(packname, idx);
 		PHP_GIT2_EXCEPTION_CHECK(error);
-	}
+	}*/
 
 	//error = git_remote_update_tips(m_remote->remote);
 	PHP_GIT2_EXCEPTION_CHECK(error);
 
-	free(packname);
+	//free(packname);
 	git_indexer_free(idx);
 }
 /* }}} */

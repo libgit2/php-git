@@ -41,6 +41,7 @@
 #  include <git2.h>
 #  include <git2/errors.h>
 #  include <git2/odb_backend.h>
+#  include <git2/sys/odb_backend.h>
 
 extern zend_module_entry git2_module_entry;
 

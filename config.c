@@ -430,7 +430,7 @@ PHP_METHOD(git2_config, delete)
 	}
 	
 	m_config = PHP_GIT2_GET_OBJECT(php_git2_config, getThis());
-	git_config_delete(m_config->config, key);
+	git_config_delete_entry(m_config->config, key);
 	php_git2_config_reload(getThis(), 0 TSRMLS_CC);
 }
 /* }}} */
