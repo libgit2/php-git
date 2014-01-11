@@ -19,7 +19,7 @@ if (preg_match_all("/GIT_EXTERN\((.+?)\)\s*([a-zA-Z0-9_-]+)\((.+?)\);/s", $data,
         $tmp['retval'] = $match[1][$i];
 
         $d = count($list);
-        if (preg_match("/\*\*/", $list[0])) {
+        if ((preg_match("/(\*\*|out)/", $list[0]) || preg_match("/(write|create|new)/", $match[2][$i]))) {
             $d--;
         }
 

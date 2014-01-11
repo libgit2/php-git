@@ -33,6 +33,7 @@
 #include "revwalk.h"
 #include "treebuilder.h"
 #include "reference.h"
+#include "g_config.h"
 
 int git2_resource_handle;
 
@@ -61,6 +62,8 @@ void static destruct_git2(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 				git_treebuilder_free(PHP_GIT2_V(resource, treebuilder));
 			case PHP_GIT2_TYPE_REFERENCE:
 				git_reference_free(PHP_GIT2_V(resource, reference));
+			case PHP_GIT2_TYPE_CONFIG:
+				git_config_free(PHP_GIT2_V(resource, config));
 			default:
 				break;
 		}
@@ -212,6 +215,45 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_revwalk_simplify_first_parent, arginfo_git_revwalk_simplify_first_parent)
 	PHP_FE(git_revwalk_free, arginfo_git_revwalk_free)
 	PHP_FE(git_revwalk_repository, arginfo_git_revwalk_repository)
+
+	/* config */
+	PHP_FE(git_config_find_global, arginfo_git_config_find_global)
+	PHP_FE(git_config_find_xdg, arginfo_git_config_find_xdg)
+	PHP_FE(git_config_find_system, arginfo_git_config_find_system)
+	PHP_FE(git_config_open_default, arginfo_git_config_open_default)
+	PHP_FE(git_config_new, arginfo_git_config_new)
+	PHP_FE(git_config_add_file_ondisk, arginfo_git_config_add_file_ondisk)
+	PHP_FE(git_config_open_ondisk, arginfo_git_config_open_ondisk)
+	PHP_FE(git_config_open_level, arginfo_git_config_open_level)
+	PHP_FE(git_config_open_global, arginfo_git_config_open_global)
+	PHP_FE(git_config_refresh, arginfo_git_config_refresh)
+	PHP_FE(git_config_free, arginfo_git_config_free)
+	PHP_FE(git_config_get_entry, arginfo_git_config_get_entry)
+	PHP_FE(git_config_get_int32, arginfo_git_config_get_int32)
+	PHP_FE(git_config_get_int64, arginfo_git_config_get_int64)
+	PHP_FE(git_config_get_bool, arginfo_git_config_get_bool)
+	PHP_FE(git_config_get_string, arginfo_git_config_get_string)
+	PHP_FE(git_config_get_multivar_foreach, arginfo_git_config_get_multivar_foreach)
+	PHP_FE(git_config_multivar_iterator_new, arginfo_git_config_multivar_iterator_new)
+	PHP_FE(git_config_next, arginfo_git_config_next)
+	PHP_FE(git_config_iterator_free, arginfo_git_config_iterator_free)
+	PHP_FE(git_config_set_int32, arginfo_git_config_set_int32)
+	PHP_FE(git_config_set_int64, arginfo_git_config_set_int64)
+	PHP_FE(git_config_set_bool, arginfo_git_config_set_bool)
+	PHP_FE(git_config_set_string, arginfo_git_config_set_string)
+	PHP_FE(git_config_set_multivar, arginfo_git_config_set_multivar)
+	PHP_FE(git_config_delete_entry, arginfo_git_config_delete_entry)
+	PHP_FE(git_config_delete_multivar, arginfo_git_config_delete_multivar)
+	PHP_FE(git_config_foreach, arginfo_git_config_foreach)
+	PHP_FE(git_config_iterator_new, arginfo_git_config_iterator_new)
+	PHP_FE(git_config_iterator_glob_new, arginfo_git_config_iterator_glob_new)
+	PHP_FE(git_config_foreach_match, arginfo_git_config_foreach_match)
+	PHP_FE(git_config_get_mapped, arginfo_git_config_get_mapped)
+	PHP_FE(git_config_lookup_map_value, arginfo_git_config_lookup_map_value)
+	PHP_FE(git_config_parse_bool, arginfo_git_config_parse_bool)
+	PHP_FE(git_config_parse_int32, arginfo_git_config_parse_int32)
+	PHP_FE(git_config_parse_int64, arginfo_git_config_parse_int64)
+	PHP_FE(git_config_backend_foreach_match, arginfo_git_config_backend_foreach_match)
 
 	PHP_FE_END
 };

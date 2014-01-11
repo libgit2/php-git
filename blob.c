@@ -180,12 +180,12 @@ PHP_FUNCTION(git_blob_lookup)
 
 	ZEND_FETCH_RESOURCE(git2, php_git2_t*, &repository, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 
-	PHP_GIT2_MAKE_RESOURCE(result);
 	error = git_blob_lookup(&blob, PHP_GIT2_V(git2, repository), &id);
 	if (php_git2_check_error(error, "git_blob_lookup" TSRMLS_CC)) {
 		RETURN_FALSE
 	}
 
+	PHP_GIT2_MAKE_RESOURCE(result);
 	PHP_GIT2_V(result, blob) = blob;
 	result->type = PHP_GIT2_TYPE_BLOB;
 	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);

@@ -82,6 +82,7 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_REVWALK,
 	PHP_GIT2_TYPE_TREEBUILDER,
 	PHP_GIT2_TYPE_REFERENCE,
+	PHP_GIT2_TYPE_CONFIG,
 };
 
 typedef struct php_git2_t {
@@ -95,6 +96,7 @@ typedef struct php_git2_t {
 		git_revwalk *revwalk;
 		git_treebuilder *treebuilder;
 		git_reference *reference;
+		git_config *config;
 	} v;
 	int should_free_v;
 	int resource_id;
