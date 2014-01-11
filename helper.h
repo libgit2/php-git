@@ -30,4 +30,10 @@
 
 int php_git2_check_error(int error_code, const char *action TSRMLS_DC);
 
+zval* php_git2_read_arrval(zval *array, char *name, size_t name_len TSRMLS_DC);
+
+long php_git2_read_arrval_long(zval *array, char *name, size_t name_len TSRMLS_DC);
+
+const char* php_git2_read_arrval_string(zval *array, char *name, size_t name_len TSRMLS_DC);
+
 #endif

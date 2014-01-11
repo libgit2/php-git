@@ -469,17 +469,6 @@ PHP_FUNCTION(git_commit_nth_gen_ancestor)
 
 }
 
-static zval* php_git2_read_arrval(zval *array, char *name, size_t name_len TSRMLS_DC)
-{
-	zval *result = NULL, **element;
-
-	if (zend_hash_find(Z_ARRVAL_P(array), name, name_len, (void**)&element) == SUCCESS) {
-		result = *element;
-	}
-
-	return result;
-}
-
 static void php_git2_array_to_signature(git_signature *signature, zval *author TSRMLS_DC)
 {
 	zval *name = NULL, *email = NULL, *time = NULL;
