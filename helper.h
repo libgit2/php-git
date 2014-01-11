@@ -36,4 +36,10 @@ long php_git2_read_arrval_long(zval *array, char *name, size_t name_len TSRMLS_D
 
 const char* php_git2_read_arrval_string(zval *array, char *name, size_t name_len TSRMLS_DC);
 
+void php_git2_array_to_signature(git_signature *signature, zval *author TSRMLS_DC);
+
+void php_git2_signature_to_array(const git_signature *signature, zval **out TSRMLS_DC);
+
+void php_git2_strarray_to_array(git_strarray *array, zval **out TSRMLS_DC);
+
 #endif

@@ -88,6 +88,8 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_ODB,
 	PHP_GIT2_TYPE_REFDB,
 	PHP_GIT2_TYPE_STATUS_LIST,
+	PHP_GIT2_TYPE_BRANCH_ITERATOR,
+	PHP_GIT2_TYPE_TAG,
 };
 
 typedef struct php_git2_t {
@@ -107,6 +109,8 @@ typedef struct php_git2_t {
 		git_odb *odb;
 		git_refdb *refdb;
 		git_status_list *status_list;
+		git_branch_iterator *branch_iterator;
+		git_tag *tag;
 	} v;
 	int should_free_v;
 	int resource_id;

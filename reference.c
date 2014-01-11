@@ -451,11 +451,7 @@ PHP_FUNCTION(git_reference_list)
 		RETURN_FALSE
 	}
 
-	MAKE_STD_ZVAL(result);
-	array_init(result);
-	for (i = 0; i < list.count; i++) {
-		add_next_index_string(result, list.strings[i], 1);
-	}
+	php_git2_strarray_to_array(&list, &result TSRMLS_CC);
 	git_strarray_free(&list);
 
 	RETURN_ZVAL(result, 0, 1);

@@ -45,12 +45,20 @@ class Func
                 return true;
             }
         }
+
         return false;
+    }
+
+    public function isStringCreator()
+    {
+        if (preg_match("/(char)/", $this->getReturnType())) {
+            return true;
+        }
     }
 
     public function isLongCreator()
     {
-        if (preg_match("/size_t/", $this->getReturnType())) {
+        if (preg_match("/(size_t|int)/", $this->getReturnType())) {
             return true;
         }
     }
@@ -111,6 +119,12 @@ class Arg
         return $this->name;
     }
 
+    public function setName($name)
+    {
+        return $this->name = $name;
+    }
+
+
     public function getType()
     {
         return $this->type;
@@ -137,10 +151,14 @@ class Arg
     {
         if (preg_match("/char/", $this->type)) {
             return "char";
+        } else if (preg_match("/(size_t|int)/", $this->type)) {
+            return "long";
+        } else if (preg_match("/git_oid/", $this->type)) {
+            return "char";
         } else if (preg_match("/^git_/", $this->type)) {
             return "zval";
-        } else if (preg_match("/size_t/", $this->type)) {
-            return "long";
+        } else {
+            error_log(sprintf("%s (zendtype)", $this->type));
         }
     }
 
@@ -318,6 +336,8 @@ class Fashion
                 "git_odb",
                 "git_refdb",
                 "git_status_list",
+                "git_branch_iterator",
+                "git_tag",
             );
         }
 
@@ -335,10 +355,14 @@ class Fashion
         } else {
             if (preg_match("/(int|size_t)/", $f->getReturnType())) {
                 return "long";
+            } else if (preg_match("/git_signature/", $f->getReturnType())) {
+                return "array";
             } else if (preg_match("/git/", $f->getReturnType())) {
                 return "resource";
             } else if (preg_match("/void/", $f->getReturnType())) {
                 return "void";
+            } else if (preg_match("/char/", $f->getReturnType())) {
+                return "string";
             } else {
                 error_log(sprintf("%s does not support yet", $f->getReturnType()));
             }
@@ -373,8 +397,14 @@ class Fashion
                     $printer->put("string");
                 } else if (preg_match("/(int|size_t)/", $arg->getType())) {
                     $printer->put("long");
+                } else if (preg_match("/(git_oid)/", $arg->getType())) {
+                    $printer->put("string");
+                } else if (preg_match("/(git_signature)/", $arg->getType())) {
+                    $printer->put("array");
+                } else if (preg_match("/(git_strarray)/", $arg->getType())) {
+                    $printer->put("array");
                 } else {
-                    error_log("HOGE");
+                    error_log(sprintf("# unknown type (%s)", $arg->getType()));
                 }
             }
             $printer->put(" ");
@@ -409,8 +439,13 @@ class Fashion
             $printer->put("php_git2_t *result = NULL;\n");
         } else if ($f->isArrayCreator()) {
             $printer->put("`type` *result = NULL;\n", "type", $f->getReturnType());
+            if (preg_match("/git_signature/", $f->getReturnType())) {
+                $printer->put("zval *__result = NULL;\n");
+            }
         } else if ($f->isLongCreator()) {
             $printer->put("`type` result = 0;\n", "type", $f->getReturnType());
+        } else if ($f->isStringCreator()) {
+            $printer->put("`type` *result = NULL;\n", "type", $f->getReturnType());
         }
 
         $i = 0;
@@ -453,10 +488,20 @@ class Fashion
                 }
             }
 
+            if ($arg->getType() == "git_oid") {
+                $printer->put("git_oid __`name`;\n", "name", $arg->getName());
+            }
+
             $i++;
         }
         if ($f->getReturnType() == "int") {
             $printer->put("`type` error = 0;\n", "type", $f->getReturnType());
+        }
+        if (preg_match("/git_oid/", $f->getReturnType())) {
+            $printer->put("char __result[41] = {0};\n");
+        }
+        if (preg_match("/_owner$/", $f->getName())) {
+            $printer->put("php_git2_t *__result = NULL;\n");
         }
     }
 
@@ -464,9 +509,6 @@ class Fashion
     {
         $printer->put("if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,\n");
         $printer->block(function(Printer $printer) use ($f) {
-//            $printer->put('"`specs`", `values`) == FAILURE) {',
-//                "specs", "s",
-//                "values", "&a, &a_len");
             $i = 0;
             $cnt = count($f->getArguments());
             $printer->put('"');
@@ -485,6 +527,8 @@ class Fashion
                     $printer->put("s");
                 } else if (preg_match("/long/", $arg->getZendType())) {
                     $printer->put("l");
+                } else if (preg_match("/git_signature/", $arg->getType())) {
+                    $printer->put("a");
                 } else if ($this->shouldResource($arg)) {
                     $printer->put("r");
                 } else {
@@ -541,9 +585,27 @@ class Fashion
         }
     }
 
+        public function generateOidTranslation(Printer $printer, Func $f)
+        {
+            foreach ($f->getArguments() as $arg) {
+                /** @var Arg $arg */
+                if ($arg->getType() == "git_oid") {
+                    $printer->put("if (git_oid_fromstrn(&__`name`, `name`, `name`_len)) {\n",
+                        "name", $arg->getName()
+                    );
+                    $printer->block(function(Printer $printer) use($arg) {
+                        $printer->put("RETURN_FALSE;\n");
+                    });
+                    $printer->put("}\n");
+                    $arg->setName("__" . $arg->getName());
+                }
+            }
+        }
+
     public function generateFunctionCall(Printer $printer, Func $f)
     {
-        if ($f->getReturnType() == "int") {
+        $this->generateOidTranslation($printer, $f);
+        if ($f->getReturnType() == "int" && $f->isResourceCreator()) {
             $printer->put("error = `function`",
                 "function", $f->getName()
             );
@@ -646,7 +708,19 @@ class Fashion
             }
 
             $printer->put(");\n");
-            $printer->put("/* TODO(chobie): implement this */\n");
+            if (preg_match("/git_oid/", $f->getReturnType())) {
+                $printer->put("git_oid_fmt(__result, `name`);\n", "name", "result");
+                $printer->put("RETURN_STRING(__result, 1);\n");
+            } else if (preg_match("/_owner$/", $f->getName())) {
+                $this->generateMakeResourceIfNeeded($printer, $f, "__result", 1);
+            } else if (preg_match("/_type/", $f->getName())) {
+                $printer->put("RETURN_LONG(`name`);\n", "name", "result");
+            } else if (preg_match("/git_signature/", $f->getReturnType())) {
+                $printer->put("php_git2_signature_to_array(result, &__result TSRMLS_CC);\n");
+                $printer->put("RETURN_ZVAL(__result, 0, 1);\n");
+            } else {
+                $printer->put("/* TODO(chobie): implement this */\n");
+            }
         } else if ($f->isLongCreator()) {
             $printer->put("result = `function`",
                 "function", $f->getName()
@@ -675,7 +749,11 @@ class Fashion
             }
             $printer->put(");\n");
 
-            $printer->put("RETURN_LONG(`name`);\n", "name", "result");
+            if (preg_match("/_is_/", $f->getName())) {
+                $printer->put("RETURN_BOOL(`name`);\n", "name", "result");
+            } else {
+                $printer->put("RETURN_LONG(`name`);\n", "name", "result");
+            }
         } else if ($f->isSavior()) {
 
             $first = $f->first();
@@ -714,7 +792,34 @@ class Fashion
             $printer->put("};\n");
 
             $printer->put("zval_ptr_dtor(&`name`);\n", "name", $first->getName());
+        } else if ($f->isStringCreator()) {
+            $printer->put("result = `function`",
+                "function", $f->getName()
+            );
+            $printer->put("(");
+            $i = 0;
+            $cnt = count($f->getArguments());
+            foreach ($f->getArguments() as $arg) {
+                /** @var Arg $arg */
 
+                if ($this->shouldResource($arg) && !$arg->shouldWrite()) {
+                    $printer->put("PHP_GIT2_V(_`name`, `type`)",
+                        "name", $arg->getName(),
+                        "type", $this->getNormarizedTypeName($arg)
+                    );
+                } else if ($arg->shouldWrite()) {
+                    $printer->put("&`name`", "name", $arg->getName());
+                } else {
+                    $printer->put("`name`", "name", $arg->getName());
+                }
+
+                if ($i + 1 < $cnt) {
+                    $printer->put(", ");
+                }
+                $i++;
+            }
+            $printer->put(");\n");
+            $printer->put("RETURN_STRING(`name`, 1);\n", "name", "result");
         } else {
             error_log(sprintf("# %s not supported (call function)", $f->getName()));
         }
@@ -722,7 +827,7 @@ class Fashion
 
     public function generateCheckStatementIfNeeded(Printer $printer, Func $f)
     {
-        if ($f->getReturnType() == "int") {
+        if ($f->getReturnType() == "int" && $f->isResourceCreator()) {
             $printer->put('if (php_git2_check_error(error, "`func`" TSRMLS_CC)) {',
                 "func", $f->getName()
             );
@@ -740,21 +845,23 @@ class Fashion
         return preg_replace("/^git_/", "", $name);
     }
 
-    public function generateMakeResourceIfNeeded(Printer $printer, Func $f)
+    public function generateMakeResourceIfNeeded(Printer $printer, Func $f, $name = "result", $force = 0)
     {
-        if ($f->isResourceCreator()) {
+        if ($f->isResourceCreator() || $force) {
             $arg = $f->first();
-            $printer->put("PHP_GIT2_MAKE_RESOURCE(result);\n");
-            $printer->put("PHP_GIT2_V(result, `type`) = `variable`;\n",
+            $printer->put("PHP_GIT2_MAKE_RESOURCE(`name`);\n", "name", $name);
+            $printer->put("PHP_GIT2_V(`name`, `type`) = `variable`;\n",
+                "name", $name,
                 "type", $this->getNormarizedTypeName($arg),
                 "variable", $arg->getName()
             );
-            $printer->put("result->type = PHP_GIT2_TYPE_`type`;\n",
+            $printer->put("`name`->type = PHP_GIT2_TYPE_`type`;\n",
+                "name", $name,
                 "type", strtoupper($this->getNormarizedTypeName($arg))
             );
-            $printer->put("result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);\n");
-            $printer->put("result->should_free_v = 0;\n");
-            $printer->put("ZVAL_RESOURCE(return_value, result->resource_id);\n");
+            $printer->put("`name`->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);\n", "name", $name);
+            $printer->put("`name`->should_free_v = 0;\n", "name", $name);
+            $printer->put("ZVAL_RESOURCE(return_value, `name`->resource_id);\n", "name", $name);
         }
     }
 
