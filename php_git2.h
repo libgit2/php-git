@@ -90,6 +90,9 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_STATUS_LIST,
 	PHP_GIT2_TYPE_BRANCH_ITERATOR,
 	PHP_GIT2_TYPE_TAG,
+	PHP_GIT2_TYPE_CRED,
+	PHP_GIT2_TYPE_TRANSPORT,
+	PHP_GIT2_TYPE_REMOTE,
 };
 
 typedef struct php_git2_t {
@@ -111,6 +114,9 @@ typedef struct php_git2_t {
 		git_status_list *status_list;
 		git_branch_iterator *branch_iterator;
 		git_tag *tag;
+		git_cred *cred;
+		git_transport *transport;
+		git_remote *remote;
 	} v;
 	int should_free_v;
 	int resource_id;

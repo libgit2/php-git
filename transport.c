@@ -2,25 +2,36 @@
 #include "php_git2_priv.h"
 #include "transport.h"
 
-/* {{{ proto resource git_transport_new(owner, url)
-*/
+/* {{{ proto resource git_transport_new(resource $owner, string $url)
+ */
 PHP_FUNCTION(git_transport_new)
 {
-	zval *owner;
-	php_git2_t *_owner;
-	char *url = {0};
-	int url_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_transport_new not implemented yet");
-	return;
+	php_git2_t *result = NULL;
+	git_transport *out = NULL;
+	zval *owner = NULL;
+	php_git2_t *_owner = NULL;
+	char *url = NULL;
+	int url_len = 0;
+	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &owner, &url, &url_len) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_owner, php_git2_t*, &owner, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	error = git_transport_new(&out, PHP_GIT2_V(_owner, remote), url);
+	if (php_git2_check_error(error, "git_transport_new" TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	PHP_GIT2_MAKE_RESOURCE(result);
+	PHP_GIT2_V(result, transport) = out;
+	result->type = PHP_GIT2_TYPE_TRANSPORT;
+	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
+	result->should_free_v = 0;
+	ZVAL_RESOURCE(return_value, result->resource_id);
 }
+/* }}} */
 
 /* {{{ proto long git_transport_register(prefix, priority, cb, param)
 */

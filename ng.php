@@ -70,6 +70,13 @@ class Func
         }
     }
 
+    public function isVoidCreator()
+    {
+        if (preg_match("/void/", $this->getReturnType())) {
+            return true;
+        }
+    }
+
     public function isSavior()
     {
         if (preg_match('/_free$/', $this->getName())) {
@@ -338,6 +345,9 @@ class Fashion
                 "git_status_list",
                 "git_branch_iterator",
                 "git_tag",
+                "git_cred",
+                "git_transport",
+                "git_remote",
             );
         }
 
@@ -820,6 +830,33 @@ class Fashion
             }
             $printer->put(");\n");
             $printer->put("RETURN_STRING(`name`, 1);\n", "name", "result");
+        } else if ($f->isVoidCreator()) {
+            $printer->put("`function`",
+                "function", $f->getName()
+            );
+            $printer->put("(");
+            $i = 0;
+            $cnt = count($f->getArguments());
+            foreach ($f->getArguments() as $arg) {
+                /** @var Arg $arg */
+
+                if ($this->shouldResource($arg) && !$arg->shouldWrite()) {
+                    $printer->put("PHP_GIT2_V(_`name`, `type`)",
+                        "name", $arg->getName(),
+                        "type", $this->getNormarizedTypeName($arg)
+                    );
+                } else if ($arg->shouldWrite()) {
+                    $printer->put("&`name`", "name", $arg->getName());
+                } else {
+                    $printer->put("`name`", "name", $arg->getName());
+                }
+
+                if ($i + 1 < $cnt) {
+                    $printer->put(", ");
+                }
+                $i++;
+            }
+            $printer->put(");\n");
         } else {
             error_log(sprintf("# %s not supported (call function)", $f->getName()));
         }
