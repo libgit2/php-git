@@ -85,6 +85,8 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_CONFIG,
 	PHP_GIT2_TYPE_OBJECT,
 	PHP_GIT2_TYPE_INDEX,
+	PHP_GIT2_TYPE_ODB,
+	PHP_GIT2_TYPE_REFDB,
 };
 
 typedef struct php_git2_t {
@@ -101,6 +103,8 @@ typedef struct php_git2_t {
 		git_config *config;
 		git_object *object;
 		git_index *index;
+		git_odb *odb;
+		git_refdb *refdb;
 	} v;
 	int should_free_v;
 	int resource_id;
