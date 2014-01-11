@@ -36,6 +36,13 @@
 #include "g_config.h"
 #include "object.h"
 #include "index.h"
+#include "revparse.h"
+#include "branch.h"
+#include "tag.h"
+#include "status.h"
+#include "cred.h"
+#include "remote.h"
+#include "transport.h"
 
 int git2_resource_handle;
 
@@ -339,6 +346,84 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_config_parse_int32, arginfo_git_config_parse_int32)
 	PHP_FE(git_config_parse_int64, arginfo_git_config_parse_int64)
 	PHP_FE(git_config_backend_foreach_match, arginfo_git_config_backend_foreach_match)
+
+	/* revparse */
+	PHP_FE(git_revparse_single, arginfo_git_revparse_single)
+	PHP_FE(git_revparse_ext, arginfo_git_revparse_ext)
+	PHP_FE(git_revparse, arginfo_git_revparse)
+
+	/* remote */
+	PHP_FE(git_remote_create, arginfo_git_remote_create)
+	PHP_FE(git_remote_create_with_fetchspec, arginfo_git_remote_create_with_fetchspec)
+	PHP_FE(git_remote_create_inmemory, arginfo_git_remote_create_inmemory)
+	PHP_FE(git_remote_load, arginfo_git_remote_load)
+	PHP_FE(git_remote_save, arginfo_git_remote_save)
+	PHP_FE(git_remote_owner, arginfo_git_remote_owner)
+	PHP_FE(git_remote_name, arginfo_git_remote_name)
+	PHP_FE(git_remote_url, arginfo_git_remote_url)
+	PHP_FE(git_remote_pushurl, arginfo_git_remote_pushurl)
+	PHP_FE(git_remote_set_url, arginfo_git_remote_set_url)
+	PHP_FE(git_remote_set_pushurl, arginfo_git_remote_set_pushurl)
+	PHP_FE(git_remote_add_fetch, arginfo_git_remote_add_fetch)
+	PHP_FE(git_remote_get_fetch_refspecs, arginfo_git_remote_get_fetch_refspecs)
+	PHP_FE(git_remote_set_fetch_refspecs, arginfo_git_remote_set_fetch_refspecs)
+	PHP_FE(git_remote_add_push, arginfo_git_remote_add_push)
+	PHP_FE(git_remote_get_push_refspecs, arginfo_git_remote_get_push_refspecs)
+	PHP_FE(git_remote_set_push_refspecs, arginfo_git_remote_set_push_refspecs)
+	PHP_FE(git_remote_clear_refspecs, arginfo_git_remote_clear_refspecs)
+	PHP_FE(git_remote_refspec_count, arginfo_git_remote_refspec_count)
+	PHP_FE(git_remote_get_refspec, arginfo_git_remote_get_refspec)
+	PHP_FE(git_remote_connect, arginfo_git_remote_connect)
+	PHP_FE(git_remote_ls, arginfo_git_remote_ls)
+	PHP_FE(git_remote_download, arginfo_git_remote_download)
+	PHP_FE(git_remote_connected, arginfo_git_remote_connected)
+	PHP_FE(git_remote_stop, arginfo_git_remote_stop)
+	PHP_FE(git_remote_disconnect, arginfo_git_remote_disconnect)
+	PHP_FE(git_remote_free, arginfo_git_remote_free)
+	PHP_FE(git_remote_update_tips, arginfo_git_remote_update_tips)
+	PHP_FE(git_remote_fetch, arginfo_git_remote_fetch)
+	PHP_FE(git_remote_valid_url, arginfo_git_remote_valid_url)
+	PHP_FE(git_remote_supported_url, arginfo_git_remote_supported_url)
+	PHP_FE(git_remote_list, arginfo_git_remote_list)
+	PHP_FE(git_remote_check_cert, arginfo_git_remote_check_cert)
+	PHP_FE(git_remote_set_transport, arginfo_git_remote_set_transport)
+	PHP_FE(git_remote_set_callbacks, arginfo_git_remote_set_callbacks)
+	PHP_FE(git_remote_stats, arginfo_git_remote_stats)
+	PHP_FE(git_remote_autotag, arginfo_git_remote_autotag)
+	PHP_FE(git_remote_set_autotag, arginfo_git_remote_set_autotag)
+	PHP_FE(git_remote_rename, arginfo_git_remote_rename)
+	PHP_FE(git_remote_update_fetchhead, arginfo_git_remote_update_fetchhead)
+	PHP_FE(git_remote_set_update_fetchhead, arginfo_git_remote_set_update_fetchhead)
+	PHP_FE(git_remote_is_valid_name, arginfo_git_remote_is_valid_name)
+
+	/* cred */
+	PHP_FE(git_cred_has_username, arginfo_git_cred_has_username)
+	PHP_FE(git_cred_userpass_plaintext_new, arginfo_git_cred_userpass_plaintext_new)
+	PHP_FE(git_cred_ssh_key_new, arginfo_git_cred_ssh_key_new)
+	PHP_FE(git_cred_ssh_custom_new, arginfo_git_cred_ssh_custom_new)
+	PHP_FE(git_cred_default_new, arginfo_git_cred_default_new)
+	PHP_FE(git_cred_userpass, arginfo_git_cred_userpass)
+
+	/* status */
+	PHP_FE(git_status_foreach, arginfo_git_status_foreach)
+	PHP_FE(git_status_foreach_ext, arginfo_git_status_foreach_ext)
+	PHP_FE(git_status_file, arginfo_git_status_file)
+	PHP_FE(git_status_list_new, arginfo_git_status_list_new)
+	PHP_FE(git_status_list_entrycount, arginfo_git_status_list_entrycount)
+	PHP_FE(git_status_byindex, arginfo_git_status_byindex)
+	PHP_FE(git_status_list_free, arginfo_git_status_list_free)
+	PHP_FE(git_status_should_ignore, arginfo_git_status_should_ignore)
+
+	/* transport */
+	PHP_FE(git_transport_new, arginfo_git_transport_new)
+	PHP_FE(git_transport_register, arginfo_git_transport_register)
+	PHP_FE(git_transport_unregister, arginfo_git_transport_unregister)
+	PHP_FE(git_transport_dummy, arginfo_git_transport_dummy)
+	PHP_FE(git_transport_local, arginfo_git_transport_local)
+	PHP_FE(git_transport_smart, arginfo_git_transport_smart)
+	PHP_FE(git_smart_subtransport_http, arginfo_git_smart_subtransport_http)
+	PHP_FE(git_smart_subtransport_git, arginfo_git_smart_subtransport_git)
+	PHP_FE(git_smart_subtransport_ssh, arginfo_git_smart_subtransport_ssh)
 
 	PHP_FE_END
 };

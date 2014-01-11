@@ -1,5 +1,18 @@
 <?php
 // slipshod template generator.
+//
+// flag:
+//   0 => generate header
+//   1 => generate source
+//
+// filter:
+//   - prefix: don't show matched keywords
+//             e.g ) -cred
+//                   will ignore codes which have `cred` keyword
+//   default: show matched keywords only
+//             e.g ) cred
+//                   will show codes which have `cred` keyword
+//
 // php gen.php libgit2/include/git2/<target>.h (0|1) [filter] > target.h or target.c
 
 $data = file_get_contents($_SERVER['argv'][1]);
@@ -23,8 +36,17 @@ if (preg_match_all("/GIT_EXTERN\((.+?)\)\s*([a-zA-Z0-9_-]+)\((.+?)\);/s", $data,
             $d--;
         }
 
-        if (isset($_SERVER['argv'][3]) && preg_match("/{$_SERVER['argv'][3]}/", $match[2][$i])) {
-            continue;
+
+        if (isset($_SERVER['argv'][3])) {
+            if ($_SERVER['argv'][3][0] == "-") {
+                $_SERVER['argv'][3] = substr($_SERVER['argv'][3][0], 1);
+                $flag = true;
+            } else {
+                $flag = false;
+            }
+            if (preg_match("/{$_SERVER['argv'][3]}/", $match[2][$i]) == $flag) {
+                continue;
+            }
         }
 
         $match[3][$i] = trim(preg_replace("/\r?\n/", "", $match[3][$i]));
