@@ -258,19 +258,21 @@ PHP_FUNCTION(git_config_add_file_ondisk)
 	php_git2_t *_cfg;
 	char *path = {0};
 	int path_len;
-	zval *level;
-	php_git2_t *_level;
-	long force;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_add_file_ondisk not implemented yet");
-	return;
+	long level;
+	long force = 0;
+	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsrl", &cfg, &path, &path_len, &level, &force) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_cfg, php_git2_t*, &cfg, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	error = git_config_add_file_ondisk(PHP_GIT2_V(_cfg, config), path, level, force);
+	if (php_git2_check_error(error, "git_config_add_file_ondisk" TSRMLS_CC)) {
+		RETURN_FALSE
+	}
+	RETURN_TRUE;
 }
 
 /* {{{ proto resource git_config_open_ondisk(path)
@@ -279,15 +281,25 @@ PHP_FUNCTION(git_config_open_ondisk)
 {
 	char *path = {0};
 	int path_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_open_ondisk not implemented yet");
-	return;
+	git_config *config;
+	php_git2_t *result;
+	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &path, &path_len) == FAILURE) {
 		return;
 	}
+	error = git_config_open_ondisk(&config, path);
+	if (php_git2_check_error(error, "git_config_open_ondisk" TSRMLS_CC)) {
+		RETURN_FALSE
+	}
+	PHP_GIT2_MAKE_RESOURCE(result);
+	PHP_GIT2_V(result, config) = config;
+	result->type = PHP_GIT2_TYPE_CONFIG;
+	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
+	result->should_free_v = 1;
+
+	ZVAL_RESOURCE(return_value, result->resource_id);
 }
 
 /* {{{ proto resource git_config_open_level(parent, level)
@@ -295,19 +307,28 @@ PHP_FUNCTION(git_config_open_ondisk)
 PHP_FUNCTION(git_config_open_level)
 {
 	zval *parent;
-	php_git2_t *_parent;
-	zval *level;
-	php_git2_t *_level;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_open_level not implemented yet");
-	return;
+	php_git2_t *_parent, *result;
+	long level;
+	int error = 0;
+	git_config *out;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rr", &parent, &level) == FAILURE) {
+		"rl", &parent, &level) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(_parent, php_git2_t*, &parent, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+
+	error = git_config_open_level(&out, PHP_GIT2_V(_parent, config), level);
+	if (php_git2_check_error(error, "git_config_open_level" TSRMLS_CC)) {
+		RETURN_FALSE
+	}
+	PHP_GIT2_MAKE_RESOURCE(result);
+	PHP_GIT2_V(result, config) = out;
+	result->type = PHP_GIT2_TYPE_CONFIG;
+	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
+	result->should_free_v = 1;
+
+	ZVAL_RESOURCE(return_value, result->resource_id);
 }
 
 /* {{{ proto resource git_config_open_global(config)
@@ -315,17 +336,27 @@ PHP_FUNCTION(git_config_open_level)
 PHP_FUNCTION(git_config_open_global)
 {
 	zval *config;
-	php_git2_t *_config;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_open_global not implemented yet");
-	return;
+	php_git2_t *_config, *result;
+	git_config *out;
+	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &config) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_config, php_git2_t*, &config, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	error = git_config_open_global(&out, PHP_GIT2_V(_config, config));
+	if (php_git2_check_error(error, "git_config_open_global" TSRMLS_CC)) {
+		RETURN_FALSE
+	}
+	PHP_GIT2_MAKE_RESOURCE(result);
+	PHP_GIT2_V(result, config) = out;
+	result->type = PHP_GIT2_TYPE_CONFIG;
+	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
+	result->should_free_v = 1;
+
+	ZVAL_RESOURCE(return_value, result->resource_id);
 }
 
 /* {{{ proto long git_config_refresh(cfg)
