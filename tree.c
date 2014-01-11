@@ -373,12 +373,12 @@ PHP_FUNCTION(git_tree_lookup)
 
 	ZEND_FETCH_RESOURCE(git2, php_git2_t*, &repository, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 
-	PHP_GIT2_MAKE_RESOURCE(result);
 	error = git_tree_lookup(&tree, PHP_GIT2_V(git2, repository), &id);
 	if (php_git2_check_error(error, "git_commit_lookup" TSRMLS_CC)) {
 		RETURN_FALSE
 	}
 
+	PHP_GIT2_MAKE_RESOURCE(result);
 	PHP_GIT2_V(result, tree) = tree;
 	result->type = PHP_GIT2_TYPE_TREE;
 	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
