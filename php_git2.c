@@ -34,6 +34,8 @@
 #include "treebuilder.h"
 #include "reference.h"
 #include "g_config.h"
+#include "object.h"
+#include "index.h"
 
 int git2_resource_handle;
 
@@ -84,13 +86,94 @@ static zend_class_entry *php_git2_get_exception_base(TSRMLS_D)
 }
 
 static zend_function_entry php_git2_functions[] = {
+	/* repository */
 	PHP_FE(git_repository_new, arginfo_git_repository_new)
 	PHP_FE(git_repository_init, arginfo_git_repository_init)
 	PHP_FE(git_repository_open_bare, arginfo_git_repository_open_bare)
 	PHP_FE(git_repository_open, arginfo_git_repository_open)
 	PHP_FE(git_repository_get_namespace, arginfo_git_repository_get_namespace)
 	PHP_FE(git_repository_workdir, arginfo_git_repository_workdir)
+	PHP_FE(git_repository_wrap_odb, arginfo_git_repository_wrap_odb)
+	PHP_FE(git_repository_discover, arginfo_git_repository_discover)
+	PHP_FE(git_repository_open_ext, arginfo_git_repository_open_ext)
+	PHP_FE(git_repository_free, arginfo_git_repository_free)
+	PHP_FE(git_repository_init_ext, arginfo_git_repository_init_ext)
+	PHP_FE(git_repository_head, arginfo_git_repository_head)
+	PHP_FE(git_repository_head_detached, arginfo_git_repository_head_detached)
+	PHP_FE(git_repository_head_unborn, arginfo_git_repository_head_unborn)
+	PHP_FE(git_repository_is_empty, arginfo_git_repository_is_empty)
+	PHP_FE(git_repository_path, arginfo_git_repository_path)
+	PHP_FE(git_repository_set_workdir, arginfo_git_repository_set_workdir)
+	PHP_FE(git_repository_is_bare, arginfo_git_repository_is_bare)
+	PHP_FE(git_repository_config, arginfo_git_repository_config)
+	PHP_FE(git_repository_odb, arginfo_git_repository_odb)
+	PHP_FE(git_repository_refdb, arginfo_git_repository_refdb)
+	PHP_FE(git_repository_index, arginfo_git_repository_index)
+	PHP_FE(git_repository_message, arginfo_git_repository_message)
+	PHP_FE(git_repository_message_remove, arginfo_git_repository_message_remove)
+	PHP_FE(git_repository_merge_cleanup, arginfo_git_repository_merge_cleanup)
+	PHP_FE(git_repository_fetchhead_foreach, arginfo_git_repository_fetchhead_foreach)
+	PHP_FE(git_repository_mergehead_foreach, arginfo_git_repository_mergehead_foreach)
+	PHP_FE(git_repository_hashfile, arginfo_git_repository_hashfile)
+	PHP_FE(git_repository_set_head, arginfo_git_repository_set_head)
+	PHP_FE(git_repository_set_head_detached, arginfo_git_repository_set_head_detached)
+	PHP_FE(git_repository_detach_head, arginfo_git_repository_detach_head)
+	PHP_FE(git_repository_state, arginfo_git_repository_state)
+	PHP_FE(git_repository_set_namespace, arginfo_git_repository_set_namespace)
+	PHP_FE(git_repository_is_shallow, arginfo_git_repository_is_shallow)
 
+	/* index */
+	PHP_FE(git_index_open, arginfo_git_index_open)
+	PHP_FE(git_index_new, arginfo_git_index_new)
+	PHP_FE(git_index_free, arginfo_git_index_free)
+	PHP_FE(git_index_owner, arginfo_git_index_owner)
+	PHP_FE(git_index_caps, arginfo_git_index_caps)
+	PHP_FE(git_index_set_caps, arginfo_git_index_set_caps)
+	PHP_FE(git_index_read, arginfo_git_index_read)
+	PHP_FE(git_index_write, arginfo_git_index_write)
+	PHP_FE(git_index_path, arginfo_git_index_path)
+	PHP_FE(git_index_read_tree, arginfo_git_index_read_tree)
+	PHP_FE(git_index_write_tree, arginfo_git_index_write_tree)
+	PHP_FE(git_index_write_tree_to, arginfo_git_index_write_tree_to)
+	PHP_FE(git_index_entrycount, arginfo_git_index_entrycount)
+	PHP_FE(git_index_clear, arginfo_git_index_clear)
+	PHP_FE(git_index_get_byindex, arginfo_git_index_get_byindex)
+	PHP_FE(git_index_get_bypath, arginfo_git_index_get_bypath)
+	PHP_FE(git_index_remove, arginfo_git_index_remove)
+	PHP_FE(git_index_remove_directory, arginfo_git_index_remove_directory)
+	PHP_FE(git_index_add, arginfo_git_index_add)
+	PHP_FE(git_index_entry_stage, arginfo_git_index_entry_stage)
+	PHP_FE(git_index_add_bypath, arginfo_git_index_add_bypath)
+	PHP_FE(git_index_remove_bypath, arginfo_git_index_remove_bypath)
+	PHP_FE(git_index_add_all, arginfo_git_index_add_all)
+	PHP_FE(git_index_remove_all, arginfo_git_index_remove_all)
+	PHP_FE(git_index_update_all, arginfo_git_index_update_all)
+	PHP_FE(git_index_find, arginfo_git_index_find)
+	PHP_FE(git_index_conflict_add, arginfo_git_index_conflict_add)
+	PHP_FE(git_index_conflict_get, arginfo_git_index_conflict_get)
+	PHP_FE(git_index_conflict_remove, arginfo_git_index_conflict_remove)
+	PHP_FE(git_index_conflict_cleanup, arginfo_git_index_conflict_cleanup)
+	PHP_FE(git_index_has_conflicts, arginfo_git_index_has_conflicts)
+	PHP_FE(git_index_conflict_iterator_new, arginfo_git_index_conflict_iterator_new)
+	PHP_FE(git_index_conflict_next, arginfo_git_index_conflict_next)
+	PHP_FE(git_index_conflict_iterator_free, arginfo_git_index_conflict_iterator_free)
+
+	/* object */
+	PHP_FE(git_object_lookup, arginfo_git_object_lookup)
+	PHP_FE(git_object_lookup_prefix, arginfo_git_object_lookup_prefix)
+	PHP_FE(git_object_lookup_bypath, arginfo_git_object_lookup_bypath)
+	PHP_FE(git_object_id, arginfo_git_object_id)
+	PHP_FE(git_object_type, arginfo_git_object_type)
+	PHP_FE(git_object_owner, arginfo_git_object_owner)
+	PHP_FE(git_object_free, arginfo_git_object_free)
+	PHP_FE(git_object_type2string, arginfo_git_object_type2string)
+	PHP_FE(git_object_string2type, arginfo_git_object_string2type)
+	PHP_FE(git_object_typeisloose, arginfo_git_object_typeisloose)
+	PHP_FE(git_object__size, arginfo_git_object__size)
+	PHP_FE(git_object_peel, arginfo_git_object_peel)
+	PHP_FE(git_object_dup, arginfo_git_object_dup)
+
+	/* clone */
 	PHP_FE(git_clone, arginfo_git_clone)
 
 	/* reference */

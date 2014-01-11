@@ -23,7 +23,7 @@ if (preg_match_all("/GIT_EXTERN\((.+?)\)\s*([a-zA-Z0-9_-]+)\((.+?)\);/s", $data,
             $d--;
         }
 
-        if (isset($_SERVER['argv'][3]) && !preg_match("/{$_SERVER['argv'][3]}/", $match[2][$i])) {
+        if (isset($_SERVER['argv'][3]) && preg_match("/{$_SERVER['argv'][3]}/", $match[2][$i])) {
             continue;
         }
 
