@@ -64,6 +64,102 @@ static void php_git2_config_get_with(INTERNAL_FUNCTION_PARAMETERS, enum php_git2
 	}
 }
 
+static void php_git2_config_set_with(INTERNAL_FUNCTION_PARAMETERS, enum php_git2_config type)
+{
+	zval *cfg;
+	php_git2_t *_cfg;
+	char *name = {0};
+	int name_len;
+	int error = 0;
+	zval *value;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"rsz", &cfg, &name, &name_len, &value) == FAILURE) {
+		return;
+	}
+	ZEND_FETCH_RESOURCE(_cfg, php_git2_t*, &cfg, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+
+	switch (type) {
+		case PHP_GIT2_CONFIG_STRING: {
+			if (Z_TYPE_P(value) != IS_STRING) {
+				convert_to_string(value);
+			}
+			error = git_config_set_string(PHP_GIT2_V(_cfg, config), name, Z_STRVAL_P(value));
+			if (php_git2_check_error(error, "git_config_set_string" TSRMLS_CC)) {
+				RETURN_FALSE
+			}
+			RETURN_TRUE;
+			break;
+		}
+		case PHP_GIT2_CONFIG_BOOL: {
+			if (Z_TYPE_P(value) != IS_BOOL) {
+				convert_to_bool(value);
+			}
+			error = git_config_set_bool(PHP_GIT2_V(_cfg, config), name, Z_LVAL_P(value));
+			if (php_git2_check_error(error, "git_config_set_bool" TSRMLS_CC)) {
+				RETURN_FALSE
+			}
+			RETURN_TRUE;
+			break;
+		}
+		case PHP_GIT2_CONFIG_INT32: {
+			if (Z_TYPE_P(value) != IS_LONG) {
+				convert_to_long(value);
+			}
+			error = git_config_set_int32(PHP_GIT2_V(_cfg, config), name, Z_LVAL_P(value));
+			if (php_git2_check_error(error, "git_config_set_int32" TSRMLS_CC)) {
+				RETURN_FALSE
+			}
+			RETURN_TRUE;
+			break;
+		}
+		case PHP_GIT2_CONFIG_INT64: {
+			if (Z_TYPE_P(value) != IS_LONG) {
+				convert_to_long(value);
+			}
+			error = git_config_set_int64(PHP_GIT2_V(_cfg, config), name, Z_LVAL_P(value));
+			if (php_git2_check_error(error, "git_config_set_int64" TSRMLS_CC)) {
+				RETURN_FALSE
+			}
+			RETURN_TRUE;
+			break;
+		}
+	}
+}
+
+
+static void php_git2_config_parse_with(INTERNAL_FUNCTION_PARAMETERS, enum php_git2_config type)
+{
+	char *value = {0};
+	int value_len;
+	int error = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"s", &value, &value_len) == FAILURE) {
+		return;
+	}
+
+	switch (type) {
+		case PHP_GIT2_CONFIG_BOOL: {
+			int result;
+			result = git_config_parse_bool(&result, value);
+			RETURN_BOOL(result);
+			break;
+		}
+		case PHP_GIT2_CONFIG_INT32: {
+			int32_t result;
+			result = git_config_parse_int32(&result, value);
+			RETURN_LONG(result);
+			break;
+		}
+		case PHP_GIT2_CONFIG_INT64: {
+			int64_t result;
+			result = git_config_parse_int64(&result, value);
+			RETURN_LONG(result);
+			break;
+		}
+	}
+}
 
 /* {{{ proto resource git_config_find_global()
 */
@@ -420,85 +516,28 @@ PHP_FUNCTION(git_config_iterator_free)
 */
 PHP_FUNCTION(git_config_set_int32)
 {
-	zval *cfg;
-	php_git2_t *_cfg;
-	char *name = {0};
-	int name_len;
-	long value;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_set_int32 not implemented yet");
-	return;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rsl", &cfg, &name, &name_len, &value) == FAILURE) {
-		return;
-	}
-	ZEND_FETCH_RESOURCE(_cfg, php_git2_t*, &cfg, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	php_git2_config_set_with(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GIT2_CONFIG_INT32);
 }
 
 /* {{{ proto long git_config_set_int64(cfg, name, value)
 */
 PHP_FUNCTION(git_config_set_int64)
 {
-	zval *cfg;
-	php_git2_t *_cfg;
-	char *name = {0};
-	int name_len;
-	long value;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_set_int64 not implemented yet");
-	return;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rsl", &cfg, &name, &name_len, &value) == FAILURE) {
-		return;
-	}
-	ZEND_FETCH_RESOURCE(_cfg, php_git2_t*, &cfg, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	php_git2_config_set_with(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GIT2_CONFIG_INT64);
 }
 
 /* {{{ proto long git_config_set_bool(cfg, name, value)
 */
 PHP_FUNCTION(git_config_set_bool)
 {
-	zval *cfg;
-	php_git2_t *_cfg;
-	char *name = {0};
-	int name_len;
-	long value;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_set_bool not implemented yet");
-	return;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rsl", &cfg, &name, &name_len, &value) == FAILURE) {
-		return;
-	}
-	ZEND_FETCH_RESOURCE(_cfg, php_git2_t*, &cfg, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	php_git2_config_set_with(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GIT2_CONFIG_BOOL);
 }
 
 /* {{{ proto long git_config_set_string(cfg, name, value)
 */
 PHP_FUNCTION(git_config_set_string)
 {
-	zval *cfg;
-	php_git2_t *_cfg;
-	char *name = {0};
-	int name_len;
-	char *value = {0};
-	int value_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_set_string not implemented yet");
-	return;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rss", &cfg, &name, &name_len, &value, &value_len) == FAILURE) {
-		return;
-	}
-	ZEND_FETCH_RESOURCE(_cfg, php_git2_t*, &cfg, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	php_git2_config_set_with(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GIT2_CONFIG_STRING);
 }
 
 /* {{{ proto long git_config_set_multivar(cfg, name, regexp, value)
@@ -533,16 +572,20 @@ PHP_FUNCTION(git_config_delete_entry)
 	php_git2_t *_cfg;
 	char *name = {0};
 	int name_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_delete_entry not implemented yet");
-	return;
+	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &cfg, &name, &name_len) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(_cfg, php_git2_t*, &cfg, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+
+	error = git_config_delete_entry(PHP_GIT2_V(_cfg, config), name);
+	if (php_git2_check_error(error, "git_config_delete_entry" TSRMLS_CC)) {
+		RETURN_FALSE
+	}
+
+	RETURN_TRUE;
 }
 
 /* {{{ proto long git_config_delete_multivar(cfg, name, regexp)
@@ -695,51 +738,21 @@ PHP_FUNCTION(git_config_lookup_map_value)
 */
 PHP_FUNCTION(git_config_parse_bool)
 {
-	char *value = {0};
-	int value_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_parse_bool not implemented yet");
-	return;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"s", &value, &value_len) == FAILURE) {
-		return;
-	}
+	php_git2_config_parse_with(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GIT2_CONFIG_BOOL);
 }
 
 /* {{{ proto resource git_config_parse_int32(value)
 */
 PHP_FUNCTION(git_config_parse_int32)
 {
-	char *value = {0};
-	int value_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_parse_int32 not implemented yet");
-	return;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"s", &value, &value_len) == FAILURE) {
-		return;
-	}
+	php_git2_config_parse_with(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GIT2_CONFIG_INT32);
 }
 
 /* {{{ proto resource git_config_parse_int64(value)
 */
 PHP_FUNCTION(git_config_parse_int64)
 {
-	char *value = {0};
-	int value_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_parse_int64 not implemented yet");
-	return;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"s", &value, &value_len) == FAILURE) {
-		return;
-	}
+	php_git2_config_parse_with(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GIT2_CONFIG_INT64);
 }
 
 /* {{{ proto long git_config_backend_foreach_match(backend, regexp, , ), data)
