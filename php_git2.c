@@ -458,31 +458,6 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_checkout_index, arginfo_git_checkout_index)
 	PHP_FE(git_checkout_tree, arginfo_git_checkout_tree)
 
-	/* diff */
-	PHP_FE(git_diff_free, arginfo_git_diff_free)
-	PHP_FE(git_diff_tree_to_tree, arginfo_git_diff_tree_to_tree)
-	PHP_FE(git_diff_tree_to_index, arginfo_git_diff_tree_to_index)
-	PHP_FE(git_diff_index_to_workdir, arginfo_git_diff_index_to_workdir)
-	PHP_FE(git_diff_tree_to_workdir, arginfo_git_diff_tree_to_workdir)
-	PHP_FE(git_diff_tree_to_workdir_with_index, arginfo_git_diff_tree_to_workdir_with_index)
-	PHP_FE(git_diff_merge, arginfo_git_diff_merge)
-	PHP_FE(git_diff_find_similar, arginfo_git_diff_find_similar)
-	PHP_FE(git_diff_options_init, arginfo_git_diff_options_init)
-	PHP_FE(git_diff_num_deltas, arginfo_git_diff_num_deltas)
-	PHP_FE(git_diff_num_deltas_of_type, arginfo_git_diff_num_deltas_of_type)
-	PHP_FE(git_diff_get_delta, arginfo_git_diff_get_delta)
-	PHP_FE(git_diff_is_sorted_icase, arginfo_git_diff_is_sorted_icase)
-	PHP_FE(git_diff_foreach, arginfo_git_diff_foreach)
-	PHP_FE(git_diff_status_char, arginfo_git_diff_status_char)
-	PHP_FE(git_diff_print, arginfo_git_diff_print)
-	PHP_FE(git_diff_blobs, arginfo_git_diff_blobs)
-	PHP_FE(git_diff_blob_to_buffer, arginfo_git_diff_blob_to_buffer)
-
-	/* checkout */
-	PHP_FE(git_checkout_head, arginfo_git_checkout_head)
-	PHP_FE(git_checkout_index, arginfo_git_checkout_index)
-	PHP_FE(git_checkout_tree, arginfo_git_checkout_tree)
-
 	/* filter */
 	PHP_FE(git_filter_list_load, arginfo_git_filter_list_load)
 	PHP_FE(git_filter_list_apply_to_data, arginfo_git_filter_list_apply_to_data)
@@ -572,6 +547,7 @@ PHP_MINFO_FUNCTION(git2)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Git2 Support", "enabled");
+	php_info_print_table_header(2, "libgit2 version", buf);
 	php_info_print_table_end();
 }
 
