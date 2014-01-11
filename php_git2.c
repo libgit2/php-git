@@ -43,6 +43,14 @@
 #include "cred.h"
 #include "remote.h"
 #include "transport.h"
+#include "diff.h"
+#include "checkout.h"
+#include "filter.h"
+#include "ignore.h"
+#include "indexer.h"
+#include "pathspec.h"
+#include "patch.h"
+#include "merge.h"
 
 int git2_resource_handle;
 
@@ -424,6 +432,130 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_smart_subtransport_http, arginfo_git_smart_subtransport_http)
 	PHP_FE(git_smart_subtransport_git, arginfo_git_smart_subtransport_git)
 	PHP_FE(git_smart_subtransport_ssh, arginfo_git_smart_subtransport_ssh)
+
+	/* diff */
+	PHP_FE(git_diff_free, arginfo_git_diff_free)
+	PHP_FE(git_diff_tree_to_tree, arginfo_git_diff_tree_to_tree)
+	PHP_FE(git_diff_tree_to_index, arginfo_git_diff_tree_to_index)
+	PHP_FE(git_diff_index_to_workdir, arginfo_git_diff_index_to_workdir)
+	PHP_FE(git_diff_tree_to_workdir, arginfo_git_diff_tree_to_workdir)
+	PHP_FE(git_diff_tree_to_workdir_with_index, arginfo_git_diff_tree_to_workdir_with_index)
+	PHP_FE(git_diff_merge, arginfo_git_diff_merge)
+	PHP_FE(git_diff_find_similar, arginfo_git_diff_find_similar)
+	PHP_FE(git_diff_options_init, arginfo_git_diff_options_init)
+	PHP_FE(git_diff_num_deltas, arginfo_git_diff_num_deltas)
+	PHP_FE(git_diff_num_deltas_of_type, arginfo_git_diff_num_deltas_of_type)
+	PHP_FE(git_diff_get_delta, arginfo_git_diff_get_delta)
+	PHP_FE(git_diff_is_sorted_icase, arginfo_git_diff_is_sorted_icase)
+	PHP_FE(git_diff_foreach, arginfo_git_diff_foreach)
+	PHP_FE(git_diff_status_char, arginfo_git_diff_status_char)
+	PHP_FE(git_diff_print, arginfo_git_diff_print)
+	PHP_FE(git_diff_blobs, arginfo_git_diff_blobs)
+	PHP_FE(git_diff_blob_to_buffer, arginfo_git_diff_blob_to_buffer)
+
+	/* checkout */
+	PHP_FE(git_checkout_head, arginfo_git_checkout_head)
+	PHP_FE(git_checkout_index, arginfo_git_checkout_index)
+	PHP_FE(git_checkout_tree, arginfo_git_checkout_tree)
+
+	/* diff */
+	PHP_FE(git_diff_free, arginfo_git_diff_free)
+	PHP_FE(git_diff_tree_to_tree, arginfo_git_diff_tree_to_tree)
+	PHP_FE(git_diff_tree_to_index, arginfo_git_diff_tree_to_index)
+	PHP_FE(git_diff_index_to_workdir, arginfo_git_diff_index_to_workdir)
+	PHP_FE(git_diff_tree_to_workdir, arginfo_git_diff_tree_to_workdir)
+	PHP_FE(git_diff_tree_to_workdir_with_index, arginfo_git_diff_tree_to_workdir_with_index)
+	PHP_FE(git_diff_merge, arginfo_git_diff_merge)
+	PHP_FE(git_diff_find_similar, arginfo_git_diff_find_similar)
+	PHP_FE(git_diff_options_init, arginfo_git_diff_options_init)
+	PHP_FE(git_diff_num_deltas, arginfo_git_diff_num_deltas)
+	PHP_FE(git_diff_num_deltas_of_type, arginfo_git_diff_num_deltas_of_type)
+	PHP_FE(git_diff_get_delta, arginfo_git_diff_get_delta)
+	PHP_FE(git_diff_is_sorted_icase, arginfo_git_diff_is_sorted_icase)
+	PHP_FE(git_diff_foreach, arginfo_git_diff_foreach)
+	PHP_FE(git_diff_status_char, arginfo_git_diff_status_char)
+	PHP_FE(git_diff_print, arginfo_git_diff_print)
+	PHP_FE(git_diff_blobs, arginfo_git_diff_blobs)
+	PHP_FE(git_diff_blob_to_buffer, arginfo_git_diff_blob_to_buffer)
+
+	/* checkout */
+	PHP_FE(git_checkout_head, arginfo_git_checkout_head)
+	PHP_FE(git_checkout_index, arginfo_git_checkout_index)
+	PHP_FE(git_checkout_tree, arginfo_git_checkout_tree)
+
+	/* filter */
+	PHP_FE(git_filter_list_load, arginfo_git_filter_list_load)
+	PHP_FE(git_filter_list_apply_to_data, arginfo_git_filter_list_apply_to_data)
+	PHP_FE(git_filter_list_apply_to_file, arginfo_git_filter_list_apply_to_file)
+	PHP_FE(git_filter_list_apply_to_blob, arginfo_git_filter_list_apply_to_blob)
+	PHP_FE(git_filter_list_free, arginfo_git_filter_list_free)
+	PHP_FE(git_filter_lookup, arginfo_git_filter_lookup)
+	PHP_FE(git_filter_list_new, arginfo_git_filter_list_new)
+	PHP_FE(git_filter_list_push, arginfo_git_filter_list_push)
+	PHP_FE(git_filter_list_length, arginfo_git_filter_list_length)
+	PHP_FE(git_filter_source_repo, arginfo_git_filter_source_repo)
+	PHP_FE(git_filter_source_path, arginfo_git_filter_source_path)
+	PHP_FE(git_filter_source_filemode, arginfo_git_filter_source_filemode)
+	PHP_FE(git_filter_source_id, arginfo_git_filter_source_id)
+	PHP_FE(git_filter_source_mode, arginfo_git_filter_source_mode)
+	PHP_FE(git_filter_register, arginfo_git_filter_register)
+	PHP_FE(git_filter_unregister, arginfo_git_filter_unregister)
+
+	/* ignore */
+	PHP_FE(git_ignore_add_rule, arginfo_git_ignore_add_rule)
+	PHP_FE(git_ignore_clear_internal_rules, arginfo_git_ignore_clear_internal_rules)
+	PHP_FE(git_ignore_path_is_ignored, arginfo_git_ignore_path_is_ignored)
+
+	/* indexer */
+	PHP_FE(git_indexer_new, arginfo_git_indexer_new)
+	PHP_FE(git_indexer_append, arginfo_git_indexer_append)
+	PHP_FE(git_indexer_commit, arginfo_git_indexer_commit)
+	PHP_FE(git_indexer_hash, arginfo_git_indexer_hash)
+	PHP_FE(git_indexer_free, arginfo_git_indexer_free)
+
+	/* pathspec */
+	PHP_FE(git_pathspec_new, arginfo_git_pathspec_new)
+	PHP_FE(git_pathspec_free, arginfo_git_pathspec_free)
+	PHP_FE(git_pathspec_matches_path, arginfo_git_pathspec_matches_path)
+	PHP_FE(git_pathspec_match_workdir, arginfo_git_pathspec_match_workdir)
+	PHP_FE(git_pathspec_match_index, arginfo_git_pathspec_match_index)
+	PHP_FE(git_pathspec_match_tree, arginfo_git_pathspec_match_tree)
+	PHP_FE(git_pathspec_match_diff, arginfo_git_pathspec_match_diff)
+	PHP_FE(git_pathspec_match_list_free, arginfo_git_pathspec_match_list_free)
+	PHP_FE(git_pathspec_match_list_entrycount, arginfo_git_pathspec_match_list_entrycount)
+	PHP_FE(git_pathspec_match_list_entry, arginfo_git_pathspec_match_list_entry)
+	PHP_FE(git_pathspec_match_list_diff_entry, arginfo_git_pathspec_match_list_diff_entry)
+	PHP_FE(git_pathspec_match_list_failed_entrycount, arginfo_git_pathspec_match_list_failed_entrycount)
+	PHP_FE(git_pathspec_match_list_failed_entry, arginfo_git_pathspec_match_list_failed_entry)
+
+	/* patch */
+	PHP_FE(git_patch_from_diff, arginfo_git_patch_from_diff)
+	PHP_FE(git_patch_from_blobs, arginfo_git_patch_from_blobs)
+	PHP_FE(git_patch_from_blob_and_buffer, arginfo_git_patch_from_blob_and_buffer)
+	PHP_FE(git_patch_free, arginfo_git_patch_free)
+	PHP_FE(git_patch_get_delta, arginfo_git_patch_get_delta)
+	PHP_FE(git_patch_num_hunks, arginfo_git_patch_num_hunks)
+	PHP_FE(git_patch_line_stats, arginfo_git_patch_line_stats)
+	PHP_FE(git_patch_get_hunk, arginfo_git_patch_get_hunk)
+	PHP_FE(git_patch_num_lines_in_hunk, arginfo_git_patch_num_lines_in_hunk)
+	PHP_FE(git_patch_get_line_in_hunk, arginfo_git_patch_get_line_in_hunk)
+	PHP_FE(git_patch_size, arginfo_git_patch_size)
+	PHP_FE(git_patch_print, arginfo_git_patch_print)
+	PHP_FE(git_patch_to_str, arginfo_git_patch_to_str)
+
+	/* merge */
+	PHP_FE(git_merge_base, arginfo_git_merge_base)
+	PHP_FE(git_merge_base_many, arginfo_git_merge_base_many)
+	PHP_FE(git_merge_head_from_ref, arginfo_git_merge_head_from_ref)
+	PHP_FE(git_merge_head_from_fetchhead, arginfo_git_merge_head_from_fetchhead)
+	PHP_FE(git_merge_head_from_oid, arginfo_git_merge_head_from_oid)
+	PHP_FE(git_merge_head_free, arginfo_git_merge_head_free)
+	PHP_FE(git_merge_trees, arginfo_git_merge_trees)
+	PHP_FE(git_merge, arginfo_git_merge)
+	PHP_FE(git_merge_result_is_uptodate, arginfo_git_merge_result_is_uptodate)
+	PHP_FE(git_merge_result_is_fastforward, arginfo_git_merge_result_is_fastforward)
+	PHP_FE(git_merge_result_fastforward_oid, arginfo_git_merge_result_fastforward_oid)
+	PHP_FE(git_merge_result_free, arginfo_git_merge_result_free)
 
 	PHP_FE_END
 };

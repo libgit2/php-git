@@ -93,6 +93,7 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_CRED,
 	PHP_GIT2_TYPE_TRANSPORT,
 	PHP_GIT2_TYPE_REMOTE,
+	PHP_GIT2_TYPE_DIFF,
 };
 
 typedef struct php_git2_t {
@@ -117,6 +118,7 @@ typedef struct php_git2_t {
 		git_cred *cred;
 		git_transport *transport;
 		git_remote *remote;
+		git_diff *diff;
 	} v;
 	int should_free_v;
 	int resource_id;
