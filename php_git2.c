@@ -58,6 +58,7 @@
 #include "packbuilder.h"
 #include "stash.h"
 #include "signature.h"
+#include "reset.h"
 
 int git2_resource_handle;
 
@@ -803,6 +804,10 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_signature_default, arginfo_git_signature_default)
 	PHP_FE(git_signature_dup, arginfo_git_signature_dup)
 	PHP_FE(git_signature_free, arginfo_git_signature_free)
+
+	/* reset */
+	PHP_FE(git_reset, arginfo_git_reset)
+	PHP_FE(git_reset_default, arginfo_git_reset_default)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
