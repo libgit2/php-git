@@ -42,4 +42,6 @@ void php_git2_signature_to_array(const git_signature *signature, zval **out TSRM
 
 void php_git2_strarray_to_array(git_strarray *array, zval **out TSRMLS_DC);
 
+int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, void *resource, int should_free TSRMLS_DC);
+
 #endif

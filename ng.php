@@ -778,10 +778,10 @@ class Fashion
         } else if ($f->isSavior()) {
 
             $first = $f->first();
-            $printer->put("if (_`name`->should_free_v) {\n",
+            $printer->put("if (GIT2_SHOULD_FREE(_`name`)) {\n",
                 "name", $first->getName()
             );
-            $printer->block(function(Printer $printer) use ($f) {
+            $printer->block(function(Printer $printer) use ($f, $first) {
                 $printer->put("`function`",
                     "function", $f->getName()
                 );
@@ -808,7 +808,7 @@ class Fashion
                     $i++;
                 }
                 $printer->put(");\n");
-
+                $printer->put("GIT2_SHOULD_FREE(_`name`) = 0;\n", "name", $first->getName());
             });
             $printer->put("};\n");
 
@@ -897,19 +897,15 @@ class Fashion
     {
         if ($f->isResourceCreator() || $force) {
             $arg = $f->first();
-            $printer->put("PHP_GIT2_MAKE_RESOURCE(`name`);\n", "name", $name);
-            $printer->put("PHP_GIT2_V(`name`, `type`) = `variable`;\n",
-                "name", $name,
-                "type", $this->getNormarizedTypeName($arg),
-                "variable", $arg->getName()
-            );
-            $printer->put("`name`->type = PHP_GIT2_TYPE_`type`;\n",
+            $printer->put("if (php_git2_make_resource(&`name`, PHP_GIT2_TYPE_`type`, `name`, 1 TSRMLS_CC)) {\n",
                 "name", $name,
                 "type", strtoupper($this->getNormarizedTypeName($arg))
             );
-            $printer->put("`name`->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);\n", "name", $name);
-            $printer->put("`name`->should_free_v = 0;\n", "name", $name);
-            $printer->put("ZVAL_RESOURCE(return_value, `name`->resource_id);\n", "name", $name);
+            $printer->block(function(Printer $printer) {
+                $printer->put("RETURN_FALSE;\n");
+            });
+            $printer->put("}\n");
+            $printer->put("ZVAL_RESOURCE(return_value, GIT2_RVAL_P(`name`));\n", "name", $name);
         }
     }
 

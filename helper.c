@@ -1,4 +1,5 @@
 #include "php_git2.h"
+#include "php_git2_priv.h"
 #include "helper.h"
 
 static zval* datetime_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
@@ -135,3 +136,114 @@ void php_git2_strarray_to_array(git_strarray *array, zval **out TSRMLS_DC)
 	}
 	*out = result;
 }
+
+int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, void *resource, int should_free TSRMLS_DC)
+{
+	php_git2_t *result = NULL;
+
+	PHP_GIT2_MAKE_RESOURCE_NOCHECK(result);
+	if (result == NULL) {
+		return 1;
+	}
+
+	switch (type) {
+		case PHP_GIT2_TYPE_REPOSITORY:
+			PHP_GIT2_V(result, repository) = (git_repository*)resource;
+			break;
+		case PHP_GIT2_TYPE_COMMIT:
+			PHP_GIT2_V(result, commit) = (git_commit*)resource;
+			break;
+		case PHP_GIT2_TYPE_TREE:
+			PHP_GIT2_V(result, commit) = (git_tree*)resource;
+			break;
+		case PHP_GIT2_TYPE_TREE_ENTRY:
+			PHP_GIT2_V(result, tree_entry) = (git_tree_entry*)resource;
+			break;
+		case PHP_GIT2_TYPE_BLOB:
+			PHP_GIT2_V(result, blob) = (git_blob*)resource;
+			break;
+		case PHP_GIT2_TYPE_REVWALK:
+			PHP_GIT2_V(result, revwalk) = (git_revwalk*)resource;
+			break;
+		case PHP_GIT2_TYPE_TREEBUILDER:
+			PHP_GIT2_V(result, treebuilder) = (git_treebuilder*)resource;
+			break;
+		case PHP_GIT2_TYPE_REFERENCE:
+			PHP_GIT2_V(result, reference) = (git_reference*)resource;
+			break;
+		case PHP_GIT2_TYPE_CONFIG:
+			PHP_GIT2_V(result, config) = (git_config*)resource;
+			break;
+		case PHP_GIT2_TYPE_OBJECT:
+			PHP_GIT2_V(result, object) = (git_object*)resource;
+			break;
+		case PHP_GIT2_TYPE_INDEX:
+			PHP_GIT2_V(result, index) = (git_index*)resource;
+			break;
+		case PHP_GIT2_TYPE_ODB:
+			PHP_GIT2_V(result, odb) = (git_odb*)resource;
+			break;
+		case PHP_GIT2_TYPE_REFDB:
+			PHP_GIT2_V(result, refdb) = (git_refdb*)resource;
+			break;
+		case PHP_GIT2_TYPE_STATUS_LIST:
+			PHP_GIT2_V(result, status_list) = (git_status_list*)resource;
+			break;
+		case PHP_GIT2_TYPE_BRANCH_ITERATOR:
+			PHP_GIT2_V(result, branch_iterator) = (git_branch_iterator*)resource;
+			break;
+		case PHP_GIT2_TYPE_TAG:
+			PHP_GIT2_V(result, tag) = (git_tag*)resource;
+			break;
+		case PHP_GIT2_TYPE_CRED:
+			PHP_GIT2_V(result, cred) = (git_cred*)resource;
+			break;
+		case PHP_GIT2_TYPE_TRANSPORT:
+			PHP_GIT2_V(result, transport) = (git_transport*)resource;
+			break;
+		case PHP_GIT2_TYPE_REMOTE:
+			PHP_GIT2_V(result, remote) = (git_remote*)resource;
+			break;
+		case PHP_GIT2_TYPE_DIFF:
+			PHP_GIT2_V(result, diff) = (git_diff*)resource;
+			break;
+		case PHP_GIT2_TYPE_MERGE_RESULT:
+			PHP_GIT2_V(result, merge_result) = (git_merge_result*)resource;
+			break;
+		case PHP_GIT2_TYPE_MERGE_HEAD:
+			PHP_GIT2_V(result, merge_head) = (git_merge_head*)resource;
+			break;
+		case PHP_GIT2_TYPE_PATHSPEC:
+			PHP_GIT2_V(result, pathspec) = (git_pathspec*)resource;
+			break;
+		case PHP_GIT2_TYPE_PATHSPEC_MATCH_LIST:
+			PHP_GIT2_V(result, pathspec_match_list) = (git_pathspec_match_list*)resource;
+			break;
+		case PHP_GIT2_TYPE_PATCH:
+			PHP_GIT2_V(result, patch) = (git_patch*)resource;
+			break;
+		case PHP_GIT2_TYPE_DIFF_HUNK:
+			PHP_GIT2_V(result, diff_hunk) = (git_diff_hunk*)resource;
+			break;
+		case PHP_GIT2_TYPE_BUF:
+			PHP_GIT2_V(result, buf) = (git_buf*)resource;
+			break;
+		case PHP_GIT2_TYPE_FILTER_LIST:
+			PHP_GIT2_V(result, filter_list) = (git_filter_list*)resource;
+			break;
+		case PHP_GIT2_TYPE_FILTER_SOURCE:
+			PHP_GIT2_V(result, filter_source) = (git_filter_source*)resource;
+			break;
+		case PHP_GIT2_TYPE_DIFF_LINE:
+			PHP_GIT2_V(result, diff_line) = (git_diff_line*)resource;
+			break;
+	}
+
+	result->type = type;
+	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
+	result->should_free_v = should_free;
+
+	*out = result;
+	return 0;
+}
+
