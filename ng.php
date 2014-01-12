@@ -348,6 +348,8 @@ class Fashion
                 "git_cred",
                 "git_transport",
                 "git_remote",
+                "git_merge_head",
+                "git_merge_result",
             );
         }
 

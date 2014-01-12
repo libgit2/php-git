@@ -94,6 +94,8 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_TRANSPORT,
 	PHP_GIT2_TYPE_REMOTE,
 	PHP_GIT2_TYPE_DIFF,
+	PHP_GIT2_TYPE_MERGE_RESULT,
+	PHP_GIT2_TYPE_MERGE_HEAD,
 };
 
 typedef struct php_git2_t {
@@ -119,6 +121,8 @@ typedef struct php_git2_t {
 		git_transport *transport;
 		git_remote *remote;
 		git_diff *diff;
+		git_merge_result *merge_result;
+		git_merge_head *merge_head;
 	} v;
 	int should_free_v;
 	int resource_id;
