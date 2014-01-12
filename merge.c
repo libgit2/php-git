@@ -16,7 +16,7 @@ PHP_FUNCTION(git_merge_base)
 	int two_len = 0;
 	git_oid __two;
 	int error = 0;
-	char result[41] = {0};
+	char result[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rss", &repo, &one, &one_len, &two, &two_len) == FAILURE) {
@@ -316,7 +316,7 @@ PHP_FUNCTION(git_merge_result_fastforward_oid)
 	zval *merge_result = NULL;
 	php_git2_t *_merge_result = NULL;
 	int error = 0;
-	char buffer[41] = {0};
+	char buffer[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &merge_result) == FAILURE) {

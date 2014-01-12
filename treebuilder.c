@@ -210,7 +210,7 @@ PHP_FUNCTION(git_treebuilder_write)
 	php_git2_t *_bld;
 	git_oid id;
 	int error = 0;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rr", &repo, &bld) == FAILURE) {

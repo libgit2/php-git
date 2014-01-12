@@ -42,7 +42,7 @@ PHP_FUNCTION(git_reference_name_to_id)
 	char *name = {0};
 	int name_len;
 	git_oid id;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 	int error;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -196,7 +196,7 @@ PHP_FUNCTION(git_reference_target_peel)
 	zval *ref;
 	php_git2_t *_ref;
 	git_oid *oid;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &ref) == FAILURE) {

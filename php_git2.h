@@ -48,9 +48,10 @@
 #include "limits.h"
 
 #include "git2.h"
-#include "git2/sys/filter.h"
+#include "git2/odb.h"
 #include "git2/odb_backend.h"
 #include "git2/trace.h"
+#include "git2/sys/filter.h"
 
 #include "date/php_date.h"
 

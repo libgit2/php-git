@@ -35,7 +35,7 @@ static int php_git2_array_to_index_entry(git_index_entry *entry, zval *array TSR
 static void php_git2_index_entry_to_array(const git_index_entry *entry, zval **result TSRMLS_DC)
 {
 	zval *tmp, *ctime, *mtime;
-	char buf[41] = {0};
+	char buf[GIT2_OID_HEXSIZE] = {0};
 
 	MAKE_STD_ZVAL(tmp);
 	MAKE_STD_ZVAL(ctime);
@@ -283,7 +283,7 @@ PHP_FUNCTION(git_index_write_tree)
 	php_git2_t *_index;
 	int error = 0;
 	git_oid id;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &index) == FAILURE) {
@@ -307,7 +307,7 @@ PHP_FUNCTION(git_index_write_tree_to)
 	zval *repo;
 	php_git2_t *_repo;
 	git_oid id;
-	char out[41]= {0};
+	char out[GIT2_OID_HEXSIZE]= {0};
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,

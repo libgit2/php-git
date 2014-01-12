@@ -121,7 +121,7 @@ PHP_FUNCTION(git_commit_id)
 {
 	zval *commit;
 	php_git2_t *_commit;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 	const git_oid *id;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -293,7 +293,7 @@ PHP_FUNCTION(git_commit_tree_id)
 {
 	zval *commit;
 	php_git2_t *_commit;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 	const git_oid *id;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -362,7 +362,7 @@ PHP_FUNCTION(git_commit_parent_id)
 	php_git2_t *_commit;
 	long n;
 	git_oid *oid;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rl", &commit, &n) == FAILURE) {
@@ -417,7 +417,7 @@ PHP_FUNCTION(git_commit_create)
 	int update_ref_len, message_encoding_len, message_len, parent_count = 0, error = 0, i;
 	php_git2_t *_repo, *_author, *_committer, *_tree;
 	git_signature __author, __committer;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 	git_oid oid;
 	const git_commit **__parents = NULL;
 	HashPosition pos;

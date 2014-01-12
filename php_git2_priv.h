@@ -57,6 +57,8 @@ do {\
 	val->mutable = 0;\
 } while (0);\
 
+#define GIT2_OID_HEXSIZE (GIT_OID_HEXSZ+1)
+
 #include "helper.h"
 
 #endif

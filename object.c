@@ -98,7 +98,7 @@ PHP_FUNCTION(git_object_id)
 	zval *obj;
 	php_git2_t *_obj;
 	const git_oid *id;
-	char buf[41] = {0};
+	char buf[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &obj) == FAILURE) {

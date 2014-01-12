@@ -100,7 +100,7 @@ PHP_FUNCTION(git_tag_id)
 	const git_oid  *result = NULL;
 	zval *tag = NULL;
 	php_git2_t *_tag = NULL;
-	char __result[41] = {0};
+	char __result[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &tag) == FAILURE) {
@@ -175,7 +175,7 @@ PHP_FUNCTION(git_tag_target_id)
 	const git_oid  *result = NULL;
 	zval *tag = NULL;
 	php_git2_t *_tag = NULL;
-	char __result[41] = {0};
+	char __result[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &tag) == FAILURE) {
@@ -284,7 +284,7 @@ PHP_FUNCTION(git_tag_create)
 	int message_len = 0;
 	long force = 0;
 	int error = 0;
-	char buffer[41] = {0};
+	char buffer[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsrasl", &repo, &tag_name, &tag_name_len, &target, &tagger, &message, &message_len, &force) == FAILURE) {
@@ -320,7 +320,7 @@ PHP_FUNCTION(git_tag_annotation_create)
 	char *message = NULL;
 	int message_len = 0;
 	int error = 0;
-	char buffer[41] = {0};
+	char buffer[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsras", &repo, &tag_name, &tag_name_len, &target, &tagger, &message, &message_len) == FAILURE) {
@@ -351,7 +351,7 @@ PHP_FUNCTION(git_tag_create_frombuffer)
 	int buffer_len = 0;
 	long force = 0;
 	int error = 0;
-	char oid[41] = {0};
+	char oid[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsl", &repo, &buffer, &buffer_len, &force) == FAILURE) {
@@ -383,7 +383,7 @@ PHP_FUNCTION(git_tag_create_lightweight)
 	php_git2_t *_target = NULL;
 	long force = 0;
 	int error = 0;
-	char oid[41] = {0};
+	char oid[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsrl", &repo, &tag_name, &tag_name_len, &target, &force) == FAILURE) {

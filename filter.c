@@ -308,7 +308,7 @@ PHP_FUNCTION(git_filter_source_id)
 	const git_oid  *result = NULL;
 	zval *src = NULL;
 	php_git2_t *_src = NULL;
-	char __result[41] = {0};
+	char __result[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &src) == FAILURE) {

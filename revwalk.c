@@ -238,7 +238,7 @@ PHP_FUNCTION(git_revwalk_next)
 	zval *walk;
 	php_git2_t *_walk;
 	git_oid id = {0};
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,

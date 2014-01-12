@@ -519,7 +519,7 @@ class Fashion
             $printer->put("`type` error = 0;\n", "type", $f->getReturnType());
         }
         if (preg_match("/git_oid/", $f->getReturnType())) {
-            $printer->put("char __result[41] = {0};\n");
+            $printer->put("char __result[GIT2_OID_HEXSIZE] = {0};\n");
         }
         if (preg_match("/_owner$/", $f->getName())) {
             $printer->put("php_git2_t *__result = NULL;\n");

@@ -127,7 +127,7 @@ PHP_FUNCTION(git_tree_entry_id)
 {
 	zval *tree_entry;
 	php_git2_t *git2;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 
 	const git_oid *id;
 
@@ -333,7 +333,7 @@ PHP_FUNCTION(git_tree_id)
 {
 	zval *tree;
 	php_git2_t *git2;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 
 	const git_oid *id;
 

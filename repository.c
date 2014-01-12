@@ -625,7 +625,7 @@ PHP_FUNCTION(git_repository_hashfile)
 	int as_path_len;
 	git_oid oid;
 	int error = 0;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsrs", &repo, &path, &path_len, &type, &as_path, &as_path_len) == FAILURE) {

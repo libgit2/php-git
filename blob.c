@@ -12,7 +12,7 @@ PHP_FUNCTION(git_blob_create_frombuffer)
 	int buffer_len;
 	int error;
 	git_oid id;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &repository, &buffer, &buffer_len) == FAILURE) {
@@ -20,7 +20,6 @@ PHP_FUNCTION(git_blob_create_frombuffer)
 	}
 
 	ZEND_FETCH_RESOURCE(git2, php_git2_t*, &repository, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-
 	error = git_blob_create_frombuffer(&id, PHP_GIT2_V(git2, repository), buffer, buffer_len);
 	if (php_git2_check_error(error, "git_blob_create_frombuffer" TSRMLS_CC)) {
 		RETURN_FALSE
@@ -46,7 +45,7 @@ PHP_FUNCTION(git_blob_create_fromdisk)
 	int path_len;
 	int error;
 	git_oid id;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &repository, &path, &path_len) == FAILURE) {
@@ -74,7 +73,7 @@ PHP_FUNCTION(git_blob_create_fromworkdir)
 	int path_len;
 	int error;
 	git_oid id;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &repository, &path, &path_len) == FAILURE) {
@@ -124,7 +123,7 @@ PHP_FUNCTION(git_blob_id)
 {
 	zval *blob;
 	php_git2_t *git2;
-	char out[41] = {0};
+	char out[GIT2_OID_HEXSIZE] = {0};
 	const git_oid *id;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
