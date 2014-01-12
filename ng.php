@@ -389,6 +389,7 @@ class Fashion
                 "git_reflog_entry",
                 "git_blame",
                 "git_packbuilder",
+                "git_submodule",
             );
         }
 

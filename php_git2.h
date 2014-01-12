@@ -122,6 +122,7 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_REFLOG_ENTRY,
 	PHP_GIT2_TYPE_BLAME,
 	PHP_GIT2_TYPE_PACKBUILDER,
+	PHP_GIT2_TYPE_SUBMODULE,
 };
 
 typedef struct php_git2_t {
@@ -171,6 +172,7 @@ typedef struct php_git2_t {
 		git_reflog_entry *reflog_entry;
 		git_blame *blame;
 		git_packbuilder *packbuilder;
+		git_submodule *submodule;
 	} v;
 	int should_free_v;
 	int resource_id;

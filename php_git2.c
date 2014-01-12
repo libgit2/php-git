@@ -60,6 +60,7 @@
 #include "signature.h"
 #include "reset.h"
 #include "message.h"
+#include "submodule.h"
 
 int git2_resource_handle;
 
@@ -812,6 +813,35 @@ static zend_function_entry php_git2_functions[] = {
 
 	/* message */
 	PHP_FE(git_message_prettify, arginfo_git_message_prettify)
+
+	/* submodule */
+	PHP_FE(git_submodule_lookup, arginfo_git_submodule_lookup)
+	PHP_FE(git_submodule_foreach, arginfo_git_submodule_foreach)
+	PHP_FE(git_submodule_add_setup, arginfo_git_submodule_add_setup)
+	PHP_FE(git_submodule_add_finalize, arginfo_git_submodule_add_finalize)
+	PHP_FE(git_submodule_add_to_index, arginfo_git_submodule_add_to_index)
+	PHP_FE(git_submodule_save, arginfo_git_submodule_save)
+	PHP_FE(git_submodule_owner, arginfo_git_submodule_owner)
+	PHP_FE(git_submodule_name, arginfo_git_submodule_name)
+	PHP_FE(git_submodule_path, arginfo_git_submodule_path)
+	PHP_FE(git_submodule_url, arginfo_git_submodule_url)
+	PHP_FE(git_submodule_set_url, arginfo_git_submodule_set_url)
+	PHP_FE(git_submodule_index_id, arginfo_git_submodule_index_id)
+	PHP_FE(git_submodule_head_id, arginfo_git_submodule_head_id)
+	PHP_FE(git_submodule_wd_id, arginfo_git_submodule_wd_id)
+	PHP_FE(git_submodule_ignore, arginfo_git_submodule_ignore)
+	PHP_FE(git_submodule_set_ignore, arginfo_git_submodule_set_ignore)
+	PHP_FE(git_submodule_update, arginfo_git_submodule_update)
+	PHP_FE(git_submodule_set_update, arginfo_git_submodule_set_update)
+	PHP_FE(git_submodule_fetch_recurse_submodules, arginfo_git_submodule_fetch_recurse_submodules)
+	PHP_FE(git_submodule_set_fetch_recurse_submodules, arginfo_git_submodule_set_fetch_recurse_submodules)
+	PHP_FE(git_submodule_init, arginfo_git_submodule_init)
+	PHP_FE(git_submodule_sync, arginfo_git_submodule_sync)
+	PHP_FE(git_submodule_open, arginfo_git_submodule_open)
+	PHP_FE(git_submodule_reload, arginfo_git_submodule_reload)
+	PHP_FE(git_submodule_reload_all, arginfo_git_submodule_reload_all)
+	PHP_FE(git_submodule_status, arginfo_git_submodule_status)
+	PHP_FE(git_submodule_location, arginfo_git_submodule_location)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
