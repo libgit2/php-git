@@ -2,6 +2,38 @@
 #include "php_git2_priv.h"
 #include "tag.h"
 
+static int php_git2_tag_foreach_cb(const char *name, git_oid *oid, void *payload)
+{
+	php_git2_t *result;
+	zval *param_name, *param_oid, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	int i = 0;
+	long retval = 0;
+	char buffer[41] = {0};
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	git_oid_fmt(buffer, oid);
+
+	Z_ADDREF_P(p->payload);
+	MAKE_STD_ZVAL(param_name);
+	MAKE_STD_ZVAL(param_oid);
+	ZVAL_STRING(param_name, name, 1);
+	ZVAL_STRING(param_oid, buffer, 1);
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 3, &param_name, &param_oid, &p->payload)) {
+		zval_ptr_dtor(&retval_ptr);
+		zend_list_delete(result->resource_id);
+		return GIT_EUSER;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	zend_list_delete(result->resource_id);
+
+	return retval;
+}
+
+
 /* {{{ proto resource git_tag_lookup(resource $repo, string $id)
  */
 PHP_FUNCTION(git_tag_lookup)
@@ -482,26 +514,33 @@ PHP_FUNCTION(git_tag_list_match)
 /* }}} */
 
 
-/* {{{ proto long git_tag_foreach(repo, callback, payload)
-*/
+/* {{{ proto long git_tag_foreach(resource $repo,  $callback,  $payload)
+ */
 PHP_FUNCTION(git_tag_foreach)
 {
-	zval *repo;
-	php_git2_t *_repo;
-	zval *callback;
-	php_git2_t *_callback;
-	zval *payload;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_tag_foreach not implemented yet");
-	return;
+	int result = 0, error = 0;
+	zval *repo = NULL, *callback = NULL;
+	php_git2_t *_repo = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb;
+	zval *payload = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrz", &repo, &callback, &payload) == FAILURE) {
+		"rfz", &repo, &fci, &fcc, &payload) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_tag_foreach(PHP_GIT2_V(_repo, repository), php_git2_tag_foreach_cb, cb);
+	php_git2_cb_free(cb);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto resource git_tag_peel(resource $tag)
  */

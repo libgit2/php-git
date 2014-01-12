@@ -558,6 +558,28 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_merge_result_fastforward_oid, arginfo_git_merge_result_fastforward_oid)
 	PHP_FE(git_merge_result_free, arginfo_git_merge_result_free)
 
+	/* tag */
+	PHP_FE(git_tag_lookup, arginfo_git_tag_lookup)
+	PHP_FE(git_tag_lookup_prefix, arginfo_git_tag_lookup_prefix)
+	PHP_FE(git_tag_free, arginfo_git_tag_free)
+	PHP_FE(git_tag_id, arginfo_git_tag_id)
+	PHP_FE(git_tag_owner, arginfo_git_tag_owner)
+	PHP_FE(git_tag_target, arginfo_git_tag_target)
+	PHP_FE(git_tag_target_id, arginfo_git_tag_target_id)
+	PHP_FE(git_tag_target_type, arginfo_git_tag_target_type)
+	PHP_FE(git_tag_name, arginfo_git_tag_name)
+	PHP_FE(git_tag_tagger, arginfo_git_tag_tagger)
+	PHP_FE(git_tag_message, arginfo_git_tag_message)
+	PHP_FE(git_tag_create, arginfo_git_tag_create)
+	PHP_FE(git_tag_annotation_create, arginfo_git_tag_annotation_create)
+	PHP_FE(git_tag_create_frombuffer, arginfo_git_tag_create_frombuffer)
+	PHP_FE(git_tag_create_lightweight, arginfo_git_tag_create_lightweight)
+	PHP_FE(git_tag_delete, arginfo_git_tag_delete)
+	PHP_FE(git_tag_list, arginfo_git_tag_list)
+	PHP_FE(git_tag_list_match, arginfo_git_tag_list_match)
+	PHP_FE(git_tag_foreach, arginfo_git_tag_foreach)
+	PHP_FE(git_tag_peel, arginfo_git_tag_peel)
+
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
 	PHP_FE_END
