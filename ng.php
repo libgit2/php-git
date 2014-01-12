@@ -350,6 +350,9 @@ class Fashion
                 "git_remote",
                 "git_merge_head",
                 "git_merge_result",
+                "git_pathspec",
+                "git_pathspec_match_list",
+                "git_diff",
             );
         }
 

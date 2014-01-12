@@ -96,6 +96,8 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_DIFF,
 	PHP_GIT2_TYPE_MERGE_RESULT,
 	PHP_GIT2_TYPE_MERGE_HEAD,
+	PHP_GIT2_TYPE_PATHSPEC,
+	PHP_GIT2_TYPE_PATHSPEC_MATCH_LIST,
 };
 
 typedef struct php_git2_t {
@@ -123,6 +125,8 @@ typedef struct php_git2_t {
 		git_diff *diff;
 		git_merge_result *merge_result;
 		git_merge_head *merge_head;
+		git_pathspec *pathspec;
+		git_pathspec_match_list *pathspec_match_list;
 	} v;
 	int should_free_v;
 	int resource_id;
