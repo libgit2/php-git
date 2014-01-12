@@ -59,6 +59,7 @@
 #include "stash.h"
 #include "signature.h"
 #include "reset.h"
+#include "message.h"
 
 int git2_resource_handle;
 
@@ -808,6 +809,9 @@ static zend_function_entry php_git2_functions[] = {
 	/* reset */
 	PHP_FE(git_reset, arginfo_git_reset)
 	PHP_FE(git_reset_default, arginfo_git_reset_default)
+
+	/* message */
+	PHP_FE(git_message_prettify, arginfo_git_message_prettify)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)

@@ -7,7 +7,7 @@ PHP_ARG_ENABLE(git2-debug, for git2 debug support,
 if test $PHP_GIT2 != "no"; then
 	PHP_SUBST(GIT2_SHARED_LIBADD)
 
-	PHP_NEW_EXTENSION(git2, php_git2.c repository.c commit.c tree.c clone.c blob.c helper.c revwalk.c treebuilder.c reference.c g_config.c object.c index.c revparse.c branch.c tag.c status.c cred.c remote.c transport.c diff.c checkout.c filter.c ignore.c indexer.c pathspec.c patch.c merge.c note.c odb.c reflog.c blame.c packbuilder.c stash.c signature.c reset.c, $ext_shared)
+	PHP_NEW_EXTENSION(git2, php_git2.c repository.c commit.c tree.c clone.c blob.c helper.c revwalk.c treebuilder.c reference.c g_config.c object.c index.c revparse.c branch.c tag.c status.c cred.c remote.c transport.c diff.c checkout.c filter.c ignore.c indexer.c pathspec.c patch.c merge.c note.c odb.c reflog.c blame.c packbuilder.c stash.c signature.c reset.c message.c, $ext_shared)
 	PHP_ADD_INCLUDE([$ext_srcdir/libgit2/include])
 
 	# for now
