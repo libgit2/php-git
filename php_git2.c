@@ -51,6 +51,8 @@
 #include "pathspec.h"
 #include "patch.h"
 #include "merge.h"
+#include "note.h"
+#include "odb.h"
 
 int git2_resource_handle;
 
@@ -217,6 +219,13 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 			break;
 		case PHP_GIT2_TYPE_SMART_SUBTRANSPORT:
 			PHP_GIT2_V(result, smart_subtransport) = (git_smart_subtransport*)resource;
+			break;
+		case PHP_GIT2_TYPE_NOTE:
+			PHP_GIT2_V(result, note) = (git_note*)resource;
+			break;
+		case PHP_GIT2_TYPE_NOTE_ITERATOR:
+			PHP_GIT2_V(result, note_iterator) = (git_note_iterator*)resource;
+			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "passed resource type does not support. probably bug.");
 	}
@@ -702,6 +711,51 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_tag_list_match, arginfo_git_tag_list_match)
 	PHP_FE(git_tag_foreach, arginfo_git_tag_foreach)
 	PHP_FE(git_tag_peel, arginfo_git_tag_peel)
+
+	/* note */
+	PHP_FE(git_note_iterator_new, arginfo_git_note_iterator_new)
+	PHP_FE(git_note_iterator_free, arginfo_git_note_iterator_free)
+	PHP_FE(git_note_next, arginfo_git_note_next)
+	PHP_FE(git_note_read, arginfo_git_note_read)
+	PHP_FE(git_note_message, arginfo_git_note_message)
+	PHP_FE(git_note_oid, arginfo_git_note_oid)
+	PHP_FE(git_note_create, arginfo_git_note_create)
+	PHP_FE(git_note_remove, arginfo_git_note_remove)
+	PHP_FE(git_note_free, arginfo_git_note_free)
+	PHP_FE(git_note_default_ref, arginfo_git_note_default_ref)
+	PHP_FE(git_note_foreach, arginfo_git_note_foreach)
+
+	/* odb */
+	PHP_FE(git_odb_new, arginfo_git_odb_new)
+	PHP_FE(git_odb_open, arginfo_git_odb_open)
+	PHP_FE(git_odb_add_disk_alternate, arginfo_git_odb_add_disk_alternate)
+	PHP_FE(git_odb_free, arginfo_git_odb_free)
+	PHP_FE(git_odb_read, arginfo_git_odb_read)
+	PHP_FE(git_odb_read_prefix, arginfo_git_odb_read_prefix)
+	PHP_FE(git_odb_read_header, arginfo_git_odb_read_header)
+	PHP_FE(git_odb_exists, arginfo_git_odb_exists)
+	PHP_FE(git_odb_refresh, arginfo_git_odb_refresh)
+	PHP_FE(git_odb_foreach, arginfo_git_odb_foreach)
+	PHP_FE(git_odb_write, arginfo_git_odb_write)
+	PHP_FE(git_odb_open_wstream, arginfo_git_odb_open_wstream)
+	PHP_FE(git_odb_stream_write, arginfo_git_odb_stream_write)
+	PHP_FE(git_odb_stream_finalize_write, arginfo_git_odb_stream_finalize_write)
+	PHP_FE(git_odb_stream_read, arginfo_git_odb_stream_read)
+	PHP_FE(git_odb_stream_free, arginfo_git_odb_stream_free)
+	PHP_FE(git_odb_open_rstream, arginfo_git_odb_open_rstream)
+	PHP_FE(git_odb_write_pack, arginfo_git_odb_write_pack)
+	PHP_FE(git_odb_hash, arginfo_git_odb_hash)
+	PHP_FE(git_odb_hashfile, arginfo_git_odb_hashfile)
+	PHP_FE(git_odb_object_dup, arginfo_git_odb_object_dup)
+	PHP_FE(git_odb_object_free, arginfo_git_odb_object_free)
+	PHP_FE(git_odb_object_id, arginfo_git_odb_object_id)
+	PHP_FE(git_odb_object_data, arginfo_git_odb_object_data)
+	PHP_FE(git_odb_object_size, arginfo_git_odb_object_size)
+	PHP_FE(git_odb_object_type, arginfo_git_odb_object_type)
+	PHP_FE(git_odb_add_backend, arginfo_git_odb_add_backend)
+	PHP_FE(git_odb_add_alternate, arginfo_git_odb_add_alternate)
+	PHP_FE(git_odb_num_backends, arginfo_git_odb_num_backends)
+	PHP_FE(git_odb_get_backend, arginfo_git_odb_get_backend)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)

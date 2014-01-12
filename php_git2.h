@@ -112,6 +112,12 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_DIFF_LINE,
 	PHP_GIT2_TYPE_INDEX_CONFLICT_ITERATOR,
 	PHP_GIT2_TYPE_SMART_SUBTRANSPORT,
+	PHP_GIT2_TYPE_NOTE,
+	PHP_GIT2_TYPE_NOTE_ITERATOR,
+	PHP_GIT2_TYPE_ODB_STREAM,
+	PHP_GIT2_TYPE_ODB_OBJECT,
+	PHP_GIT2_TYPE_ODB_WRITEPACK,
+	PHP_GIT2_TYPE_ODB_BACKEND,
 };
 
 typedef struct php_git2_t {
@@ -151,6 +157,12 @@ typedef struct php_git2_t {
 		git_diff_line *diff_line;
 		git_index_conflict_iterator *index_conflict_iterator;
 		git_smart_subtransport *smart_subtransport;
+		git_note *note;
+		git_note_iterator *note_iterator;
+		git_odb_stream *odb_stream;
+		git_odb_object *odb_object;
+		git_odb_writepack *odb_writepack;
+		git_odb_backend *odb_backend;
 	} v;
 	int should_free_v;
 	int resource_id;

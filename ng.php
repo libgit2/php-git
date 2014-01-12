@@ -90,7 +90,11 @@ class Func
             if (preg_match("/_cb$/", $arg->getType())) {
                 return true;
             }
+            if (preg_match("/callback$/", $arg->getType())) {
+                return true;
+            }
         }
+
         return false;
     }
 
@@ -361,7 +365,14 @@ class Fashion
                 "git_config_iterator",
                 "git_index_conflict_iterator",
                 "git_transport*",
-                "git_transport"
+                "git_transport",
+                "git_note",
+                "git_note_iterator",
+                "git_odb",
+                "git_odb_object",
+                "git_odb_backend",
+                "git_odb_stream",
+                "struct git_odb",
             );
         }
 
@@ -1073,6 +1084,13 @@ if (preg_match_all("/GIT_EXTERN\((.+?)\)\s*([a-zA-Z0-9_-]+)\((.+?)\);/s", $data,
     }
 }
 
-$printer = new Fashion();
-echo $printer->out($table[$_SERVER['argv'][2]]);
+if (isset($_SERVER['argv'][2])) {
+    $printer = new Fashion();
+    echo $printer->out($table[$_SERVER['argv'][2]]);
+} else {
+    foreach ($table as $name => $func) {
+        $printer = new Fashion();
+        echo $printer->out($func);
+    }
+}
 
