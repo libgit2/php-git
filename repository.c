@@ -2,6 +2,72 @@
 #include "php_git2_priv.h"
 #include "repository.h"
 
+static int php_git2_repository_fetchhead_foreach_cb(const char *ref_name,
+                                                            const char *remote_url,
+                                                            const git_oid *oid,
+                                                            unsigned int is_merge,
+                                                            void *payload)
+{
+	php_git2_t *result;
+	zval *param_ref_name, *param_remote_url, *param_oid, *param_is_merge, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	int i = 0;
+	long retval = 0;
+	char _oid[41] = {0};
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	git_oid_fmt(_oid, oid);
+
+	Z_ADDREF_P(p->payload);
+	MAKE_STD_ZVAL(param_ref_name);
+	MAKE_STD_ZVAL(param_remote_url);
+	MAKE_STD_ZVAL(param_oid);
+	MAKE_STD_ZVAL(param_is_merge);
+	ZVAL_STRING(param_ref_name, ref_name, 1);
+	ZVAL_STRING(param_remote_url, remote_url, 1);
+	ZVAL_STRING(param_oid, _oid, 1);
+	ZVAL_BOOL(param_is_merge, is_merge);
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 5,
+	 	&param_ref_name,
+	 	&param_remote_url,
+	 	&param_oid,
+	 	&param_is_merge,
+	 	&p->payload)) {
+		return GIT_EUSER;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	return retval;
+}
+
+static int php_git2_repository_mergehead_foreach_cb(const git_oid *oid,
+                                                            void *payload)
+{
+	php_git2_t *result;
+	zval *param_oid, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	int i = 0;
+	long retval = 0;
+	char _oid[41] = {0};
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	git_oid_fmt(_oid, oid);
+
+	Z_ADDREF_P(p->payload);
+	MAKE_STD_ZVAL(param_oid);
+	ZVAL_STRING(param_oid, _oid, 1);
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 2, &param_oid, &p->payload)) {
+		return GIT_EUSER;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	return retval;
+}
+
 /* {{{ proto resource git_repository_new()
 */
 PHP_FUNCTION(git_repository_new)
@@ -601,48 +667,58 @@ PHP_FUNCTION(git_repository_merge_cleanup)
 }
 /* }}} */
 
-
-/* {{{ proto long git_repository_fetchhead_foreach(repo, callback, payload)
-*/
+/* {{{ proto long git_repository_fetchhead_foreach(resource $repo, Callable $callback,  $payload)
+ */
 PHP_FUNCTION(git_repository_fetchhead_foreach)
 {
-	zval *repo;
-	php_git2_t *_repo;
-	zval *callback;
-	php_git2_t *_callback;
-	zval *payload;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_repository_fetchhead_foreach not implemented yet");
-	return;
+	int result = 0, error = 0;
+	zval *repo = NULL, *callback = NULL, *payload = NULL;
+	php_git2_t *_repo = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrz", &repo, &callback, &payload) == FAILURE) {
+		"rfz", &repo, &fci, &fcc, &payload) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
 
-/* {{{ proto long git_repository_mergehead_foreach(repo, callback, payload)
-*/
+	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_repository_fetchhead_foreach(PHP_GIT2_V(_repo, repository), php_git2_repository_fetchhead_foreach_cb, cb);
+	php_git2_cb_free(cb);
+	RETURN_LONG(result);
+}
+/* }}} */
+
+/* {{{ proto long git_repository_mergehead_foreach(resource $repo, Callable $callback,  $payload)
+ */
 PHP_FUNCTION(git_repository_mergehead_foreach)
 {
-	zval *repo;
-	php_git2_t *_repo;
-	zval *callback;
-	php_git2_t *_callback;
-	zval *payload;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_repository_mergehead_foreach not implemented yet");
-	return;
+	int result = 0, error = 0;
+	zval *repo = NULL, *callback = NULL, *payload = NULL;
+	php_git2_t *_repo = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrz", &repo, &callback, &payload) == FAILURE) {
+		"rfz", &repo, &fci, &fcc, &payload) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_repository_mergehead_foreach(PHP_GIT2_V(_repo, repository), php_git2_repository_mergehead_foreach_cb, cb);
+	php_git2_cb_free(cb);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto resource git_repository_hashfile(repo, path, type, as_path)
 */
