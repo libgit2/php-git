@@ -57,6 +57,7 @@
 #include "blame.h"
 #include "packbuilder.h"
 #include "stash.h"
+#include "signature.h"
 
 int git2_resource_handle;
 
@@ -795,6 +796,13 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_stash_save, arginfo_git_stash_save)
 	PHP_FE(git_stash_foreach, arginfo_git_stash_foreach)
 	PHP_FE(git_stash_drop, arginfo_git_stash_drop)
+
+	/* signature */
+	PHP_FE(git_signature_new, arginfo_git_signature_new)
+	PHP_FE(git_signature_now, arginfo_git_signature_now)
+	PHP_FE(git_signature_default, arginfo_git_signature_default)
+	PHP_FE(git_signature_dup, arginfo_git_signature_dup)
+	PHP_FE(git_signature_free, arginfo_git_signature_free)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
