@@ -215,6 +215,8 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 		case PHP_GIT2_TYPE_INDEX_CONFLICT_ITERATOR:
 			PHP_GIT2_V(result, index_conflict_iterator) = (git_index_conflict_iterator*)resource;
 			break;
+		case PHP_GIT2_TYPE_SMART_SUBTRANSPORT:
+			PHP_GIT2_V(result, smart_subtransport) = (git_smart_subtransport*)resource;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "passed resource type does not support. probably bug.");
 	}

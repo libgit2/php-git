@@ -360,6 +360,8 @@ class Fashion
                 "git_reference_iterator",
                 "git_config_iterator",
                 "git_index_conflict_iterator",
+                "git_transport*",
+                "git_transport"
             );
         }
 

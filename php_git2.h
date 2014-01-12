@@ -111,6 +111,7 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_FILTER_SOURCE,
 	PHP_GIT2_TYPE_DIFF_LINE,
 	PHP_GIT2_TYPE_INDEX_CONFLICT_ITERATOR,
+	PHP_GIT2_TYPE_SMART_SUBTRANSPORT,
 };
 
 typedef struct php_git2_t {
@@ -149,6 +150,7 @@ typedef struct php_git2_t {
 		git_filter_source *filter_source;
 		git_diff_line *diff_line;
 		git_index_conflict_iterator *index_conflict_iterator;
+		git_smart_subtransport *smart_subtransport;
 	} v;
 	int should_free_v;
 	int resource_id;
