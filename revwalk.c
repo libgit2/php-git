@@ -2,13 +2,13 @@
 #include "php_git2_priv.h"
 #include "revwalk.h"
 
-/* {{{ proto resource git_revwalk_new(repo)
-*/
+/* {{{ proto resource git_revwalk_new(resource $repo)
+ */
 PHP_FUNCTION(git_revwalk_new)
 {
-	zval *repo;
-	php_git2_t *_repo, *result;
-	git_revwalk *walker;
+	php_git2_t *result = NULL, *_repo = NULL;
+	git_revwalk *out = NULL;
+	zval *repo = NULL;
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -17,19 +17,17 @@ PHP_FUNCTION(git_revwalk_new)
 	}
 
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	error = git_revwalk_new(&walker, PHP_GIT2_V(_repo, repository));
+	error = git_revwalk_new(&out, PHP_GIT2_V(_repo, repository));
 	if (php_git2_check_error(error, "git_revwalk_new" TSRMLS_CC)) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, revwalk) = walker;
-	result->type = PHP_GIT2_TYPE_REVWALK;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 1;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REVWALK, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
+
 
 /* {{{ proto void git_revwalk_reset(walker)
 */
@@ -47,35 +45,30 @@ PHP_FUNCTION(git_revwalk_reset)
 	git_revwalk_reset(PHP_GIT2_V(_walker, revwalk));
 }
 
-/* {{{ proto long git_revwalk_push(walk, id)
-*/
+/* {{{ proto long git_revwalk_push(resource $walk, string $id)
+ */
 PHP_FUNCTION(git_revwalk_push)
 {
-	zval *walk;
-	php_git2_t *_walk;
-	char *id = {0};
-	int id_len;
-	git_oid oid;
-	int error = 0;
+	int result = 0, id_len = 0;
+	zval *walk = NULL;
+	php_git2_t *_walk = NULL;
+	char *id = NULL;
+	git_oid __id = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &walk, &id, &id_len) == FAILURE) {
 		return;
 	}
 
-	if (git_oid_fromstrn(&oid, id, id_len) != GIT_OK) {
-		return;
-	}
-
 	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	error = git_revwalk_push(PHP_GIT2_V(_walk, revwalk), &oid);
-
-	if (php_git2_check_error(error, "git_revwalk_push" TSRMLS_CC)) {
+	if (git_oid_fromstrn(&__id, id, id_len)) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+	result = git_revwalk_push(PHP_GIT2_V(_walk, revwalk), &__id);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto long git_revwalk_push_glob(walk, glob)
 */
@@ -248,7 +241,6 @@ PHP_FUNCTION(git_revwalk_next)
 
 	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	error = git_revwalk_next(&id, PHP_GIT2_V(_walk, revwalk));
-
 	if (error == GIT_ITEROVER) {
 		RETURN_FALSE;
 	}

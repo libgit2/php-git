@@ -69,31 +69,30 @@ PHP_FUNCTION(git_repository_open_bare)
 }
 
 /* {{{ proto resource git_repository_open(string $path)
-*/
+ */
 PHP_FUNCTION(git_repository_open)
 {
-	char *path;
-	int path_len;
-	git_repository *repository;
-	int error = 0;
-	php_git2_t *git2;
+	php_git2_t *result = NULL;
+	git_repository *out = NULL;
+	char *path = NULL;
+	int path_len = 0, error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &path, &path_len) == FAILURE) {
 		return;
 	}
 
-	PHP_GIT2_MAKE_RESOURCE(git2);
-	error = git_repository_open(&repository, path);
+	error = git_repository_open(&out, path);
 	if (php_git2_check_error(error, "git_repository_open" TSRMLS_CC)) {
-		RETURN_FALSE
-	}
-	if (php_git2_make_resource(&git2, PHP_GIT2_TYPE_REPOSITORY, repository, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(git2));
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REPOSITORY, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
+
 
 /* {{{ proto string git_repository_get_namespace(resource $repository)
 */

@@ -456,17 +456,33 @@ class Fashion
 
     public function generateDeclarations(Printer $printer, Func $f)
     {
+        $tables = array();
         if ($f->isResourceCreator()) {
-            $printer->put("php_git2_t *result = NULL;\n");
+            $tables["php_git2_t"][] = array(
+                "name" => "*result",
+                "value" => "NULL",
+            );
         } else if ($f->isArrayCreator()) {
-            $printer->put("`type` *result = NULL;\n", "type", $f->getReturnType());
+            $tables[$f->getReturnType()][] = array(
+                "name" => "*result",
+                "value" => "NULL",
+            );
             if (preg_match("/git_signature/", $f->getReturnType())) {
-                $printer->put("zval *__result = NULL;\n");
+                $tables["zval"][] = array(
+                    "name" => "*__result",
+                    "value" => "NULL",
+                );
             }
         } else if ($f->isLongCreator()) {
-            $printer->put("`type` result = 0;\n", "type", $f->getReturnType());
+            $tables[$f->getReturnType()][] = array(
+                "name" => "result",
+                "value" => "0",
+            );
         } else if ($f->isStringCreator()) {
-            $printer->put("`type` *result = NULL;\n", "type", $f->getReturnType());
+            $tables[$f->getReturnType()][] = array(
+                "name" => "*result",
+                "value" => "NULL",
+            );
         }
 
         $i = 0;
@@ -474,55 +490,80 @@ class Fashion
         foreach ($f->getArguments() as $arg) {
             /** @var Arg $arg */
             if ($i == 0  && $f->isResourceCreator()) {
-                $printer->put("`type` `ptr``name` = NULL;\n",
-                    "type", $arg->getType(),
-                    "ptr", $arg->getPtr(),
-                    "name", $arg->getName()
+                $tables[$arg->getType()][] = array(
+                    "name" => sprintf("%s%s", $arg->getPtr(), $arg->getName()),
+                    "value" => "NULL",
                 );
                 $i++;
                 continue;
             }
             if ($arg->shouldWrite()) {
-                $printer->put("`type` `ptr``name` = NULL;\n",
-                    "type", $arg->getType(),
-                    "ptr", $arg->getPtr(),
-                    "name", $arg->getName()
+                $tables[$arg->getType()][] = array(
+                    "name" => sprintf("%s%s", $arg->getPtr(), $arg->getName()),
+                    "value" => "NULL",
                 );
             } else {
                 /** @var Arg $arg */
-                $printer->put("`type` `ptr``name` = `value`;\n",
-                    "type", $arg->getZendType(),
-                    "ptr", $this->isPtr($arg),
-                    "name", $arg->getName(),
-                    "value", $arg->getDefaultValue()
+                $tables[$arg->getZendType()][] = array(
+                    "name" => sprintf("%s%s", $this->isPtr($arg), $arg->getName()),
+                    "value" => $arg->getDefaultValue(),
                 );
                 if ($this->shouldResource($arg)) {
-                    $printer->put("`type` *_`name` = NULL;\n",
-                        "type", "php_git2_t",
-                        "name", $arg->getName()
+                    $tables["php_git2_t"][] = array(
+                        "name" => sprintf("*_%s", $arg->getName()),
+                        "value" => "NULL",
                     );
                 }
 
                 if (preg_match("/char/", $arg->getZendType())) {
-                    $printer->put("int `name`_len = 0;\n",
-                        "name", $arg->getName());
+                    $tables["int"][] = array(
+                        "name" => sprintf("%s_len", $arg->getName()),
+                        "value" => "0",
+                    );
                 }
             }
 
             if ($arg->getType() == "git_oid") {
-                $printer->put("git_oid __`name`;\n", "name", $arg->getName());
+                $tables["git_oid"][] = array(
+                    "name" => sprintf("__%s", $arg->getName()),
+                    "value" => "{0}",
+                );
             }
 
             $i++;
         }
         if ($f->getReturnType() == "int") {
-            $printer->put("`type` error = 0;\n", "type", $f->getReturnType());
+            $tables[$f->getReturnType()][] = array(
+                "name" => "error",
+                "value" => "0",
+            );
         }
         if (preg_match("/git_oid/", $f->getReturnType())) {
-            $printer->put("char __result[GIT2_OID_HEXSIZE] = {0};\n");
+            $tables["char"][] = array(
+                "name" => "__result[GIT2_OID_HEXSIZE]",
+                "value" => "{0}",
+            );
         }
         if (preg_match("/_owner$/", $f->getName())) {
-            $printer->put("php_git2_t *__result = NULL;\n");
+            $tables["php_git2_t"][] = array(
+                "name" => "*__result",
+                "value" => "NULL",
+            );
+        }
+
+
+        foreach ($tables as $type => $values) {
+            $printer->put("`type` ", "type", $type);
+            $i = 0;
+            $cnt = count($values);
+            foreach ($values as $val) {
+                $printer->put("`name` = `value`", "name", $val['name'], "value", $val["value"]);
+                if ($i+1 < $cnt) {
+                    $printer->put(", ");
+                }
+                $i++;
+            }
+            $printer->put(";\n");
         }
     }
 
@@ -897,9 +938,10 @@ class Fashion
     {
         if ($f->isResourceCreator() || $force) {
             $arg = $f->first();
-            $printer->put("if (php_git2_make_resource(&`name`, PHP_GIT2_TYPE_`type`, `name`, 1 TSRMLS_CC)) {\n",
+            $printer->put("if (php_git2_make_resource(&`name`, PHP_GIT2_TYPE_`type`, `target`, 1 TSRMLS_CC)) {\n",
                 "name", $name,
-                "type", strtoupper($this->getNormarizedTypeName($arg))
+                "type", strtoupper($this->getNormarizedTypeName($arg)),
+                "target", "out"
             );
             $printer->block(function(Printer $printer) {
                 $printer->put("RETURN_FALSE;\n");

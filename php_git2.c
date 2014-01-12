@@ -73,16 +73,22 @@ void static destruct_git2(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 				break;
 			case PHP_GIT2_TYPE_BLOB:
 				git_blob_free(PHP_GIT2_V(resource, blob));
+				break;
 			case PHP_GIT2_TYPE_REVWALK:
 				git_revwalk_free(PHP_GIT2_V(resource, revwalk));
+				break;
 			case PHP_GIT2_TYPE_TREEBUILDER:
 				git_treebuilder_free(PHP_GIT2_V(resource, treebuilder));
+				break;
 			case PHP_GIT2_TYPE_REFERENCE:
 				git_reference_free(PHP_GIT2_V(resource, reference));
+				break;
 			case PHP_GIT2_TYPE_CONFIG:
 				git_config_free(PHP_GIT2_V(resource, config));
+				break;
 			case PHP_GIT2_TYPE_OBJECT:
 				git_object_free(PHP_GIT2_V(resource, object));
+				break;
 			default:
 				break;
 		}
