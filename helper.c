@@ -204,3 +204,34 @@ void php_git2_cb_free(php_git2_cb_t *target)
 {
 	efree(target);
 }
+
+void php_git2_array_to_strarray(git_strarray *out, zval *array TSRMLS_DC)
+{
+	int elements = 0, i;
+	HashPosition pos;
+	zval **value;
+
+	elements = zend_hash_num_elements(Z_ARRVAL_P(array));
+	out->strings = (char**)emalloc(sizeof(char*) * elements);
+	out->count = elements;
+	for (i = 0, zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
+		zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&value, &pos) == SUCCESS;
+		zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos), i++) {
+		char *buffer;
+
+		Z_STRVAL_PP(value);
+		buffer = emalloc(sizeof(char*) * Z_STRLEN_PP(value) + 1);
+		memcpy(buffer, Z_STRVAL_PP(value), Z_STRLEN_PP(value));
+		buffer[Z_STRLEN_PP(value)] = '\0';
+		out->strings[i] = buffer;
+	}
+}
+
+void php_git2_strarray_free(git_strarray *out)
+{
+	int i = 0;
+	for (i = 0; i < out->count; i++) {
+		efree(out->strings[i]);
+	}
+	efree(out->strings);
+}

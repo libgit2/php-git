@@ -2,6 +2,34 @@
 #include "php_git2_priv.h"
 #include "index.h"
 
+static int php_git2_index_matched_path_cb(const char *path, const char *matched_pathspec, void *payload)
+{
+	php_git2_t *result;
+	zval *param_path, *param_matched_pathspec, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	int i = 0;
+	long retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	Z_ADDREF_P(p->payload);
+	MAKE_STD_ZVAL(param_path);
+	MAKE_STD_ZVAL(param_matched_pathspec);
+	ZVAL_STRING(param_path, path, 1);
+	ZVAL_STRING(param_matched_pathspec, matched_pathspec, 1);
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 3, &param_path, &param_matched_pathspec, &p->payload)) {
+		zval_ptr_dtor(&param_path);
+		zval_ptr_dtor(&param_matched_pathspec);
+		zval_ptr_dtor(&p->payload);
+		return 0;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	return retval;
+}
+
+
 static int php_git2_array_to_index_entry(git_index_entry *entry, zval *array TSRMLS_DC)
 {
 	zval *ctime, *mtime, *oid;
@@ -538,75 +566,96 @@ PHP_FUNCTION(git_index_remove_bypath)
 	RETURN_TRUE;
 }
 
-/* {{{ proto long git_index_add_all(index, pathspec, flags, callback, payload)
-*/
+/* {{{ proto long git_index_add_all(resource $index, array $pathspec, long $flags, Callable $callback,  $payload)
+ */
 PHP_FUNCTION(git_index_add_all)
 {
-	zval *index;
-	php_git2_t *_index;
-	zval *pathspec;
-	php_git2_t *_pathspec;
-	long flags;
-	zval *callback;
-	php_git2_t *_callback;
-	zval *payload;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_index_add_all not implemented yet");
-	return;
+	int result = 0, error = 0;
+	zval *index = NULL, *pathspec = NULL, *callback = NULL, *payload = NULL;
+	php_git2_t *_index = NULL;
+	git_strarray _pathspec = {0};
+	long flags = 0;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrlr", &index, &pathspec, &flags, &callback, &payload) == FAILURE) {
+		"ralfz", &index, &pathspec, &flags, &fci, &fcc, &payload) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
 
-/* {{{ proto long git_index_remove_all(index, pathspec, callback, payload)
-*/
+	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	php_git2_array_to_strarray(&_pathspec, pathspec TSRMLS_CC);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_index_add_all(PHP_GIT2_V(_index, index), pathspec, flags, php_git2_index_matched_path_cb, cb);
+	php_git2_cb_free(cb);
+	php_git2_strarray_free(&_pathspec);
+	RETURN_LONG(result);
+}
+/* }}} */
+
+
+/* {{{ proto long git_index_remove_all(resource $index, array $pathspec, Callable $callback,  $payload)
+ */
 PHP_FUNCTION(git_index_remove_all)
 {
-	zval *index;
-	php_git2_t *_index;
-	zval *pathspec;
-	php_git2_t *_pathspec;
-	zval *callback;
-	php_git2_t *_callback;
-	zval *payload;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_index_remove_all not implemented yet");
-	return;
+	int result = 0, error = 0;
+	zval *index = NULL, *pathspec = NULL, *callback = NULL, *payload = NULL;
+	php_git2_t *_index = NULL;
+	git_strarray _pathspec = {0};
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrr", &index, &pathspec, &callback, &payload) == FAILURE) {
+		"rafz", &index, &pathspec, &fci, &fcc, &payload) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
 
-/* {{{ proto long git_index_update_all(index, pathspec, callback, payload)
-*/
+	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	php_git2_array_to_strarray(&_pathspec, pathspec TSRMLS_CC);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_index_remove_all(PHP_GIT2_V(_index, index), pathspec, php_git2_index_matched_path_cb, cb);
+	php_git2_cb_free(cb);
+	php_git2_strarray_free(&_pathspec);
+	RETURN_LONG(result);
+}
+/* }}} */
+
+
+/* {{{ proto long git_index_update_all(resource $index, array $pathspec, Callable $callback,  $payload)
+ */
 PHP_FUNCTION(git_index_update_all)
 {
-	zval *index;
-	php_git2_t *_index;
-	zval *pathspec;
-	php_git2_t *_pathspec;
-	zval *callback;
-	php_git2_t *_callback;
-	zval *payload;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_index_update_all not implemented yet");
-	return;
+	int result = 0, error = 0;
+	zval *index = NULL, *pathspec = NULL, *callback = NULL, *payload = NULL;
+	php_git2_t *_index = NULL;
+	git_strarray _pathspec = {0};
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrr", &index, &pathspec, &callback, &payload) == FAILURE) {
+		"rafz", &index, &pathspec, &fci, &fcc, &payload) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	php_git2_array_to_strarray(&_pathspec, pathspec TSRMLS_CC);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_index_update_all(PHP_GIT2_V(_index, index), pathspec, php_git2_index_matched_path_cb, cb);
+	php_git2_cb_free(cb);
+	php_git2_strarray_free(&_pathspec);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto long git_index_find(at_pos, index, path)
 */
@@ -628,87 +677,99 @@ PHP_FUNCTION(git_index_find)
 	RETURN_LONG(result);
 }
 
-/* {{{ proto long git_index_conflict_add(index, ancestor_entry, our_entry, their_entry)
-*/
+/* {{{ proto long git_index_conflict_add(resource $index, $ancestor_entry, $our_entry, $their_entry)
+ */
 PHP_FUNCTION(git_index_conflict_add)
 {
-//	zval *index;
-//	php_git2_t *_index;
-//	zval *ancestor_entry;
-//	php_git2_t *_ancestor_entry;
-//	zval *our_entry;
-//	php_git2_t *_our_entry;
-//	zval *their_entry;
-//	php_git2_t *_their_entry;
-//
-//	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-//		"rrrr", &index, &ancestor_entry, &our_entry, &their_entry) == FAILURE) {
-//		return;
-//	}
-//	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
-
-/* {{{ proto resource git_index_conflict_get(our_out, their_out, index, path)
-*/
-PHP_FUNCTION(git_index_conflict_get)
-{
-	zval *our_out;
-	php_git2_t *_our_out;
-	zval *their_out;
-	php_git2_t *_their_out;
-	zval *index;
-	php_git2_t *_index;
-	char *path = {0};
-	int path_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_index_conflict_get not implemented yet");
-	return;
+	int result = 0, error = 0;
+	zval *index = NULL, *ancestor_entry = NULL, *our_entry = NULL, *their_entry = NULL;
+	php_git2_t *_index = NULL;
+	git_index_entry ancestor = {0}, our = {0}, their = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrrs", &our_out, &their_out, &index, &path, &path_len) == FAILURE) {
+		"raaa", &index, &ancestor_entry, &our_entry, &their_entry) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_our_out, php_git2_t*, &our_out, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+
+	php_git2_array_to_index_entry(&ancestor, ancestor_entry TSRMLS_CC);
+	php_git2_array_to_index_entry(&our, our_entry TSRMLS_CC);
+	php_git2_array_to_index_entry(&their, their_entry TSRMLS_CC);
+
+	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_index_conflict_add(PHP_GIT2_V(_index, index), &ancestor, &our, &their);
+	RETURN_LONG(result);
 }
+/* }}} */
 
-/* {{{ proto long git_index_conflict_remove(index, path)
-*/
-PHP_FUNCTION(git_index_conflict_remove)
+/* {{{ proto resource git_index_conflict_get(resource $index, string $path)
+ */
+PHP_FUNCTION(git_index_conflict_get)
 {
-	zval *index;
-	php_git2_t *_index;
-	char *path = {0};
-	int path_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_index_conflict_remove not implemented yet");
-	return;
+	php_git2_t *result = NULL, *_index = NULL;
+	git_index_entry *ancestor_out = NULL, *our_out = NULL, *their_out = NULL;
+	zval *index = NULL, *ancestor, *our, *their, *container;
+	char *path = NULL;
+	int path_len = 0, error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &index, &path, &path_len) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
 
-/* {{{ proto void git_index_conflict_cleanup(index)
-*/
+	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	error = git_index_conflict_get(&ancestor_out, &our_out, &their_out, PHP_GIT2_V(_index, index), path);
+	if (php_git2_check_error(error, "git_index_conflict_get" TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	php_git2_index_entry_to_array(ancestor_out, &ancestor TSRMLS_CC);
+	php_git2_index_entry_to_array(our_out, &our TSRMLS_CC);
+	php_git2_index_entry_to_array(their_out, &their TSRMLS_CC);
+	MAKE_STD_ZVAL(container);
+	array_init(container);
+	add_next_index_zval(container, ancestor);
+	add_next_index_zval(container, our);
+	add_next_index_zval(container, their);
+	RETURN_ZVAL(container, 0, 1);
+}
+/* }}} */
+
+/* {{{ proto long git_index_conflict_remove(resource $index, string $path)
+ */
+PHP_FUNCTION(git_index_conflict_remove)
+{
+	int result = 0, path_len = 0, error = 0;
+	zval *index = NULL;
+	php_git2_t *_index = NULL;
+	char *path = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"rs", &index, &path, &path_len) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_index_conflict_remove(PHP_GIT2_V(_index, index), path);
+	RETURN_LONG(result);
+}
+/* }}} */
+
+/* {{{ proto void git_index_conflict_cleanup(resource $index)
+ */
 PHP_FUNCTION(git_index_conflict_cleanup)
 {
-	zval *index;
-	php_git2_t *_index;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_index_conflict_cleanup not implemented yet");
-	return;
+	zval *index = NULL;
+	php_git2_t *_index = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &index) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	git_index_conflict_cleanup(PHP_GIT2_V(_index, index));
 }
+/* }}} */
 
 /* {{{ proto long git_index_has_conflicts(index)
 */
@@ -727,61 +788,82 @@ PHP_FUNCTION(git_index_has_conflicts)
 	RETURN_LONG(conflict);
 }
 
-/* {{{ proto resource git_index_conflict_iterator_new(index)
-*/
+/* {{{ proto resource git_index_conflict_iterator_new(resource $index)
+ */
 PHP_FUNCTION(git_index_conflict_iterator_new)
 {
-	zval *index;
-	php_git2_t *_index;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_index_conflict_iterator_new not implemented yet");
-	return;
+	php_git2_t *result = NULL, *_index = NULL;
+	git_index_conflict_iterator *iterator_out = NULL;
+	zval *index = NULL;
+	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &index) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
 
-/* {{{ proto resource git_index_conflict_next(our_out, their_out, iterator)
-*/
+	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	error = git_index_conflict_iterator_new(&iterator_out, PHP_GIT2_V(_index, index));
+	if (php_git2_check_error(error, "git_index_conflict_iterator_new" TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_INDEX_CONFLICT_ITERATOR, iterator_out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
+}
+/* }}} */
+
+/* {{{ proto resource git_index_conflict_next(resource $iterator)
+ */
 PHP_FUNCTION(git_index_conflict_next)
 {
-	zval *our_out;
-	php_git2_t *_our_out;
-	zval *their_out;
-	php_git2_t *_their_out;
-	zval *iterator;
-	php_git2_t *_iterator;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_index_conflict_next not implemented yet");
-	return;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrr", &our_out, &their_out, &iterator) == FAILURE) {
-		return;
-	}
-	ZEND_FETCH_RESOURCE(_our_out, php_git2_t*, &our_out, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
-
-/* {{{ proto void git_index_conflict_iterator_free(iterator)
-*/
-PHP_FUNCTION(git_index_conflict_iterator_free)
-{
-	zval *iterator;
-	php_git2_t *_iterator;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_index_conflict_iterator_free not implemented yet");
-	return;
+	php_git2_t *result = NULL, *_iterator = NULL;
+	git_index_entry *ancestor_out = NULL, *our_out = NULL, *their_out = NULL;
+	zval *iterator = NULL, *ancestor, *our, *their, *container;
+	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &iterator) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_iterator, php_git2_t*, &iterator, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
 
+	ZEND_FETCH_RESOURCE(_iterator, php_git2_t*, &iterator, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	error = git_index_conflict_next(&ancestor_out, &our_out, &their_out, PHP_GIT2_V(_iterator, index_conflict_iterator));
+	if (php_git2_check_error(error, "git_index_conflict_next" TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	php_git2_index_entry_to_array(ancestor_out, &ancestor TSRMLS_CC);
+	php_git2_index_entry_to_array(our_out, &our TSRMLS_CC);
+	php_git2_index_entry_to_array(their_out, &their TSRMLS_CC);
+	MAKE_STD_ZVAL(container);
+	array_init(container);
+	add_next_index_zval(container, ancestor);
+	add_next_index_zval(container, our);
+	add_next_index_zval(container, their);
+	RETURN_ZVAL(container, 0, 1);
+
+}
+/* }}} */
+
+/* {{{ proto void git_index_conflict_iterator_free(resource $iterator)
+ */
+PHP_FUNCTION(git_index_conflict_iterator_free)
+{
+	zval *iterator = NULL;
+	php_git2_t *_iterator = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"r", &iterator) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(_iterator, php_git2_t*, &iterator, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (GIT2_SHOULD_FREE(_iterator)) {
+		git_index_conflict_iterator_free(PHP_GIT2_V(_iterator, index_conflict_iterator));
+		GIT2_SHOULD_FREE(_iterator) = 0;
+	};
+	zval_ptr_dtor(&iterator);
+}
+/* }}} */

@@ -322,25 +322,6 @@ class Printer
 }
 class Fashion
 {
-/*
-    {{{ proto resource git_revparse_single(repo, spec)
-    PHP_FUNCTION(git_revparse_single)
-    {
-    zval *repo;
-    php_git2_t *_repo;
-    char *spec = {0};
-    int spec_len;
-
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_revparse_single not implemented yet");
-        return;
-
-        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-            "rs", &repo, &spec, &spec_len) == FAILURE) {
-        return;
-    }
-        ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-    }
- */
     public function shouldResource(Arg $arg)
     {
         static $types;
@@ -378,6 +359,7 @@ class Fashion
                 "git_diff_line",
                 "git_reference_iterator",
                 "git_config_iterator",
+                "git_index_conflict_iterator",
             );
         }
 
@@ -535,6 +517,12 @@ class Fashion
                         "value" => "NULL",
                     );
                 }
+                if ($arg->getType() == "git_strarray") {
+                    $tables["git_strarray"][] = array(
+                        "name" => sprintf("_%s", $arg->getName()),
+                        "value" => "{0}",
+                    );
+                }
 
                 if (preg_match("/char/", $arg->getZendType())) {
                     $tables["int"][] = array(
@@ -625,6 +613,8 @@ class Fashion
                 } else if (preg_match("/long/", $arg->getZendType())) {
                     $printer->put("l");
                 } else if (preg_match("/git_signature/", $arg->getType())) {
+                    $printer->put("a");
+                } else if (preg_match("/git_strarray/", $arg->getType())) {
                     $printer->put("a");
                 } else if ($this->shouldResource($arg)) {
                     $printer->put("r");
@@ -1019,6 +1009,17 @@ class Fashion
         }
     }
 
+    public function generateStrarrayConversion(Printer $printer, Func $f)
+    {
+        foreach ($f->getArguments() as $arg) {
+            /** @var Arg $arg */
+            if ($arg->getType() == "git_strarray") {
+                $printer->put("php_git2_array_to_strarray(&_`name`, `name` TSRMLS_CC);\n",
+                    "name", $arg->getName());
+            }
+        }
+    }
+
     public function out(Func $f)
     {
         $stream = new StringStream();
@@ -1036,6 +1037,7 @@ class Fashion
             $printer->put("\n");
 
             $this->generateFetchResourceIfNeeded($printer, $f);
+            $this->generateStrarrayConversion($printer, $f);
             $this->generateFunctionCall($printer, $f);
             $this->generateCheckStatementIfNeeded($printer, $f);
             $this->generateMakeResourceIfNeeded($printer, $f);

@@ -49,4 +49,8 @@ int php_git2_cb_init(php_git2_cb_t **out, zend_fcall_info *fci, zend_fcall_info_
 
 void php_git2_cb_free(php_git2_cb_t *target);
 
+void php_git2_array_to_strarray(git_strarray *out, zval *array TSRMLS_DC);
+
+void php_git2_strarray_free(git_strarray *out);
+
 #endif
