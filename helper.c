@@ -278,6 +278,12 @@ int php_git2_call_function_v(
 		fci->no_separation  = 1;
 
 		if (zend_call_function(fci, fcc TSRMLS_CC) != SUCCESS) {
+			if (param_count > 0) {
+				for (i = 0; i < param_count; i++) {
+					zval_ptr_dtor(params[i]);
+				}
+				efree(params);
+			}
 			return 1;
 		}
 		zend_fcall_info_args_clear(fci, 0);

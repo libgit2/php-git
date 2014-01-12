@@ -2,6 +2,39 @@
 #include "php_git2_priv.h"
 #include "revwalk.h"
 
+static int php_git2_treebuilder_filter_cb(const git_tree_entry *entry, void *payload)
+{
+	php_git2_t *result;
+	zval *param_tree_entry, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	int i = 0;
+	long retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	MAKE_STD_ZVAL(param_tree_entry);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_TREE_ENTRY, entry, 0 TSRMLS_CC)) {
+		return 0;
+	}
+	ZVAL_RESOURCE(param_tree_entry, GIT2_RVAL_P(result));
+	zend_list_addref(GIT2_RVAL_P(result));
+	Z_ADDREF_P(p->payload);
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 2, &param_tree_entry, &p->payload)) {
+		zval_ptr_dtor(&param_tree_entry);
+		zval_ptr_dtor(&p->payload);
+		zend_list_delete(result->resource_id);
+		retval = 0;
+		return 0;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	zend_list_delete(result->resource_id);
+
+	return retval;
+}
+
+
 /* {{{ proto resource git_treebuilder_create([resource $source])
 */
 PHP_FUNCTION(git_treebuilder_create)
@@ -179,26 +212,31 @@ PHP_FUNCTION(git_treebuilder_remove)
 	RETURN_TRUE;
 }
 
-/* {{{ proto void git_treebuilder_filter(bld, filter, payload)
-*/
+/* {{{ proto void git_treebuilder_filter(resource $bld,  $filter,  $payload)
+ */
 PHP_FUNCTION(git_treebuilder_filter)
 {
-	zval *bld;
-	php_git2_t *_bld;
-	zval *filter;
-	php_git2_t *_filter;
-	zval *payload;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_treebuilder_filter not implemented yet");
-	return;
+	zval *bld = NULL, *filter = NULL;
+	php_git2_t *_bld = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb;
+	zval *payload = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrz", &bld, &filter, &payload) == FAILURE) {
+		"rfz", &bld, &fci, &fcc, &payload) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_bld, php_git2_t*, &bld, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	git_treebuilder_filter(PHP_GIT2_V(_bld, treebuilder), php_git2_treebuilder_filter_cb, cb);
+	php_git2_cb_free(cb);
 }
+/* }}} */
+
 
 /* {{{ proto resource git_treebuilder_write(repo, bld)
 */

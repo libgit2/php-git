@@ -62,7 +62,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_treebuilder_filter, 0, 0, 3)
 	ZEND_ARG_INFO(0, bld)
 	ZEND_ARG_INFO(0, filter)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_treebuilder_write, 0, 0, 2)

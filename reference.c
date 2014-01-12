@@ -19,14 +19,13 @@ static int php_git2_reference_foreach_cb(git_reference *reference, void *payload
 	ZVAL_RESOURCE(param_reference, result->resource_id);
 
 	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 2, &param_reference, &p->payload)) {
-		zval_ptr_dtor(&retval_ptr);
 		zend_list_delete(result->resource_id);
 		return GIT_EUSER;
 	}
+
 	retval = Z_LVAL_P(retval_ptr);
 	zval_ptr_dtor(&retval_ptr);
 	zend_list_delete(result->resource_id);
-
 	return retval;
 }
 

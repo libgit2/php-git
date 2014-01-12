@@ -27,7 +27,6 @@ static int tree_walk_cb(const char *root, const git_tree_entry *entry, void *pay
 	ZVAL_RESOURCE(param_rsrc, result->resource_id);
 
 	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 3, &param_root, &param_rsrc, &p->payload)) {
-		zval_ptr_dtor(&retval_ptr);
 		zend_list_delete(result->resource_id);
 		return 0;
 	}
