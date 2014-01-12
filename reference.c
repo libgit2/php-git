@@ -263,23 +263,25 @@ PHP_FUNCTION(git_reference_target_peel)
 	RETURN_STRING(out, 1);
 }
 
-/* {{{ proto resource git_reference_symbolic_target(ref)
-*/
+/* {{{ proto string git_reference_symbolic_target(resource $ref)
+ */
 PHP_FUNCTION(git_reference_symbolic_target)
 {
-	zval *ref;
-	php_git2_t *_ref;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_reference_symbolic_target not implemented yet");
-	return;
+	const char  *result = NULL;
+	zval *ref = NULL;
+	php_git2_t *_ref = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &ref) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_reference_symbolic_target(PHP_GIT2_V(_ref, reference));
+	RETURN_STRING(result, 1);
 }
+/* }}} */
+
 
 /* {{{ proto resource git_reference_type(ref)
 */
@@ -731,29 +733,33 @@ PHP_FUNCTION(git_reference_iterator_free)
 }
 /* }}} */
 
-
-/* {{{ proto long git_reference_foreach_glob(repo, glob, callback, payload)
-*/
+/* {{{ proto long git_reference_foreach_glob(resource $repo, string $glob,  $callback,  $payload)
+ */
 PHP_FUNCTION(git_reference_foreach_glob)
 {
-	zval *repo;
-	php_git2_t *_repo;
-	char *glob = {0};
-	int glob_len;
-	zval *callback;
-	php_git2_t *_callback;
-	zval *payload;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_reference_foreach_glob not implemented yet");
-	return;
+	int result = 0, glob_len = 0, error = 0;
+	zval *repo = NULL, *callback = NULL;
+	php_git2_t *_repo = NULL;
+	char *glob = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb;
+	zval *payload = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rsrz", &repo, &glob, &glob_len, &callback, &payload) == FAILURE) {
+		"rsfz", &repo, &glob, &glob_len, &fci, &fcc, &payload) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_reference_foreach_glob(PHP_GIT2_V(_repo, repository), glob, php_git2_reference_foreach_name_cb, cb);
+	php_git2_cb_free(cb);
+	RETURN_LONG(result);
 }
+/* }}} */
 
 /* {{{ proto long git_reference_has_log(ref)
 */
