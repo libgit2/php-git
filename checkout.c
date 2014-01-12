@@ -1,67 +1,78 @@
 #include "php_git2.h"
 #include "php_git2_priv.h"
 #include "checkout.h"
-/* {{{ proto long git_checkout_head(repo, opts)
-*/
+
+/* {{{ proto long git_checkout_head(resource $repo,  $opts)
+ */
 PHP_FUNCTION(git_checkout_head)
 {
-	zval *repo;
-	php_git2_t *_repo;
-	zval *opts;
-	php_git2_t *_opts;
+	int result = 0;
+	zval *repo = NULL;
+	php_git2_t *_repo = NULL;
+	zval *opts = NULL;
+	int error = 0;
 
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_checkout_head not implemented yet");
-	return;
-
+	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rr", &repo, &opts) == FAILURE) {
+		"ra", &repo, &opts) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
 
-/* {{{ proto long git_checkout_index(repo, index, opts)
-*/
+	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_checkout_head(PHP_GIT2_V(_repo, repository), opts);
+	RETURN_LONG(result);
+}
+/* }}} */
+
+
+/* {{{ proto long git_checkout_index(resource $repo, resource $index,  $opts)
+ */
 PHP_FUNCTION(git_checkout_index)
 {
-	zval *repo;
-	php_git2_t *_repo;
-	zval *index;
-	php_git2_t *_index;
-	zval *opts;
-	php_git2_t *_opts;
+	int result = 0;
+	zval *repo = NULL;
+	php_git2_t *_repo = NULL;
+	zval *index = NULL;
+	php_git2_t *_index = NULL;
+	zval *opts = NULL;
+	int error = 0;
 
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_checkout_index not implemented yet");
-	return;
-
+	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrr", &repo, &index, &opts) == FAILURE) {
+		"rra", &repo, &index, &opts) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
 
-/* {{{ proto long git_checkout_tree(repo, treeish, opts)
-*/
+	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_checkout_index(PHP_GIT2_V(_repo, repository), PHP_GIT2_V(_index, index), opts);
+	RETURN_LONG(result);
+}
+/* }}} */
+
+
+/* {{{ proto long git_checkout_tree(resource $repo, resource $treeish,  $opts)
+ */
 PHP_FUNCTION(git_checkout_tree)
 {
-	zval *repo;
-	php_git2_t *_repo;
-	zval *treeish;
-	php_git2_t *_treeish;
-	zval *opts;
-	php_git2_t *_opts;
+	int result = 0;
+	zval *repo = NULL;
+	php_git2_t *_repo = NULL;
+	zval *treeish = NULL;
+	php_git2_t *_treeish = NULL;
+	zval *opts = NULL;
+	int error = 0;
 
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_checkout_tree not implemented yet");
-	return;
-
+	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rrr", &repo, &treeish, &opts) == FAILURE) {
+		"rra", &repo, &treeish, &opts) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	ZEND_FETCH_RESOURCE(_treeish, php_git2_t*, &treeish, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_checkout_tree(PHP_GIT2_V(_repo, repository), PHP_GIT2_V(_treeish, object), opts);
+	RETURN_LONG(result);
 }
+/* }}} */
 
