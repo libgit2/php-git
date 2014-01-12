@@ -93,6 +93,9 @@ class Func
             if (preg_match("/callback$/", $arg->getType())) {
                 return true;
             }
+            if (preg_match("/packbuilder_progress/", $arg->getType())) {
+                return true;
+            }
         }
 
         return false;
@@ -153,7 +156,16 @@ class Arg
 
     public function isCallback()
     {
-        return preg_match("/_cb$/", $this->type);
+        if (preg_match("/_cb$/", $this->getType())) {
+            return true;
+        }
+        if (preg_match("/callback$/", $this->getType())) {
+            return true;
+        }
+        if (preg_match("/packbuilder_progress/", $this->getType())) {
+            return true;
+        }
+        return false;
     }
 
     public function getPtr()
@@ -375,6 +387,8 @@ class Fashion
                 "struct git_odb",
                 "git_reflog",
                 "git_reflog_entry",
+                "git_blame",
+                "git_packbuilder",
             );
         }
 

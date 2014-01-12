@@ -54,6 +54,8 @@
 #include "note.h"
 #include "odb.h"
 #include "reflog.h"
+#include "blame.h"
+#include "packbuilder.h"
 
 int git2_resource_handle;
 
