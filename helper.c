@@ -247,3 +247,42 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 	return 0;
 }
 
+
+int php_git2_call_function_v(
+	zend_fcall_info *fci, zend_fcall_info_cache *fcc TSRMLS_DC, zval **retval_ptr_ptr, zend_uint param_count, ...)
+{
+	zval **params = NULL;
+	va_list ap;
+	int i = 0;
+
+	if (param_count > 0) {
+		params = emalloc(sizeof(zval*) * param_count);
+		va_start(ap, param_count);
+		for (i = 0; i < param_count; i++) {
+			params[i] = va_arg(ap, zval**);
+		}
+		va_end(ap);
+	} else {
+		params = NULL;
+	}
+
+	if (ZEND_FCI_INITIALIZED(*fci)) {
+		fci->params         = params;
+		fci->retval_ptr_ptr = retval_ptr_ptr;
+		fci->param_count    = param_count;
+		fci->no_separation  = 1;
+
+		if (zend_call_function(fci, fcc TSRMLS_CC) != SUCCESS) {
+			return 1;
+		}
+		zend_fcall_info_args_clear(fci, 0);
+	}
+
+	if (param_count > 0) {
+		for (i = 0; i < param_count; i++) {
+			zval_ptr_dtor(params[i]);
+		}
+		efree(params);
+	}
+	return 0;
+}

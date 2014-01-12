@@ -44,4 +44,7 @@ void php_git2_strarray_to_array(git_strarray *array, zval **out TSRMLS_DC);
 
 int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, void *resource, int should_free TSRMLS_DC);
 
+int php_git2_call_function_v(
+	zend_fcall_info *fci, zend_fcall_info_cache *fcc TSRMLS_DC, zval **retval_ptr_ptr, zend_uint param_count, ...);
+
 #endif

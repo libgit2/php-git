@@ -38,6 +38,16 @@ extern int git2_resource_handle;
 #define GIT2_RVAL_P(git2) git2->resource_id
 #define GIT2_SHOULD_FREE(git2) git2->should_free_v
 
+#ifdef ZTS
+#define GIT2_TSRMLS_SET(target) void ***tsrm_ls = target;
+#define GIT2_TSRMLS_DECL void ***tsrm_ls;
+#define GIT2_TSRMLS_SET2(target, value) target->tsrm_ls = value;
+#else
+#define GIT2_TSRMLS_SET(target)
+#define GIT2_TSRMLS_SET2(target, value)
+#define GIT2_TSRMLS_DECL
+#endif
+
 #define PHP_GIT2_MAKE_RESOURCE(val) \
 do {\
 	val = (php_git2_t *)emalloc(sizeof(php_git2_t));\
