@@ -84,6 +84,16 @@ class Func
         }
     }
 
+    public function isCallbacker()
+    {
+        foreach($this->args as $arg) {
+            if (preg_match("/_cb$/", $arg->getType())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function getArguments()
     {
         return $this->args;
@@ -137,6 +147,11 @@ class Arg
         return $this->type;
     }
 
+    public function isCallback()
+    {
+        return preg_match("/_cb$/", $this->type);
+    }
+
     public function getPtr()
     {
         return str_repeat("*", $this->ptr - 1);
@@ -163,6 +178,8 @@ class Arg
         } else if (preg_match("/git_oid/", $this->type)) {
             return "char";
         } else if (preg_match("/^git_/", $this->type)) {
+            return "zval";
+        } else if (preg_match("/payload/", $this->name)) {
             return "zval";
         } else {
             error_log(sprintf("%s (zendtype)", $this->type));
@@ -360,6 +377,7 @@ class Fashion
                 "git_filter_source",
                 "git_diff_line",
                 "git_reference_iterator",
+                "git_config_iterator",
             );
         }
 
@@ -425,6 +443,8 @@ class Fashion
                     $printer->put("array");
                 } else if (preg_match("/(git_strarray)/", $arg->getType())) {
                     $printer->put("array");
+                } else if (preg_match("/_cb$/", $arg->getType())) {
+                    $printer->put("Callable");
                 } else {
                     error_log(sprintf("# unknown type (%s)", $arg->getType()));
                 }
@@ -551,6 +571,20 @@ class Fashion
                 "value" => "NULL",
             );
         }
+        if ($f->isCallbacker()) {
+            $tables["zend_fcall_info"][] = array(
+                "name" => "fci",
+                "value" => "empty_fcall_info",
+            );
+            $tables["zend_fcall_info_cache"][] = array(
+                "name" => "fcc",
+                "value" => "empty_fcall_info_cache",
+            );
+            $tables["php_git2_cb_t"][] = array(
+                "name" => "*cb",
+                "value" => "NULL",
+            );
+        }
 
 
         foreach ($tables as $type => $values) {
@@ -594,6 +628,10 @@ class Fashion
                     $printer->put("a");
                 } else if ($this->shouldResource($arg)) {
                     $printer->put("r");
+                } else if ($arg->isCallback()) {
+                    $printer->put("f");
+                } else if ($f->isCallbacker() && preg_match("/payload/", $arg->getName())) {
+                    $printer->put("z");
                 } else {
                     $printer->put("<{$arg->getType()}>");
                 }
@@ -612,7 +650,12 @@ class Fashion
                     continue;
                 }
 
-                $printer->put("&`name`", "name", $arg->getName());
+                if ($arg->isCallback()) {
+                    $printer->put("&fci, ");
+                    $printer->put("&fcc");
+                } else {
+                    $printer->put("&`name`", "name", $arg->getName());
+                }
                 if (preg_match("/char/", $arg->getZendType())) {
                     $printer->put(", ");
                     $printer->put("&`name`_len", "name", $arg->getName());
@@ -648,26 +691,45 @@ class Fashion
         }
     }
 
-        public function generateOidTranslation(Printer $printer, Func $f)
-        {
-            foreach ($f->getArguments() as $arg) {
-                /** @var Arg $arg */
-                if ($arg->getType() == "git_oid") {
-                    $printer->put("if (git_oid_fromstrn(&__`name`, `name`, `name`_len)) {\n",
-                        "name", $arg->getName()
-                    );
-                    $printer->block(function(Printer $printer) use($arg) {
-                        $printer->put("RETURN_FALSE;\n");
-                    });
-                    $printer->put("}\n");
-                    $arg->setName("__" . $arg->getName());
-                }
+    public function generateOidTranslation(Printer $printer, Func $f)
+    {
+        foreach ($f->getArguments() as $arg) {
+            /** @var Arg $arg */
+            if ($arg->getType() == "git_oid") {
+                $printer->put("if (git_oid_fromstrn(&__`name`, `name`, `name`_len)) {\n",
+                    "name", $arg->getName()
+                );
+                $printer->block(function(Printer $printer) use($arg) {
+                    $printer->put("RETURN_FALSE;\n");
+                });
+                $printer->put("}\n");
+                $arg->setName("__" . $arg->getName());
             }
         }
+    }
+
+    public function generateCallbackInit(Printer $printer, Func $f)
+    {
+        if ($f->isCallbacker()) {
+            $printer->put("if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {\n");
+            $printer->block(function(Printer $printer) {
+                $printer->put("RETURN_FALSE;\n");
+            });
+            $printer->put("}\n");
+        }
+    }
+
+    public function generateCallbackFree(Printer $printer, Func $f)
+    {
+        if ($f->isCallbacker()) {
+            $printer->put("php_git2_cb_free(cb);\n");
+        }
+    }
 
     public function generateFunctionCall(Printer $printer, Func $f)
     {
         $this->generateOidTranslation($printer, $f);
+        $this->generateCallbackInit($printer, $f);
         if ($f->getReturnType() == "int" && $f->isResourceCreator()) {
             $printer->put("error = `function`",
                 "function", $f->getName()
@@ -801,6 +863,10 @@ class Fashion
                     );
                 } else if ($arg->shouldWrite()) {
                     $printer->put("&`name`", "name", $arg->getName());
+                } else if ($arg->isCallback()) {
+                    $printer->put("<CHANGEME>");
+                } else if (preg_match("/payload/", $arg->getName())) {
+                    $printer->put("cb");
                 } else {
                     $printer->put("`name`", "name", $arg->getName());
                 }
@@ -812,6 +878,7 @@ class Fashion
             }
             $printer->put(");\n");
 
+            $this->generateCallbackFree($printer, $f);
             if (preg_match("/_is_/", $f->getName())) {
                 $printer->put("RETURN_BOOL(`name`);\n", "name", "result");
             } else {

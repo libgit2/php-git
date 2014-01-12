@@ -88,6 +88,7 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_REFERENCE,
 	PHP_GIT2_TYPE_REFERENCE_ITERATOR,
 	PHP_GIT2_TYPE_CONFIG,
+	PHP_GIT2_TYPE_CONFIG_ITERATOR,
 	PHP_GIT2_TYPE_OBJECT,
 	PHP_GIT2_TYPE_INDEX,
 	PHP_GIT2_TYPE_ODB,
@@ -124,6 +125,7 @@ typedef struct php_git2_t {
 		git_reference *reference;
 		git_reference_iterator *reference_iterator;
 		git_config *config;
+		git_config_iterator *config_iterator;
 		git_object *object;
 		git_index *index;
 		git_odb *odb;

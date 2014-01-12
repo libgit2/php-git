@@ -78,6 +78,8 @@ typedef struct php_git2_cb_t {
 	GIT2_TSRMLS_DECL
 } php_git2_cb_t;
 
+int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, void *resource, int should_free TSRMLS_DC);
+
 #include "helper.h"
 
 #endif
