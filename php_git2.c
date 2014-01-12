@@ -56,6 +56,7 @@
 #include "reflog.h"
 #include "blame.h"
 #include "packbuilder.h"
+#include "stash.h"
 
 int git2_resource_handle;
 
@@ -775,6 +776,25 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_reflog_entry_committer, arginfo_git_reflog_entry_committer)
 	PHP_FE(git_reflog_entry_message, arginfo_git_reflog_entry_message)
 	PHP_FE(git_reflog_free, arginfo_git_reflog_free)
+
+	/* packbuilder */
+	PHP_FE(git_packbuilder_new, arginfo_git_packbuilder_new)
+	PHP_FE(git_packbuilder_set_threads, arginfo_git_packbuilder_set_threads)
+	PHP_FE(git_packbuilder_insert, arginfo_git_packbuilder_insert)
+	PHP_FE(git_packbuilder_insert_tree, arginfo_git_packbuilder_insert_tree)
+	PHP_FE(git_packbuilder_insert_commit, arginfo_git_packbuilder_insert_commit)
+	PHP_FE(git_packbuilder_write, arginfo_git_packbuilder_write)
+	PHP_FE(git_packbuilder_hash, arginfo_git_packbuilder_hash)
+	PHP_FE(git_packbuilder_foreach, arginfo_git_packbuilder_foreach)
+	PHP_FE(git_packbuilder_object_count, arginfo_git_packbuilder_object_count)
+	PHP_FE(git_packbuilder_written, arginfo_git_packbuilder_written)
+	PHP_FE(git_packbuilder_set_callbacks, arginfo_git_packbuilder_set_callbacks)
+	PHP_FE(git_packbuilder_free, arginfo_git_packbuilder_free)
+
+	/* stash */
+	PHP_FE(git_stash_save, arginfo_git_stash_save)
+	PHP_FE(git_stash_foreach, arginfo_git_stash_foreach)
+	PHP_FE(git_stash_drop, arginfo_git_stash_drop)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
