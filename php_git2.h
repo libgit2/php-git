@@ -118,6 +118,8 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_ODB_OBJECT,
 	PHP_GIT2_TYPE_ODB_WRITEPACK,
 	PHP_GIT2_TYPE_ODB_BACKEND,
+	PHP_GIT2_TYPE_REFLOG,
+	PHP_GIT2_TYPE_REFLOG_ENTRY,
 };
 
 typedef struct php_git2_t {
@@ -163,6 +165,8 @@ typedef struct php_git2_t {
 		git_odb_object *odb_object;
 		git_odb_writepack *odb_writepack;
 		git_odb_backend *odb_backend;
+		git_reflog *reflog;
+		git_reflog_entry *reflog_entry;
 	} v;
 	int should_free_v;
 	int resource_id;

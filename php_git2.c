@@ -53,6 +53,7 @@
 #include "merge.h"
 #include "note.h"
 #include "odb.h"
+#include "reflog.h"
 
 int git2_resource_handle;
 
@@ -756,6 +757,22 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_odb_add_alternate, arginfo_git_odb_add_alternate)
 	PHP_FE(git_odb_num_backends, arginfo_git_odb_num_backends)
 	PHP_FE(git_odb_get_backend, arginfo_git_odb_get_backend)
+
+	/* reflog */
+	PHP_FE(git_reflog_read, arginfo_git_reflog_read)
+	PHP_FE(git_reflog_write, arginfo_git_reflog_write)
+	PHP_FE(git_reflog_append, arginfo_git_reflog_append)
+	PHP_FE(git_reflog_append_to, arginfo_git_reflog_append_to)
+	PHP_FE(git_reflog_rename, arginfo_git_reflog_rename)
+	PHP_FE(git_reflog_delete, arginfo_git_reflog_delete)
+	PHP_FE(git_reflog_entrycount, arginfo_git_reflog_entrycount)
+	PHP_FE(git_reflog_entry_byindex, arginfo_git_reflog_entry_byindex)
+	PHP_FE(git_reflog_drop, arginfo_git_reflog_drop)
+	PHP_FE(git_reflog_entry_id_old, arginfo_git_reflog_entry_id_old)
+	PHP_FE(git_reflog_entry_id_new, arginfo_git_reflog_entry_id_new)
+	PHP_FE(git_reflog_entry_committer, arginfo_git_reflog_entry_committer)
+	PHP_FE(git_reflog_entry_message, arginfo_git_reflog_entry_message)
+	PHP_FE(git_reflog_free, arginfo_git_reflog_free)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)

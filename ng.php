@@ -373,6 +373,8 @@ class Fashion
                 "git_odb_backend",
                 "git_odb_stream",
                 "struct git_odb",
+                "git_reflog",
+                "git_reflog_entry",
             );
         }
 
