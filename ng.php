@@ -353,6 +353,8 @@ class Fashion
                 "git_pathspec",
                 "git_pathspec_match_list",
                 "git_diff",
+                "git_patch",
+                "git_diff_hunk",
             );
         }
 
