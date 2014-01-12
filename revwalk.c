@@ -69,26 +69,26 @@ PHP_FUNCTION(git_revwalk_push)
 }
 /* }}} */
 
-
-/* {{{ proto long git_revwalk_push_glob(walk, glob)
-*/
+/* {{{ proto long git_revwalk_push_glob(resource $walk, string $glob)
+ */
 PHP_FUNCTION(git_revwalk_push_glob)
 {
-	zval *walk;
-	php_git2_t *_walk;
-	char *glob = {0};
-	int glob_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_revwalk_push_glob not implemented yet");
-	return;
+	int result = 0, glob_len = 0, error = 0;
+	zval *walk = NULL;
+	php_git2_t *_walk = NULL;
+	char *glob = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &walk, &glob, &glob_len) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_revwalk_push_glob(PHP_GIT2_V(_walk, revwalk), glob);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto long git_revwalk_push_head(walk)
 */
@@ -142,25 +142,26 @@ PHP_FUNCTION(git_revwalk_hide)
 
 }
 
-/* {{{ proto long git_revwalk_hide_glob(walk, glob)
-*/
+/* {{{ proto long git_revwalk_hide_glob(resource $walk, string $glob)
+ */
 PHP_FUNCTION(git_revwalk_hide_glob)
 {
-	zval *walk;
-	php_git2_t *_walk;
-	char *glob = {0};
-	int glob_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_revwalk_hide_glob not implemented yet");
-	return;
+	int result = 0, glob_len = 0, error = 0;
+	zval *walk = NULL;
+	php_git2_t *_walk = NULL;
+	char *glob = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &walk, &glob, &glob_len) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_revwalk_hide_glob(PHP_GIT2_V(_walk, revwalk), glob);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto long git_revwalk_hide_head(walk)
 */
@@ -184,45 +185,47 @@ PHP_FUNCTION(git_revwalk_hide_head)
 	}
 }
 
-/* {{{ proto long git_revwalk_push_ref(walk, refname)
-*/
+/* {{{ proto long git_revwalk_push_ref(resource $walk, string $refname)
+ */
 PHP_FUNCTION(git_revwalk_push_ref)
 {
-	zval *walk;
-	php_git2_t *_walk;
-	char *refname = {0};
-	int refname_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_revwalk_push_ref not implemented yet");
-	return;
+	int result = 0, refname_len = 0, error = 0;
+	zval *walk = NULL;
+	php_git2_t *_walk = NULL;
+	char *refname = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &walk, &refname, &refname_len) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
 
-/* {{{ proto long git_revwalk_hide_ref(walk, refname)
-*/
+	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_revwalk_push_ref(PHP_GIT2_V(_walk, revwalk), refname);
+	RETURN_LONG(result);
+}
+/* }}} */
+
+
+/* {{{ proto long git_revwalk_hide_ref(resource $walk, string $refname)
+ */
 PHP_FUNCTION(git_revwalk_hide_ref)
 {
-	zval *walk;
-	php_git2_t *_walk;
-	char *refname = {0};
-	int refname_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_revwalk_hide_ref not implemented yet");
-	return;
+	int result = 0, refname_len = 0, error = 0;
+	zval *walk = NULL;
+	php_git2_t *_walk = NULL;
+	char *refname = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &walk, &refname, &refname_len) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_revwalk_hide_ref(PHP_GIT2_V(_walk, revwalk), refname);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto string git_revwalk_next(walk)
 */
@@ -267,25 +270,26 @@ PHP_FUNCTION(git_revwalk_sorting)
 	git_revwalk_sorting(PHP_GIT2_V(_walk, revwalk), sort_mode);
 }
 
-/* {{{ proto long git_revwalk_push_range(walk, range)
-*/
+/* {{{ proto long git_revwalk_push_range(resource $walk, string $range)
+ */
 PHP_FUNCTION(git_revwalk_push_range)
 {
-	zval *walk;
-	php_git2_t *_walk;
-	char *range = {0};
-	int range_len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_revwalk_push_range not implemented yet");
-	return;
+	int result = 0, range_len = 0, error = 0;
+	zval *walk = NULL;
+	php_git2_t *_walk = NULL;
+	char *range = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &walk, &range, &range_len) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_revwalk_push_range(PHP_GIT2_V(_walk, revwalk), range);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto void git_revwalk_simplify_first_parent(walk)
 */
@@ -303,24 +307,27 @@ PHP_FUNCTION(git_revwalk_simplify_first_parent)
 	git_revwalk_simplify_first_parent(PHP_GIT2_V(_walk, revwalk));
 }
 
-/* {{{ proto void git_revwalk_free(walk)
-*/
+/* {{{ proto void git_revwalk_free(resource $walk)
+ */
 PHP_FUNCTION(git_revwalk_free)
 {
-	zval *walk;
-	php_git2_t *_walk;
+	zval *walk = NULL;
+	php_git2_t *_walk = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &walk) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 
-	if (_walk->should_free_v) {
+	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (GIT2_SHOULD_FREE(_walk)) {
 		git_revwalk_free(PHP_GIT2_V(_walk, revwalk));
-	}
+		GIT2_SHOULD_FREE(_walk) = 0;
+	};
 	zval_ptr_dtor(&walk);
 }
+/* }}} */
+
 
 /* {{{ proto resource git_revwalk_repository(walk)
 */
@@ -337,12 +344,9 @@ PHP_FUNCTION(git_revwalk_repository)
 	ZEND_FETCH_RESOURCE(_walk, php_git2_t*, &walk, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 
 	repository = git_revwalk_repository(PHP_GIT2_V(_walk, revwalk));
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, repository) = repository;
-	result->type = PHP_GIT2_TYPE_REPOSITORY;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REPOSITORY, repository, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 
 	ZVAL_RESOURCE(return_value, result->resource_id);
 }
