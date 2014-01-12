@@ -48,6 +48,7 @@
 #include "limits.h"
 
 #include "git2.h"
+#include "git2/sys/filter.h"
 
 #include "date/php_date.h"
 
@@ -100,6 +101,10 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_PATHSPEC_MATCH_LIST,
 	PHP_GIT2_TYPE_PATCH,
 	PHP_GIT2_TYPE_DIFF_HUNK,
+	PHP_GIT2_TYPE_BUF,
+	PHP_GIT2_TYPE_FILTER_LIST,
+	PHP_GIT2_TYPE_FILTER_SOURCE,
+	PHP_GIT2_TYPE_DIFF_LINE,
 };
 
 typedef struct php_git2_t {
@@ -131,6 +136,10 @@ typedef struct php_git2_t {
 		git_pathspec_match_list *pathspec_match_list;
 		git_patch *patch;
 		git_diff_hunk *diff_hunk;
+		git_buf *buf;
+		git_filter_list *filter_list;
+		git_filter_source *filter_source;
+		git_diff_line *diff_line;
 	} v;
 	int should_free_v;
 	int resource_id;

@@ -355,6 +355,10 @@ class Fashion
                 "git_diff",
                 "git_patch",
                 "git_diff_hunk",
+                "git_filter_list",
+                "git_buf",
+                "git_filter_source",
+                "git_diff_line",
             );
         }
 

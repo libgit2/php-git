@@ -71,7 +71,7 @@ PHP_FUNCTION(git_patch_from_blobs)
 }
 /* }}} */
 
-/* {{{ proto resource git_patch_from_blob_and_buffer(resource $old_blob, string $old_as_path, string $buffer, long $buffer_len, string $buffer_as_path,  $opts)
+/* {{{ proto resource git_patch_from_blob_and_buffer(resource $old_blob, string $old_as_path, string $buffer, string $buffer_as_path, $opts)
  */
 PHP_FUNCTION(git_patch_from_blob_and_buffer)
 {
@@ -83,7 +83,6 @@ PHP_FUNCTION(git_patch_from_blob_and_buffer)
 	int old_as_path_len = 0;
 	char *buffer = NULL;
 	int buffer_len = 0;
-	long buffer_len = 0;
 	char *buffer_as_path = NULL;
 	int buffer_as_path_len = 0;
 	zval *opts = NULL;
