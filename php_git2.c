@@ -89,8 +89,6 @@ void static destruct_git2(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 			case PHP_GIT2_TYPE_OBJECT:
 				git_object_free(PHP_GIT2_V(resource, object));
 				break;
-			default:
-				break;
 		}
 	}
 

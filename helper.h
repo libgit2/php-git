@@ -47,4 +47,8 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 int php_git2_call_function_v(
 	zend_fcall_info *fci, zend_fcall_info_cache *fcc TSRMLS_DC, zval **retval_ptr_ptr, zend_uint param_count, ...);
 
+int php_git2_cb_init(php_git2_cb_t **out, zend_fcall_info *fci, zend_fcall_info_cache *fcc, void *payload TSRMLS_DC);
+
+void php_git2_cb_free(php_git2_cb_t *target);
+
 #endif

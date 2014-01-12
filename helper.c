@@ -171,6 +171,9 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 		case PHP_GIT2_TYPE_REFERENCE:
 			PHP_GIT2_V(result, reference) = (git_reference*)resource;
 			break;
+		case PHP_GIT2_TYPE_REFERENCE_ITERATOR:
+			PHP_GIT2_V(result, reference_iterator) = (git_reference_iterator*)resource;
+			break;
 		case PHP_GIT2_TYPE_CONFIG:
 			PHP_GIT2_V(result, config) = (git_config*)resource;
 			break;
@@ -237,6 +240,8 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 		case PHP_GIT2_TYPE_DIFF_LINE:
 			PHP_GIT2_V(result, diff_line) = (git_diff_line*)resource;
 			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "passed resource type does not support. probably bug.");
 	}
 
 	result->type = type;
@@ -285,4 +290,27 @@ int php_git2_call_function_v(
 		efree(params);
 	}
 	return 0;
+}
+
+int php_git2_cb_init(php_git2_cb_t **out, zend_fcall_info *fci, zend_fcall_info_cache *fcc, void *payload TSRMLS_DC)
+{
+	php_git2_cb_t *cb;
+
+	cb = (struct php_git2_cb_t*)emalloc(sizeof(php_git2_cb_t));
+	if (cb == NULL) {
+		return 1;
+	}
+
+	cb->payload = payload;
+	cb->fci = fci;
+	cb->fcc = fcc;
+	GIT2_TSRMLS_SET2(cb, TSRMLS_C);
+
+	*out = cb;
+	return 0;
+}
+
+void php_git2_cb_free(php_git2_cb_t *target)
+{
+	efree(target);
 }

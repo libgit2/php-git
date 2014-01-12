@@ -71,6 +71,13 @@ do {\
 
 #define GIT2_OID_HEXSIZE (GIT_OID_HEXSZ+1)
 
+typedef struct php_git2_cb_t {
+	zval *payload;
+	zend_fcall_info *fci;
+	zend_fcall_info_cache *fcc;
+	GIT2_TSRMLS_DECL
+} php_git2_cb_t;
+
 #include "helper.h"
 
 #endif

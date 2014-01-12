@@ -359,6 +359,7 @@ class Fashion
                 "git_buf",
                 "git_filter_source",
                 "git_diff_line",
+                "git_reference_iterator",
             );
         }
 
