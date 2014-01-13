@@ -61,6 +61,7 @@
 #include "reset.h"
 #include "message.h"
 #include "submodule.h"
+#include "attr.h"
 
 int git2_resource_handle;
 
@@ -842,6 +843,14 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_submodule_reload_all, arginfo_git_submodule_reload_all)
 	PHP_FE(git_submodule_status, arginfo_git_submodule_status)
 	PHP_FE(git_submodule_location, arginfo_git_submodule_location)
+
+	/* attr */
+	PHP_FE(git_attr_value, arginfo_git_attr_value)
+	PHP_FE(git_attr_get, arginfo_git_attr_get)
+	PHP_FE(git_attr_get_many, arginfo_git_attr_get_many)
+	PHP_FE(git_attr_foreach, arginfo_git_attr_foreach)
+	PHP_FE(git_attr_cache_flush, arginfo_git_attr_cache_flush)
+	PHP_FE(git_attr_add_macro, arginfo_git_attr_add_macro)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
