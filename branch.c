@@ -6,16 +6,12 @@
  */
 PHP_FUNCTION(git_branch_create)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_repo = NULL, *_target = NULL;
 	git_reference *out = NULL;
-	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
+	zval *repo = NULL, *target = NULL;
 	char *branch_name = NULL;
-	int branch_name_len = 0;
-	zval *target = NULL;
-	php_git2_t *_target = NULL;
+	int branch_name_len = 0, error = 0;
 	long force = 0;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsrl", &repo, &branch_name, &branch_name_len, &target, &force) == FAILURE) {
@@ -28,12 +24,10 @@ PHP_FUNCTION(git_branch_create)
 	if (php_git2_check_error(error, "git_branch_create" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 1;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
 
@@ -63,12 +57,11 @@ PHP_FUNCTION(git_branch_delete)
  */
 PHP_FUNCTION(git_branch_iterator_new)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_repo = NULL;
 	git_branch_iterator *out = NULL;
 	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
-	long list_flags = 0;
 	int error = 0;
+	long list_flags = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rl", &repo, &list_flags) == FAILURE) {
@@ -80,12 +73,10 @@ PHP_FUNCTION(git_branch_iterator_new)
 	if (php_git2_check_error(error, "git_branch_iterator_new" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, branch_iterator) = out;
-	result->type = PHP_GIT2_TYPE_BRANCH_ITERATOR;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_BRANCH_ITERATOR, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
 
@@ -94,11 +85,10 @@ PHP_FUNCTION(git_branch_iterator_new)
  */
 PHP_FUNCTION(git_branch_next)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_iter = NULL;
 	git_reference *out = NULL;
-	long out_type = 0;
 	zval *iter = NULL;
-	php_git2_t *_iter = NULL;
+	long out_type = 0;
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -111,15 +101,12 @@ PHP_FUNCTION(git_branch_next)
 	if (php_git2_check_error(error, "git_branch_next" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
-
 
 /* {{{ proto void git_branch_iterator_free(resource $iter)
  */
@@ -134,8 +121,9 @@ PHP_FUNCTION(git_branch_iterator_free)
 	}
 
 	ZEND_FETCH_RESOURCE(_iter, php_git2_t*, &iter, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	if (_iter->should_free_v) {
+	if (GIT2_SHOULD_FREE(_iter)) {
 		git_branch_iterator_free(PHP_GIT2_V(_iter, branch_iterator));
+		GIT2_SHOULD_FREE(_iter) = 0;
 	};
 	zval_ptr_dtor(&iter);
 }
@@ -145,14 +133,12 @@ PHP_FUNCTION(git_branch_iterator_free)
  */
 PHP_FUNCTION(git_branch_move)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_branch = NULL;
 	git_reference *out = NULL;
 	zval *branch = NULL;
-	php_git2_t *_branch = NULL;
 	char *new_branch_name = NULL;
-	int new_branch_name_len = 0;
+	int new_branch_name_len = 0, error = 0;
 	long force = 0;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsl", &branch, &new_branch_name, &new_branch_name_len, &force) == FAILURE) {
@@ -164,27 +150,24 @@ PHP_FUNCTION(git_branch_move)
 	if (php_git2_check_error(error, "git_branch_move" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
 
-/* {{{ proto resource git_branch_lookup(resource $repo, string $branch_name, long $branch_type)
+
+/* {{{ proto resource git_branch_lookup(resource $repo, string $branch_name,  $branch_type)
  */
 PHP_FUNCTION(git_branch_lookup)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_repo = NULL;
 	git_reference *out = NULL;
 	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
 	char *branch_name = NULL;
-	int branch_name_len = 0;
+	int branch_name_len = 0, error = 0;
 	long branch_type = 0;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsl", &repo, &branch_name, &branch_name_len, &branch_type) == FAILURE) {
@@ -196,15 +179,12 @@ PHP_FUNCTION(git_branch_lookup)
 	if (php_git2_check_error(error, "git_branch_lookup" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
-
 
 /* {{{ proto resource git_branch_name(resource $ref)
  */
@@ -234,10 +214,9 @@ PHP_FUNCTION(git_branch_name)
  */
 PHP_FUNCTION(git_branch_upstream)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_branch = NULL;
 	git_reference *out = NULL;
 	zval *branch = NULL;
-	php_git2_t *_branch = NULL;
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -250,14 +229,13 @@ PHP_FUNCTION(git_branch_upstream)
 	if (php_git2_check_error(error, "git_branch_upstream" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
+
 
 /* {{{ proto resource git_branch_upstream_name(resource $repo, string $canonical_branch_name)
  */

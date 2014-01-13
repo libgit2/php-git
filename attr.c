@@ -49,17 +49,19 @@ PHP_FUNCTION(git_attr_get)
 PHP_FUNCTION(git_attr_get_many)
 {
 	php_git2_t *result = NULL, *_repo = NULL;
-	char *values_out = NULL, *path = NULL, *names = NULL;
-	zval *repo = NULL;
+	char *values_out = NULL, *path = NULL;
+	zval *repo = NULL, *names = NULL;
 	long flags = 0, num_attr = 0;
-	int path_len = 0, names_len = 0, error = 0;
-	
+	int path_len = 0, error = 0;
+
+	/* TODO(chobie): write array to const char** conversion */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rlsls", &repo, &flags, &path, &path_len, &num_attr, &names, &names_len) == FAILURE) {
+		"rlsla", &repo, &flags, &path, &path_len, &num_attr, &names) == FAILURE) {
 		return;
 	}
 	
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	/* TODO(chobie): emalloc values_out */
 	error = git_attr_get_many(&values_out, PHP_GIT2_V(_repo, repository), flags, path, num_attr, names);
 	if (php_git2_check_error(error, "git_attr_get_many" TSRMLS_CC)) {
 		RETURN_FALSE;
