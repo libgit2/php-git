@@ -12,7 +12,7 @@ static int php_git2_stash_cb(size_t index,
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
 	int i = 0;
 	long retval = 0;
-	char _oid[41] = {0};
+	char _oid[GIT2_OID_HEXSIZE] = {0};
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	git_oid_fmt(_oid, stash_id);
@@ -44,7 +44,7 @@ PHP_FUNCTION(git_stash_save)
 	char *message = NULL;
 	int message_len = 0, error = 0;
 	long flags = 0;
-	char buf[41] = {0};
+	char buf[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rasl", &repo, &stasher, &message, &message_len, &flags) == FAILURE) {

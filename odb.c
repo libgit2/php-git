@@ -258,7 +258,7 @@ PHP_FUNCTION(git_odb_write)
 	zval *data = NULL;
 	long type = 0;
 	int error = 0, data_len = 0;
-	char buf[41] = {0};
+	char buf[GIT2_OID_HEXSIZE] = {0};
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsl", &odb, &data, &data_len, &type) == FAILURE) {
@@ -330,7 +330,7 @@ PHP_FUNCTION(git_odb_stream_finalize_write)
 	git_oid out = {0};
 	zval *stream = NULL;
 	int error = 0;
-	char buf[41] = {0};
+	char buf[GIT2_OID_HEXSIZE] = {0};
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &stream) == FAILURE) {
@@ -461,7 +461,7 @@ PHP_FUNCTION(git_odb_hash)
 	zval *data = NULL;
 	int error = 0, data_len = 0;
 	long type = 0;
-	char buf[41] = {0};
+	char buf[GIT2_OID_HEXSIZE] = {0};
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sl", &data, &data_len, &type) == FAILURE) {
@@ -484,7 +484,7 @@ PHP_FUNCTION(git_odb_hashfile)
 	git_oid out = {0};
 	char *path = NULL;
 	int path_len = 0, error = 0;
-	char buf[41] = {0};
+	char buf[GIT2_OID_HEXSIZE] = {0};
 	long type = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,

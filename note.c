@@ -151,7 +151,7 @@ PHP_FUNCTION(git_note_create)
 	char *notes_ref = NULL, *oid = NULL, *note = NULL;
 	int notes_ref_len = 0, oid_len = 0, note_len = 0, error = 0;
 	long force = 0;
-	char buf[41] = {0};
+	char buf[GIT2_OID_HEXSIZE] = {0};
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"raasssl", &repo, &author, &committer, &notes_ref, &notes_ref_len, &oid, &oid_len, &note, &note_len, &force) == FAILURE) {

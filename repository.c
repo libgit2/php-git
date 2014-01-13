@@ -13,7 +13,7 @@ static int php_git2_repository_fetchhead_foreach_cb(const char *ref_name,
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
 	int i = 0;
 	long retval = 0;
-	char _oid[41] = {0};
+	char _oid[GIT2_OID_HEXSIZE] = {0};
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	git_oid_fmt(_oid, oid);
@@ -50,7 +50,7 @@ static int php_git2_repository_mergehead_foreach_cb(const git_oid *oid,
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
 	int i = 0;
 	long retval = 0;
-	char _oid[41] = {0};
+	char _oid[GIT2_OID_HEXSIZE] = {0};
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	git_oid_fmt(_oid, oid);

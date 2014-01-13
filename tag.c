@@ -9,7 +9,7 @@ static int php_git2_tag_foreach_cb(const char *name, git_oid *oid, void *payload
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
 	int i = 0;
 	long retval = 0;
-	char buffer[41] = {0};
+	char buffer[GIT2_OID_HEXSIZE] = {0};
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	git_oid_fmt(buffer, oid);
