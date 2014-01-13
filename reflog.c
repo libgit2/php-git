@@ -161,7 +161,7 @@ PHP_FUNCTION(git_reflog_entry_byindex)
 {
 	const git_reflog_entry  *result = NULL;
 	zval *reflog = NULL;
-	php_git2_t *_reflog = NULL;
+	php_git2_t *_reflog = NULL, *_result;
 	long idx = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -171,7 +171,10 @@ PHP_FUNCTION(git_reflog_entry_byindex)
 	
 	ZEND_FETCH_RESOURCE(_reflog, php_git2_t*, &reflog, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_reflog_entry_byindex(PHP_GIT2_V(_reflog, reflog), idx);
-	/* TODO(chobie): implement this */
+	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_REFLOG_ENTRY, result, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT_RVAL_P(_result));
 }
 /* }}} */
 
