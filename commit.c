@@ -2,41 +2,31 @@
 #include "php_git2_priv.h"
 #include "commit.h"
 
-/* {{{ proto resource git_commit_lookup(resource $repository, mixed $oid)
-*/
+/* {{{ proto long git_commit_lookup(resource $repo, string $id)
+ */
 PHP_FUNCTION(git_commit_lookup)
 {
-	zval *repository;
-	php_git2_t *git2, *result;
-	git_commit *commit;
-	char *hash;
-	int hash_len;
-	int error;
-	git_oid id;
-
+	int result = 0, id_len = 0, error = 0;
+	git_commit *commit = NULL;
+	zval *repo = NULL;
+	php_git2_t *_repo = NULL, *_result = NULL;
+	char *id = NULL;
+	git_oid __id = {0};
+	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rs", &repository, &hash, &hash_len) == FAILURE) {
+		"rs", &repo, &id, &id_len) == FAILURE) {
 		return;
 	}
-
-	if (git_oid_fromstrn(&id, hash, hash_len) != GIT_OK) {
-		return;
+	
+	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (git_oid_fromstrn(&__id, id, id_len)) {
+		RETURN_FALSE;
 	}
-
-	ZEND_FETCH_RESOURCE(git2, php_git2_t*, &repository, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	error = git_commit_lookup(&commit, PHP_GIT2_V(git2, repository), &id);
-	if (php_git2_check_error(error, "git_commit_lookup" TSRMLS_CC)) {
-		RETURN_FALSE
+	result = git_commit_lookup(&commit, PHP_GIT2_V(_repo, repository), &__id);
+	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_COMMIT, commit, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
 	}
-
-	PHP_GIT2_V(result, commit) = commit;
-	result->type = PHP_GIT2_TYPE_COMMIT;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_result));
 }
 /* }}} */
 
@@ -64,102 +54,103 @@ PHP_FUNCTION(git_commit_author)
 /* }}} */
 
 /* {{{ proto resource git_commit_tree(resource $commit)
-*/
+ */
 PHP_FUNCTION(git_commit_tree)
 {
-	zval *repository;
-	php_git2_t *git2, *result;
-	git_commit *commit;
-	git_tree *tree;
-	int error;
+	php_git2_t *result = NULL, *_commit = NULL;
+	git_tree *tree_out = NULL;
+	zval *commit = NULL;
+	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &commit) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(git2, php_git2_t*, &commit, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	error = git_commit_tree(&tree, PHP_GIT2_V(git2, commit));
+	ZEND_FETCH_RESOURCE(_commit, php_git2_t*, &commit, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	error = git_commit_tree(&tree_out, PHP_GIT2_V(_commit, commit));
 	if (php_git2_check_error(error, "git_commit_tree" TSRMLS_CC)) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
-
-	PHP_GIT2_V(result, tree) = tree;
-	result->type = PHP_GIT2_TYPE_TREE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_TREE, tree_out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
 
-/* {{{ proto resource git_commit_lookup_prefix(repo, id, len)
-*/
+/* {{{ proto long git_commit_lookup_prefix(resource $repo, string $id, long $len)
+ */
 PHP_FUNCTION(git_commit_lookup_prefix)
 {
-	zval *repo;
-	php_git2_t *_repo;
-	char *id = {0};
-	int id_len;
-	long len;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_commit_lookup_prefix not implemented yet");
-	return;
+	int result = 0, id_len = 0, error = 0;
+	git_commit *commit = NULL;
+	zval *repo = NULL;
+	php_git2_t *_repo = NULL, *_result = NULL;
+	char *id = NULL;
+	git_oid __id = {0};
+	long len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsl", &repo, &id, &id_len, &len) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-}
 
-/* {{{ proto resource git_commit_id(commit)
-*/
+	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (git_oid_fromstrn(&__id, id, id_len)) {
+		RETURN_FALSE;
+	}
+	result = git_commit_lookup_prefix(&commit, PHP_GIT2_V(_repo, repository), &__id, len);
+	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_COMMIT, commit, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_result));
+}
+/* }}} */
+
+/* {{{ proto resource git_commit_id(resource $commit)
+ */
 PHP_FUNCTION(git_commit_id)
 {
-	zval *commit;
-	php_git2_t *_commit;
-	char out[GIT2_OID_HEXSIZE] = {0};
-	const git_oid *id;
+	const git_oid  *result = NULL;
+	zval *commit = NULL;
+	php_git2_t *_commit = NULL;
+	char __result[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &commit) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_commit, php_git2_t*, &commit, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-
-	id = git_blob_id(PHP_GIT2_V(_commit, commit));
-
-	git_oid_fmt(out, id);
-	RETURN_STRING(out, 1);
+	result = git_commit_id(PHP_GIT2_V(_commit, commit));
+	git_oid_fmt(__result, result);
+	RETURN_STRING(__result, 1);
 }
+/* }}} */
 
-/* {{{ proto resource git_commit_owner(commit)
-*/
+/* {{{ proto resource git_commit_owner(resource $commit)
+ */
 PHP_FUNCTION(git_commit_owner)
 {
-	zval *commit;
-	php_git2_t *_commit, *result;
-	git_repository *repository;
+	git_repository  *result = NULL;
+	zval *commit = NULL;
+	php_git2_t *_commit = NULL, *__result = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &commit) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_commit, php_git2_t*, &commit, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	repository = git_commit_owner(PHP_GIT2_V(_commit, commit));
-
-	PHP_GIT2_V(result, repository) = repository;
-	result->type = PHP_GIT2_TYPE_REPOSITORY;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	result = git_commit_owner(PHP_GIT2_V(_commit, commit));
+	if (php_git2_make_resource(&__result, PHP_GIT2_TYPE_COMMIT, result, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(__result));
 }
+/* }}} */
+
 
 /* {{{ proto resource git_commit_message_encoding(commit)
 */
@@ -177,6 +168,7 @@ PHP_FUNCTION(git_commit_message_encoding)
 	encoding = git_commit_message_encoding(PHP_GIT2_V(_commit, commit));
 	RETURN_STRING(encoding, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_message(commit)
 */
@@ -194,6 +186,7 @@ PHP_FUNCTION(git_commit_message)
 	message = git_commit_message(PHP_GIT2_V(_commit, commit));
 	RETURN_STRING(message, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_message_raw(commit)
 */
@@ -212,6 +205,7 @@ PHP_FUNCTION(git_commit_message_raw)
 	message = git_commit_message_raw(PHP_GIT2_V(_commit, commit));
 	RETURN_STRING(message, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_time(commit)
 */
@@ -231,6 +225,7 @@ PHP_FUNCTION(git_commit_time)
 	/* NOTE(chobie) should this return as a string? */
 	RETURN_LONG(time);
 }
+/* }}} */
 
 /* {{{ proto long git_commit_time_offset(commit)
 */
@@ -248,6 +243,7 @@ PHP_FUNCTION(git_commit_time_offset)
 	result = git_commit_time_offset(PHP_GIT2_V(_commit, commit));
 	RETURN_LONG(result);
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_committer(commit)
 */
@@ -268,6 +264,7 @@ PHP_FUNCTION(git_commit_committer)
 	php_git2_signature_to_array(committer, &result TSRMLS_CC);
 	RETURN_ZVAL(result, 0, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_raw_header(commit)
 */
@@ -286,6 +283,7 @@ PHP_FUNCTION(git_commit_raw_header)
 
 	RETURN_STRING(header, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_tree_id(commit)
 */
@@ -306,6 +304,7 @@ PHP_FUNCTION(git_commit_tree_id)
 	git_oid_fmt(out, id);
 	RETURN_STRING(out, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_parentcount(commit)
 */
@@ -324,6 +323,7 @@ PHP_FUNCTION(git_commit_parentcount)
 	count = git_commit_parentcount(PHP_GIT2_V(_commit, commit));
 	RETURN_LONG(count);
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_parent(commit, n)
 */
@@ -353,6 +353,7 @@ PHP_FUNCTION(git_commit_parent)
 
 	ZVAL_RESOURCE(return_value, result->resource_id);
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_parent_id(commit, n)
 */
@@ -374,6 +375,7 @@ PHP_FUNCTION(git_commit_parent_id)
 
 	RETURN_STRING(out, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_nth_gen_ancestor(commit, n)
 */
@@ -405,6 +407,7 @@ PHP_FUNCTION(git_commit_nth_gen_ancestor)
 	ZVAL_RESOURCE(return_value, result->resource_id);
 
 }
+/* }}} */
 
 /* {{{ proto resource git_commit_create(
 	resource $repo, string $update_ref, array $author, array $committer,

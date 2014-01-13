@@ -23,7 +23,6 @@ PHP_FUNCTION(git_diff_free)
 }
 /* }}} */
 
-
 /* {{{ proto long git_diff_tree_to_tree(resource $repo, resource $old_tree, resource $new_tree,  $opts)
  */
 PHP_FUNCTION(git_diff_tree_to_tree)
@@ -298,11 +297,31 @@ PHP_FUNCTION(git_diff_is_sorted_icase)
 /* }}} */
 
 
-/* {{{ proto long git_diff_foreach(diff, file_cb, hunk_cb, line_cb, payload)
-*/
+/* {{{ proto long git_diff_foreach(resource $diff, Callable $file_cb, Callable $hunk_cb, Callable $line_cb,  $payload)
+ */
 PHP_FUNCTION(git_diff_foreach)
 {
+	int result = 0, error = 0;
+	zval *diff = NULL, *file_cb = NULL, *hunk_cb = NULL, *line_cb = NULL, *payload = NULL;
+	php_git2_t *_diff = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"rfffz", &diff, &fci, &fcc, &fci, &fcc, &fci, &fcc, &payload) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(_diff, php_git2_t*, &diff, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	//result = git_diff_foreach(PHP_GIT2_V(_diff, diff), <CHANGEME>, <CHANGEME>, <CHANGEME>, cb);
+	php_git2_cb_free(cb);
+	RETURN_LONG(result);
 }
+/* }}} */
 
 /* {{{ proto string git_diff_status_char( $status)
  */
@@ -321,21 +340,85 @@ PHP_FUNCTION(git_diff_status_char)
 }
 /* }}} */
 
-/* {{{ proto long git_diff_print(diff, format, print_cb, payload)
-*/
+/* {{{ proto long git_diff_print(resource $diff, long $format, Callable $print_cb,  $payload)
+ */
 PHP_FUNCTION(git_diff_print)
 {
-}
+	int result = 0, error = 0;
+	zval *diff = NULL, *print_cb = NULL, *payload = NULL;
+	php_git2_t *_diff = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
+	long format = 0;
 
-/* {{{ proto long git_diff_blobs(old_blob, old_as_path, new_blob, new_as_path, options, file_cb, hunk_cb, line_cb, payload)
-*/
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"rlfz", &diff, &format, &fci, &fcc, &payload) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(_diff, php_git2_t*, &diff, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	//result = git_diff_print(PHP_GIT2_V(_diff, diff), format, <CHANGEME>, cb);
+	php_git2_cb_free(cb);
+	RETURN_LONG(result);
+}
+/* }}} */
+
+/* {{{ proto long git_diff_blobs(resource $old_blob, string $old_as_path, resource $new_blob, string $new_as_path,  $options, Callable $file_cb, Callable $hunk_cb, Callable $line_cb,  $payload)
+ */
 PHP_FUNCTION(git_diff_blobs)
 {
-}
+	int result = 0, old_as_path_len = 0, new_as_path_len = 0, error = 0;
+	zval *old_blob = NULL, *new_blob = NULL, *options = NULL, *file_cb = NULL, *hunk_cb = NULL, *line_cb = NULL, *payload = NULL;
+	php_git2_t *_old_blob = NULL, *_new_blob = NULL;
+	char *old_as_path = NULL, *new_as_path = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
 
-/* {{{ proto long git_diff_blob_to_buffer(old_blob, old_as_path, buffer, buffer_len, buffer_as_path, options, file_cb, hunk_cb, line_cb, payload)
-*/
+//	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+//		"rsrs<git_diff_options>fffz", &old_blob, &old_as_path, &old_as_path_len, &new_blob, &new_as_path, &new_as_path_len, &options, &fci, &fcc, &fci, &fcc, &fci, &fcc, &payload) == FAILURE) {
+//		return;
+//	}
+//
+//	ZEND_FETCH_RESOURCE(_old_blob, php_git2_t*, &old_blob, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+//	ZEND_FETCH_RESOURCE(_new_blob, php_git2_t*, &new_blob, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+//	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+//		RETURN_FALSE;
+//	}
+//	result = git_diff_blobs(PHP_GIT2_V(_old_blob, blob), old_as_path, PHP_GIT2_V(_new_blob, blob), new_as_path, options, <CHANGEME>, <CHANGEME>, <CHANGEME>, cb);
+//	php_git2_cb_free(cb);
+//	RETURN_LONG(result);
+}
+/* }}} */
+
+/* {{{ proto long git_diff_blob_to_buffer(resource $old_blob, string $old_as_path, string $buffer, long $buffer_len, string $buffer_as_path,  $options, Callable $file_cb, Callable $hunk_cb, Callable $line_cb,  $payload)
+ */
 PHP_FUNCTION(git_diff_blob_to_buffer)
 {
-}
+	int result = 0, old_as_path_len = 0, buffer_len = 0, buffer_as_path_len = 0, error = 0;
+	zval *old_blob = NULL, *options = NULL, *file_cb = NULL, *hunk_cb = NULL, *line_cb = NULL, *payload = NULL;
+	php_git2_t *_old_blob = NULL;
+	char *old_as_path = NULL, *buffer = NULL, *buffer_as_path = NULL;
+//	long buffer_len = 0;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
 
+//	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+//		"rssls<git_diff_options>fffz", &old_blob, &old_as_path, &old_as_path_len, &buffer, &buffer_len, &buffer_len, &buffer_as_path, &buffer_as_path_len, &options, &fci, &fcc, &fci, &fcc, &fci, &fcc, &payload) == FAILURE) {
+//		return;
+//	}
+//
+//	ZEND_FETCH_RESOURCE(_old_blob, php_git2_t*, &old_blob, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+//	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+//		RETURN_FALSE;
+//	}
+//	result = git_diff_blob_to_buffer(PHP_GIT2_V(_old_blob, blob), old_as_path, buffer, buffer_len, buffer_as_path, options, <CHANGEME>, <CHANGEME>, <CHANGEME>, cb);
+//	php_git2_cb_free(cb);
+//	RETURN_LONG(result);
+}
+/* }}} */
