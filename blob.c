@@ -28,12 +28,40 @@ PHP_FUNCTION(git_blob_create_frombuffer)
 	git_oid_fmt(out, &id);
 	RETURN_STRING(out, 1);
 }
+/* }}} */
 
-/* {{{ proto resource git_blob_create_fromchunks(resource $repository, string $hintpath, Callable $callback, mixed payload)
-*/
+/* {{{ proto long git_blob_create_fromchunks(string $id, resource $repo, string $hintpath, Callable $callback,  $payload)
+ */
 PHP_FUNCTION(git_blob_create_fromchunks)
 {
+	int result = 0, id_len = 0, hintpath_len = 0, error = 0;
+	char *id = NULL, *hintpath = NULL;
+	git_oid __id = {0};
+	zval *repo = NULL, *callback = NULL, *payload = NULL;
+	php_git2_t *_repo = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"srsfz", &id, &id_len, &repo, &hintpath, &hintpath_len, &fci, &fcc, &payload) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (git_oid_fromstrn(&__id, id, id_len)) {
+		RETURN_FALSE;
+	}
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	// TODO(chobie) implement this */
+	//result = git_blob_create_fromchunks(__id, PHP_GIT2_V(_repo, repository), hintpath, <CHANGEME>, cb);
+	php_git2_cb_free(cb);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto resource git_blob_create_fromdisk(resource $repository, string $path)
 */
@@ -62,6 +90,7 @@ PHP_FUNCTION(git_blob_create_fromdisk)
 	git_oid_fmt(out, &id);
 	RETURN_STRING(out, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_blob_create_fromworkdir(resource $repository, string $relative_path)
 */
@@ -90,32 +119,56 @@ PHP_FUNCTION(git_blob_create_fromworkdir)
 	git_oid_fmt(out, &id);
 	RETURN_STRING(out, 1);
 }
+/* }}} */
 
-/* {{{ proto resource git_blob_filtered_content($blob, $as_path, $check_for_binary_data)
-*/
+/* {{{ proto resource git_blob_filtered_content(resource $blob, string $as_path, long $check_for_binary_data)
+ */
 PHP_FUNCTION(git_blob_filtered_content)
 {
-}
+	php_git2_t *result = NULL, *_blob = NULL;
+	git_buf out = NULL;
+	zval *blob = NULL;
+	char *as_path = NULL;
+	int as_path_len = 0, error = 0;
+	long check_for_binary_data = 0;
 
-/* {{{ proto resource git_blob_free(resource $blob)
-*/
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"rsl", &blob, &as_path, &as_path_len, &check_for_binary_data) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(_blob, php_git2_t*, &blob, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	error = git_blob_filtered_content(&out, PHP_GIT2_V(_blob, blob), as_path, check_for_binary_data);
+	if (php_git2_check_error(error, "git_blob_filtered_content" TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_BUF, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
+}
+/* }}} */
+
+/* {{{ proto void git_blob_free(resource $blob)
+ */
 PHP_FUNCTION(git_blob_free)
 {
-	zval *blob;
-	php_git2_t *git2;
+	zval *blob = NULL;
+	php_git2_t *_blob = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &blob) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(git2, php_git2_t*, &blob, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	if (git2->should_free_v) {
-		git_blob_free(PHP_GIT2_V(git2, blob));
-		git2->should_free_v = 0;
-	}
+	ZEND_FETCH_RESOURCE(_blob, php_git2_t*, &blob, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (GIT2_SHOULD_FREE(_blob)) {
+		git_blob_free(PHP_GIT2_V(_blob, blob));
+		GIT2_SHOULD_FREE(_blob) = 0;
+	};
 	zval_ptr_dtor(&blob);
 }
+/* }}} */
 
 /* {{{ proto resource git_blob_id(resource $blob)
 */
@@ -137,6 +190,7 @@ PHP_FUNCTION(git_blob_id)
 	git_oid_fmt(out, id);
 	RETURN_STRING(out, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_blob_is_binary(resource $blob)
 */
@@ -155,75 +209,89 @@ PHP_FUNCTION(git_blob_is_binary)
 	result = git_blob_is_binary(PHP_GIT2_V(git2, blob));
 	RETURN_BOOL(result);
 }
+/* }}} */
 
-/* {{{ proto resource git_blob_lookup(resource $repository, string $oid)
-*/
+/* {{{ proto long git_blob_lookup(resource $repo, string $id)
+ */
 PHP_FUNCTION(git_blob_lookup)
 {
-	zval *repository;
-	php_git2_t *git2, *result;
-	git_blob *blob;
-	char *hash;
-	int hash_len;
-	int error;
-	git_oid id;
+	int result = 0, id_len = 0, error = 0;
+	git_blob *blob = NULL;
+	zval *repo = NULL;
+	php_git2_t *_repo = NULL, *_result = NULL;
+	char *id = NULL;
+	git_oid __id = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rs", &repository, &hash, &hash_len) == FAILURE) {
+		"rs", &repo, &id, &id_len) == FAILURE) {
 		return;
 	}
 
-	if (git_oid_fromstrn(&id, hash, hash_len) != GIT_OK) {
-		return;
+	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (git_oid_fromstrn(&__id, id, id_len)) {
+		RETURN_FALSE;
 	}
-
-	ZEND_FETCH_RESOURCE(git2, php_git2_t*, &repository, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-
-	error = git_blob_lookup(&blob, PHP_GIT2_V(git2, repository), &id);
-	if (php_git2_check_error(error, "git_blob_lookup" TSRMLS_CC)) {
-		RETURN_FALSE
+	result = git_blob_lookup(&blob, PHP_GIT2_V(_repo, repository), &__id);
+	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_BLOB, result, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, blob) = blob;
-	result->type = PHP_GIT2_TYPE_BLOB;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_result));
 }
+/* }}} */
 
-/* {{{ proto resource git_blob_lookup_prefix(resource $blob, string $oid)
-*/
+
+/* {{{ proto long git_blob_lookup_prefix(resource $repo, string $id, long $len)
+ */
 PHP_FUNCTION(git_blob_lookup_prefix)
 {
-}
+	int result = 0, id_len = 0, error = 0;
+	git_blob *blob = NULL;
+	zval *repo = NULL;
+	php_git2_t *_repo = NULL, *_result = NULL;
+	char *id = NULL;
+	git_oid __id = {0};
+	long len = 0;
 
-/* {{{ proto resource git_blob_owner(resource $blob, string $oid)
-*/
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"rsl", &repo, &id, &id_len, &len) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (git_oid_fromstrn(&__id, id, id_len)) {
+		RETURN_FALSE;
+	}
+	result = git_blob_lookup_prefix(&blob, PHP_GIT2_V(_repo, repository), &__id, len);
+	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_BLOB, blob, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_result));
+}
+/* }}} */
+
+
+/* {{{ proto resource git_blob_owner(resource $blob)
+ */
 PHP_FUNCTION(git_blob_owner)
 {
-	zval *blob;
-	php_git2_t *git2, *result;
-	git_repository *repository;
+	git_repository  *result = NULL;
+	zval *blob = NULL;
+	php_git2_t *_blob = NULL, *__result = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &blob) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(git2, php_git2_t*, &blob, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	repository = git_blob_owner(PHP_GIT2_V(git2, blob));
-
-	PHP_GIT2_V(result, repository) = repository;
-	result->type = PHP_GIT2_TYPE_REPOSITORY;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	ZEND_FETCH_RESOURCE(_blob, php_git2_t*, &blob, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_blob_owner(PHP_GIT2_V(_blob, blob));
+	if (php_git2_make_resource(&__result, PHP_GIT2_TYPE_BLOB, result, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(__result));
 }
+/* }}} */
+
 
 /* {{{ proto resource git_blob_rawcontent(resource $blob)
 */
@@ -248,6 +316,7 @@ PHP_FUNCTION(git_blob_rawcontent)
 	size = git_blob_rawsize(PHP_GIT2_V(git2, blob));
 	RETURN_STRINGL(buffer, size, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_blob_rawsize(resource $blob, string $oid)
 */
@@ -266,3 +335,4 @@ PHP_FUNCTION(git_blob_rawsize)
 	size = git_blob_rawsize(PHP_GIT2_V(git2, blob));
 	RETURN_LONG(size);
 }
+/* }}} */
