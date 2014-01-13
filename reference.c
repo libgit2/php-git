@@ -858,11 +858,12 @@ PHP_FUNCTION(git_reference_peel)
 {
 	php_git2_t *result = NULL, *_ref = NULL;
 	git_object *out = NULL;
-	zval *ref = NULL, *type = NULL;
+	zval *ref = NULL;
 	int error = 0;
+	long type = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"r<git_otype>", &ref, &type) == FAILURE) {
+		"rl", &ref, &type) == FAILURE) {
 		return;
 	}
 
