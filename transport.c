@@ -17,7 +17,7 @@ static int php_git2_transport_cb(git_transport **out, git_remote *owner, void *p
 	if (php_git2_make_resource(&_param_owner, PHP_GIT2_TYPE_REMOTE, owner, 0 TSRMLS_CC)) {
 		return 0;
 	}
-	ZVAL_RESOURCE(param_owner, GIT_RVAL_P(_param_owner));
+	ZVAL_RESOURCE(param_owner, GIT2_RVAL_P(_param_owner));
 
 	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 2, &param_owner, &p->payload)) {
 		return GIT_EUSER;

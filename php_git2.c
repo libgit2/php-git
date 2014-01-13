@@ -135,7 +135,7 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 			PHP_GIT2_V(result, commit) = (git_commit*)resource;
 			break;
 		case PHP_GIT2_TYPE_TREE:
-			PHP_GIT2_V(result, commit) = (git_tree*)resource;
+			PHP_GIT2_V(result, tree) = (git_tree*)resource;
 			break;
 		case PHP_GIT2_TYPE_TREE_ENTRY:
 			PHP_GIT2_V(result, tree_entry) = (git_tree_entry*)resource;
@@ -235,6 +235,33 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 			break;
 		case PHP_GIT2_TYPE_NOTE_ITERATOR:
 			PHP_GIT2_V(result, note_iterator) = (git_note_iterator*)resource;
+			break;
+		case PHP_GIT2_TYPE_ODB_STREAM:
+			PHP_GIT2_V(result, odb_stream) = (git_odb_stream*)resource;
+			break;
+		case PHP_GIT2_TYPE_ODB_OBJECT:
+			PHP_GIT2_V(result, odb_object) = (git_odb_object*)resource;
+			break;
+		case PHP_GIT2_TYPE_ODB_WRITEPACK:
+			PHP_GIT2_V(result, odb_writepack) = (git_odb_writepack*)resource;
+			break;
+		case PHP_GIT2_TYPE_ODB_BACKEND:
+			PHP_GIT2_V(result, odb_backend) = (git_odb_backend*)resource;
+			break;
+		case PHP_GIT2_TYPE_REFLOG:
+			PHP_GIT2_V(result, reflog) = (git_reflog*)resource;
+			break;
+		case PHP_GIT2_TYPE_REFLOG_ENTRY:
+			PHP_GIT2_V(result, reflog_entry) = (git_reflog_entry*)resource;
+			break;
+		case PHP_GIT2_TYPE_BLAME:
+			PHP_GIT2_V(result, blame) = (git_blame*)resource;
+			break;
+		case PHP_GIT2_TYPE_PACKBUILDER:
+			PHP_GIT2_V(result, packbuilder) = (git_packbuilder*)resource;
+			break;
+		case PHP_GIT2_TYPE_SUBMODULE:
+			PHP_GIT2_V(result, submodule) = (git_submodule*)resource;
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "passed resource type does not support. probably bug.");

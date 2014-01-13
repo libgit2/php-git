@@ -174,7 +174,7 @@ PHP_FUNCTION(git_reflog_entry_byindex)
 	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_REFLOG_ENTRY, result, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	ZVAL_RESOURCE(return_value, GIT_RVAL_P(_result));
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_result));
 }
 /* }}} */
 

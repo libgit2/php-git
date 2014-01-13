@@ -256,7 +256,7 @@ PHP_FUNCTION(git_object_peel)
 	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_OBJECT, peeled, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	ZVAL_RESOURCE(return_value, GIT_RVAL_P(_result));
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_result));
 }
 /* }}} */
 
@@ -279,6 +279,6 @@ PHP_FUNCTION(git_object_dup)
 	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_OBJECT, dest, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	ZVAL_RESOURCE(return_value, GIT_RVAL_P(_result));
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_result));
 }
 /* }}} */

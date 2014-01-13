@@ -111,9 +111,10 @@ void php_git2_signature_to_array(const git_signature *signature, zval **out TSRM
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(timezone TSRMLS_CC);
 	tzobj->initialized = 1;
 	tzobj->type = TIMELIB_ZONETYPE_OFFSET;
-	tzobj->tzi.utc_offset = -signature->when.offset; /* NOTE(chobie): probably this fine */
+	tzobj->tzi.utc_offset = -signature->when.offset; // doesn't work
 
-	php_date_initialize(zend_object_store_get_object(datetime TSRMLS_CC), NULL, 0, NULL, timezone, 0 TSRMLS_CC);
+	/* TODO(chobie): how do i set offset? */
+	php_date_initialize(zend_object_store_get_object(datetime TSRMLS_CC), time_str, strlen(time_str), NULL, timezone, 0 TSRMLS_CC);
 
 	add_assoc_string_ex(result, ZEND_STRS("name"), signature->name, 1);
 	add_assoc_string_ex(result, ZEND_STRS("email"), signature->email, 1);

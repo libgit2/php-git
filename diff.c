@@ -76,7 +76,7 @@ PHP_FUNCTION(git_diff_tree_to_index)
 	if (php_git2_make_resource(&_diff, PHP_GIT2_TYPE_DIFF, diff, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	ZVAL_RESOURCE(return_value, GIT_RVAL_P(_diff));
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_diff));
 
 }
 /* }}} */
@@ -101,7 +101,7 @@ PHP_FUNCTION(git_diff_index_to_workdir)
 	if (php_git2_make_resource(&_diff, PHP_GIT2_TYPE_DIFF, diff, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	ZVAL_RESOURCE(return_value, GIT_RVAL_P(_diff));
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_diff));
 
 }
 /* }}} */
@@ -147,7 +147,7 @@ PHP_FUNCTION(git_diff_tree_to_workdir_with_index)
 	if (php_git2_make_resource(&_diff, PHP_GIT2_TYPE_DIFF, diff, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	ZVAL_RESOURCE(return_value, GIT_RVAL_P(_diff));
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_diff));
 }
 /* }}} */
 
