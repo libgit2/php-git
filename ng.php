@@ -193,6 +193,8 @@ class Arg
             return "long";
         } else if (preg_match("/git_oid/", $this->type)) {
             return "char";
+        } else if (preg_match("/git_otype/", $this->type)) {
+            return "long";
         } else if (preg_match("/^git_/", $this->type)) {
             return "zval";
         } else if (preg_match("/payload/", $this->name)) {
@@ -457,6 +459,8 @@ class Fashion
                     $printer->put("array");
                 } else if (preg_match("/_cb$/", $arg->getType())) {
                     $printer->put("Callable");
+                } else if (preg_match("/git_otype/", $arg->getType())) {
+                    $printer->put("long");
                 } else {
                     error_log(sprintf("# unknown type (%s)", $arg->getType()));
                 }
