@@ -15,8 +15,9 @@ PHP_FUNCTION(git_diff_free)
 	}
 
 	ZEND_FETCH_RESOURCE(_diff, php_git2_t*, &diff, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	if (_diff->should_free_v) {
+	if (GIT2_SHOULD_FREE(_diff)) {
 		git_diff_free(PHP_GIT2_V(_diff, diff));
+		GIT2_SHOULD_FREE(_diff) = 0;
 	};
 	zval_ptr_dtor(&diff);
 }
@@ -57,18 +58,12 @@ PHP_FUNCTION(git_diff_tree_to_tree)
  */
 PHP_FUNCTION(git_diff_tree_to_index)
 {
-	int result = 0;
+	int result = 0, error = 0;
 	git_diff *diff = NULL;
-	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
-	zval *old_tree = NULL;
-	php_git2_t *_old_tree = NULL;
-	zval *index = NULL;
-	php_git2_t *_index = NULL;
-	zval *opts = NULL;
-	int error = 0;
+	zval *repo = NULL, *old_tree = NULL, *index = NULL, *opts = NULL;
+	php_git2_t *_repo = NULL, *_old_tree = NULL, *_index = NULL, *_diff = NULL;
 
-	/* TODO(chobie): generate converter */
+	/* TODO(chobie): convert options */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rrra", &repo, &old_tree, &index, &opts) == FAILURE) {
 		return;
@@ -78,25 +73,23 @@ PHP_FUNCTION(git_diff_tree_to_index)
 	ZEND_FETCH_RESOURCE(_old_tree, php_git2_t*, &old_tree, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_diff_tree_to_index(&diff, PHP_GIT2_V(_repo, repository), PHP_GIT2_V(_old_tree, tree), PHP_GIT2_V(_index, index), opts);
-	RETURN_LONG(result);
+	if (php_git2_make_resource(&_diff, PHP_GIT2_TYPE_DIFF, diff, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT_RVAL_P(_diff));
+
 }
 /* }}} */
-
 
 /* {{{ proto long git_diff_index_to_workdir(resource $repo, resource $index,  $opts)
  */
 PHP_FUNCTION(git_diff_index_to_workdir)
 {
-	int result = 0;
+	int result = 0, error = 0;
 	git_diff *diff = NULL;
-	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
-	zval *index = NULL;
-	php_git2_t *_index = NULL;
-	zval *opts = NULL;
-	int error = 0;
+	zval *repo = NULL, *index = NULL, *opts = NULL;
+	php_git2_t *_repo = NULL, *_index = NULL, *_diff = NULL;
 
-	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rra", &repo, &index, &opts) == FAILURE) {
 		return;
@@ -105,52 +98,23 @@ PHP_FUNCTION(git_diff_index_to_workdir)
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	ZEND_FETCH_RESOURCE(_index, php_git2_t*, &index, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_diff_index_to_workdir(&diff, PHP_GIT2_V(_repo, repository), PHP_GIT2_V(_index, index), opts);
-	RETURN_LONG(result);
-}
-/* }}} */
-
-
-/* {{{ proto long git_diff_tree_to_workdir(resource $repo, resource $old_tree,  $opts)
- */
-PHP_FUNCTION(git_diff_tree_to_workdir)
-{
-	int result = 0;
-	git_diff *diff = NULL;
-	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
-	zval *old_tree = NULL;
-	php_git2_t *_old_tree = NULL;
-	zval *opts = NULL;
-	int error = 0;
-
-	/* TODO(chobie): generate converter */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rra", &repo, &old_tree, &opts) == FAILURE) {
-		return;
+	if (php_git2_make_resource(&_diff, PHP_GIT2_TYPE_DIFF, diff, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
 	}
+	ZVAL_RESOURCE(return_value, GIT_RVAL_P(_diff));
 
-	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	ZEND_FETCH_RESOURCE(_old_tree, php_git2_t*, &old_tree, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	result = git_diff_tree_to_workdir(&diff, PHP_GIT2_V(_repo, repository), PHP_GIT2_V(_old_tree, tree), opts);
-	RETURN_LONG(result);
 }
 /* }}} */
-
 
 /* {{{ proto long git_diff_tree_to_workdir_with_index(resource $repo, resource $old_tree,  $opts)
  */
 PHP_FUNCTION(git_diff_tree_to_workdir_with_index)
 {
-	int result = 0;
+	int result = 0, error = 0;
 	git_diff *diff = NULL;
-	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
-	zval *old_tree = NULL;
-	php_git2_t *_old_tree = NULL;
-	zval *opts = NULL;
-	int error = 0;
+	zval *repo = NULL, *old_tree = NULL, *opts = NULL;
+	php_git2_t *_repo = NULL, *_old_tree = NULL, *_diff = NULL;
 
-	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rra", &repo, &old_tree, &opts) == FAILURE) {
 		return;
@@ -159,21 +123,20 @@ PHP_FUNCTION(git_diff_tree_to_workdir_with_index)
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	ZEND_FETCH_RESOURCE(_old_tree, php_git2_t*, &old_tree, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_diff_tree_to_workdir_with_index(&diff, PHP_GIT2_V(_repo, repository), PHP_GIT2_V(_old_tree, tree), opts);
-	RETURN_LONG(result);
+	if (php_git2_make_resource(&_diff, PHP_GIT2_TYPE_DIFF, diff, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT_RVAL_P(_diff));
 }
 /* }}} */
-
 
 /* {{{ proto long git_diff_merge(resource $onto, resource $from)
  */
 PHP_FUNCTION(git_diff_merge)
 {
-	int result = 0;
-	zval *onto = NULL;
-	php_git2_t *_onto = NULL;
-	zval *from = NULL;
-	php_git2_t *_from = NULL;
-	int error = 0;
+	int result = 0, error = 0;
+	zval *onto = NULL, *from = NULL;
+	php_git2_t *_onto = NULL, *_from = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rr", &onto, &from) == FAILURE) {
@@ -186,7 +149,6 @@ PHP_FUNCTION(git_diff_merge)
 	RETURN_LONG(result);
 }
 /* }}} */
-
 
 /* {{{ proto long git_diff_find_similar(resource $diff,  $options)
  */
@@ -321,11 +283,22 @@ PHP_FUNCTION(git_diff_foreach)
 {
 }
 
-/* {{{ proto resource git_diff_status_char(status)
-*/
+/* {{{ proto string git_diff_status_char( $status)
+ */
 PHP_FUNCTION(git_diff_status_char)
 {
+	char *result = NULL;
+	long status = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"l", &status) == FAILURE) {
+		return;
+	}
+
+	result = git_diff_status_char(status);
+	RETURN_STRING(result, 1);
 }
+/* }}} */
 
 /* {{{ proto long git_diff_print(diff, format, print_cb, payload)
 */
