@@ -7,11 +7,12 @@
 PHP_FUNCTION(git_reset)
 {
 	int result = 0, error = 0;
-	zval *repo = NULL, *target = NULL, *reset_type = NULL;
+	zval *repo = NULL, *target = NULL;
 	php_git2_t *_repo = NULL, *_target = NULL;
+	long reset_type = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rr<git_reset_t>", &repo, &target, &reset_type) == FAILURE) {
+		"rrl", &repo, &target, &reset_type) == FAILURE) {
 		return;
 	}
 	
