@@ -806,8 +806,6 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_signature_new, arginfo_git_signature_new)
 	PHP_FE(git_signature_now, arginfo_git_signature_now)
 	PHP_FE(git_signature_default, arginfo_git_signature_default)
-	PHP_FE(git_signature_dup, arginfo_git_signature_dup)
-	PHP_FE(git_signature_free, arginfo_git_signature_free)
 
 	/* reset */
 	PHP_FE(git_reset, arginfo_git_reset)

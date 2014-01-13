@@ -77,32 +77,3 @@ PHP_FUNCTION(git_signature_default)
 	RETURN_ZVAL(signature, 0, 1);
 }
 /* }}} */
-
-/* {{{ proto array git_signature_dup(array $sig)
- */
-PHP_FUNCTION(git_signature_dup)
-{
-	// TODO(chobie): remove later. we don't need to export this function */
-	git_signature  *result = NULL;
-	zval *__result = NULL, *sig = NULL;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"a", &sig) == FAILURE) {
-		return;
-	}
-	
-	result = git_signature_dup(sig);
-	php_git2_signature_to_array(result, &__result TSRMLS_CC);
-	git_signature_free(result);
-	RETURN_ZVAL(__result, 0, 1);
-}
-/* }}} */
-
-/* {{{ proto void git_signature_free(array $sig)
- */
-PHP_FUNCTION(git_signature_free)
-{
-	// TODO(chobie): remove later. we don't need to export this function */
-}
-/* }}} */
-
