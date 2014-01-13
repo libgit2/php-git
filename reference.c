@@ -54,37 +54,33 @@ static int php_git2_reference_foreach_name_cb(const char *name, void *payload)
 	return retval;
 }
 
-
-/* {{{ proto resource git_reference_lookup(repo, name)
-*/
+/* {{{ proto resource git_reference_lookup(resource $repo, string $name)
+ */
 PHP_FUNCTION(git_reference_lookup)
 {
-	zval *repo;
-	php_git2_t *_repo, *result;
-	char *name = {0};
-	int name_len;
-	git_reference *out;
-	int error;
+	php_git2_t *result = NULL, *_repo = NULL;
+	git_reference *out = NULL;
+	zval *repo = NULL;
+	char *name = NULL;
+	int name_len = 0, error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &repo, &name, &name_len) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 
+	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	error = git_reference_lookup(&out, PHP_GIT2_V(_repo, repository), name);
 	if (php_git2_check_error(error, "git_reference_lookup" TSRMLS_CC)) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
+
 
 /* {{{ proto resource git_reference_name_to_id(repo, name)
 */
@@ -113,49 +109,43 @@ PHP_FUNCTION(git_reference_name_to_id)
 	RETURN_STRING(out, 1);
 }
 
-/* {{{ proto resource git_reference_dwim(repo, shorthand)
-*/
+/* {{{ proto resource git_reference_dwim(resource $repo, string $shorthand)
+ */
 PHP_FUNCTION(git_reference_dwim)
 {
-	zval *repo;
-	php_git2_t *_repo, *result;
-	char *shorthand = {0};
-	int shorthand_len;
-	git_reference *out;
-	int error = 0;
+	php_git2_t *result = NULL, *_repo = NULL;
+	git_reference *out = NULL;
+	zval *repo = NULL;
+	char *shorthand = NULL;
+	int shorthand_len = 0, error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &repo, &shorthand, &shorthand_len) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	error = git_reference_dwim(&out, PHP_GIT2_V(_repo, repository), shorthand);
 	if (php_git2_check_error(error, "git_reference_dwim" TSRMLS_CC)) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
 
-/* {{{ proto resource git_reference_symbolic_create(repo, name, target, force)
-*/
+/* {{{ proto resource git_reference_symbolic_create(resource $repo, string $name, string $target, long $force)
+ */
 PHP_FUNCTION(git_reference_symbolic_create)
 {
-	zval *repo;
-	php_git2_t *_repo, *result;
-	char *name = {0};
-	int name_len;
-	char *target = {0};
-	int target_len;
+	php_git2_t *result = NULL, *_repo = NULL;
+	git_reference *out = NULL;
+	zval *repo = NULL;
+	char *name = NULL, *target = NULL;
+	int name_len = 0, target_len = 0, error = 0;
 	long force = 0;
-	int error;
-	git_reference *out;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rssl", &repo, &name, &name_len, &target, &target_len, &force) == FAILURE) {
@@ -164,83 +154,69 @@ PHP_FUNCTION(git_reference_symbolic_create)
 
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	error = git_reference_symbolic_create(&out, PHP_GIT2_V(_repo, repository), name, target, force);
-	if (php_git2_check_error(error, "git_reference_lookup" TSRMLS_CC)) {
-		RETURN_FALSE
+	if (php_git2_check_error(error, "git_reference_symbolic_create" TSRMLS_CC)) {
+		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
 
-/* {{{ proto resource git_reference_create(repo, name, id, force)
-*/
+/* {{{ proto resource git_reference_create(resource $repo, string $name, string $id, long $force)
+ */
 PHP_FUNCTION(git_reference_create)
 {
-	zval *repo;
-	php_git2_t *_repo, *result;
-	char *name = {0};
-	int name_len;
-	char *id = {0};
-	int id_len;
+	php_git2_t *result = NULL, *_repo = NULL;
+	git_reference *out = NULL;
+	zval *repo = NULL;
+	char *name = NULL, *id = NULL;
+	int name_len = 0, id_len = 0, error = 0;
+	git_oid __id = {0};
 	long force = 0;
-	git_reference *out;
-	git_oid oid;
-	int error;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rssl", &repo, &name, &name_len, &id, &id_len, &force) == FAILURE) {
 		return;
 	}
-	if (git_oid_fromstrn(&oid, id, id_len) != GIT_OK) {
-		return;
-	}
 
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	error = git_reference_create(&out, PHP_GIT2_V(_repo, repository), name, &oid, force);
-	if (php_git2_check_error(error, "git_reference_lookup" TSRMLS_CC)) {
+	if (git_oid_fromstrn(&__id, id, id_len)) {
 		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	error = git_reference_create(&out, PHP_GIT2_V(_repo, repository), name, &__id, force);
+	if (php_git2_check_error(error, "git_reference_create" TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
 
-/* {{{ proto resource git_reference_target(ref)
-*/
+
+/* {{{ proto resource git_reference_target(resource $ref)
+ */
 PHP_FUNCTION(git_reference_target)
 {
-	zval *ref;
-	php_git2_t *_ref, *result;
-	const git_reference *out = NULL;
+	const git_oid  *result = NULL;
+	zval *ref = NULL;
+	php_git2_t *_ref = NULL;
+	char __result[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &ref) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	out = git_reference_target(PHP_GIT2_V(_ref, reference));
-	if (out = NULL) {
-		RETURN_FALSE;
-	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	result = git_reference_target(PHP_GIT2_V(_ref, reference));
+	git_oid_fmt(__result, result);
+	RETURN_STRING(__result, 1);
 }
+/* }}} */
 
 /* {{{ proto resource git_reference_target_peel(ref)
 */
@@ -281,209 +257,192 @@ PHP_FUNCTION(git_reference_symbolic_target)
 }
 /* }}} */
 
-
-/* {{{ proto resource git_reference_type(ref)
-*/
+/* {{{ proto resource git_reference_type(resource $ref)
+ */
 PHP_FUNCTION(git_reference_type)
 {
-	zval *ref;
-	php_git2_t *_ref;
-	git_ref_t type;
+	git_ref_t *result = NULL;
+	zval *ref = NULL;
+	php_git2_t *_ref = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &ref) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	type = git_tree_entry_type(PHP_GIT2_V(_ref, reference));
-
-	RETURN_LONG(type);
+	result = git_reference_type(PHP_GIT2_V(_ref, reference));
+	RETURN_LONG(result);
 }
+/* }}} */
 
-/* {{{ proto resource git_reference_name(ref)
-*/
+/* {{{ proto string git_reference_name(resource $ref)
+ */
 PHP_FUNCTION(git_reference_name)
 {
-	zval *ref;
-	php_git2_t *_ref;
-	const char *name;
+	const char  *result = NULL;
+	zval *ref = NULL;
+	php_git2_t *_ref = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &ref) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	name = git_reference_name(PHP_GIT2_V(_ref, reference));
-
-	RETURN_STRING(name, 1);
+	result = git_reference_name(PHP_GIT2_V(_ref, reference));
+	RETURN_STRING(result, 1);
 }
+/* }}} */
 
-/* {{{ proto resource git_reference_resolve(ref)
-*/
+/* {{{ proto resource git_reference_resolve(resource $ref)
+ */
 PHP_FUNCTION(git_reference_resolve)
 {
-	zval *ref;
-	php_git2_t *_ref, *result;
-	git_reference *out;
+	php_git2_t *result = NULL, *_ref = NULL;
+	git_reference *out = NULL;
+	zval *ref = NULL;
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &ref) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 
+	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	error = git_reference_resolve(&out, PHP_GIT2_V(_ref, reference));
 	if (php_git2_check_error(error, "git_reference_resolve" TSRMLS_CC)) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
 
-/* {{{ proto resource git_reference_owner(ref)
-*/
+/* {{{ proto resource git_reference_owner(resource $ref)
+ */
 PHP_FUNCTION(git_reference_owner)
 {
-	zval *ref;
-	php_git2_t *_ref, *result;
-	git_repository *repository;
+	git_repository  *result = NULL;
+	zval *ref = NULL;
+	php_git2_t *_ref = NULL, *__result = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &ref) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	repository = git_reference_owner(PHP_GIT2_V(_ref, reference));
-
-	PHP_GIT2_V(result, repository) = repository;
-	result->type = PHP_GIT2_TYPE_REPOSITORY;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	result = git_reference_owner(PHP_GIT2_V(_ref, reference));
+	if (php_git2_make_resource(&__result, PHP_GIT2_TYPE_REFERENCE, result, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(__result));
 }
+/* }}} */
 
-/* {{{ proto resource git_reference_symbolic_set_target(ref, target)
-*/
+/* {{{ proto resource git_reference_symbolic_set_target(resource $ref, string $target)
+ */
 PHP_FUNCTION(git_reference_symbolic_set_target)
 {
-	zval *ref;
-	php_git2_t *_ref, *result;
-	char *target = {0};
-	int target_len;
-	git_reference *out;
-	int error = 0;
+	php_git2_t *result = NULL, *_ref = NULL;
+	git_reference *out = NULL;
+	zval *ref = NULL;
+	char *target = NULL;
+	int target_len = 0, error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &ref, &target, &target_len) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	error = git_reference_symbolic_set_target(&out, PHP_GIT2_V(_ref, reference), target);
 	if (php_git2_check_error(error, "git_reference_symbolic_set_target" TSRMLS_CC)) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
 
-/* {{{ proto resource git_reference_set_target(ref, id)
-*/
+
+/* {{{ proto resource git_reference_set_target(resource $ref, string $id)
+ */
 PHP_FUNCTION(git_reference_set_target)
 {
-	zval *ref;
-	php_git2_t *_ref, *result;
-	char *id = {0};
-	int id_len;
-	git_oid oid;
-	int error;
-	git_reference *out;
+	php_git2_t *result = NULL, *_ref = NULL;
+	git_reference *out = NULL;
+	zval *ref = NULL;
+	char *id = NULL;
+	int id_len = 0, error = 0;
+	git_oid __id = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &ref, &id, &id_len) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	if (git_oid_fromstrn(&oid, id, id_len) != GIT_OK) {
-		return;
+	if (git_oid_fromstrn(&__id, id, id_len)) {
+		RETURN_FALSE;
 	}
-	error = git_reference_set_target(&out, PHP_GIT2_V(_ref, reference), &oid);
+	error = git_reference_set_target(&out, PHP_GIT2_V(_ref, reference), &__id);
 	if (php_git2_check_error(error, "git_reference_set_target" TSRMLS_CC)) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
 
-/* {{{ proto resource git_reference_rename(ref, new_name, force)
-*/
+/* {{{ proto long git_reference_rename(resource $ref, string $new_name, long $force)
+ */
 PHP_FUNCTION(git_reference_rename)
 {
-	zval *ref;
-	php_git2_t *_ref, *result;
-	char *new_name = {0};
-	int new_name_len;
+	int result = 0, new_name_len = 0, error = 0;
+	git_reference *new_ref = NULL;
+	zval *ref = NULL;
+	php_git2_t *_ref = NULL;
+	char *new_name = NULL;
 	long force = 0;
-	git_reference *out;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsl", &ref, &new_name, &new_name_len, &force) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	error = git_reference_rename(&out, PHP_GIT2_V(_ref, reference), new_name, force);
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, reference) = out;
-	result->type = PHP_GIT2_TYPE_REFERENCE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	result = git_reference_rename(&new_ref, PHP_GIT2_V(_ref, reference), new_name, force);
+	RETURN_LONG(result);
 }
+/* }}} */
 
-/* {{{ proto long git_reference_delete(ref)
-*/
+/* {{{ proto long git_reference_delete(resource $ref)
+ */
 PHP_FUNCTION(git_reference_delete)
 {
-	zval *ref;
-	php_git2_t *_ref;
-	int error;
+	int result = 0, error = 0;
+	zval *ref = NULL;
+	php_git2_t *_ref = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &ref) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	error = git_reference_delete(PHP_GIT2_V(_ref, reference));
-	if (php_git2_check_error(error, "git_reference_delete" TSRMLS_CC)) {
-		RETURN_FALSE
-	}
-	zval_ptr_dtor(&ref);
+	result = git_reference_delete(PHP_GIT2_V(_ref, reference));
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto long git_reference_list(repo)
 */
@@ -511,6 +470,7 @@ PHP_FUNCTION(git_reference_list)
 
 	RETURN_ZVAL(result, 0, 1);
 }
+/* }}} */
 
 /* {{{ proto long git_reference_foreach(resource $repo,  $callback,  $payload)
  */
@@ -566,24 +526,26 @@ PHP_FUNCTION(git_reference_foreach_name)
 }
 /* }}} */
 
-/* {{{ proto void git_reference_free(ref)
-*/
+/* {{{ proto void git_reference_free(resource $ref)
+ */
 PHP_FUNCTION(git_reference_free)
 {
-	zval *ref;
-	php_git2_t *_ref;
+	zval *ref = NULL;
+	php_git2_t *_ref = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &ref) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_ref, php_git2_t*, &ref, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	if (_ref->should_free_v) {
+	if (GIT2_SHOULD_FREE(_ref)) {
 		git_reference_free(PHP_GIT2_V(_ref, reference));
-		_ref->should_free_v = 0;
-	}
+		GIT2_SHOULD_FREE(_ref) = 0;
+	};
 	zval_ptr_dtor(&ref);
 }
+/* }}} */
 
 /* {{{ proto long git_reference_cmp(ref1, ref2)
 */
