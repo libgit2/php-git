@@ -2,7 +2,7 @@
 #include "php_git2_priv.h"
 #include "signature.h"
 
-/* {{{ proto resource git_signature_new(string $name, string $email,  $time, long $offset)
+/* {{{ proto resource git_signature_new(string $name, string $email, array $time, long $offset)
  */
 PHP_FUNCTION(git_signature_new)
 {
@@ -10,11 +10,11 @@ PHP_FUNCTION(git_signature_new)
 	git_signature *out = NULL;
 	char *name = NULL, *email = NULL;
 	int name_len = 0, email_len = 0, error = 0;
-	zval *time = NULL;
-	long offset = 0;
-	
+	long time = 0, offset = 0;
+	zval *signature = NULL;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"ssal", &name, &name_len, &email, &email_len, &time, &offset) == FAILURE) {
+		"ssll", &name, &name_len, &email, &email_len, &time, &offset) == FAILURE) {
 		return;
 	}
 	
@@ -22,6 +22,9 @@ PHP_FUNCTION(git_signature_new)
 	if (php_git2_check_error(error, "git_signature_new" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+	php_git2_signature_to_array(out, &signature TSRMLS_CC);
+	git_signature_free(out);
+	RETURN_ZVAL(signature, 0, 1);
 }
 /* }}} */
 
@@ -33,6 +36,7 @@ PHP_FUNCTION(git_signature_now)
 	git_signature *out = NULL;
 	char *name = NULL, *email = NULL;
 	int name_len = 0, email_len = 0, error = 0;
+	zval *signature = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ss", &name, &name_len, &email, &email_len) == FAILURE) {
@@ -43,6 +47,9 @@ PHP_FUNCTION(git_signature_now)
 	if (php_git2_check_error(error, "git_signature_now" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+	php_git2_signature_to_array(out, &signature TSRMLS_CC);
+	git_signature_free(out);
+	RETURN_ZVAL(signature, 0, 1);
 }
 /* }}} */
 
@@ -52,7 +59,7 @@ PHP_FUNCTION(git_signature_default)
 {
 	php_git2_t *result = NULL, *_repo = NULL;
 	git_signature *out = NULL;
-	zval *repo = NULL;
+	zval *repo = NULL, *signature = NULL;
 	int error = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -65,6 +72,9 @@ PHP_FUNCTION(git_signature_default)
 	if (php_git2_check_error(error, "git_signature_default" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+	php_git2_signature_to_array(out, &signature TSRMLS_CC);
+	git_signature_free(out);
+	RETURN_ZVAL(signature, 0, 1);
 }
 /* }}} */
 
@@ -82,6 +92,7 @@ PHP_FUNCTION(git_signature_dup)
 	
 	result = git_signature_dup(sig);
 	php_git2_signature_to_array(result, &__result TSRMLS_CC);
+	git_signature_free(result);
 	RETURN_ZVAL(__result, 0, 1);
 }
 /* }}} */
@@ -90,18 +101,7 @@ PHP_FUNCTION(git_signature_dup)
  */
 PHP_FUNCTION(git_signature_free)
 {
-//	zval *sig = NULL;
-//
-//	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-//		"a", &sig) == FAILURE) {
-//		return;
-//	}
-//
-//	if (GIT2_SHOULD_FREE(_sig)) {
-//		git_signature_free(sig);
-//		GIT2_SHOULD_FREE(_sig) = 0;
-//	};
-//	zval_ptr_dtor(&sig);
+	// TODO(chobie): remove later. we don't need to export this function */
 }
 /* }}} */
 

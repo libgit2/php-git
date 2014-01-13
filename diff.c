@@ -106,6 +106,27 @@ PHP_FUNCTION(git_diff_index_to_workdir)
 }
 /* }}} */
 
+/* {{{ proto long git_diff_tree_to_workdir(resource $repo, resource $old_tree,  $opts)
+ */
+PHP_FUNCTION(git_diff_tree_to_workdir)
+{
+	int result = 0, error = 0;
+	git_diff *diff = NULL;
+	zval *repo = NULL, *old_tree = NULL, *opts = NULL;
+	php_git2_t *_repo = NULL, *_old_tree = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"rr<git_diff_options>", &repo, &old_tree, &opts) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	ZEND_FETCH_RESOURCE(_old_tree, php_git2_t*, &old_tree, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_diff_tree_to_workdir(&diff, PHP_GIT2_V(_repo, repository), PHP_GIT2_V(_old_tree, tree), opts);
+	RETURN_LONG(result);
+}
+/* }}} */
+
 /* {{{ proto long git_diff_tree_to_workdir_with_index(resource $repo, resource $old_tree,  $opts)
  */
 PHP_FUNCTION(git_diff_tree_to_workdir_with_index)
