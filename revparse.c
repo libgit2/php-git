@@ -6,13 +6,11 @@
  */
 PHP_FUNCTION(git_revparse_single)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_repo = NULL;
 	git_object *out = NULL;
 	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
 	char *spec = NULL;
-	int spec_len = 0;
-	int error = 0;
+	int spec_len = 0, error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &repo, &spec, &spec_len) == FAILURE) {
@@ -24,14 +22,13 @@ PHP_FUNCTION(git_revparse_single)
 	if (php_git2_check_error(error, "git_revparse_single" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, object) = out;
-	result->type = PHP_GIT2_TYPE_OBJECT;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_OBJECT, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
+
 
 /* {{{ proto array git_revparse_ext(resource $repo, string $spec)
  */
@@ -58,23 +55,19 @@ PHP_FUNCTION(git_revparse_ext)
 		RETURN_FALSE;
 	}
 
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_MAKE_RESOURCE(result2);
 	MAKE_STD_ZVAL(array);
 	MAKE_STD_ZVAL(a);
 	MAKE_STD_ZVAL(b);
 
-	PHP_GIT2_V(result, object) = object_out;
-	result->type = PHP_GIT2_TYPE_OBJECT;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(a, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_OBJECT, object_out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(a, GIT2_RVAL_P(result));
 
-	PHP_GIT2_V(result2, reference) = reference_out;
-	result2->type = PHP_GIT2_TYPE_REFERENCE;
-	result2->resource_id = PHP_GIT2_LIST_INSERT(result2, git2_resource_handle);
-	result2->should_free_v = 0;
-	ZVAL_RESOURCE(b, result->resource_id);
+	if (php_git2_make_resource(&result2, PHP_GIT2_TYPE_REFERENCE, reference_out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(b, GIT2_RVAL_P(result2));
 
 	array_init(array);
 	add_next_index_zval(array, a);
@@ -108,20 +101,15 @@ PHP_FUNCTION(git_revparse)
 		RETURN_FALSE;
 	}
 	MAKE_STD_ZVAL(result);
-	MAKE_STD_ZVAL(from);
-	MAKE_STD_ZVAL(to);
+	if (php_git2_make_resource(&_from, PHP_GIT2_TYPE_OBJECT, revspec.from, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(from, GIT2_RVAL_P(_from));
 
-	PHP_GIT2_V(_from, object) = revspec.from;
-	_from->type = PHP_GIT2_TYPE_OBJECT;
-	_from->resource_id = PHP_GIT2_LIST_INSERT(_from, git2_resource_handle);
-	_from->should_free_v = 0;
-	ZVAL_RESOURCE(from, _from->resource_id);
-
-	PHP_GIT2_V(_to, object) = revspec.to;
-	_to->type = PHP_GIT2_TYPE_OBJECT;
-	_to->resource_id = PHP_GIT2_LIST_INSERT(_to, git2_resource_handle);
-	_to->should_free_v = 0;
-	ZVAL_RESOURCE(to, _to->resource_id);
+	if (php_git2_make_resource(&_to, PHP_GIT2_TYPE_OBJECT, revspec.to, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(to, GIT2_RVAL_P(_to));
 
 	array_init(result);
 	add_assoc_zval_ex(result, ZEND_STRS("from"), from);
