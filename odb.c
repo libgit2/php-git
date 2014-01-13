@@ -241,31 +241,32 @@ PHP_FUNCTION(git_odb_foreach)
 	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+	// TODO(chobie): implment callback */
 	//result = git_odb_foreach(PHP_GIT2_V(_db, odb), <CHANGEME>, cb);
 	php_git2_cb_free(cb);
 	RETURN_LONG(result);
 }
 /* }}} */
 
-/* {{{ proto resource git_odb_write(resource $odb,  $data, long $len,  $type)
+/* {{{ proto resource git_odb_write(resource $odb,  $data,  $type)
  */
 PHP_FUNCTION(git_odb_write)
 {
 	php_git2_t *result = NULL, *_odb = NULL;
 	git_oid out = {0};
-	zval *odb = NULL, *type = NULL;
+	zval *odb = NULL;
 	zval *data = NULL;
-	long len = 0;
-	int error = 0;
+	long type = 0;
+	int error = 0, data_len = 0;
 	char buf[41] = {0};
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"r<void>l<git_otype>", &odb, &data, &len, &type) == FAILURE) {
+		"rsl", &odb, &data, &data_len, &type) == FAILURE) {
 		return;
 	}
 	
 	ZEND_FETCH_RESOURCE(_odb, php_git2_t*, &odb, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	error = git_odb_write(&out, PHP_GIT2_V(_odb, odb), data, len, type);
+	error = git_odb_write(&out, PHP_GIT2_V(_odb, odb), data, data_len, type);
 	if (php_git2_check_error(error, "git_odb_write" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -280,12 +281,12 @@ PHP_FUNCTION(git_odb_open_wstream)
 {
 	php_git2_t *result = NULL, *_db = NULL;
 	git_odb_stream *out = NULL;
-	zval *db = NULL, *type = NULL;
-	long size = 0;
+	zval *db = NULL;
+	long size = 0, type = 0;
 	int error = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rl<git_otype>", &db, &size, &type) == FAILURE) {
+		"rll", &db, &size, &type) == FAILURE) {
 		return;
 	}
 	
@@ -301,7 +302,7 @@ PHP_FUNCTION(git_odb_open_wstream)
 }
 /* }}} */
 
-/* {{{ proto long git_odb_stream_write(resource $stream, string $buffer, long $len)
+/* {{{ proto long git_odb_stream_write(resource $stream, string $buffer)
  */
 PHP_FUNCTION(git_odb_stream_write)
 {
@@ -309,15 +310,14 @@ PHP_FUNCTION(git_odb_stream_write)
 	zval *stream = NULL;
 	php_git2_t *_stream = NULL;
 	char *buffer = NULL;
-	long len = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rsl", &stream, &buffer, &buffer_len, &len) == FAILURE) {
+		"rs", &stream, &buffer, &buffer_len) == FAILURE) {
 		return;
 	}
 	
 	ZEND_FETCH_RESOURCE(_stream, php_git2_t*, &stream, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	result = git_odb_stream_write(PHP_GIT2_V(_stream, odb_stream), buffer, len);
+	result = git_odb_stream_write(PHP_GIT2_V(_stream, odb_stream), buffer, buffer_len);
 	RETURN_LONG(result);
 }
 /* }}} */
@@ -452,23 +452,22 @@ PHP_FUNCTION(git_odb_write_pack)
 }
 /* }}} */
 
-/* {{{ proto resource git_odb_hash( $data, long $len,  $type)
+/* {{{ proto resource git_odb_hash(string $data, long $type)
  */
 PHP_FUNCTION(git_odb_hash)
 {
 	php_git2_t *result = NULL;
 	git_oid out = {0};
 	zval *data = NULL;
-	long len = 0;
-	zval *type = NULL;
-	int error = 0;
+	int error = 0, data_len = 0;
+	long type = 0;
 	char buf[41] = {0};
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"<void>l<git_otype>", &data, &len, &type) == FAILURE) {
+		"sl", &data, &data_len, &type) == FAILURE) {
 		return;
 	}
-	error = git_odb_hash(&out, data, len, type);
+	error = git_odb_hash(&out, data, data_len, type);
 	if (php_git2_check_error(error, "git_odb_hash" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -485,11 +484,11 @@ PHP_FUNCTION(git_odb_hashfile)
 	git_oid out = {0};
 	char *path = NULL;
 	int path_len = 0, error = 0;
-	zval *type = NULL;
 	char buf[41] = {0};
+	long type = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"s<git_otype>", &path, &path_len, &type) == FAILURE) {
+		"sl", &path, &path_len, &type) == FAILURE) {
 		return;
 	}
 	error = git_odb_hashfile(&out, path, type);

@@ -83,11 +83,9 @@ PHP_FUNCTION(git_merge_head_from_ref)
 	if (php_git2_check_error(error, "git_merge_head_from_ref" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, merge_head) = out;
-	result->type = PHP_GIT2_TYPE_MERGE_HEAD;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_MERGE_HEAD, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 	ZVAL_RESOURCE(return_value, result->resource_id);
 }
 /* }}} */
@@ -158,11 +156,9 @@ PHP_FUNCTION(git_merge_head_from_oid)
 	if (php_git2_check_error(error, "git_merge_head_from_oid" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, merge_head) = out;
-	result->type = PHP_GIT2_TYPE_MERGE_HEAD;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_MERGE_HEAD, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 	ZVAL_RESOURCE(return_value, result->resource_id);
 }
 /* }}} */
@@ -220,11 +216,9 @@ PHP_FUNCTION(git_merge_trees)
 	if (php_git2_check_error(error, "git_merge_trees" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, index) = out;
-	result->type = PHP_GIT2_TYPE_INDEX;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_INDEX, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 	ZVAL_RESOURCE(return_value, result->resource_id);
 }
 /* }}} */
@@ -255,11 +249,9 @@ PHP_FUNCTION(git_merge)
 	if (php_git2_check_error(error, "git_merge" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, merge_result) = out;
-	result->type = PHP_GIT2_TYPE_MERGE_RESULT;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_MERGE_RESULT, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 	ZVAL_RESOURCE(return_value, result->resource_id);
 }
 /* }}} */
@@ -346,8 +338,9 @@ PHP_FUNCTION(git_merge_result_free)
 	}
 
 	ZEND_FETCH_RESOURCE(_merge_result, php_git2_t*, &merge_result, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	if (_merge_result->should_free_v) {
+	if (GIT2_SHOULD_FREE(_merge_result)) {
 		git_merge_result_free(PHP_GIT2_V(_merge_result, merge_result));
+		GIT2_SHOULD_FREE(_merge_result) = 0;
 	};
 	zval_ptr_dtor(&merge_result);
 }

@@ -28,11 +28,8 @@ PHP_FUNCTION(git_cred_userpass_plaintext_new)
 {
 	php_git2_t *result = NULL;
 	git_cred *out = NULL;
-	char *username = NULL;
-	int username_len = 0;
-	char *password = NULL;
-	int password_len = 0;
-	int error = 0;
+	char *username = NULL, *password = NULL;
+	int username_len = 0, password_len = 0, error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ss", &username, &username_len, &password, &password_len) == FAILURE) {
@@ -43,14 +40,13 @@ PHP_FUNCTION(git_cred_userpass_plaintext_new)
 	if (php_git2_check_error(error, "git_cred_userpass_plaintext_new" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, cred) = out;
-	result->type = PHP_GIT2_TYPE_CRED;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_CRED, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
+
 
 /* {{{ proto resource git_cred_ssh_key_new(string $username, string $publickey, string $privatekey, string $passphrase)
  */
@@ -58,15 +54,8 @@ PHP_FUNCTION(git_cred_ssh_key_new)
 {
 	php_git2_t *result = NULL;
 	git_cred *out = NULL;
-	char *username = NULL;
-	int username_len = 0;
-	char *publickey = NULL;
-	int publickey_len = 0;
-	char *privatekey = NULL;
-	int privatekey_len = 0;
-	char *passphrase = NULL;
-	int passphrase_len = 0;
-	int error = 0;
+	char *username = NULL, *publickey = NULL, *privatekey = NULL, *passphrase = NULL;
+	int username_len = 0, publickey_len = 0, privatekey_len = 0, passphrase_len = 0, error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ssss", &username, &username_len, &publickey, &publickey_len, &privatekey, &privatekey_len, &passphrase, &passphrase_len) == FAILURE) {
@@ -77,14 +66,13 @@ PHP_FUNCTION(git_cred_ssh_key_new)
 	if (php_git2_check_error(error, "git_cred_ssh_key_new" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, cred) = out;
-	result->type = PHP_GIT2_TYPE_CRED;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_CRED, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
+
 
 
 /* {{{ proto resource git_cred_ssh_custom_new(username, publickey, publickey_len, sign_fn, sign_data)
@@ -121,14 +109,13 @@ PHP_FUNCTION(git_cred_default_new)
 	if (php_git2_check_error(error, "git_cred_default_new" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, cred) = out;
-	result->type = PHP_GIT2_TYPE_CRED;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_CRED, out, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
+
 
 
 /* {{{ proto resource git_cred_userpass(url, user_from_url, allowed_types, payload)
