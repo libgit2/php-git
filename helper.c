@@ -351,6 +351,7 @@ void php_git2_git_checkout_progress_cb(const char *path,
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
 
+	Z_ADDREF_P(p->payload);
 	MAKE_STD_ZVAL(param_path);
 	MAKE_STD_ZVAL(param_completed_steps);
 	MAKE_STD_ZVAL(param_total_steps);
@@ -361,6 +362,7 @@ void php_git2_git_checkout_progress_cb(const char *path,
 	ZVAL_LONG(param_completed_steps, completed_steps);
 	ZVAL_LONG(param_total_steps, total_steps);
 
+	SEPARATE_ZVAL_TO_MAKE_IS_REF(&p->payload);
 	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 4, &param_path, &param_completed_steps, &param_total_steps, &p->payload)) {
 		return;
 	}
