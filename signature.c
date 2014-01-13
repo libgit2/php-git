@@ -82,6 +82,7 @@ PHP_FUNCTION(git_signature_default)
  */
 PHP_FUNCTION(git_signature_dup)
 {
+	// TODO(chobie): remove later. we don't need to export this function */
 	git_signature  *result = NULL;
 	zval *__result = NULL, *sig = NULL;
 	
