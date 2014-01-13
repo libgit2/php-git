@@ -27,21 +27,21 @@ GIT_EXTERN(int) git_repository_init(
         unsigned is_bare);
 
 
-// error code will handle extension.
+// error code should handle in extension.
 // resource creation or getting functions will return their resource or bool.
 resource|bool function git_repository_init(string $path, long $is_bare);
 
-some small structure (e.g: git_config_entry) should consider return as an array. it's usefull.
+public struct (e.g: git_config_entry) should consider return as an array.
 ````
 
-see http://libgit2.github.com/libgit2/#HEAD
+see libgit2.github.com/libgit2/#v0.20.0
 
 ##### file name rules.
 
 basically, we rely libgit2 grouping at this time. (`branch` group functions should be in branch.c)
-some group (e.g config) will conflicts php headers. we choose `g_` prefix for now.
+some group (e.g config) will conflicts php header files. we choose `g_` prefix for now.
 
-check grouping here http://libgit2.github.com/libgit2/#HEAD
+check grouping here libgit2.github.com/libgit2/#v0.20.0
 
 ##### generating files
 
@@ -49,18 +49,40 @@ if you wanna try to work new file. please use gen.php and generate stubs. as dec
 (sometimes, this generator might output wrong headers. then just comment out or fix generator)
 
 ````
-php gen.php libgit2/include/git2/branch.h (0|1) [filter] > target.c or target.h
+php gen.php libgit2/include/git2/branch.h 0  > branch.h
+
+# improved code generator
+php ng.php libgit2/include/git2/branch.h > branch.c
 ````
 
-you can ouptut function entry with this. past it to `php_git2.c`
+you can generate `PHP_FE` with this. past it to `php_git2.c`
 
 ````
 php fe.php target.c
 ````
 
+Note: usually, these generators might output needless variables. DON'T PR `prettify codes` at this moment.
+As we have more than 500 php functions. we like to use some fixer command than fix by hand.
+
+##### documents
+
+use prototype.
+
+```
+  /* {{{ proto int abs(int number)
+     Returns the absolute value of the number */
+  PHP_FUNCTION(abs)
+  {
+     ...
+  }
+  /* }}} */
+```
+
+document will generate later. please check source code before publish docs.
+
 ##### testing
 
-group/function.phpt
+[group]/[function].phpt
 
 ##### policy
 
