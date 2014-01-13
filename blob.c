@@ -126,7 +126,7 @@ PHP_FUNCTION(git_blob_create_fromworkdir)
 PHP_FUNCTION(git_blob_filtered_content)
 {
 	php_git2_t *result = NULL, *_blob = NULL;
-	git_buf out = NULL;
+	git_buf out = {0};
 	zval *blob = NULL;
 	char *as_path = NULL;
 	int as_path_len = 0, error = 0;
@@ -142,7 +142,7 @@ PHP_FUNCTION(git_blob_filtered_content)
 	if (php_git2_check_error(error, "git_blob_filtered_content" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_BUF, out, 1 TSRMLS_CC)) {
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_BUF, &out, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
