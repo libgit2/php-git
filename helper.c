@@ -235,3 +235,231 @@ void php_git2_strarray_free(git_strarray *out)
 	}
 	efree(out->strings);
 }
+
+void php_git2_git_checkout_opts_to_array(git_checkout_opts *opts, zval **out TSRMLS_DC)
+{
+	zval *result;
+	git_checkout_opts tmp = GIT_CHECKOUT_OPTS_INIT;
+	opts = &tmp;
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+
+	add_assoc_long_ex(result, ZEND_STRS("version"), opts->version);
+	add_assoc_long_ex(result, ZEND_STRS("checkout_strategy"), opts->checkout_strategy);
+	add_assoc_long_ex(result, ZEND_STRS("disable_filters"), opts->disable_filters);
+	add_assoc_long_ex(result, ZEND_STRS("dir_mode"), opts->dir_mode);
+	add_assoc_long_ex(result, ZEND_STRS("file_mode"), opts->file_mode);
+	add_assoc_long_ex(result, ZEND_STRS("file_open_flags"), opts->file_open_flags);
+	add_assoc_long_ex(result, ZEND_STRS("notify_flags"), opts->notify_flags);
+
+	if (opts->notify_payload != NULL) {
+
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("notify_cb"));
+	}
+
+	if (opts->notify_payload != NULL) {
+
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("notify_payload"));
+	}
+
+	if (opts->progress_cb != NULL) {
+
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("progress_cb"));
+	}
+
+	if (opts->progress_payload != NULL) {
+
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("progress_payload"));
+	}
+
+	if (opts->paths.count > 0) {
+		zval *paths;
+		php_git2_strarray_to_array(&opts->paths, &paths TSRMLS_CC);
+		add_assoc_zval_ex(result, ZEND_STRS("paths"), paths);
+	} else {
+		zval *paths;
+		MAKE_STD_ZVAL(paths);
+		array_init(paths);
+		add_assoc_zval_ex(result, ZEND_STRS("paths"), paths);
+	}
+
+	if (opts->baseline != NULL) {
+		// git_tree
+
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("baseline"));
+	}
+	add_assoc_string_ex(result, ZEND_STRS("target_directory"), (opts->target_directory) ? opts->target_directory : "", 1);
+	add_assoc_string_ex(result, ZEND_STRS("our_label"), (opts->our_label) ? opts->our_label : "", 1);
+	add_assoc_string_ex(result, ZEND_STRS("their_label"), (opts->their_label) ? opts->their_label : "", 1);
+
+	*out = result;
+}
+
+void php_git_git_checkout_opts_free(git_checkout_opts *target TSRMLS_DC)
+{
+	php_git2_cb_t *tmp;
+
+	if (target->notify_payload) {
+		tmp = (php_git2_cb_t*)target->notify_payload;
+		if (tmp->fci) {
+			efree(tmp->fci);
+		}
+		if (tmp->fcc) {
+			efree(tmp->fcc);
+		}
+		efree(target->notify_payload);
+	}
+	if (target->progress_payload) {
+		tmp = (php_git2_cb_t*)target->progress_payload;
+		if (tmp->fci) {
+			efree(tmp->fci);
+		}
+		if (tmp->fcc) {
+			efree(tmp->fcc);
+		}
+		efree(target->progress_payload);
+	}
+
+	php_git2_strarray_free(&target->paths);
+	efree(target);
+}
+
+
+static int php_git2_git_checkout_notify_cb(git_checkout_notify_t why,
+	const char *path,
+	const git_diff_file *baseline,
+	const git_diff_file *target,
+	const git_diff_file *workdir,
+	void *payload)
+{
+	/* TODO(chobie): implement callback */
+}
+
+void php_git2_git_checkout_progress_cb(const char *path,
+        size_t completed_steps,
+        size_t total_steps,
+        void *payload)
+{
+	php_git2_t *result;
+	zval *param_path, *param_completed_steps, *param_total_steps, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	GIT2_TSRMLS_SET(p->tsrm_ls);
+
+	MAKE_STD_ZVAL(param_path);
+	MAKE_STD_ZVAL(param_completed_steps);
+	MAKE_STD_ZVAL(param_total_steps);
+	ZVAL_NULL(param_path);
+	if (path != NULL) {
+		ZVAL_STRING(param_path, path, 1);
+	}
+	ZVAL_LONG(param_completed_steps, completed_steps);
+	ZVAL_LONG(param_total_steps, total_steps);
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 4, &param_path, &param_completed_steps, &param_total_steps, &p->payload)) {
+		return;
+	}
+
+	zval_ptr_dtor(&retval_ptr);
+}
+
+
+static void php_git2_fcall_info_wrapper(zval *target, zend_fcall_info **out_fci, zend_fcall_info_cache **out_fcc TSRMLS_DC)
+{
+	char *is_callable_error = NULL;
+	zend_fcall_info *fci = NULL;
+	zend_fcall_info_cache *fcc = NULL;
+
+	fci = (zend_fcall_info*)emalloc(sizeof(zend_fcall_info));
+	fcc = (zend_fcall_info_cache*)emalloc(sizeof(zend_fcall_info_cache));
+	memcpy(fci, &empty_fcall_info, sizeof(zend_fcall_info));
+	memcpy(fcc, &empty_fcall_info_cache, sizeof(zend_fcall_info_cache));
+
+	if (zend_fcall_info_init(target, 0, fci, fcc, NULL, &is_callable_error TSRMLS_CC) == SUCCESS) {
+		if (is_callable_error) {
+			efree(is_callable_error);
+		}
+	} else {
+		fprintf(stderr, "FAILED");
+		efree(fci);
+		efree(fcc);
+		return;
+	}
+
+	*out_fci = fci;
+	*out_fcc = fcc;
+}
+
+int php_git2_array_to_git_checkout_opts(git_checkout_opts **out, zval *array TSRMLS_DC)
+{
+	const char *target_directory, *our_label, *their_label;
+	git_checkout_opts *opts = NULL, def = GIT_CHECKOUT_OPTS_INIT;
+	php_git2_cb_t *notify_payload = NULL, *progress_payload= NULL;
+	zval *notify_cb = NULL, *progress_cb = NULL;
+	char *tmp;
+
+	opts = (git_checkout_opts*)emalloc(sizeof(struct git_checkout_opts));
+	memcpy(opts, &def, sizeof(git_checkout_opts));
+
+	notify_cb = php_git2_read_arrval(array, ZEND_STRS("notify_cb") TSRMLS_CC);
+	progress_cb = php_git2_read_arrval(array, ZEND_STRS("progress_cb") TSRMLS_CC);
+
+
+	opts->notify_cb = php_git2_git_checkout_notify_cb;
+	opts->progress_cb = php_git2_git_checkout_progress_cb;
+	opts->version = php_git2_read_arrval_long(array, ZEND_STRS("version") TSRMLS_CC);
+	opts->checkout_strategy = php_git2_read_arrval_long(array, ZEND_STRS("checkout_strategy") TSRMLS_CC);
+	opts->disable_filters = php_git2_read_arrval_long(array, ZEND_STRS("disable_filters") TSRMLS_CC);
+	opts->dir_mode = php_git2_read_arrval_long(array, ZEND_STRS("dir_mode") TSRMLS_CC);
+	opts->file_mode = php_git2_read_arrval_long(array, ZEND_STRS("file_mode") TSRMLS_CC);
+	opts->file_open_flags = php_git2_read_arrval_long(array, ZEND_STRS("file_open_flags") TSRMLS_CC);
+	opts->notify_flags = php_git2_read_arrval_long(array, ZEND_STRS("notify_flags") TSRMLS_CC);
+
+	//notify_cb
+	if (Z_TYPE_P(notify_cb) != IS_NULL) {
+		zend_fcall_info *fci;
+		zend_fcall_info_cache *fcc;
+
+		php_git2_fcall_info_wrapper(notify_cb, &fci, &fcc TSRMLS_CC);
+		if (php_git2_cb_init(&notify_payload, fci, fcc,
+		 	php_git2_read_arrval(array, ZEND_STRS("notify_payload") TSRMLS_CC) TSRMLS_CC)) {
+		}
+		opts->notify_payload = notify_payload;
+	} else {
+		opts->notify_cb = NULL;
+	}
+
+	//progress_cb
+	if (Z_TYPE_P(progress_cb) != IS_NULL) {
+		zend_fcall_info *fci;
+		zend_fcall_info_cache *fcc;
+
+		php_git2_fcall_info_wrapper(progress_cb, &fci, &fcc TSRMLS_CC);
+		if (php_git2_cb_init(&progress_payload, fci, fcc,
+		 	php_git2_read_arrval(array, ZEND_STRS("progress_payload") TSRMLS_CC) TSRMLS_CC)) {
+		}
+		opts->progress_payload = progress_payload;
+	} else {
+		opts->progress_cb = NULL;
+	}
+
+
+	php_git2_array_to_strarray(&opts->paths, php_git2_read_arrval(array, ZEND_STRS("paths") TSRMLS_CC) TSRMLS_CC);
+
+	// TODO: assign baseline(git_tree)
+
+	target_directory = php_git2_read_arrval_string(array, ZEND_STRS("target_directory") TSRMLS_CC);
+	our_label = php_git2_read_arrval_string(array, ZEND_STRS("our_label") TSRMLS_CC);
+	their_label = php_git2_read_arrval_string(array, ZEND_STRS("their_label") TSRMLS_CC);
+	opts->target_directory = target_directory;
+	opts->our_label = our_label;
+	opts->their_label = their_label;
+
+	*out = opts;
+	return 0;
+}

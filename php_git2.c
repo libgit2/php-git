@@ -270,6 +270,15 @@ PHP_FUNCTION(git_resource_type)
 }
 /* }}} */
 
+PHP_FUNCTION(git_checkout_opts_new)
+{
+	zval *tmp;
+	git_checkout_opts opt = GIT_CHECKOUT_OPTS_INIT;
+
+	php_git2_git_checkout_opts_to_array(&opt, &tmp TSRMLS_CC);
+	RETURN_ZVAL(tmp, 0, 1);
+}
+
 static zend_function_entry php_git2_functions[] = {
 	/* repository */
 	PHP_FE(git_repository_new, arginfo_git_repository_new)
@@ -625,6 +634,8 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_checkout_head, arginfo_git_checkout_head)
 	PHP_FE(git_checkout_index, arginfo_git_checkout_index)
 	PHP_FE(git_checkout_tree, arginfo_git_checkout_tree)
+
+	PHP_FE(git_checkout_opts_new, NULL) /* convention function */
 
 	/* filter */
 	PHP_FE(git_filter_list_load, arginfo_git_filter_list_load)

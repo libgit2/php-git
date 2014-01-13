@@ -53,4 +53,10 @@ void php_git2_array_to_strarray(git_strarray *out, zval *array TSRMLS_DC);
 
 void php_git2_strarray_free(git_strarray *out);
 
+void php_git2_git_checkout_opts_to_array(git_checkout_opts *opts, zval **out TSRMLS_DC);
+
+void php_git_git_checkout_opts_free(git_checkout_opts *target TSRMLS_DC);
+
+int php_git2_array_to_git_checkout_opts(git_checkout_opts **out, zval *array TSRMLS_DC);
+
 #endif
