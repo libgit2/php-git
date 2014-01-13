@@ -36,12 +36,12 @@ static int php_git2_treebuilder_filter_cb(const git_tree_entry *entry, void *pay
 
 
 /* {{{ proto resource git_treebuilder_create([resource $source])
-*/
+ */
 PHP_FUNCTION(git_treebuilder_create)
 {
+	php_git2_t *result = NULL, *_source = NULL;
+	git_treebuilder *out = NULL;
 	zval *source = NULL;
-	php_git2_t *_source, *result;
-	git_treebuilder *builder;
 	git_tree *tree = NULL;
 	int error = 0;
 
@@ -49,25 +49,22 @@ PHP_FUNCTION(git_treebuilder_create)
 		"|r", &source) == FAILURE) {
 		return;
 	}
-
 	if (source != NULL) {
-		ZEND_FETCH_RESOURCE(_source, php_git2_t*, &source, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 		tree = PHP_GIT2_V(_source, tree);
 	}
 
-	error = git_treebuilder_create(&builder, tree);
+	ZEND_FETCH_RESOURCE(_source, php_git2_t*, &source, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	error = git_treebuilder_create(&out, tree);
 	if (php_git2_check_error(error, "git_treebuilder_create" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, treebuilder) = builder;
-	result->type = PHP_GIT2_TYPE_TREEBUILDER;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 1;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_TREEBUILDER, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
+
 
 /* {{{ proto void git_treebuilder_clear(bld)
 */
@@ -135,57 +132,47 @@ PHP_FUNCTION(git_treebuilder_get)
 	ZEND_FETCH_RESOURCE(_bld, php_git2_t*, &bld, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	entry = git_treebuilder_get(PHP_GIT2_V(_bld, treebuilder), filename);
 	if (entry != NULL) {
-		PHP_GIT2_MAKE_RESOURCE(result);
-		PHP_GIT2_V(result, tree_entry) = entry;
-		result->type = PHP_GIT2_TYPE_TREE_ENTRY;
-		result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-		result->should_free_v = 0;
-
+		if (php_git2_make_resource(&result, PHP_GIT2_TYPE_TREE_ENTRY, entry, 0 TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
 		ZVAL_RESOURCE(return_value, result->resource_id);
 	} else {
 		RETURN_FALSE;
 	}
 }
 
-/* {{{ proto resource git_treebuilder_insert(bld, filename, id, filemode)
-*/
+/* {{{ proto resource git_treebuilder_insert(resource $bld, string $filename, string $id,  $filemode)
+ */
 PHP_FUNCTION(git_treebuilder_insert)
 {
-	zval *bld;
-	php_git2_t *_bld, *result;
-	char *filename = {0};
-	int filename_len;
-	char *id = {0};
-	int id_len;
-	long filemode;
-	const git_tree_entry *entry;
-	int error = 0;
-	git_oid oid;
+	php_git2_t *result = NULL, *_bld = NULL;
+	git_tree_entry *out = NULL;
+	zval *bld = NULL;
+	char *filename = NULL, *id = NULL;
+	int filename_len = 0, id_len = 0, error = 0;
+	git_oid __id = {0};
+	long filemode = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rssl", &bld, &filename, &filename_len, &id, &id_len, &filemode) == FAILURE) {
 		return;
 	}
 
-	if (git_oid_fromstrn(&oid, id, id_len) != GIT_OK) {
-		return;
-	}
-
 	ZEND_FETCH_RESOURCE(_bld, php_git2_t*, &bld, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	error = git_treebuilder_insert(&entry, PHP_GIT2_V(_bld, treebuilder), filename, &oid, filemode);
-
-	if (php_git2_check_error(error, "git_treebuilder_write" TSRMLS_CC)) {
+	if (git_oid_fromstrn(&__id, id, id_len)) {
 		RETURN_FALSE;
 	}
-
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, tree_entry) = entry;
-	result->type = PHP_GIT2_TYPE_TREE_ENTRY;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	error = git_treebuilder_insert(&out, PHP_GIT2_V(_bld, treebuilder), filename, &__id, filemode);
+	if (php_git2_check_error(error, "git_treebuilder_insert" TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_TREE_ENTRY, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
+
 
 /* {{{ proto long git_treebuilder_remove(bld, filename)
 */
