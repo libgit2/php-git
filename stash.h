@@ -36,7 +36,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_stash_foreach, 0, 0, 3)
 	ZEND_ARG_INFO(0, repo)
 	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_stash_drop, 0, 0, 2)
