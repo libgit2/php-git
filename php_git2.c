@@ -62,6 +62,7 @@
 #include "message.h"
 #include "submodule.h"
 #include "attr.h"
+#include "giterr.h"
 
 int git2_resource_handle;
 
@@ -851,6 +852,13 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_attr_foreach, arginfo_git_attr_foreach)
 	PHP_FE(git_attr_cache_flush, arginfo_git_attr_cache_flush)
 	PHP_FE(git_attr_add_macro, arginfo_git_attr_add_macro)
+
+	/* giterr */
+	PHP_FE(giterr_last, arginfo_giterr_last)
+	PHP_FE(giterr_clear, arginfo_giterr_clear)
+	PHP_FE(giterr_detach, arginfo_giterr_detach)
+	PHP_FE(giterr_set_str, arginfo_giterr_set_str)
+	PHP_FE(giterr_set_oom, arginfo_giterr_set_oom)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
