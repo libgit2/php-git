@@ -191,7 +191,7 @@ PHP_FUNCTION(git_branch_lookup)
 PHP_FUNCTION(git_branch_name)
 {
 	php_git2_t *result = NULL;
-	char out[512] = {0};
+	char out[GIT2_BUFFER_SIZE] = {0};
 	zval *ref = NULL;
 	php_git2_t *_ref = NULL;
 	int error = 0;
@@ -242,8 +242,8 @@ PHP_FUNCTION(git_branch_upstream)
 PHP_FUNCTION(git_branch_upstream_name)
 {
 	php_git2_t *result = NULL;
-	char tracking_branch_name_out[512] = {0};
-	long buffer_size = 512;
+	char tracking_branch_name_out[GIT2_BUFFER_SIZE] = {0};
+	long buffer_size = GIT2_BUFFER_SIZE;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	char *canonical_branch_name = NULL;
@@ -289,8 +289,8 @@ PHP_FUNCTION(git_branch_is_head)
 PHP_FUNCTION(git_branch_remote_name)
 {
 	php_git2_t *result = NULL;
-	char remote_name_out[512] = {0};
-	long buffer_size = 512;
+	char remote_name_out[GIT2_BUFFER_SIZE] = {0};
+	long buffer_size = GIT2_BUFFER_SIZE;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	char *canonical_branch_name = NULL;

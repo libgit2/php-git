@@ -799,8 +799,8 @@ PHP_FUNCTION(git_reference_normalize_name)
 	char *name = {0};
 	int name_len;
 	long flags;
-	char buffer[512] = {0};
-	size_t buffer_sz = 512;
+	char buffer[GIT2_BUFFER_SIZE] = {0};
+	size_t buffer_sz = GIT2_BUFFER_SIZE;
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,

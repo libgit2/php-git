@@ -244,8 +244,8 @@ PHP_FUNCTION(git_repository_discover)
 	char *ceiling_dirs = {0};
 	int ceiling_dirs_len;
 	int error = 0;
-	char buffer[512];
-	size_t buffer_len = 512;
+	char buffer[GIT2_BUFFER_SIZE];
+	size_t buffer_len = GIT2_BUFFER_SIZE;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sls", &start_path, &start_path_len, &across_fs, &ceiling_dirs, &ceiling_dirs_len) == FAILURE) {
@@ -609,8 +609,8 @@ PHP_FUNCTION(git_repository_message)
 {
 	zval *repo;
 	php_git2_t *_repo;
-	char buffer[512];
-	size_t buffer_len = 512;
+	char buffer[GIT2_BUFFER_SIZE];
+	size_t buffer_len = GIT2_BUFFER_SIZE;
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,

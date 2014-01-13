@@ -205,8 +205,8 @@ static void php_git2_config_entry_to_array(git_config_entry *entry, zval **resul
 */
 PHP_FUNCTION(git_config_find_global)
 {
-	char buffer[512];
-	size_t buffer_len = 512;
+	char buffer[GIT2_BUFFER_SIZE];
+	size_t buffer_len = GIT2_BUFFER_SIZE;
 	int error = 0;
 
 	error = git_config_find_global(buffer, buffer_len);
@@ -235,8 +235,8 @@ PHP_FUNCTION(git_config_find_xdg)
 */
 PHP_FUNCTION(git_config_find_system)
 {
-	char buffer[512];
-	size_t buffer_len = 512;
+	char buffer[GIT2_BUFFER_SIZE];
+	size_t buffer_len = GIT2_BUFFER_SIZE;
 	int error = 0;
 
 	error = git_config_find_system(buffer, buffer_len);

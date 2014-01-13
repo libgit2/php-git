@@ -70,6 +70,8 @@ do {\
 } while (0);\
 
 #define GIT2_OID_HEXSIZE (GIT_OID_HEXSZ+1)
+#define GIT2_BUFFER_SIZE 512
+
 
 typedef struct php_git2_cb_t {
 	zval *payload;
