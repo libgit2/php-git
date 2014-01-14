@@ -63,6 +63,7 @@
 #include "submodule.h"
 #include "attr.h"
 #include "giterr.h"
+#include "push.h"
 
 int git2_resource_handle;
 
@@ -263,6 +264,8 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 		case PHP_GIT2_TYPE_SUBMODULE:
 			PHP_GIT2_V(result, submodule) = (git_submodule*)resource;
 			break;
+		case PHP_GIT2_TYPE_PUSH:
+			PHP_GIT2_V(result, push) = (git_push*)resource;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "passed resource type does not support. probably bug.");
 	}
@@ -895,6 +898,18 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(giterr_detach, arginfo_giterr_detach)
 	PHP_FE(giterr_set_str, arginfo_giterr_set_str)
 	PHP_FE(giterr_set_oom, arginfo_giterr_set_oom)
+
+	/* push */
+	PHP_FE(git_push_new, arginfo_git_push_new)
+	PHP_FE(git_push_set_options, arginfo_git_push_set_options)
+	PHP_FE(git_push_set_callbacks, arginfo_git_push_set_callbacks)
+	PHP_FE(git_push_add_refspec, arginfo_git_push_add_refspec)
+	PHP_FE(git_push_update_tips, arginfo_git_push_update_tips)
+	PHP_FE(git_push_finish, arginfo_git_push_finish)
+	PHP_FE(git_push_unpack_ok, arginfo_git_push_unpack_ok)
+	PHP_FE(git_push_status_foreach, arginfo_git_push_status_foreach)
+	PHP_FE(git_push_free, arginfo_git_push_free)
+
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
