@@ -266,6 +266,7 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 			break;
 		case PHP_GIT2_TYPE_PUSH:
 			PHP_GIT2_V(result, push) = (git_push*)resource;
+			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "passed resource type does not support. probably bug.");
 	}

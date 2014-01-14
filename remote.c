@@ -753,6 +753,23 @@ PHP_FUNCTION(git_remote_set_transport)
 }
 /* }}} */
 
+static int cred_cb(git_cred **cred, const char *url, const char *username_from_url, unsigned int allowed_types, void *data)
+{
+	fprintf(stderr, "url: %s\n", url);
+	fprintf(stderr, "name: %s\n", username_from_url);
+	fprintf(stderr, "types: %d\n", allowed_types);
+
+	return 0;
+}
+
+typedef struct php_git2_fcall_t {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+} php_git2_fcall_t;
+typedef struct php_git2_remote_cb_t {
+	php_git2_fcall_t callbacks[4];
+	zval *payload;
+} php_git2_remote_cb_t;
 
 /* {{{ proto long git_remote_set_callbacks(remote, callbacks)
 */
@@ -762,16 +779,17 @@ PHP_FUNCTION(git_remote_set_callbacks)
 	php_git2_t *_remote;
 	zval *callbacks;
 	php_git2_t *_callbacks;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_remote_set_callbacks not implemented yet");
-	return;
+	struct git_remote_callbacks cb = GIT_REMOTE_CALLBACKS_INIT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rr", &remote, &callbacks) == FAILURE) {
+		"ra", &remote, &callbacks) == FAILURE) {
 		return;
 	}
+
+	cb.credentials = cred_cb;
+
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	git_remote_set_callbacks(PHP_GIT2_V(_remote, remote), &cb);
 }
 
 /* {{{ proto resource git_remote_stats(resource $remote)

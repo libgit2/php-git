@@ -165,6 +165,9 @@ class Arg
         if (preg_match("/packbuilder_progress/", $this->getType())) {
             return true;
         }
+        if (preg_match("/git_push_transfer_progress/", $this->getType())) {
+            return true;
+        }
         return false;
     }
 

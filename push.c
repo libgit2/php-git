@@ -2,6 +2,13 @@
 #include "php_git2_priv.h"
 #include "push.h"
 
+static int php_git2_push_status_foreach_cb(const char *ref, const char *msg, void *data)
+{
+	fprintf(stderr, "ref: %s\n", ref);
+	fprintf(stderr, "msg: %s\n", msg);
+	return 0;
+}
+
 /* {{{ proto resource git_push_new(resource $remote)
  */
 PHP_FUNCTION(git_push_new)
@@ -54,24 +61,33 @@ PHP_FUNCTION(git_push_set_callbacks)
 	int result = 0, error = 0;
 	zval *push = NULL, *pack_progress_cb = NULL, *pack_progress_cb_payload = NULL, *transfer_progress_cb = NULL, *transfer_progress_cb_payload = NULL;
 	php_git2_t *_push = NULL;
-	zend_fcall_info fci = empty_fcall_info;
-	zend_fcall_info_cache fcc = empty_fcall_info_cache;
-	php_git2_cb_t *cb = NULL;
+	zend_fcall_info pack_fci = empty_fcall_info;
+	zend_fcall_info_cache pack_fcc = empty_fcall_info_cache;
+	zend_fcall_info transfer_fci = empty_fcall_info;
+	zend_fcall_info_cache transfer_fcc = empty_fcall_info_cache;
+	php_git2_cb_t *pack_cb = NULL;
+	php_git2_cb_t *transfer_cb = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rfz<git_push_transfer_progress>z", &push, &fci, &fcc, &pack_progress_cb_payload, &transfer_progress_cb, &transfer_progress_cb_payload) == FAILURE) {
+		"rfzfz", &push, &pack_fci, &pack_fcc, &pack_progress_cb_payload, &transfer_fci, &transfer_fcc, &transfer_progress_cb_payload) == FAILURE) {
 		return;
 	}
-	
+
 	ZEND_FETCH_RESOURCE(_push, php_git2_t*, &push, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-//	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
-//		RETURN_FALSE;
-//	}
-	//result = git_push_set_callbacks(PHP_GIT2_V(_push, push), <CHANGEME>, cb, transfer_progress_cb, cb);
-	php_git2_cb_free(cb);
+	if (php_git2_cb_init(&pack_cb, &pack_fci, &pack_fcc, pack_progress_cb_payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	if (php_git2_cb_init(&transfer_cb, &transfer_fci, &transfer_fcc, transfer_progress_cb_payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_push_set_callbacks(PHP_GIT2_V(_push, push), NULL, pack_cb, NULL, transfer_cb);
+	php_git2_cb_free(pack_cb);
+	php_git2_cb_free(transfer_cb);
 	RETURN_LONG(result);
 }
 /* }}} */
+
+
 
 /* {{{ proto long git_push_add_refspec(resource $push, string $refspec)
  */
@@ -150,22 +166,28 @@ PHP_FUNCTION(git_push_unpack_ok)
 }
 /* }}} */
 
-/* {{{ proto long git_push_status_foreach(resource $push, string $ref, string $msg,  $data),  $data)
+/* {{{ proto long git_push_status_foreach(resource $push, Callable callback, mixed $payload)
  */
 PHP_FUNCTION(git_push_status_foreach)
 {
-	int result = 0, ref_len = 0, msg_len = 0, error = 0;
-	zval *push = NULL;
+	int result = 0;
+	zval *push = NULL, *payload = NULL;
 	php_git2_t *_push = NULL;
-	char *ref = NULL, *msg = NULL;
-	
-//	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-//		"rss<void><void>", &push, &ref, &ref_len, &msg, &msg_len, &data, &data) == FAILURE) {
-//		return;
-//	}
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"rfz", &push, &fci, &fcc, &payload) == FAILURE) {
+		return;
+	}
 	
 	ZEND_FETCH_RESOURCE(_push, php_git2_t*, &push, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	//result = git_push_status_foreach(PHP_GIT2_V(_push, push), ref, msg, data);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_push_status_foreach(PHP_GIT2_V(_push, push), php_git2_push_status_foreach_cb, cb);
+	php_git2_cb_free(cb);
 	RETURN_LONG(result);
 }
 /* }}} */
