@@ -158,25 +158,32 @@ PHP_FUNCTION(git_transport_local)
 /* }}} */
 
 
-/* {{{ proto resource git_transport_smart(owner, payload)
-*/
+/* {{{ proto resource git_transport_smart(resource $owner,  $payload)
+ */
 PHP_FUNCTION(git_transport_smart)
 {
-	zval *owner;
-	php_git2_t *_owner;
-	zval *payload;
-	php_git2_t *_payload;
-
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_transport_smart not implemented yet");
-	return;
+	php_git2_t *result = NULL, *_owner = NULL;
+	git_transport *out = NULL;
+	zval *owner = NULL, *payload = NULL;
+	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rr", &owner, &payload) == FAILURE) {
+		"r</* (git_smart_subtransport_definition *) */ void>", &owner, &payload) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_owner, php_git2_t*, &owner, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	error = git_transport_smart(&out, PHP_GIT2_V(_owner, remote), payload);
+	if (php_git2_check_error(error, "git_transport_smart" TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_TRANSPORT, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
+/* }}} */
+
 
 /* {{{ proto resource git_smart_subtransport_http(resource $owner)
  */
