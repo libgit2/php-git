@@ -1,7 +1,12 @@
 # PHP-Git2 - libgit2 bindings in PHP
 
-php-git2 is a PHP bindings to the libgit2 linkable C Git library. 
+php-git2 is a PHP bindings to the libgit2 linkable C Git library.
 this extension are re-writing php-git as that code too dirty.
+
+# Latest Branch
+
+v0.3.0 (switching to functions)
+https://github.com/libgit2/php-git/tree/functions
 
 # Important Notice
 
