@@ -26,7 +26,8 @@
 #ifndef PHP_GIT2_INDEXER_H
 #define PHP_GIT2_INDEXER_H
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_indexer_new, 0, 0, 5)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_indexer_new, 0, 0, 6)
+	ZEND_ARG_INFO(0, out)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, odb)
@@ -54,24 +55,24 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_indexer_free, 0, 0, 1)
 	ZEND_ARG_INFO(0, idx)
 ZEND_END_ARG_INFO()
 
-/* {{{ proto resource git_indexer_new(path, mode, odb, progress_cb, progress_cb_payload)
-*/
+/* {{{ proto resource git_indexer_new(string $path, long $mode, resource $odb,  $progress_cb,  $progress_cb_payload)
+ */
 PHP_FUNCTION(git_indexer_new);
 
-/* {{{ proto long git_indexer_append(idx, data, size, stats)
-*/
+/* {{{ proto long git_indexer_append(resource $idx,  $data, long $size,  $stats)
+ */
 PHP_FUNCTION(git_indexer_append);
 
-/* {{{ proto long git_indexer_commit(idx, stats)
-*/
+/* {{{ proto long git_indexer_commit(resource $idx,  $stats)
+ */
 PHP_FUNCTION(git_indexer_commit);
 
-/* {{{ proto resource git_indexer_hash(idx)
-*/
+/* {{{ proto resource git_indexer_hash(resource $idx)
+ */
 PHP_FUNCTION(git_indexer_hash);
 
-/* {{{ proto void git_indexer_free(idx)
-*/
+/* {{{ proto void git_indexer_free(resource $idx)
+ */
 PHP_FUNCTION(git_indexer_free);
 
 #endif
