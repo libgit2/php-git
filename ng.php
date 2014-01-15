@@ -406,6 +406,7 @@ class Fashion
                 "git_submodule",
                 "git_push",
                 "git_refspec",
+                "git_filter",
             );
         }
 
