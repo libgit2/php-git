@@ -6,6 +6,8 @@ php-git2 is a PHP bindings to the libgit2 linkable C Git library.
 
 0.3.0 Alpha (switching to functions)
 
+https://docs.google.com/spreadsheet/ccc?key=0AjvShWAWqvfHdDRneEtIUF9GRUZMNVVVR1hpdURiUWc&usp=sharing
+
 ## For Contributors
 
 ##### Issue first.
@@ -49,9 +51,7 @@ if you wanna try to work new file. please use gen.php and generate stubs. as dec
 (sometimes, this generator might output wrong headers. then just comment out or fix generator)
 
 ````
-php gen.php libgit2/include/git2/branch.h 0  > branch.h
-
-# improved code generator
+PRINT_HEADER=1 php ng.php libgit2/include/git2/branch.h > branch.h
 php ng.php libgit2/include/git2/branch.h > branch.c
 ````
 
@@ -86,7 +86,7 @@ document will generate later. please check source code before publish docs.
 
 ##### policy
 
-* don't create OOP interface for ease of maintenance.
+* don't create OOP interface in extension for ease of maintenance.
 * follow latest libgit2 api. don't consider BC at this time.
 
 ## LICENSE
