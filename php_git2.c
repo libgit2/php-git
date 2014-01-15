@@ -310,6 +310,12 @@ PHP_FUNCTION(git_checkout_opts_new)
 	RETURN_ZVAL(tmp, 0, 1);
 }
 
+PHP_FUNCTION(git_libgit2_capabilities)
+{
+	RETURN_LONG(git_libgit2_capabilities());
+}
+
+
 static zend_function_entry php_git2_functions[] = {
 	/* repository */
 	PHP_FE(git_repository_new, arginfo_git_repository_new)
@@ -914,6 +920,7 @@ static zend_function_entry php_git2_functions[] = {
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
+	PHP_FE(git_libgit2_capabilities, NULL)
 	PHP_FE_END
 };
 

@@ -753,23 +753,57 @@ PHP_FUNCTION(git_remote_set_transport)
 }
 /* }}} */
 
-static int cred_cb(git_cred **cred, const char *url, const char *username_from_url, unsigned int allowed_types, void *data)
-{
-	fprintf(stderr, "url: %s\n", url);
-	fprintf(stderr, "name: %s\n", username_from_url);
-	fprintf(stderr, "types: %d\n", allowed_types);
-
-	return 0;
-}
 
 typedef struct php_git2_fcall_t {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
+	zval *value;
 } php_git2_fcall_t;
+
 typedef struct php_git2_remote_cb_t {
 	php_git2_fcall_t callbacks[4];
 	zval *payload;
+	GIT2_TSRMLS_DECL
 } php_git2_remote_cb_t;
+
+static int cred_cb(git_cred **cred, const char *url, const char *username_from_url, unsigned int allowed_types, void *data)
+{
+	php_git2_t *result;
+	zval *param_url = NULL, *param_username_from_url = NULL, *param_allowed_types = NULL, *retval_ptr;
+	php_git2_remote_cb_t *cb = (php_git2_remote_cb_t*)data;
+	GIT2_TSRMLS_SET(cb->tsrm_ls);
+	int retval = 1;
+
+	if (cb != NULL) {
+		MAKE_STD_ZVAL(param_url);
+		MAKE_STD_ZVAL(param_username_from_url);
+		MAKE_STD_ZVAL(param_allowed_types);
+		ZVAL_NULL(param_url);
+		ZVAL_NULL(param_username_from_url);
+
+		if (url != NULL) {
+			ZVAL_STRING(param_url, url, 1);
+		}
+		if (username_from_url != NULL) {
+			ZVAL_STRING(param_username_from_url, username_from_url, 1);
+		}
+		ZVAL_LONG(param_allowed_types, allowed_types);
+		Z_ADDREF_P(cb->payload);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(&cb->payload);
+
+		if (php_git2_call_function_v(&cb->callbacks[0].fci, &cb->callbacks[0].fcc TSRMLS_CC, &retval_ptr, 4,
+			&param_url, &param_username_from_url, &param_allowed_types, &cb->payload)) {
+				fprintf(stderr, "CALL FUNCTION ERROR");
+		}
+	}
+
+	if (retval_ptr && Z_TYPE_P(retval_ptr) == IS_RESOURCE) {
+		ZEND_FETCH_RESOURCE_NO_RETURN(result, php_git2_t*, &retval_ptr, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+		*cred = PHP_GIT2_V(result, cred);
+		zval_ptr_dtor(&retval_ptr);
+	}
+	return retval;
+}
 
 /* {{{ proto long git_remote_set_callbacks(remote, callbacks)
 */
@@ -777,16 +811,36 @@ PHP_FUNCTION(git_remote_set_callbacks)
 {
 	zval *remote;
 	php_git2_t *_remote;
-	zval *callbacks;
+	zval *callbacks, *credentials_cb = NULL;
 	php_git2_t *_callbacks;
 	struct git_remote_callbacks cb = GIT_REMOTE_CALLBACKS_INIT;
+	php_git2_remote_cb_t *_payload = NULL, payload = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ra", &remote, &callbacks) == FAILURE) {
 		return;
 	}
 
+	/* TODO(chobie): support other callbacks */
 	cb.credentials = cred_cb;
+	credentials_cb = php_git2_read_arrval(callbacks, ZEND_STRS("credentials") TSRMLS_CC);
+
+	/* TODO(chobie): can we free payload? */
+	_payload = emalloc(sizeof(php_git2_remote_cb_t));
+	MAKE_STD_ZVAL(_payload->payload);
+	GIT2_TSRMLS_SET2(_payload, TSRMLS_C);
+
+	if (credentials_cb != NULL) {
+		char *is_callable_error;
+
+		if(zend_fcall_info_init(credentials_cb, 0, &(_payload->callbacks[0].fci), &(_payload->callbacks[0].fci), NULL, &is_callable_error TSRMLS_CC) == SUCCESS) {
+			if (is_callable_error) {
+				efree(is_callable_error);
+			}
+		}
+		Z_ADDREF_P(credentials_cb);
+	}
+	cb.payload = _payload;
 
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	git_remote_set_callbacks(PHP_GIT2_V(_remote, remote), &cb);

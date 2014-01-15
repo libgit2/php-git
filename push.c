@@ -4,9 +4,34 @@
 
 static int php_git2_push_status_foreach_cb(const char *ref, const char *msg, void *data)
 {
-	fprintf(stderr, "ref: %s\n", ref);
-	fprintf(stderr, "msg: %s\n", msg);
-	return 0;
+	php_git2_t *result;
+	zval *param_ref, *param_msg, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)data;
+	int i = 0;
+	int retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	Z_ADDREF_P(p->payload);
+	MAKE_STD_ZVAL(param_ref);
+	MAKE_STD_ZVAL(param_msg);
+	ZVAL_NULL(param_ref);
+	ZVAL_NULL(param_msg);
+
+	if (ref != NULL) {
+		ZVAL_STRING(param_ref, ref, 1);
+	}
+	if (msg != NULL) {
+		ZVAL_STRING(param_msg, msg, 1);
+	}
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 3, &param_ref, &param_msg, &p->payload)) {
+		zend_list_delete(result->resource_id);
+		return GIT_EUSER;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	return retval;
 }
 
 /* {{{ proto resource git_push_new(resource $remote)
