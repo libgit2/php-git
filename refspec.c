@@ -78,7 +78,7 @@ PHP_FUNCTION(git_refspec_force)
 }
 /* }}} */
 
-/* {{{ proto resource git_refspec_direction(resource $spec)
+/* {{{ proto long git_refspec_direction(resource $spec)
  */
 PHP_FUNCTION(git_refspec_direction)
 {
@@ -93,7 +93,7 @@ PHP_FUNCTION(git_refspec_direction)
 	
 	ZEND_FETCH_RESOURCE(_spec, php_git2_t*, &spec, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_refspec_direction(PHP_GIT2_V(_spec, refspec));
-	/* TODO(chobie): implement this */
+	RETURN_LONG(result);
 }
 /* }}} */
 
@@ -137,7 +137,7 @@ PHP_FUNCTION(git_refspec_dst_matches)
 }
 /* }}} */
 
-/* {{{ proto resource git_refspec_transform(long $outlen, resource $spec, string $name)
+/* {{{ proto string git_refspec_transform(long $outlen, resource $spec, string $name)
  */
 PHP_FUNCTION(git_refspec_transform)
 {
@@ -161,7 +161,7 @@ PHP_FUNCTION(git_refspec_transform)
 }
 /* }}} */
 
-/* {{{ proto resource git_refspec_rtransform(long $outlen, resource $spec, string $name)
+/* {{{ proto string git_refspec_rtransform(long $outlen, resource $spec, string $name)
  */
 PHP_FUNCTION(git_refspec_rtransform)
 {

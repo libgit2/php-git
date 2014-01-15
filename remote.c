@@ -2,6 +2,25 @@
 #include "php_git2_priv.h"
 #include "remote.h"
 
+static void php_git2_git_transfer_progress_to_array(git_transfer_progress *progress, zval **out TSRMLS_DC)
+{
+	zval *result;
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+
+	add_assoc_long_ex(result, ZEND_STRS("total_objects"), progress->total_objects);
+	add_assoc_long_ex(result, ZEND_STRS("indexed_objects"), progress->indexed_objects);
+	add_assoc_long_ex(result, ZEND_STRS("received_objects"), progress->received_objects);
+	add_assoc_long_ex(result, ZEND_STRS("local_objects"), progress->local_objects);
+	add_assoc_long_ex(result, ZEND_STRS("total_deltas"), progress->total_deltas);
+	add_assoc_long_ex(result, ZEND_STRS("indexed_deltas"), progress->indexed_deltas);
+	add_assoc_long_ex(result, ZEND_STRS("received_bytes"), progress->received_bytes);
+
+	*out = result;
+}
+
+
 /* {{{ proto resource git_remote_create(resource $repo, string $name, string $url)
  */
 PHP_FUNCTION(git_remote_create)
@@ -312,19 +331,21 @@ PHP_FUNCTION(git_remote_get_fetch_refspecs)
 PHP_FUNCTION(git_remote_set_fetch_refspecs)
 {
 	int result = 0;
-	zval *remote = NULL;
+	zval *remote = NULL, *array = NULL;
 	php_git2_t *_remote = NULL;
-	zval *array = NULL;
 	int error = 0;
+	git_strarray out = {0};
 
-	/* TODO(chobie): implement this */
-//	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-//		"r<git_strarray>", &remote, &array) == FAILURE) {
-//		return;
-//	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"ra", &remote, &array) == FAILURE) {
+		return;
+	}
+
+	php_git2_array_to_strarray(&out, array TSRMLS_CC);
 
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	result = git_remote_set_fetch_refspecs(PHP_GIT2_V(_remote, remote), array);
+	result = git_remote_set_fetch_refspecs(PHP_GIT2_V(_remote, remote), &out);
+	php_git2_strarray_free(&out);
 	RETURN_LONG(result);
 }
 /* }}} */
@@ -348,7 +369,7 @@ PHP_FUNCTION(git_remote_add_push)
 
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_remote_add_push(PHP_GIT2_V(_remote, remote), refspec);
-	RETURN_BOOL(result);
+	RETURN_LONG(result);
 }
 /* }}} */
 
@@ -357,22 +378,22 @@ PHP_FUNCTION(git_remote_add_push)
 PHP_FUNCTION(git_remote_get_push_refspecs)
 {
 	zval *result;
-	git_strarray array = {0};
-	zval *remote = NULL;
+	git_strarray _array = {0};
+	zval *remote = NULL, *array = NULL;
 	php_git2_t *_remote = NULL;
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"<git_strarray>r", &array, &remote) == FAILURE) {
+		"ar", &array, &remote) == FAILURE) {
 		return;
 	}
 
+	php_git2_strarray_to_array(&_array, array TSRMLS_CC);
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	error = git_remote_get_push_refspecs(&array, PHP_GIT2_V(_remote, remote));
-	php_git2_strarray_to_array(&array, &result TSRMLS_CC);
-	git_strarray_free(&array);
+	error = git_remote_get_push_refspecs(&_array, PHP_GIT2_V(_remote, remote));
+	git_strarray_free(&_array);
 
-	RETURN_ZVAL(result, 0, 1);
+	RETURN_LONG(error);
 }
 /* }}} */
 
@@ -382,19 +403,20 @@ PHP_FUNCTION(git_remote_get_push_refspecs)
 PHP_FUNCTION(git_remote_set_push_refspecs)
 {
 	int result = 0;
-	zval *remote = NULL;
+	zval *remote = NULL, *array = NULL;
 	php_git2_t *_remote = NULL;
-	zval *array = NULL;
+	git_strarray _array = {0};
 	int error = 0;
 
-	/* TODO(chobie): implement this */
-//	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-//		"r<git_strarray>", &remote, &array) == FAILURE) {
-//		return;
-//	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"r", &remote, &array) == FAILURE) {
+		return;
+	}
 
+	php_git2_strarray_to_array(&_array, array TSRMLS_CC);
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	result = git_remote_set_push_refspecs(PHP_GIT2_V(_remote, remote), array);
+	result = git_remote_set_push_refspecs(PHP_GIT2_V(_remote, remote), &_array);
+	git_strarray_free(&_array);
 	RETURN_LONG(result);
 }
 /* }}} */
@@ -443,7 +465,7 @@ PHP_FUNCTION(git_remote_get_refspec)
 {
 	const git_refspec  *result = NULL;
 	zval *remote = NULL;
-	php_git2_t *_remote = NULL;
+	php_git2_t *_remote = NULL, *out;
 	long n = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -453,10 +475,12 @@ PHP_FUNCTION(git_remote_get_refspec)
 
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_remote_get_refspec(PHP_GIT2_V(_remote, remote), n);
-	/* TODO(chobie): implement this */
+	if (php_git2_make_resource(&out, PHP_GIT2_TYPE_REFSPEC, result, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(out));
 }
 /* }}} */
-
 
 /* {{{ proto bool git_remote_connect(resource $remote, long $direction)
  */
@@ -479,28 +503,59 @@ PHP_FUNCTION(git_remote_connect)
 }
 /* }}} */
 
-/* {{{ proto resource git_remote_ls(long $size, resource $remote)
+static void php_git2_git_remote_head_to_array(git_remote_head *head, zval **out TSRMLS_DC)
+{
+	zval *result = NULL;
+	char oid[41] = {0}, loid[41] = {0};
+
+
+	git_oid_fmt(oid, &head->oid);
+	git_oid_fmt(loid, &head->loid);
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+	add_assoc_long_ex(result, ZEND_STRS("local"), head->local);
+	add_assoc_string_ex(result, ZEND_STRS("oid"), oid, 1);
+	add_assoc_string_ex(result, ZEND_STRS("loid"), loid, 1);
+	add_assoc_string_ex(result, ZEND_STRS("name"), head->name, 1);
+
+	*out = result;
+}
+
+/* {{{ proto resource git_remote_ls(resource $remote)
  */
 PHP_FUNCTION(git_remote_ls)
 {
 	php_git2_t *result = NULL;
 	git_remote_head **out = NULL;
-	long size = 0;
-	zval *remote = NULL;
+	size_t size = 0;
+	zval *remote = NULL, *retval = NULL, *container = NULL;
 	php_git2_t *_remote = NULL;
-	int error = 0;
+	int error = 0, i = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"lr", &size, &remote) == FAILURE) {
+		"r", &remote) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	error = git_remote_ls(&out, size, PHP_GIT2_V(_remote, remote));
+
+	if (git_remote_connected(PHP_GIT2_V(_remote, remote)) == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "passed git_remote hasn't been connected");
+		RETURN_FALSE;
+	}
+	error = git_remote_ls(&out, &size, PHP_GIT2_V(_remote, remote));
 	if (php_git2_check_error(error, "git_remote_ls" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	/* TODO(chobie): implement this */
+
+	MAKE_STD_ZVAL(container);
+	array_init(container);
+	for (i = 0; i < size; i++) {
+		php_git2_git_remote_head_to_array(out[i], &retval TSRMLS_CC);
+		add_next_index_zval(container, retval);
+	}
+	RETURN_ZVAL(container, 0, 1);
 }
 /* }}} */
 
@@ -851,7 +906,7 @@ PHP_FUNCTION(git_remote_set_callbacks)
 PHP_FUNCTION(git_remote_stats)
 {
 	const git_transfer_progress  *result = NULL;
-	zval *remote = NULL;
+	zval *remote = NULL, *retval = NULL;
 	php_git2_t *_remote = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -861,7 +916,8 @@ PHP_FUNCTION(git_remote_stats)
 
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_remote_stats(PHP_GIT2_V(_remote, remote));
-	/* TODO(chobie): implement this */
+	php_git2_git_transfer_progress_to_array(result, &retval TSRMLS_CC);
+	RETURN_ZVAL(retval, 0, 1);
 }
 /* }}} */
 
@@ -881,7 +937,7 @@ PHP_FUNCTION(git_remote_autotag)
 
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_remote_autotag(PHP_GIT2_V(_remote, remote));
-	/* TODO(chobie): implement this */
+	RETURN_LONG(result);
 }
 /* }}} */
 
@@ -892,9 +948,8 @@ PHP_FUNCTION(git_remote_set_autotag)
 	zval *remote = NULL, *value = NULL;
 	php_git2_t *_remote = NULL;
 
-	/* TODO(chobie):impelement this */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"r<git_remote_autotag_option_t>", &remote, &value) == FAILURE) {
+		"rl", &remote, &value) == FAILURE) {
 		return;
 	}
 
@@ -904,27 +959,39 @@ PHP_FUNCTION(git_remote_set_autotag)
 /* }}} */
 
 
-/* {{{ proto long git_remote_rename(remote, new_name, callback, payload)
-*/
+static int php_git2_git_remote_rename_problem_cb(const char *problematic_refspec, void *payload)
+{
+	return 0;
+}
+
+
+/* {{{ proto long git_remote_rename(resource $remote, string $new_name, Callable $callback,  $payload)
+ */
 PHP_FUNCTION(git_remote_rename)
 {
-	zval *remote;
-	php_git2_t *_remote;
-	char *new_name = {0};
-	int new_name_len;
-	zval *callback;
-	php_git2_t *_callback;
+	int result = 0, new_name_len = 0, error = 0;
+	zval *remote = NULL, *callback = NULL, *payload = NULL;
+	php_git2_t *_remote = NULL;
+	char *new_name = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
 
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_remote_rename not implemented yet");
-	return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"rsfz", &remote, &new_name, &new_name_len, &fci, &fcc, &payload) == FAILURE) {
+		return;
+	}
 
-//	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-//		"rsr", &remote, &new_name, &new_name_len, &callback, &payload) == FAILURE) {
-//		return;
-//	}
-//	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_remote_rename(PHP_GIT2_V(_remote, remote), new_name, php_git2_git_remote_rename_problem_cb, cb);
+	php_git2_cb_free(cb);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto long git_remote_update_fetchhead(resource $remote)
  */

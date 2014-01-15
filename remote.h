@@ -128,8 +128,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_remote_connect, 0, 0, 2)
 	ZEND_ARG_INFO(0, direction)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_remote_ls, 0, 0, 2)
-	ZEND_ARG_INFO(0, size)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_remote_ls, 0, 0, 1)
 	ZEND_ARG_INFO(0, remote)
 ZEND_END_ARG_INFO()
 
@@ -205,7 +204,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_remote_rename, 0, 0, 4)
 	ZEND_ARG_INFO(0, remote)
 	ZEND_ARG_INFO(0, new_name)
 	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_remote_update_fetchhead, 0, 0, 1)
@@ -305,7 +304,7 @@ PHP_FUNCTION(git_remote_get_refspec);
 */
 PHP_FUNCTION(git_remote_connect);
 
-/* {{{ proto resource git_remote_ls(size, remote)
+/* {{{ proto resource git_remote_ls(remote)
 */
 PHP_FUNCTION(git_remote_ls);
 

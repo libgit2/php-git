@@ -1,6 +1,7 @@
 #include "php_git2.h"
 #include "php_git2_priv.h"
 #include "graph.h"
+
 /* {{{ proto long git_graph_ahead_behind(resource $repo, string $local, string $upstream)
  */
 PHP_FUNCTION(git_graph_ahead_behind)
