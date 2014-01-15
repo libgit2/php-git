@@ -343,6 +343,15 @@ class Printer
 }
 class Fashion
 {
+    protected $name;
+    protected $flag;
+
+    public function __construct($name, $flag = false)
+    {
+        $this->name = basename($name, ".h");
+        $this->flag = $flag;
+    }
+
     public function shouldResource(Arg $arg)
     {
         static $types;
@@ -396,6 +405,7 @@ class Fashion
                 "git_packbuilder",
                 "git_submodule",
                 "git_push",
+                "git_refspec",
             );
         }
 
@@ -1058,12 +1068,22 @@ class Fashion
         }
     }
 
+    public function generateIncludes(Printer $printer, Func $f)
+    {
+        if ($this->flag) {
+            $printer->put("#include \"php_git2.h\"\n");
+            $printer->put("#include \"php_git2_priv.h\"\n");
+            $printer->put("#include \"`name`.h\"\n", "name", $this->name);
+        }
+    }
+
     public function out(Func $f)
     {
         $stream = new StringStream();
         $out = new ZeroCopyOutputStream($stream);
         $printer = new Printer($out, "`");
 
+        $this->generateIncludes($printer, $f);
         $this->generateProto($printer, $f);
         $printer->put("PHP_FUNCTION(`function`)\n",
             "function", $f->getName());
@@ -1089,6 +1109,108 @@ class Fashion
     }
 }
 
+class Header extends Fashion
+{
+    public function generateLicense(Printer $printer, Func $f)
+    {
+        if (!$this->flag) {
+            return;
+        }
+        $printer->put("/*\n");
+        $printer->put(" * PHP Libgit2 Extension\n");
+        $printer->put(" *\n");
+        $printer->put(" * https://github.com/libgit2/php-git\n");
+        $printer->put(" *\n");
+        $printer->put(" * Copyright 2014 Shuhei Tanuma.  All rights reserved.\n");
+        $printer->put(" *\n");
+        $printer->put(" * Permission is hereby granted, free of charge, to any person obtaining a copy\n");
+        $printer->put(" * of this software and associated documentation files (the \"Software\"), to deal\n");
+        $printer->put(" * in the Software without restriction, including without limitation the rights\n");
+        $printer->put(" * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n");
+        $printer->put(" * copies of the Software, and to permit persons to whom the Software is\n");
+        $printer->put(" * furnished to do so, subject to the following conditions:\n");
+        $printer->put(" *\n");
+        $printer->put(" * The above copyright notice and this permission notice shall be included in\n");
+        $printer->put(" * all copies or substantial portions of the Software.\n");
+        $printer->put(" *\n");
+        $printer->put(" * THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n");
+        $printer->put(" * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n");
+        $printer->put(" * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n");
+        $printer->put(" * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n");
+        $printer->put(" * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n");
+        $printer->put(" * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n");
+        $printer->put(" * THE SOFTWARE.\n");
+        $printer->put(" */\n");
+        $printer->put("#ifndef PHP_GIT2_`file`_H\n", "file", strtoupper($this->name));
+        $printer->put("#define PHP_GIT2_`file`_H\n", "file", strtoupper($this->name));
+        $printer->put("\n");
+    }
+
+    public function generateArgInfo(Printer $printer, Func $f)
+    {
+        $printer->put("ZEND_BEGIN_ARG_INFO_EX(arginfo_`name`, `a`, `b`, `c`)\n",
+            "name", $f->getName(),
+            "a", 0,
+            "b", 0,
+            "c", count($f->getArguments())
+        );
+        foreach ($f->getArguments() as $arg) {
+            /** @var Arg $arg */
+            $printer->put("\tZEND_ARG_INFO(`is_ref`, `name`)\n",
+                "is_ref", 0,
+                "name", $arg->getName());
+        }
+        $printer->put("ZEND_END_ARG_INFO()\n");
+        $printer->put("\n");
+    }
+
+    public function out(Func $f)
+    {
+        $stream = new StringStream();
+        $out = new ZeroCopyOutputStream($stream);
+        $printer = new Printer($out, "`");
+
+        $this->generateLicense($printer, $f);
+        $this->generateArgInfo($printer, $f);
+
+        return $stream->__toString();
+    }
+}
+
+class Header2 extends Header
+{
+    public function generateArgInfo(Printer $printer, Func $f)
+    {
+        $printer->put("ZEND_BEGIN_ARG_INFO_EX(arginfo_`name`, `a`, `b`, `c`)\n",
+            "name", $f->getName(),
+            "a", 0,
+            "b", 0,
+            "c", count($f->getArguments())
+        );
+        foreach ($f->getArguments() as $arg) {
+            /** @var Arg $arg */
+            $printer->put("\tZEND_ARG_INFO(`is_ref`, `name`)\n",
+                "is_ref", 0,
+                "name", $arg->getName());
+        }
+        $printer->put("ZEND_END_ARG_INFO()\n");
+        $printer->put("\n");
+    }
+
+    public function out(Func $f)
+    {
+        $stream = new StringStream();
+        $out = new ZeroCopyOutputStream($stream);
+        $printer = new Printer($out, "`");
+
+        $this->generateProto($printer, $f);
+        $printer->put("PHP_FUNCTION(`func`);\n", "func", $f->getName());
+        $printer->put("\n");
+
+        return $stream->__toString();
+    }
+}
+
 $data = file_get_contents($_SERVER['argv'][1]);
 $table = array();
 if (preg_match_all("/GIT_EXTERN\((.+?)\)\s*([a-zA-Z0-9_-]+)\((.+?)\);/s", $data, $match)) {
@@ -1108,14 +1230,30 @@ if (preg_match_all("/GIT_EXTERN\((.+?)\)\s*([a-zA-Z0-9_-]+)\((.+?)\);/s", $data,
         $table[$func->getName()] = $func;
     }
 }
-
-if (isset($_SERVER['argv'][2])) {
-    $printer = new Fashion();
-    echo $printer->out($table[$_SERVER['argv'][2]]);
-} else {
+if (getenv("PRINT_HEADER")) {
+    $flag = true;
     foreach ($table as $name => $func) {
-        $printer = new Fashion();
+        $printer = new Header($_SERVER['argv'][1], $flag);
         echo $printer->out($func);
+        $flag = false;
+    }
+
+    foreach ($table as $name => $func) {
+        $printer = new Header2($_SERVER['argv'][1], $flag);
+        echo $printer->out($func);
+    }
+    echo "#endif\n";
+} else {
+    if (isset($_SERVER['argv'][2])) {
+        $printer = new Fashion($_SERVER['argv'][1]);
+        echo $printer->out($table[$_SERVER['argv'][2]]);
+    } else {
+        $flag = true;
+        foreach ($table as $name => $func) {
+            $printer = new Fashion($_SERVER['argv'][1], $flag);
+            echo $printer->out($func);
+            $flag = false;
+        }
     }
 }
 

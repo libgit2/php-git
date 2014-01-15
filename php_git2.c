@@ -64,6 +64,7 @@
 #include "attr.h"
 #include "giterr.h"
 #include "push.h"
+#include "refspec.h"
 
 int git2_resource_handle;
 
@@ -917,6 +918,16 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_push_status_foreach, arginfo_git_push_status_foreach)
 	PHP_FE(git_push_free, arginfo_git_push_free)
 
+	/* refspec */
+	PHP_FE(git_refspec_src, arginfo_git_refspec_src)
+	PHP_FE(git_refspec_dst, arginfo_git_refspec_dst)
+	PHP_FE(git_refspec_string, arginfo_git_refspec_string)
+	PHP_FE(git_refspec_force, arginfo_git_refspec_force)
+	PHP_FE(git_refspec_direction, arginfo_git_refspec_direction)
+	PHP_FE(git_refspec_src_matches, arginfo_git_refspec_src_matches)
+	PHP_FE(git_refspec_dst_matches, arginfo_git_refspec_dst_matches)
+	PHP_FE(git_refspec_transform, arginfo_git_refspec_transform)
+	PHP_FE(git_refspec_rtransform, arginfo_git_refspec_rtransform)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
