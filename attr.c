@@ -16,7 +16,7 @@ PHP_FUNCTION(git_attr_value)
 	}
 	
 	result = git_attr_value(attr);
-	/* TODO(chobie): implement this */
+	RETURN_LONG(result);
 }
 /* }}} */
 
@@ -92,6 +92,7 @@ PHP_FUNCTION(git_attr_foreach)
 	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+	// TODO(chobie): implement this
 	//result = git_attr_foreach(PHP_GIT2_V(_repo, repository), flags, path, <CHANGEME>, cb);
 	php_git2_cb_free(cb);
 	RETURN_LONG(result);
