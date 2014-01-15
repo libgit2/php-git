@@ -65,6 +65,7 @@
 #include "giterr.h"
 #include "push.h"
 #include "refspec.h"
+#include "graph.h"
 
 int git2_resource_handle;
 
@@ -928,6 +929,9 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_refspec_dst_matches, arginfo_git_refspec_dst_matches)
 	PHP_FE(git_refspec_transform, arginfo_git_refspec_transform)
 	PHP_FE(git_refspec_rtransform, arginfo_git_refspec_rtransform)
+
+	/* graph */
+	PHP_FE(git_graph_ahead_behind, arginfo_git_graph_ahead_behind)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
