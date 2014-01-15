@@ -6,11 +6,9 @@
  */
 PHP_FUNCTION(git_checkout_head)
 {
-	int result = 0;
-	zval *repo = NULL;
+	zval *opts = NULL, *repo = NULL;
 	php_git2_t *_repo = NULL;
-	zval *opts = NULL;
-	int error = 0, shoud_free = 0;
+	int result = 0, error = 0, shoud_free = 0;
 	git_checkout_opts *options;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -41,15 +39,10 @@ PHP_FUNCTION(git_checkout_head)
  */
 PHP_FUNCTION(git_checkout_index)
 {
-	int result = 0;
-	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
-	zval *index = NULL;
-	php_git2_t *_index = NULL;
-	zval *opts = NULL;
-	int error = 0;
+	int result = 0, error = 0;
+	zval *repo = NULL, *index = NULL, *opts = NULL;
+	php_git2_t *_repo = NULL, *_index = NULL;
 
-	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rra", &repo, &index, &opts) == FAILURE) {
 		return;
@@ -62,22 +55,18 @@ PHP_FUNCTION(git_checkout_index)
 }
 /* }}} */
 
+
 /* {{{ proto long git_checkout_tree(resource $repo, resource $treeish,  $opts)
  */
 PHP_FUNCTION(git_checkout_tree)
 {
-	int result = 0;
-	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
-	zval *treeish = NULL;
-	php_git2_t *_treeish = NULL;
-	zval *opts = NULL;
-	int error = 0;
-	git_checkout_opts options = GIT_CHECKOUT_OPTS_INIT;
-	git_object *__treeish = NULL;
+	int result = 0, error = 0;
+	zval *repo = NULL, *treeish = NULL, *opts = NULL;
+	php_git2_t *_repo = NULL, *_treeish = NULL;
+	git_checkout_opts options = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"r|ra", &repo, &treeish, &opts) == FAILURE) {
+		"rra", &repo, &treeish, &opts) == FAILURE) {
 		return;
 	}
 
@@ -93,8 +82,10 @@ PHP_FUNCTION(git_checkout_tree)
 	}
 
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	result = git_checkout_tree(PHP_GIT2_V(_repo, repository), __treeish, &options);
+	ZEND_FETCH_RESOURCE(_treeish, php_git2_t*, &treeish, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	result = git_checkout_tree(PHP_GIT2_V(_repo, repository), PHP_GIT2_V(_treeish, object), opts);
 	RETURN_LONG(result);
 }
 /* }}} */
+
 
