@@ -6,10 +6,9 @@
  */
 PHP_FUNCTION(git_patch_from_diff)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_diff = NULL;
 	git_patch *out = NULL;
 	zval *diff = NULL;
-	php_git2_t *_diff = NULL;
 	long idx = 0;
 	int error = 0;
 
@@ -23,12 +22,10 @@ PHP_FUNCTION(git_patch_from_diff)
 	if (php_git2_check_error(error, "git_patch_from_diff" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, patch) = out;
-	result->type = PHP_GIT2_TYPE_PATCH;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_PATCH, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
 
@@ -37,18 +34,11 @@ PHP_FUNCTION(git_patch_from_diff)
  */
 PHP_FUNCTION(git_patch_from_blobs)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_old_blob = NULL, *_new_blob = NULL;
 	git_patch *out = NULL;
-	zval *old_blob = NULL;
-	php_git2_t *_old_blob = NULL;
-	char *old_as_path = NULL;
-	int old_as_path_len = 0;
-	zval *new_blob = NULL;
-	php_git2_t *_new_blob = NULL;
-	char *new_as_path = NULL;
-	int new_as_path_len = 0;
-	zval *opts = NULL;
-	int error = 0;
+	zval *old_blob = NULL, *new_blob = NULL, *opts = NULL;
+	char *old_as_path = NULL, *new_as_path = NULL;
+	int old_as_path_len = 0, new_as_path_len = 0, error = 0;
 
 	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -62,31 +52,23 @@ PHP_FUNCTION(git_patch_from_blobs)
 	if (php_git2_check_error(error, "git_patch_from_blobs" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, patch) = out;
-	result->type = PHP_GIT2_TYPE_PATCH;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_PATCH, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
 
-/* {{{ proto resource git_patch_from_blob_and_buffer(resource $old_blob, string $old_as_path, string $buffer, string $buffer_as_path, $opts)
+
+/* {{{ proto resource git_patch_from_blob_and_buffer(resource $old_blob, string $old_as_path, string $buffer, string $buffer_as_path,  $opts)
  */
 PHP_FUNCTION(git_patch_from_blob_and_buffer)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_old_blob = NULL;
 	git_patch *out = NULL;
-	zval *old_blob = NULL;
-	php_git2_t *_old_blob = NULL;
-	char *old_as_path = NULL;
-	int old_as_path_len = 0;
-	char *buffer = NULL;
-	int buffer_len = 0;
-	char *buffer_as_path = NULL;
-	int buffer_as_path_len = 0;
-	zval *opts = NULL;
-	int error = 0;
+	zval *old_blob = NULL, *opts = NULL;
+	char *old_as_path = NULL, *buffer = NULL, *buffer_as_path = NULL;
+	int old_as_path_len = 0, buffer_len = 0, buffer_as_path_len = 0, error = 0;
 
 	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -99,12 +81,10 @@ PHP_FUNCTION(git_patch_from_blob_and_buffer)
 	if (php_git2_check_error(error, "git_patch_from_blob_and_buffer" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, patch) = out;
-	result->type = PHP_GIT2_TYPE_PATCH;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_PATCH, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
 
@@ -122,8 +102,9 @@ PHP_FUNCTION(git_patch_free)
 	}
 
 	ZEND_FETCH_RESOURCE(_patch, php_git2_t*, &patch, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	if (_patch->should_free_v) {
+	if (GIT2_SHOULD_FREE(_patch)) {
 		git_patch_free(PHP_GIT2_V(_patch, patch));
+		GIT2_SHOULD_FREE(_patch) = 0;
 	};
 	zval_ptr_dtor(&patch);
 }
@@ -149,7 +130,6 @@ PHP_FUNCTION(git_patch_get_delta)
 }
 /* }}} */
 
-
 /* {{{ proto long git_patch_num_hunks(resource $patch)
  */
 PHP_FUNCTION(git_patch_num_hunks)
@@ -169,18 +149,14 @@ PHP_FUNCTION(git_patch_num_hunks)
 }
 /* }}} */
 
-
 /* {{{ proto long git_patch_line_stats(long $total_context, long $total_additions, long $total_deletions, resource $patch)
  */
 PHP_FUNCTION(git_patch_line_stats)
 {
-	int result = 0;
-	long total_context = 0;
-	long total_additions = 0;
-	long total_deletions = 0;
+	int result = 0, error = 0;
+	long total_context = 0, total_additions = 0, total_deletions = 0;
 	zval *patch = NULL;
 	php_git2_t *_patch = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"lllr", &total_context, &total_additions, &total_deletions, &patch) == FAILURE) {
@@ -193,17 +169,14 @@ PHP_FUNCTION(git_patch_line_stats)
 }
 /* }}} */
 
-
 /* {{{ proto resource git_patch_get_hunk(long $lines_in_hunk, resource $patch, long $hunk_idx)
  */
 PHP_FUNCTION(git_patch_get_hunk)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_patch = NULL;
 	git_diff_hunk *out = NULL;
-	long lines_in_hunk = 0;
+	long lines_in_hunk = 0, hunk_idx = 0;
 	zval *patch = NULL;
-	php_git2_t *_patch = NULL;
-	long hunk_idx = 0;
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -216,25 +189,21 @@ PHP_FUNCTION(git_patch_get_hunk)
 	if (php_git2_check_error(error, "git_patch_get_hunk" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, diff_hunk) = out;
-	result->type = PHP_GIT2_TYPE_DIFF_HUNK;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_DIFF_HUNK, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
-
 
 /* {{{ proto long git_patch_num_lines_in_hunk(resource $patch, long $hunk_idx)
  */
 PHP_FUNCTION(git_patch_num_lines_in_hunk)
 {
-	int result = 0;
+	int result = 0, error = 0;
 	zval *patch = NULL;
 	php_git2_t *_patch = NULL;
 	long hunk_idx = 0;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rl", &patch, &hunk_idx) == FAILURE) {
@@ -251,12 +220,10 @@ PHP_FUNCTION(git_patch_num_lines_in_hunk)
  */
 PHP_FUNCTION(git_patch_get_line_in_hunk)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_patch = NULL;
 	git_diff_line *out = NULL;
 	zval *patch = NULL;
-	php_git2_t *_patch = NULL;
-	long hunk_idx = 0;
-	long line_of_hunk = 0;
+	long hunk_idx = 0, line_of_hunk = 0;
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -269,15 +236,12 @@ PHP_FUNCTION(git_patch_get_line_in_hunk)
 	if (php_git2_check_error(error, "git_patch_get_line_in_hunk" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, diff_line) = out;
-	result->type = PHP_GIT2_TYPE_DIFF_LINE;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_DIFF_LINE, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
-
 
 /* {{{ proto long git_patch_size(resource $patch, long $include_context, long $include_hunk_headers, long $include_file_headers)
  */
@@ -286,9 +250,7 @@ PHP_FUNCTION(git_patch_size)
 	size_t result = 0;
 	zval *patch = NULL;
 	php_git2_t *_patch = NULL;
-	long include_context = 0;
-	long include_hunk_headers = 0;
-	long include_file_headers = 0;
+	long include_context = 0, include_hunk_headers = 0, include_file_headers = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rlll", &patch, &include_context, &include_hunk_headers, &include_file_headers) == FAILURE) {
@@ -301,30 +263,42 @@ PHP_FUNCTION(git_patch_size)
 }
 /* }}} */
 
-/* {{{ proto long git_patch_print(patch, print_cb, payload)
-*/
+
+/* {{{ proto long git_patch_print(resource $patch, Callable $print_cb,  $payload)
+ */
 PHP_FUNCTION(git_patch_print)
 {
-	zval *patch;
-	php_git2_t *_patch;
-	zval *print_cb;
-	php_git2_t *_print_cb;
+	int result = 0, error = 0;
+	zval *patch = NULL, *print_cb = NULL, *payload = NULL;
+	php_git2_t *_patch = NULL;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
 
-	/* TODO(chobie): implement this */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_patch_print not implemented yet");
-	return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"rfz", &patch, &fci, &fcc, &payload) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(_patch, php_git2_t*, &patch, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	//result = git_patch_print(PHP_GIT2_V(_patch, patch), <CHANGEME>, cb);
+	php_git2_cb_free(cb);
+	RETURN_LONG(result);
 }
+/* }}} */
+
 
 /* {{{ proto long git_patch_to_str(string $string, resource $patch)
  */
 PHP_FUNCTION(git_patch_to_str)
 {
-	int result = 0;
+	int result = 0, string_len = 0, error = 0;
 	char *string = NULL;
-	int string_len = 0;
 	zval *patch = NULL;
 	php_git2_t *_patch = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sr", &string, &string_len, &patch) == FAILURE) {
@@ -332,7 +306,7 @@ PHP_FUNCTION(git_patch_to_str)
 	}
 
 	ZEND_FETCH_RESOURCE(_patch, php_git2_t*, &patch, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	result = git_patch_to_str(string, PHP_GIT2_V(_patch, patch));
+	result = git_patch_to_str(&string, PHP_GIT2_V(_patch, patch));
 	RETURN_LONG(result);
 }
 /* }}} */
