@@ -720,33 +720,31 @@ PHP_FUNCTION(git_repository_mergehead_foreach)
 /* }}} */
 
 
-/* {{{ proto resource git_repository_hashfile(repo, path, type, as_path)
-*/
+/* {{{ proto string git_repository_hashfile(resource $repo, string $path, long $type, string $as_path)
+ */
 PHP_FUNCTION(git_repository_hashfile)
 {
-	zval *repo;
-	php_git2_t *_repo;
-	char *path = {0};
-	int path_len;
-	zval *type;
-	php_git2_t *_type;
-	char *as_path = {0};
-	int as_path_len;
-	git_oid oid;
-	int error = 0;
-	char out[GIT2_OID_HEXSIZE] = {0};
+	php_git2_t *result = NULL, *_repo = NULL;
+	git_oid out = {0};
+	zval *repo = NULL;
+	char *path = NULL, *as_path = NULL, buf[41] = {0};
+	int path_len = 0, as_path_len = 0, error = 0;
+	long type = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rsrs", &repo, &path, &path_len, &type, &as_path, &as_path_len) == FAILURE) {
+		"rsls", &repo, &path, &path_len, &type, &as_path, &as_path_len) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	error = git_repository_hashfile(&out, PHP_GIT2_V(_repo, repository), path, type, as_path);
 	if (php_git2_check_error(error, "git_repository_hashfile" TSRMLS_CC)) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
-	git_oid_fmt(out, &oid);
+	git_oid_fmt(buf, &out);
+	RETURN_STRING(buf, 1);
 }
+/* }}} */
 
 /* {{{ proto long git_repository_set_head(repo, refname)
 */
@@ -769,6 +767,7 @@ PHP_FUNCTION(git_repository_set_head)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto long git_repository_set_head_detached(repo, commitish)
 */
@@ -796,6 +795,7 @@ PHP_FUNCTION(git_repository_set_head_detached)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto long git_repository_detach_head(repo)
 */
@@ -816,6 +816,7 @@ PHP_FUNCTION(git_repository_detach_head)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto long git_repository_state(repo)
 */
@@ -834,6 +835,7 @@ PHP_FUNCTION(git_repository_state)
 
 	RETURN_LONG(state);
 }
+/* }}} */
 
 /* {{{ proto long git_repository_set_namespace(repo, nmspace)
 */
@@ -856,6 +858,7 @@ PHP_FUNCTION(git_repository_set_namespace)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto long git_repository_is_shallow(repo)
 */
@@ -873,3 +876,4 @@ PHP_FUNCTION(git_repository_is_shallow)
 	is_shallow = git_repository_is_shallow(PHP_GIT2_V(_repo, repository));
 	RETURN_LONG(is_shallow);
 }
+/* }}} */

@@ -12,14 +12,13 @@ PHP_FUNCTION(git_pathspec_new)
 	git_strarray _pathspec = {0};
 	int error = 0;
 
-	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"a", &pathspec) == FAILURE) {
 		return;
 	}
 
 	php_git2_array_to_strarray(&_pathspec, pathspec TSRMLS_CC);
-	error = git_pathspec_new(&out, pathspec);
+	error = git_pathspec_new(&out, &pathspec);
 	if (php_git2_check_error(error, "git_pathspec_new" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}

@@ -76,8 +76,6 @@ PHP_FUNCTION(git_remote_create_with_fetchspec)
 }
 /* }}} */
 
-
-
 /* {{{ proto resource git_remote_create_inmemory(resource $repo, string $fetch, string $url)
  */
 PHP_FUNCTION(git_remote_create_inmemory)

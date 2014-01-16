@@ -318,6 +318,17 @@ PHP_FUNCTION(git_libgit2_capabilities)
 }
 
 
+PHP_FUNCTION(git_libgit2_version)
+{
+	char buf[32] = {0};
+	int major, minor, rev;
+
+	git_libgit2_version(&major, &minor, &rev);
+	snprintf(buf, 32, "%d.%d.%d", major, minor, rev);
+
+	RETURN_STRING(buf, 1);
+}
+
 static zend_function_entry php_git2_functions[] = {
 	/* repository */
 	PHP_FE(git_repository_new, arginfo_git_repository_new)
@@ -936,6 +947,7 @@ static zend_function_entry php_git2_functions[] = {
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)
 	PHP_FE(git_libgit2_capabilities, NULL)
+	PHP_FE(git_libgit2_version, NULL)
 	PHP_FE_END
 };
 

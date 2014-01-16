@@ -219,7 +219,7 @@ PHP_FUNCTION(git_reflog_entry_id_old)
 }
 /* }}} */
 
-/* {{{ proto resource git_reflog_entry_id_new(resource $entry)
+/* {{{ proto string git_reflog_entry_id_new(resource $entry)
  */
 PHP_FUNCTION(git_reflog_entry_id_new)
 {

@@ -33,19 +33,16 @@ static int php_git2_tag_foreach_cb(const char *name, git_oid *oid, void *payload
 	return retval;
 }
 
-
 /* {{{ proto resource git_tag_lookup(resource $repo, string $id)
  */
 PHP_FUNCTION(git_tag_lookup)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_repo = NULL;
 	git_tag *out = NULL;
 	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
 	char *id = NULL;
-	int id_len = 0;
-	git_oid __id;
-	int error = 0;
+	int id_len = 0, error = 0;
+	git_oid __id = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &repo, &id, &id_len) == FAILURE) {
@@ -60,15 +57,12 @@ PHP_FUNCTION(git_tag_lookup)
 	if (php_git2_check_error(error, "git_tag_lookup" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, tag) = out;
-	result->type = PHP_GIT2_TYPE_TAG;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_TAG, out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
-
 
 /* {{{ proto resource git_tag_lookup_prefix(resource $repo, string $id)
  */
@@ -152,8 +146,7 @@ PHP_FUNCTION(git_tag_owner)
 {
 	git_repository  *result = NULL;
 	zval *tag = NULL;
-	php_git2_t *_tag = NULL;
-	php_git2_t *__result = NULL;
+	php_git2_t *_tag = NULL, *__result = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &tag) == FAILURE) {
@@ -162,12 +155,10 @@ PHP_FUNCTION(git_tag_owner)
 
 	ZEND_FETCH_RESOURCE(_tag, php_git2_t*, &tag, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_tag_owner(PHP_GIT2_V(_tag, tag));
-	PHP_GIT2_MAKE_RESOURCE(__result);
-	PHP_GIT2_V(__result, tag) = tag;
-	__result->type = PHP_GIT2_TYPE_TAG;
-	__result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	__result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, __result->resource_id);
+	if (php_git2_make_resource(&__result, PHP_GIT2_TYPE_TAG, result, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(__result));
 }
 /* }}} */
 
@@ -433,7 +424,6 @@ PHP_FUNCTION(git_tag_create_lightweight)
 }
 /* }}} */
 
-
 /* {{{ proto long git_tag_delete(resource $repo, string $tag_name)
  */
 PHP_FUNCTION(git_tag_delete)
@@ -546,10 +536,9 @@ PHP_FUNCTION(git_tag_foreach)
  */
 PHP_FUNCTION(git_tag_peel)
 {
-	php_git2_t *result = NULL;
+	php_git2_t *result = NULL, *_tag = NULL;
 	git_object *tag_target_out = NULL;
 	zval *tag = NULL;
-	php_git2_t *_tag = NULL;
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -562,11 +551,9 @@ PHP_FUNCTION(git_tag_peel)
 	if (php_git2_check_error(error, "git_tag_peel" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	PHP_GIT2_MAKE_RESOURCE(result);
-	PHP_GIT2_V(result, object) = tag_target_out;
-	result->type = PHP_GIT2_TYPE_OBJECT;
-	result->resource_id = PHP_GIT2_LIST_INSERT(result, git2_resource_handle);
-	result->should_free_v = 0;
-	ZVAL_RESOURCE(return_value, result->resource_id);
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_OBJECT, tag_target_out, 1 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
 }
 /* }}} */
