@@ -35,7 +35,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_submodule_foreach, 0, 0, 5)
 	ZEND_ARG_INFO(0, repo)
 	ZEND_ARG_INFO(0, sm)
 	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_submodule_add_setup, 0, 0, 4)

@@ -132,6 +132,7 @@ void php_git2_strarray_to_array(git_strarray *array, zval **out TSRMLS_DC)
 
 	MAKE_STD_ZVAL(result);
 	array_init(result);
+
 	for (i = 0; i < array->count; i++) {
 		add_next_index_string(result, array->strings[i], 1);
 	}
@@ -211,6 +212,13 @@ void php_git2_array_to_strarray(git_strarray *out, zval *array TSRMLS_DC)
 	int elements = 0, i;
 	HashPosition pos;
 	zval **value;
+
+	if (Z_TYPE_P(array) != IS_ARRAY){
+		return;
+	}
+	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
+		return;
+	}
 
 	elements = zend_hash_num_elements(Z_ARRVAL_P(array));
 	out->strings = (char**)emalloc(sizeof(char*) * elements);

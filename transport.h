@@ -45,17 +45,17 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_transport_dummy, 0, 0, 2)
 	ZEND_ARG_INFO(0, owner)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_transport_local, 0, 0, 2)
 	ZEND_ARG_INFO(0, owner)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_transport_smart, 0, 0, 2)
 	ZEND_ARG_INFO(0, owner)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_smart_subtransport_http, 0, 0, 1)

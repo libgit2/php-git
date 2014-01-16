@@ -57,7 +57,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_cred_userpass, 0, 0, 4)
 	ZEND_ARG_INFO(0, url)
 	ZEND_ARG_INFO(0, user_from_url)
 	ZEND_ARG_INFO(0, allowed_types)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 /* {{{ proto long git_cred_has_username(cred)

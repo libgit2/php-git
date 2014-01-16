@@ -85,7 +85,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_note_foreach, 0, 0, 4)
 	ZEND_ARG_INFO(0, repo)
 	ZEND_ARG_INFO(0, notes_ref)
 	ZEND_ARG_INFO(0, note_cb)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 /* {{{ proto resource git_note_iterator_new(repo, notes_ref)

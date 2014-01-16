@@ -65,7 +65,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_packbuilder_foreach, 0, 0, 3)
 	ZEND_ARG_INFO(0, pb)
 	ZEND_ARG_INFO(0, cb)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_packbuilder_object_count, 0, 0, 1)

@@ -71,7 +71,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_odb_foreach, 0, 0, 3)
 	ZEND_ARG_INFO(0, db)
 	ZEND_ARG_INFO(0, cb)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_odb_write, 0, 0, 4)

@@ -50,7 +50,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_attr_foreach, 0, 0, 5)
 	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_attr_cache_flush, 0, 0, 1)

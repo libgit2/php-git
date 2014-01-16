@@ -66,7 +66,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_filter_list_push, 0, 0, 3)
 	ZEND_ARG_INFO(0, fl)
 	ZEND_ARG_INFO(0, filter)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_filter_list_length, 0, 0, 1)

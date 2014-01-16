@@ -94,7 +94,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_patch_print, 0, 0, 3)
 	ZEND_ARG_INFO(0, patch)
 	ZEND_ARG_INFO(0, print_cb)
-	ZEND_ARG_INFO(0, payload)
+	ZEND_ARG_INFO(1, payload)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_git_patch_to_str, 0, 0, 1)
