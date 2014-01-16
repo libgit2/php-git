@@ -466,3 +466,112 @@ int php_git2_array_to_git_checkout_opts(git_checkout_opts **out, zval *array TSR
 	*out = opts;
 	return 0;
 }
+
+int php_git2_multi_cb_init(php_git2_multi_cb_t **out, void *payload TSRMLS_DC, int num_callbacks, ...)
+{
+	php_git2_multi_cb_t *cb;
+	int i = 0;
+	va_list ap;
+
+	cb = (struct php_git2_multi_cb_t*)emalloc(sizeof(php_git2_multi_cb_t));
+	if (cb == NULL) {
+		return 1;
+	}
+
+	cb->payload = payload;
+	cb->num_callbacks = num_callbacks;
+	GIT2_TSRMLS_SET2(cb, TSRMLS_C);
+
+	cb->callbacks = emalloc(sizeof(php_git2_fcall_t) * num_callbacks);
+	memset(cb->callbacks, '\0', sizeof(php_git2_fcall_t) * num_callbacks);
+	va_start(ap, num_callbacks * 2);
+	for (i = 0; i < num_callbacks; i++) {
+		memcpy(&cb->callbacks[i].fci, va_arg(ap, zend_fcall_info*), sizeof(zend_fcall_info));
+		memcpy(&cb->callbacks[i].fcc, va_arg(ap, zend_fcall_info_cache*), sizeof(zend_fcall_info_cache));
+	}
+	va_end(ap);
+
+	*out = cb;
+	return 0;
+}
+
+void php_git2_multi_cb_free(php_git2_multi_cb_t *target)
+{
+	efree(target->callbacks);
+	efree(target);
+}
+
+void php_git2_diff_line_to_array(git_diff_line *line, zval **out TSRMLS_DC)
+{
+	zval *result;
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+	add_assoc_stringl_ex(result, ZEND_STRS("origin"), &line->origin, 1, 1);
+	add_assoc_long_ex(result, ZEND_STRS("old_lineno"), line->old_lineno);
+	add_assoc_long_ex(result, ZEND_STRS("new_lineno"), line->new_lineno);
+	add_assoc_long_ex(result, ZEND_STRS("num_lines"), line->num_lines);
+	add_assoc_long_ex(result, ZEND_STRS("content_len"), line->content_len);
+	add_assoc_long_ex(result, ZEND_STRS("content_offset"), line->content_offset);
+	add_assoc_stringl_ex(result, ZEND_STRS("content"), line->content, line->content_len, 1);
+
+	*out = result;
+}
+
+void php_git2_diff_hunk_to_array(git_diff_hunk *hunk, zval **out TSRMLS_DC)
+{
+	zval *result;
+
+	MAKE_STD_ZVAL(result);
+	if (hunk == NULL) {
+		ZVAL_NULL(result);
+	} else {
+		array_init(result);
+		add_assoc_long_ex(result, ZEND_STRS("old_start"), hunk->old_start);
+		add_assoc_long_ex(result, ZEND_STRS("old_lines"), hunk->old_lines);
+		add_assoc_long_ex(result, ZEND_STRS("new_start"), hunk->new_start);
+		add_assoc_long_ex(result, ZEND_STRS("new_lines"), hunk->new_lines);
+		add_assoc_stringl_ex(result, ZEND_STRS("header"), hunk->header, 128, 1);
+	}
+
+	*out = result;
+}
+
+void php_git2_diff_file_to_array(git_diff_file *file, zval **out TSRMLS_DC)
+{
+	zval *result;
+	char buf[41] = {0};
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+	git_oid_fmt(buf, &file->oid);
+
+	add_assoc_string_ex(result, ZEND_STRS("oid"), buf, 1);
+	add_assoc_string_ex(result, ZEND_STRS("path"), file->path, 1);
+	add_assoc_long_ex(result, ZEND_STRS("size"), file->size);
+	add_assoc_long_ex(result, ZEND_STRS("flags"), file->flags);
+	add_assoc_long_ex(result, ZEND_STRS("mode"), file->mode);
+
+	*out = result;
+}
+
+void php_git2_diff_delta_to_array(git_diff_delta *delta, zval **out TSRMLS_DC)
+{
+	zval *result, *old, *new;
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+
+	add_assoc_long_ex(result, ZEND_STRS("status"), delta->status);
+	add_assoc_long_ex(result, ZEND_STRS("flags"), delta->flags);
+	add_assoc_long_ex(result, ZEND_STRS("similarity"), delta->similarity);
+	add_assoc_long_ex(result, ZEND_STRS("nfiles"), delta->nfiles);
+
+	php_git2_diff_file_to_array(&delta->old_file, &old TSRMLS_CC);
+	php_git2_diff_file_to_array(&delta->new_file, &new TSRMLS_CC);
+
+	add_assoc_zval_ex(result, ZEND_STRS("old_file"), old);
+	add_assoc_zval_ex(result, ZEND_STRS("new_file"), new);
+
+	*out = result;
+}

@@ -806,13 +806,6 @@ PHP_FUNCTION(git_remote_set_transport)
 }
 /* }}} */
 
-
-typedef struct php_git2_fcall_t {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-	zval *value;
-} php_git2_fcall_t;
-
 typedef struct php_git2_remote_cb_t {
 	php_git2_fcall_t callbacks[4];
 	zval *payload;

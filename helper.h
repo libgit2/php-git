@@ -59,4 +59,15 @@ void php_git_git_checkout_opts_free(git_checkout_opts *target TSRMLS_DC);
 
 int php_git2_array_to_git_checkout_opts(git_checkout_opts **out, zval *array TSRMLS_DC);
 
+int php_git2_multi_cb_init(php_git2_multi_cb_t **out, void *payload TSRMLS_DC, int num_callbacks, ...);
+
+void php_git2_multi_cb_free(php_git2_multi_cb_t *target);
+
+void php_git2_diff_line_to_array(git_diff_line *line, zval **out TSRMLS_DC);
+
+void php_git2_diff_hunk_to_array(git_diff_hunk *hunk, zval **out TSRMLS_DC);
+
+void php_git2_diff_file_to_array(git_diff_file *file, zval **out TSRMLS_DC);
+
+void php_git2_diff_delta_to_array(git_diff_delta *delta, zval **out TSRMLS_DC);
 #endif
