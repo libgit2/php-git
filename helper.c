@@ -116,8 +116,16 @@ void php_git2_signature_to_array(const git_signature *signature, zval **out TSRM
 	/* TODO(chobie): how do i set offset? */
 	php_date_initialize(zend_object_store_get_object(datetime TSRMLS_CC), time_str, strlen(time_str), NULL, timezone, 0 TSRMLS_CC);
 
-	add_assoc_string_ex(result, ZEND_STRS("name"), signature->name, 1);
-	add_assoc_string_ex(result, ZEND_STRS("email"), signature->email, 1);
+	if (signature->name == NULL) {
+		add_assoc_null_ex(result, ZEND_STRS("name"));
+	} else {
+		add_assoc_string_ex(result, ZEND_STRS("name"), signature->name, 1);
+	}
+	if (signature->email == NULL) {
+		add_assoc_null_ex(result, ZEND_STRS("email"));
+	} else {
+		add_assoc_string_ex(result, ZEND_STRS("email"), signature->email, 1);
+	}
 	add_assoc_zval_ex(result, ZEND_STRS("time"), datetime);
 
 	zval_ptr_dtor(&timezone);

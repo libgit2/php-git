@@ -232,7 +232,7 @@ PHP_FUNCTION(git_blob_lookup)
 		RETURN_FALSE;
 	}
 	result = git_blob_lookup(&blob, PHP_GIT2_V(_repo, repository), &__id);
-	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_BLOB, result, 0 TSRMLS_CC)) {
+	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_BLOB, blob, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_result));

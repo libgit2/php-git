@@ -66,6 +66,7 @@
 #include "push.h"
 #include "refspec.h"
 #include "graph.h"
+#include "blame.h"
 
 int git2_resource_handle;
 
@@ -943,6 +944,15 @@ static zend_function_entry php_git2_functions[] = {
 
 	/* graph */
 	PHP_FE(git_graph_ahead_behind, arginfo_git_graph_ahead_behind)
+
+	/* blame */
+	PHP_FE(git_blame_get_hunk_count, arginfo_git_blame_get_hunk_count)
+	PHP_FE(git_blame_get_hunk_byindex, arginfo_git_blame_get_hunk_byindex)
+	PHP_FE(git_blame_get_hunk_byline, arginfo_git_blame_get_hunk_byline)
+	PHP_FE(git_blame_file, arginfo_git_blame_file)
+	PHP_FE(git_blame_buffer, arginfo_git_blame_buffer)
+	PHP_FE(git_blame_free, arginfo_git_blame_free)
+	PHP_FE(git_blame_options_new, arginfo_git_blame_options_new)
 
 	/* misc */
 	PHP_FE(git_resource_type, arginfo_git_resource_type)

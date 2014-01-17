@@ -56,6 +56,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blame_free, 0, 0, 1)
 	ZEND_ARG_INFO(0, blame)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_blame_options_new, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 /* {{{ proto resource git_blame_get_hunk_count(blame)
 */
 PHP_FUNCTION(git_blame_get_hunk_count);
@@ -79,5 +82,9 @@ PHP_FUNCTION(git_blame_buffer);
 /* {{{ proto void git_blame_free(blame)
 */
 PHP_FUNCTION(git_blame_free);
+
+/* {{{ proto void git_blame_options_new()
+ */
+PHP_FUNCTION(git_blame_options_new);
 
 #endif

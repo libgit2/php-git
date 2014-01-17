@@ -14,7 +14,7 @@ static void php_git2_array_to_git_diff_options(git_diff_options *options, zval *
 	php_git2_array_to_strarray(&options->pathspec, php_git2_read_arrval(array, ZEND_STRS("pathspec") TSRMLS_CC) TSRMLS_CC);
 	// TODO(chobie): support notify cb
 
-	
+
 	options->context_lines = php_git2_read_arrval_long(array, ZEND_STRS("context_lines") TSRMLS_CC);
 	options->interhunk_lines = php_git2_read_arrval_long(array, ZEND_STRS("interhunk_lines") TSRMLS_CC);
 	options->oid_abbrev = php_git2_read_arrval_long(array, ZEND_STRS("oid_abbrev") TSRMLS_CC);
@@ -343,7 +343,6 @@ PHP_FUNCTION(git_diff_find_similar)
 	int error = 0;
 	git_diff_options _options = {0};
 
-	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"ra", &diff, &options) == FAILURE) {
 		return;
