@@ -596,7 +596,7 @@ PHP_FUNCTION(git_repository_index)
 	if (php_git2_check_error(error, "git_repository_index" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_INDEX, result, 1 TSRMLS_CC)) {
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_INDEX, out, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));

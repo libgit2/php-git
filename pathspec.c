@@ -18,7 +18,8 @@ PHP_FUNCTION(git_pathspec_new)
 	}
 
 	php_git2_array_to_strarray(&_pathspec, pathspec TSRMLS_CC);
-	error = git_pathspec_new(&out, &pathspec);
+	error = git_pathspec_new(&out, &_pathspec);
+	php_git2_strarray_free(&_pathspec);
 	if (php_git2_check_error(error, "git_pathspec_new" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -78,7 +79,7 @@ PHP_FUNCTION(git_pathspec_matches_path)
 PHP_FUNCTION(git_pathspec_match_workdir)
 {
 	php_git2_t *result = NULL, *_repo = NULL, *_ps = NULL;
-	git_pathspec_match_list *out = NULL;
+	git_pathspec_match_list *out;
 	zval *repo = NULL, *ps = NULL;
 	long flags = 0;
 	int error = 0;

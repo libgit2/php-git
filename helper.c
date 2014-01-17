@@ -221,6 +221,9 @@ void php_git2_array_to_strarray(git_strarray *out, zval *array TSRMLS_DC)
 	HashPosition pos;
 	zval **value;
 
+	if (array == NULL) {
+		return;
+	}
 	if (Z_TYPE_P(array) != IS_ARRAY){
 		return;
 	}
@@ -591,3 +594,147 @@ void php_git2_diff_delta_to_array(git_diff_delta *delta, zval **out TSRMLS_DC)
 
 	*out = result;
 }
+
+void php_git2_array_to_git_diff_options(git_diff_options *options, zval *array TSRMLS_DC)
+{
+	git_diff_options_init(options, GIT_DIFF_OPTIONS_VERSION);
+
+	options->version = php_git2_read_arrval_long(array, ZEND_STRS("version") TSRMLS_CC);
+	options->flags = php_git2_read_arrval_long(array, ZEND_STRS("flags") TSRMLS_CC);
+	options->ignore_submodules = php_git2_read_arrval_long(array, ZEND_STRS("ignore_submodules") TSRMLS_CC);
+
+	php_git2_array_to_strarray(&options->pathspec, php_git2_read_arrval(array, ZEND_STRS("pathspec") TSRMLS_CC) TSRMLS_CC);
+	// TODO(chobie): support notify cb
+
+	options->context_lines = php_git2_read_arrval_long(array, ZEND_STRS("context_lines") TSRMLS_CC);
+	options->interhunk_lines = php_git2_read_arrval_long(array, ZEND_STRS("interhunk_lines") TSRMLS_CC);
+	options->oid_abbrev = php_git2_read_arrval_long(array, ZEND_STRS("oid_abbrev") TSRMLS_CC);
+	options->max_size = php_git2_read_arrval_long(array, ZEND_STRS("max_size") TSRMLS_CC);
+	options->old_prefix = php_git2_read_arrval_string(array, ZEND_STRS("old_prefix") TSRMLS_CC);
+	options->new_prefix = php_git2_read_arrval_string(array, ZEND_STRS("new_prefix") TSRMLS_CC);
+}
+
+void php_git2_git_diff_options_free(git_diff_options *options)
+{
+	if (options->pathspec.count > 0) {
+		efree(options->pathspec.strings);
+	}
+}
+
+void php_git2_git_diff_options_to_array(git_diff_options *options, zval **out TSRMLS_DC)
+{
+	zval *result, *pathspec;
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+	add_assoc_long_ex(result, ZEND_STRS("version"), options->version);
+	add_assoc_long_ex(result, ZEND_STRS("flags"), options->flags);
+	add_assoc_long_ex(result, ZEND_STRS("ignore_submodules"), options->ignore_submodules);
+
+	MAKE_STD_ZVAL(pathspec);
+	array_init(pathspec);
+	if (options->pathspec.count > 0) {
+	} else {
+		add_assoc_zval_ex(result, ZEND_STRS("pathspec"), pathspec);
+	}
+
+	if (options->notify_cb) {
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("notify_cb"));
+	}
+
+	add_assoc_long_ex(result, ZEND_STRS("context_lines"), options->context_lines);
+	add_assoc_long_ex(result, ZEND_STRS("interhunk_lines"), options->interhunk_lines);
+	add_assoc_long_ex(result, ZEND_STRS("oid_abbrev"), options->oid_abbrev);
+	add_assoc_long_ex(result, ZEND_STRS("max_size"), options->max_size);
+	if (options->notify_payload) {
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("notify_payload"));
+	}
+	if (options->old_prefix) {
+		add_assoc_string_ex(result, ZEND_STRS("old_prefix"), options->old_prefix, 1);
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("old_prefix"));
+	}
+	if (options->new_prefix) {
+		add_assoc_string_ex(result, ZEND_STRS("new_prefix"), options->new_prefix, 1);
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("new_prefix"));
+	}
+
+	*out = result;
+}
+
+int php_git2_git_diff_file_cb(
+	const git_diff_delta *delta,
+	float progress,
+	void *payload)
+{
+	php_git2_t *result;
+	zval *param_delta = NULL, *param_progress = NULL, *retval_ptr = NULL;
+	php_git2_multi_cb_t *p = (php_git2_multi_cb_t*)payload;
+	int i = 0, retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	Z_ADDREF_P(p->payload);
+	MAKE_STD_ZVAL(param_progress);
+	ZVAL_DOUBLE(param_progress, progress);
+	php_git2_diff_delta_to_array(delta, &param_delta TSRMLS_CC);
+	if (php_git2_call_function_v(&p->callbacks[0].fci, &p->callbacks[0].fcc TSRMLS_CC, &retval_ptr, 3, &param_delta, &param_progress, &p->payload)) {
+		return GIT_EUSER;
+	}
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+
+	return retval;
+}
+
+int php_git2_git_diff_hunk_cb(
+	const git_diff_delta *delta,
+	const git_diff_hunk *hunk,
+	void *payload)
+{
+	php_git2_t *result;
+	zval *param_delta = NULL, *param_hunk = NULL, *retval_ptr = NULL;
+	php_git2_multi_cb_t *p = (php_git2_multi_cb_t*)payload;
+	int i = 0, retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	Z_ADDREF_P(p->payload);
+	php_git2_diff_delta_to_array(delta, &param_delta TSRMLS_CC);
+	php_git2_diff_hunk_to_array(hunk, &param_hunk TSRMLS_CC);
+
+	if (php_git2_call_function_v(&p->callbacks[1].fci, &p->callbacks[1].fcc TSRMLS_CC, &retval_ptr, 3, &param_delta, &param_hunk, &p->payload)) {
+		return GIT_EUSER;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	return retval;
+}
+
+int php_git2_git_diff_line_cb(
+	const git_diff_delta *delta,
+	const git_diff_hunk *hunk,
+	const git_diff_line *line,
+	void *payload) {
+	php_git2_t *result;
+	zval *param_delta = NULL, *param_hunk = NULL, *param_line = NULL, *retval_ptr = NULL;
+	php_git2_multi_cb_t *p = (php_git2_multi_cb_t*)payload;
+	int i = 0, retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	Z_ADDREF_P(p->payload);
+	php_git2_diff_delta_to_array(delta, &param_delta TSRMLS_CC);
+	php_git2_diff_hunk_to_array(hunk, &param_hunk TSRMLS_CC);
+	php_git2_diff_line_to_array(line, &param_line TSRMLS_CC);
+
+	if (php_git2_call_function_v(&p->callbacks[2].fci, &p->callbacks[2].fcc TSRMLS_CC, &retval_ptr, 4, &param_delta, &param_hunk, &param_line, &p->payload)) {
+		return GIT_EUSER;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	return retval;
+}
+

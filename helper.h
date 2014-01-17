@@ -70,4 +70,26 @@ void php_git2_diff_hunk_to_array(git_diff_hunk *hunk, zval **out TSRMLS_DC);
 void php_git2_diff_file_to_array(git_diff_file *file, zval **out TSRMLS_DC);
 
 void php_git2_diff_delta_to_array(git_diff_delta *delta, zval **out TSRMLS_DC);
+
+void php_git2_array_to_git_diff_options(git_diff_options *options, zval *array TSRMLS_DC);
+
+void php_git2_git_diff_options_free(git_diff_options *options);
+
+void php_git2_git_diff_options_to_array(git_diff_options *options, zval **out TSRMLS_DC);
+
+int php_git2_git_diff_file_cb(
+	const git_diff_delta *delta,
+	float progress,
+	void *payload);
+
+int php_git2_git_diff_hunk_cb(
+	const git_diff_delta *delta,
+	const git_diff_hunk *hunk,
+	void *payload);
+int php_git2_git_diff_line_cb(
+	const git_diff_delta *delta,
+	const git_diff_hunk *hunk,
+	const git_diff_line *line,
+	void *payload);
+
 #endif
