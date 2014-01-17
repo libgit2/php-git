@@ -253,7 +253,7 @@ PHP_FUNCTION(git_pathspec_match_list_entry)
 PHP_FUNCTION(git_pathspec_match_list_diff_entry)
 {
 	const git_diff_delta *result = NULL;
-	zval *m = NULL;
+	zval *m = NULL, *_result = NULL;
 	php_git2_t *_m = NULL;
 	long pos = 0;
 
@@ -264,7 +264,11 @@ PHP_FUNCTION(git_pathspec_match_list_diff_entry)
 
 	ZEND_FETCH_RESOURCE(_m, php_git2_t*, &m, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_pathspec_match_list_diff_entry(PHP_GIT2_V(_m, pathspec_match_list), pos);
-	/* TODO(chobie): implement this */
+	if (result == NULL) {
+		RETURN_FALSE;
+	}
+	php_git2_diff_delta_to_array(result, &_result TSRMLS_CC);
+	RETURN_ZVAL(_result, 0, 1);
 }
 /* }}} */
 
