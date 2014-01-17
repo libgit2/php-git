@@ -317,4 +317,8 @@ PHP_FUNCTION(git_repository_set_namespace);
 */
 PHP_FUNCTION(git_repository_is_shallow);
 
+/* {{{ proto array git_repository_init_options_new()
+*/
+PHP_FUNCTION(git_repository_init_options_new);
+
 #endif

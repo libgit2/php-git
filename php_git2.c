@@ -366,6 +366,7 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_repository_state, arginfo_git_repository_state)
 	PHP_FE(git_repository_set_namespace, arginfo_git_repository_set_namespace)
 	PHP_FE(git_repository_is_shallow, arginfo_git_repository_is_shallow)
+	PHP_FE(git_repository_init_options_new, NULL)
 
 	/* index */
 	PHP_FE(git_index_open, arginfo_git_index_open)

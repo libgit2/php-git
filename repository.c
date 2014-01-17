@@ -2,6 +2,67 @@
 #include "php_git2_priv.h"
 #include "repository.h"
 
+static void php_git2_array_to_git_repository_init_options(git_repository_init_options *opts, zval *array TSRMLS_DC)
+{
+	long lval;
+
+	lval = php_git2_read_arrval_long(array, ZEND_STRS("version") TSRMLS_CC);
+	if (lval > 0) {
+		opts->version = lval;
+	}
+	opts->flags = php_git2_read_arrval_long(array, ZEND_STRS("flags") TSRMLS_CC);
+	opts->mode = php_git2_read_arrval_long(array, ZEND_STRS("mode") TSRMLS_CC);
+
+	opts->workdir_path = php_git2_read_arrval_string(array, ZEND_STRS("workdir_path") TSRMLS_CC);
+	opts->description = php_git2_read_arrval_string(array, ZEND_STRS("description") TSRMLS_CC);
+	opts->template_path = php_git2_read_arrval_string(array, ZEND_STRS("template_path") TSRMLS_CC);
+	opts->initial_head = php_git2_read_arrval_string(array, ZEND_STRS("initial_head") TSRMLS_CC);
+	opts->origin_url = php_git2_read_arrval_string(array, ZEND_STRS("origin_url") TSRMLS_CC);
+}
+
+static void php_git2_git_repository_init_options_to_array(git_repository_init_options *opts, zval **out TSRMLS_DC)
+{
+	zval *result;
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+
+	add_assoc_long_ex(result, ZEND_STRS("version"), opts->version);
+	add_assoc_long_ex(result, ZEND_STRS("flags"), opts->flags);
+	add_assoc_long_ex(result, ZEND_STRS("mode"), opts->mode);
+
+	if (opts->workdir_path != NULL) {
+		add_assoc_string_ex(result, ZEND_STRS("workdir_path"), opts->workdir_path, 1);
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("workdir_path"));
+	}
+
+	if (opts->workdir_path != NULL) {
+		add_assoc_string_ex(result, ZEND_STRS("description"), opts->description, 1);
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("description"));
+	}
+
+	if (opts->workdir_path != NULL) {
+		add_assoc_string_ex(result, ZEND_STRS("template_path"), opts->template_path, 1);
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("template_path"));
+	}
+
+	if (opts->workdir_path != NULL) {
+		add_assoc_string_ex(result, ZEND_STRS("initial_head"), opts->initial_head, 1);
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("initial_head"));
+	}
+
+	if (opts->workdir_path != NULL) {
+		add_assoc_string_ex(result, ZEND_STRS("origin_url"), opts->origin_url, 1);
+	} else {
+		add_assoc_null_ex(result, ZEND_STRS("origin_url"));
+	}
+	*out = result;
+}
+
+
 static int php_git2_repository_fetchhead_foreach_cb(const char *ref_name,
                                                             const char *remote_url,
                                                             const git_oid *oid,
@@ -310,25 +371,24 @@ PHP_FUNCTION(git_repository_free)
 }
 /* }}} */
 
-
 /* {{{ proto resource git_repository_init_ext(string $repo_path,  $opts)
  */
 PHP_FUNCTION(git_repository_init_ext)
 {
+	git_repository_init_options options = GIT_REPOSITORY_INIT_OPTIONS_INIT;
 	php_git2_t *result = NULL;
 	git_repository *out = NULL;
 	char *repo_path = NULL;
-	int repo_path_len = 0;
+	int repo_path_len = 0, error = 0;
 	zval *opts = NULL;
-	int error = 0;
 
-	/* TODO(chobie): generate converter */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"sa", &repo_path, &repo_path_len, &opts) == FAILURE) {
 		return;
 	}
 
-	error = git_repository_init_ext(&out, repo_path, opts);
+	php_git2_array_to_git_repository_init_options(&options, opts TSRMLS_CC);
+	error = git_repository_init_ext(&out, repo_path, &options);
 	if (php_git2_check_error(error, "git_repository_init_ext" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -875,5 +935,17 @@ PHP_FUNCTION(git_repository_is_shallow)
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	is_shallow = git_repository_is_shallow(PHP_GIT2_V(_repo, repository));
 	RETURN_LONG(is_shallow);
+}
+/* }}} */
+
+/* {{{ proto array git_repository_init_options_new()
+*/
+PHP_FUNCTION(git_repository_init_options_new)
+{
+	git_repository_init_options opts = GIT_REPOSITORY_INIT_OPTIONS_INIT;
+	zval *result;
+
+	php_git2_git_repository_init_options_to_array(&opts, &result TSRMLS_CC);
+	RETURN_ZVAL(result, 0, 1);
 }
 /* }}} */
