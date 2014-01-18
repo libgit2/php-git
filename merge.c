@@ -1,6 +1,7 @@
 #include "php_git2.h"
 #include "php_git2_priv.h"
 #include "merge.h"
+
 /* {{{ proto resource git_merge_base(resource $repo, string $one, string $two)
  */
 PHP_FUNCTION(git_merge_base)
@@ -202,24 +203,30 @@ PHP_FUNCTION(git_merge_trees)
 }
 /* }}} */
 
-/* {{{ proto resource git_merge(resource $repo, long $their_heads_len,  $opts)
+/* {{{ proto resource git_merge(resource $repo, array $their_heads, array $opts)
  */
 PHP_FUNCTION(git_merge)
 {
-	php_git2_t *result = NULL, *_repo = NULL;
+	php_git2_t *result = NULL, *_repo = NULL, *_their_head = NULL;
 	git_merge_result *out = NULL;
-	zval *repo = NULL, *opts = NULL;
+	zval *repo = NULL, *opts = NULL, *theirhead = NULL;
 	git_merge_head *their_heads = NULL;
+	git_merge_head *heads[1];
 	long their_heads_len = 0;
 	int error = 0;
+	git_merge_opts options = GIT_MERGE_OPTS_INIT;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rl<git_merge_opts>", &repo, &their_heads_len, &opts) == FAILURE) {
+		"rza", &repo, &theirhead, &opts) == FAILURE) {
 		return;
 	}
-	
+
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	error = git_merge(&out, PHP_GIT2_V(_repo, repository), &their_heads, their_heads_len, opts);
+	ZEND_FETCH_RESOURCE(_their_head, php_git2_t*, &theirhead, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
+	heads[0] = PHP_GIT2_V(_their_head, merge_head);
+	options.merge_flags = GIT_MERGE_NO_FASTFORWARD;
+
+	error = git_merge(&out, PHP_GIT2_V(_repo, repository), heads, 1, &options);
 	if (php_git2_check_error(error, "git_merge" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -289,7 +296,7 @@ PHP_FUNCTION(git_merge_result_fastforward_oid)
 		RETURN_FALSE;
 	}
 	git_oid_fmt(buf, &out);
-	RETURN_SRING(buf, 1);
+	RETURN_STRING(buf, 1);
 }
 /* }}} */
 
