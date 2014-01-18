@@ -2,6 +2,92 @@
 #include "php_git2_priv.h"
 #include "packbuilder.h"
 
+static int php_git2_git_packbuilder_progress(
+	int stage,
+	unsigned int current,
+	unsigned int total,
+	void *payload)
+{
+	php_git2_t *result;
+	zval *param_stage = NULL, *param_current = NULL, *param_total = NULL, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	int i = 0;
+	long retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	Z_ADDREF_P(p->payload);
+	MAKE_STD_ZVAL(param_stage);
+	MAKE_STD_ZVAL(param_current);
+	MAKE_STD_ZVAL(param_total);
+	ZVAL_LONG(param_stage, stage);
+	ZVAL_LONG(param_current, current);
+	ZVAL_LONG(param_total, total);
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 4,
+		&param_stage, &param_current, &param_total, &p->payload)) {
+		return GIT_EUSER;
+	}
+
+	if (retval_ptr) {
+		retval = Z_LVAL_P(retval_ptr);
+		zval_ptr_dtor(&retval_ptr);
+	}
+	return retval;
+}
+
+static int php_git2_git_packbuilder_foreach_cb(void *buf, size_t size, void *payload)
+{
+	php_git2_t *result;
+	zval *param_buf= NULL, *param_size = NULL, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	int i = 0;
+	long retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	Z_ADDREF_P(p->payload);
+	MAKE_STD_ZVAL(param_buf);
+	MAKE_STD_ZVAL(param_size);
+	ZVAL_STRINGL(param_buf, buf, size, 1);
+	ZVAL_LONG(param_size, size);
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 3,
+		&param_buf, &param_size, &p->payload)) {
+		return GIT_EUSER;
+	}
+
+	if (retval_ptr) {
+		retval = Z_LVAL_P(retval_ptr);
+		zval_ptr_dtor(&retval_ptr);
+	}
+	return retval;
+}
+
+
+static int php_git2_git_transfer_progress_callback(const git_transfer_progress *stats, void *payload)
+{
+	php_git2_t *result;
+	zval *param_stats = NULL, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	int i = 0;
+	long retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	Z_ADDREF_P(p->payload);
+	php_git2_git_transfer_progress_to_array(stats, &param_stats TSRMLS_CC);
+
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 2,
+		&param_stats, &p->payload)) {
+		return GIT_EUSER;
+	}
+
+	if (retval_ptr) {
+		retval = Z_LVAL_P(retval_ptr);
+		zval_ptr_dtor(&retval_ptr);
+	}
+	return retval;
+}
+
 /* {{{ proto resource git_packbuilder_new(resource $repo)
  */
 PHP_FUNCTION(git_packbuilder_new)
@@ -142,7 +228,7 @@ PHP_FUNCTION(git_packbuilder_write)
 	if (php_git2_cb_init(&cb, &fci, &fcc, progress_cb_payload TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	//result = git_packbuilder_write(PHP_GIT2_V(_pb, packbuilder), path, mode, <CHANGEME>, cb);
+	result = git_packbuilder_write(PHP_GIT2_V(_pb, packbuilder), path, mode, php_git2_git_transfer_progress_callback, cb);
 	php_git2_cb_free(cb);
 	RETURN_LONG(result);
 }
@@ -169,6 +255,7 @@ PHP_FUNCTION(git_packbuilder_hash)
 }
 /* }}} */
 
+
 /* {{{ proto long git_packbuilder_foreach(resource $pb, Callable $cb,  $payload)
  */
 PHP_FUNCTION(git_packbuilder_foreach)
@@ -189,7 +276,7 @@ PHP_FUNCTION(git_packbuilder_foreach)
 	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	//result = git_packbuilder_foreach(PHP_GIT2_V(_pb, packbuilder), <CHANGEME>, cb);
+	result = git_packbuilder_foreach(PHP_GIT2_V(_pb, packbuilder), php_git2_git_packbuilder_foreach_cb, cb);
 	php_git2_cb_free(cb);
 	RETURN_LONG(result);
 }
@@ -240,8 +327,8 @@ PHP_FUNCTION(git_packbuilder_set_callbacks)
 	int result = 0, error = 0;
 	zval *pb = NULL, *progress_cb = NULL, *progress_cb_payload = NULL;
 	php_git2_t *_pb = NULL;
-	zend_fcall_info fci = empty_fcall_info;
-	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	zend_fcall_info fci = empty_fcall_info, *_fci;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache, *_fcc;
 	php_git2_cb_t *cb = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -250,11 +337,16 @@ PHP_FUNCTION(git_packbuilder_set_callbacks)
 	}
 	
 	ZEND_FETCH_RESOURCE(_pb, php_git2_t*, &pb, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	if (php_git2_cb_init(&cb, &fci, &fcc, progress_cb_payload TSRMLS_CC)) {
+	_fci = emalloc(sizeof(zend_fcall_info));
+	_fcc = emalloc(sizeof(zend_fcall_info_cache));
+	memcpy(_fci, &fci, sizeof(zend_fcall_info));
+	memcpy(_fcc, &fcc, sizeof(zend_fcall_info_cache));
+
+	/* TODO(chobie): free memory when the resource removed */
+	if (php_git2_cb_init(&cb, &_fci, &_fcc, progress_cb_payload TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	//result = git_packbuilder_set_callbacks(PHP_GIT2_V(_pb, packbuilder), <CHANGEME>, cb);
-	php_git2_cb_free(cb);
+	result = git_packbuilder_set_callbacks(PHP_GIT2_V(_pb, packbuilder), php_git2_git_packbuilder_progress, cb);
 	RETURN_LONG(result);
 }
 /* }}} */

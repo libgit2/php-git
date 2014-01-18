@@ -92,4 +92,6 @@ int php_git2_git_diff_line_cb(
 	const git_diff_line *line,
 	void *payload);
 
+void php_git2_git_transfer_progress_to_array(git_transfer_progress *progress, zval **out TSRMLS_DC);
+
 #endif

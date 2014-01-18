@@ -738,3 +738,20 @@ int php_git2_git_diff_line_cb(
 	return retval;
 }
 
+void php_git2_git_transfer_progress_to_array(git_transfer_progress *progress, zval **out TSRMLS_DC)
+{
+	zval *result;
+
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+
+	add_assoc_long_ex(result, ZEND_STRS("total_objects"), progress->total_objects);
+	add_assoc_long_ex(result, ZEND_STRS("indexed_objects"), progress->indexed_objects);
+	add_assoc_long_ex(result, ZEND_STRS("received_objects"), progress->received_objects);
+	add_assoc_long_ex(result, ZEND_STRS("local_objects"), progress->local_objects);
+	add_assoc_long_ex(result, ZEND_STRS("total_deltas"), progress->total_deltas);
+	add_assoc_long_ex(result, ZEND_STRS("indexed_deltas"), progress->indexed_deltas);
+	add_assoc_long_ex(result, ZEND_STRS("received_bytes"), progress->received_bytes);
+
+	*out = result;
+}
