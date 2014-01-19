@@ -2,6 +2,36 @@
 #include "php_git2_priv.h"
 #include "submodule.h"
 
+static int php_git2_git_submodule_foreach_cb(git_submodule *sm, const char *name, void *payload)
+{
+	php_git2_t *result, *submodule;
+	zval *param_sm, *param_name, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	int i = 0;
+	long retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	Z_ADDREF_P(p->payload);
+	MAKE_STD_ZVAL(param_sm);
+	MAKE_STD_ZVAL(param_name);
+	if (php_git2_make_resource(&submodule, PHP_GIT2_TYPE_SUBMODULE, sm, 0 TSRMLS_CC)) {
+		return GIT_EUSER;
+	}
+	ZVAL_RESOURCE(param_sm, GIT2_RVAL_P(submodule));
+
+	ZVAL_STRING(param_name, name, 1);
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 3,
+		&param_sm, &param_name, &p->payload)) {
+		return GIT_EUSER;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	return retval;
+
+
+}
+
 /* {{{ proto long git_submodule_lookup(resource $repo, string $name)
  */
 PHP_FUNCTION(git_submodule_lookup)
@@ -9,7 +39,7 @@ PHP_FUNCTION(git_submodule_lookup)
 	int result = 0, name_len = 0, error = 0;
 	git_submodule *submodule = NULL;
 	zval *repo = NULL;
-	php_git2_t *_repo = NULL;
+	php_git2_t *_repo = NULL, *_result = NULL;
 	char *name = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -19,27 +49,35 @@ PHP_FUNCTION(git_submodule_lookup)
 	
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_submodule_lookup(&submodule, PHP_GIT2_V(_repo, repository), name);
-	RETURN_LONG(result);
+	if (php_git2_make_resource(&_result, PHP_GIT2_TYPE_SUBMODULE, submodule, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(_result));
 }
 /* }}} */
 
-/* {{{ proto long git_submodule_foreach(resource $repo, long $sm, string $name, $payload)
+/* {{{ proto long git_submodule_foreach(resource $repo, Callable $callback, $payload)
  */
 PHP_FUNCTION(git_submodule_foreach)
 {
 	int result = 0, name_len = 0, error = 0;
 	zval *repo = NULL, *payload = NULL;
 	php_git2_t *_repo = NULL;
-	long sm = 0;
-	char *name = NULL;
-	
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	php_git2_cb_t *cb = NULL;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"rls<void><void>", &repo, &sm, &name, &name_len, &payload) == FAILURE) {
+		"rfz", &repo, &fci, &fcc, &payload) == FAILURE) {
 		return;
 	}
 	
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	//result = git_submodule_foreach(PHP_GIT2_V(_repo, repository), sm, name, cb);
+	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	result = git_submodule_foreach(PHP_GIT2_V(_repo, repository), php_git2_git_submodule_foreach_cb, cb);
+	php_git2_cb_free(cb);
 	RETURN_LONG(result);
 }
 /* }}} */
@@ -139,7 +177,7 @@ PHP_FUNCTION(git_submodule_owner)
 	
 	ZEND_FETCH_RESOURCE(_submodule, php_git2_t*, &submodule, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_submodule_owner(PHP_GIT2_V(_submodule, submodule));
-	if (php_git2_make_resource(&__result, PHP_GIT2_TYPE_SUBMODULE, result, 1 TSRMLS_CC)) {
+	if (php_git2_make_resource(&__result, PHP_GIT2_TYPE_REPOSITORY, result, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(__result));
@@ -223,7 +261,7 @@ PHP_FUNCTION(git_submodule_set_url)
 }
 /* }}} */
 
-/* {{{ proto resource git_submodule_index_id(resource $submodule)
+/* {{{ proto string git_submodule_index_id(resource $submodule)
  */
 PHP_FUNCTION(git_submodule_index_id)
 {
@@ -244,7 +282,7 @@ PHP_FUNCTION(git_submodule_index_id)
 }
 /* }}} */
 
-/* {{{ proto resource git_submodule_head_id(resource $submodule)
+/* {{{ proto string git_submodule_head_id(resource $submodule)
  */
 PHP_FUNCTION(git_submodule_head_id)
 {
@@ -265,7 +303,7 @@ PHP_FUNCTION(git_submodule_head_id)
 }
 /* }}} */
 
-/* {{{ proto resource git_submodule_wd_id(resource $submodule)
+/* {{{ proto string git_submodule_wd_id(resource $submodule)
  */
 PHP_FUNCTION(git_submodule_wd_id)
 {
@@ -286,7 +324,7 @@ PHP_FUNCTION(git_submodule_wd_id)
 }
 /* }}} */
 
-/* {{{ proto resource git_submodule_ignore(resource $submodule)
+/* {{{ proto long git_submodule_ignore(resource $submodule)
  */
 PHP_FUNCTION(git_submodule_ignore)
 {
@@ -301,26 +339,27 @@ PHP_FUNCTION(git_submodule_ignore)
 	
 	ZEND_FETCH_RESOURCE(_submodule, php_git2_t*, &submodule, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_submodule_ignore(PHP_GIT2_V(_submodule, submodule));
-	/* TODO(chobie): implement this */
+	RETURN_LONG(result);
 }
 /* }}} */
 
-/* {{{ proto resource git_submodule_set_ignore(resource $submodule,  $ignore)
+/* {{{ proto long git_submodule_set_ignore(resource $submodule,  $ignore)
  */
 PHP_FUNCTION(git_submodule_set_ignore)
 {
 	git_submodule_ignore_t *result = NULL;
-	zval *submodule = NULL, *ignore = NULL;
+	zval *submodule = NULL;
 	php_git2_t *_submodule = NULL;
+	long ignore = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"r<git_submodule_ignore_t>", &submodule, &ignore) == FAILURE) {
+		"rl", &submodule, &ignore) == FAILURE) {
 		return;
 	}
 	
 	ZEND_FETCH_RESOURCE(_submodule, php_git2_t*, &submodule, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_submodule_set_ignore(PHP_GIT2_V(_submodule, submodule), ignore);
-	/* TODO(chobie): implement this */
+	RETURN_LONG(result);
 }
 /* }}} */
 
@@ -339,7 +378,7 @@ PHP_FUNCTION(git_submodule_update)
 	
 	ZEND_FETCH_RESOURCE(_submodule, php_git2_t*, &submodule, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_submodule_update(PHP_GIT2_V(_submodule, submodule));
-	/* TODO(chobie): implement this */
+	RETURN_LONG(result);
 }
 /* }}} */
 
@@ -348,17 +387,18 @@ PHP_FUNCTION(git_submodule_update)
 PHP_FUNCTION(git_submodule_set_update)
 {
 	git_submodule_update_t *result = NULL;
-	zval *submodule = NULL, *update = NULL;
+	zval *submodule = NULL;
 	php_git2_t *_submodule = NULL;
+	long update = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"r<git_submodule_update_t>", &submodule, &update) == FAILURE) {
+		"rl", &submodule, &update) == FAILURE) {
 		return;
 	}
 	
 	ZEND_FETCH_RESOURCE(_submodule, php_git2_t*, &submodule, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_submodule_set_update(PHP_GIT2_V(_submodule, submodule), update);
-	/* TODO(chobie): implement this */
+	RETURN_LONG(result);
 }
 /* }}} */
 
