@@ -391,7 +391,7 @@ void php_git2_git_checkout_progress_cb(const char *path,
 }
 
 
-static void php_git2_fcall_info_wrapper(zval *target, zend_fcall_info **out_fci, zend_fcall_info_cache **out_fcc TSRMLS_DC)
+void php_git2_fcall_info_wrapper(zval *target, zend_fcall_info **out_fci, zend_fcall_info_cache **out_fcc TSRMLS_DC)
 {
 	char *is_callable_error = NULL;
 	zend_fcall_info *fci = NULL;
@@ -416,6 +416,27 @@ static void php_git2_fcall_info_wrapper(zval *target, zend_fcall_info **out_fci,
 	*out_fci = fci;
 	*out_fcc = fcc;
 }
+
+void php_git2_fcall_info_wrapper2(zval *target, zend_fcall_info *fci, zend_fcall_info_cache *fcc TSRMLS_DC)
+{
+	char *is_callable_error = NULL;
+
+	memcpy(fci, &empty_fcall_info, sizeof(zend_fcall_info));
+	memcpy(fcc, &empty_fcall_info_cache, sizeof(zend_fcall_info_cache));
+
+	if (zend_fcall_info_init(target, 0, fci, fcc, NULL, &is_callable_error TSRMLS_CC) == SUCCESS) {
+		if (is_callable_error) {
+			efree(is_callable_error);
+		}
+	} else {
+		fprintf(stderr, "FAILED");
+		efree(fci);
+		efree(fcc);
+		return;
+	}
+}
+
+
 
 int php_git2_array_to_git_checkout_opts(git_checkout_opts **out, zval *array TSRMLS_DC)
 {

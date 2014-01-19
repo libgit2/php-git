@@ -105,6 +105,17 @@ void static destruct_git2(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 			case PHP_GIT2_TYPE_OBJECT:
 				git_object_free(PHP_GIT2_V(resource, object));
 				break;
+			case PHP_GIT2_TYPE_FILTER:
+			{
+				php_git2_filter *filter = (php_git2_filter*)PHP_GIT2_V(resource, filter);
+				zval_ptr_dtor(&filter->multi->payload);
+				php_git2_multi_cb_free(filter->multi);
+				efree(filter);
+				break;
+			}
+			case PHP_GIT2_TYPE_FILTER_LIST:
+				git_filter_list_free(PHP_GIT2_V(resource, filter_list));
+				break;
 		}
 	}
 
@@ -269,6 +280,9 @@ int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, v
 			break;
 		case PHP_GIT2_TYPE_PUSH:
 			PHP_GIT2_V(result, push) = (git_push*)resource;
+			break;
+		case PHP_GIT2_TYPE_FILTER:
+			PHP_GIT2_V(result, filter) = (git_filter*)resource;
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "passed resource type does not support. probably bug.");
@@ -706,6 +720,7 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_filter_source_mode, arginfo_git_filter_source_mode)
 	PHP_FE(git_filter_register, arginfo_git_filter_register)
 	PHP_FE(git_filter_unregister, arginfo_git_filter_unregister)
+	PHP_FE(git_filter_new, arginfo_git_filter_new)
 
 	/* ignore */
 	PHP_FE(git_ignore_add_rule, arginfo_git_ignore_add_rule)

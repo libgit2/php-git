@@ -77,6 +77,17 @@ ZEND_EXTERN_MODULE_GLOBALS(git2)
 
 #define PHP_GIT2_RESOURCE_NAME "git2"
 
+
+#ifdef ZTS
+#define GIT2_TSRMLS_SET(target) void ***tsrm_ls = target;
+#define GIT2_TSRMLS_DECL void ***tsrm_ls;
+#define GIT2_TSRMLS_SET2(target, value) target->tsrm_ls = value;
+#else
+#define GIT2_TSRMLS_SET(target)
+#define GIT2_TSRMLS_SET2(target, value)
+#define GIT2_TSRMLS_DECL
+#endif
+
 enum php_git2_resource_type {
 	PHP_GIT2_TYPE_REPOSITORY,
 	PHP_GIT2_TYPE_COMMIT,
@@ -126,6 +137,7 @@ enum php_git2_resource_type {
 	PHP_GIT2_TYPE_PUSH,
 	PHP_GIT2_TYPE_REFSPEC,
 	PHP_GIT2_TYPE_INDEXER,
+	PHP_GIT2_TYPE_FILTER, /* for conventional reason */
 };
 
 typedef struct php_git2_t {
@@ -179,10 +191,36 @@ typedef struct php_git2_t {
 		git_push *push;
 		git_refspec *refspec;
 		git_indexer *indexer;
+		git_filter *filter;
 	} v;
 	int should_free_v;
 	int resource_id;
 	int mutable;
 } php_git2_t;
+
+typedef struct php_git2_cb_t {
+	zval *payload;
+	zend_fcall_info *fci;
+	zend_fcall_info_cache *fcc;
+	GIT2_TSRMLS_DECL
+} php_git2_cb_t;
+
+typedef struct php_git2_fcall_t {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval *value;
+} php_git2_fcall_t;
+
+typedef struct php_git2_multi_cb_t {
+	int num_callbacks;
+	php_git2_fcall_t *callbacks;
+	zval *payload;
+	GIT2_TSRMLS_DECL
+} php_git2_multi_cb_t;
+
+typedef struct php_git2_filter {
+	git_filter super;
+	php_git2_multi_cb_t *multi;
+} php_git2_filter;
 
 #endif /* PHP_GIT2_H */

@@ -38,16 +38,6 @@ extern int git2_resource_handle;
 #define GIT2_RVAL_P(git2) git2->resource_id
 #define GIT2_SHOULD_FREE(git2) git2->should_free_v
 
-#ifdef ZTS
-#define GIT2_TSRMLS_SET(target) void ***tsrm_ls = target;
-#define GIT2_TSRMLS_DECL void ***tsrm_ls;
-#define GIT2_TSRMLS_SET2(target, value) target->tsrm_ls = value;
-#else
-#define GIT2_TSRMLS_SET(target)
-#define GIT2_TSRMLS_SET2(target, value)
-#define GIT2_TSRMLS_DECL
-#endif
-
 #define PHP_GIT2_MAKE_RESOURCE(val) \
 do {\
 	val = (php_git2_t *)emalloc(sizeof(php_git2_t));\
@@ -71,27 +61,6 @@ do {\
 
 #define GIT2_OID_HEXSIZE (GIT_OID_HEXSZ+1)
 #define GIT2_BUFFER_SIZE 512
-
-
-typedef struct php_git2_cb_t {
-	zval *payload;
-	zend_fcall_info *fci;
-	zend_fcall_info_cache *fcc;
-	GIT2_TSRMLS_DECL
-} php_git2_cb_t;
-
-typedef struct php_git2_fcall_t {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-	zval *value;
-} php_git2_fcall_t;
-
-typedef struct php_git2_multi_cb_t {
-	int num_callbacks;
-	php_git2_fcall_t *callbacks;
-	zval *payload;
-	GIT2_TSRMLS_DECL
-} php_git2_multi_cb_t;
 
 int php_git2_make_resource(php_git2_t **out, enum php_git2_resource_type type, void *resource, int should_free TSRMLS_DC);
 

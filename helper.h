@@ -94,4 +94,8 @@ int php_git2_git_diff_line_cb(
 
 void php_git2_git_transfer_progress_to_array(git_transfer_progress *progress, zval **out TSRMLS_DC);
 
+void php_git2_fcall_info_wrapper(zval *target, zend_fcall_info **out_fci, zend_fcall_info_cache **out_fcc TSRMLS_DC);
+
+void php_git2_fcall_info_wrapper2(zval *target, zend_fcall_info *fci, zend_fcall_info_cache *fcc TSRMLS_DC);
+
 #endif

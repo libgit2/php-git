@@ -26,7 +26,7 @@
 #ifndef PHP_GIT2_FILTER_H
 #define PHP_GIT2_FILTER_H
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_git_filter_list_load, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_filter_list_load, 0, 0, 1)
 	ZEND_ARG_INFO(0, repo)
 	ZEND_ARG_INFO(0, blob)
 	ZEND_ARG_INFO(0, path)
@@ -103,6 +103,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_filter_unregister, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_filter_new, 0, 0, 1)
+	ZEND_ARG_INFO(0, payload)
+ZEND_END_ARG_INFO()
+
 /* {{{ proto resource git_filter_list_load(repo, blob, path, mode)
 */
 PHP_FUNCTION(git_filter_list_load);
@@ -166,5 +170,9 @@ PHP_FUNCTION(git_filter_register);
 /* {{{ proto long git_filter_unregister(name)
 */
 PHP_FUNCTION(git_filter_unregister);
+
+/* {{{ proto resource git_filter_new(payload)
+*/
+PHP_FUNCTION(git_filter_new);
 
 #endif

@@ -8,6 +8,25 @@ php-git2 is a PHP bindings to the libgit2 linkable C Git library.
 
 https://docs.google.com/spreadsheet/ccc?key=0AjvShWAWqvfHdDRneEtIUF9GRUZMNVVVR1hpdURiUWc&usp=sharing
 
+## How to build
+
+```
+# build libgit2.a
+git submodule init && git submodule update
+mkdir libgit2/build
+cd libgit2/build
+cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF .
+cmake --build .
+
+# build php-git2
+cd ../../
+phpize
+./configure --enable-git2-debug
+make
+make install
+# add extension=git2.so to your php.ini
+```
+
 ## For Contributors
 
 ##### Issue first.
