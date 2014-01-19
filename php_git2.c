@@ -664,6 +664,7 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_status_byindex, arginfo_git_status_byindex)
 	PHP_FE(git_status_list_free, arginfo_git_status_list_free)
 	PHP_FE(git_status_should_ignore, arginfo_git_status_should_ignore)
+	PHP_FE(git_status_options_new, NULL)
 
 	/* transport */
 	PHP_FE(git_transport_new, arginfo_git_transport_new)

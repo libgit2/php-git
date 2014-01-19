@@ -101,4 +101,6 @@ PHP_FUNCTION(git_status_list_free);
 */
 PHP_FUNCTION(git_status_should_ignore);
 
+PHP_FUNCTION(git_status_options_new);
+
 #endif

@@ -43,6 +43,19 @@ zval* php_git2_read_arrval(zval *array, char *name, size_t name_len TSRMLS_DC)
 	return result;
 }
 
+long php_git2_read_arrval_long2(zval *array, char *name, size_t name_len, long value TSRMLS_DC)
+{
+	zval *tmp;
+	long result = value;
+
+	tmp = php_git2_read_arrval(array, name, name_len TSRMLS_CC);
+	if (tmp) {
+		result = Z_LVAL_P(tmp);
+	}
+
+	return result;
+}
+
 long php_git2_read_arrval_long(zval *array, char *name, size_t name_len TSRMLS_DC)
 {
 	zval *tmp;
