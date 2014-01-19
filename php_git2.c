@@ -116,6 +116,14 @@ void static destruct_git2(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 			case PHP_GIT2_TYPE_FILTER_LIST:
 				git_filter_list_free(PHP_GIT2_V(resource, filter_list));
 				break;
+			case PHP_GIT2_TYPE_ODB_BACKEND:
+			{
+				php_git2_odb_backend *backend = (php_git2_odb_backend*)PHP_GIT2_V(resource, odb_backend);
+				zval_ptr_dtor(&backend->multi->payload);
+				php_git2_multi_cb_free(backend->multi);
+				efree(PHP_GIT2_V(resource, odb_backend));
+				break;
+			}
 		}
 	}
 
@@ -845,6 +853,8 @@ static zend_function_entry php_git2_functions[] = {
 	PHP_FE(git_odb_add_alternate, arginfo_git_odb_add_alternate)
 	PHP_FE(git_odb_num_backends, arginfo_git_odb_num_backends)
 	PHP_FE(git_odb_get_backend, arginfo_git_odb_get_backend)
+
+	PHP_FE(git_odb_backend_new, arginfo_git_odb_backend_new)
 
 	/* reflog */
 	PHP_FE(git_reflog_read, arginfo_git_reflog_read)

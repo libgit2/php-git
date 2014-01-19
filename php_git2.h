@@ -52,6 +52,7 @@
 #include "git2/odb_backend.h"
 #include "git2/trace.h"
 #include "git2/sys/filter.h"
+#include "git2/sys/odb_backend.h"
 
 #include "date/php_date.h"
 
@@ -222,5 +223,10 @@ typedef struct php_git2_filter {
 	git_filter super;
 	php_git2_multi_cb_t *multi;
 } php_git2_filter;
+
+typedef struct php_git2_odb_backend {
+	git_odb_backend parent;
+	php_git2_multi_cb_t *multi;
+} php_git2_odb_backend;
 
 #endif /* PHP_GIT2_H */

@@ -173,6 +173,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_git_odb_get_backend, 0, 0, 2)
 	ZEND_ARG_INFO(0, pos)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_git_odb_backend_new, 0, 0, 1)
+	ZEND_ARG_INFO(0, callbacks)
+ZEND_END_ARG_INFO()
+
 /* {{{ proto resource git_odb_new()
 */
 PHP_FUNCTION(git_odb_new);
@@ -292,5 +296,7 @@ PHP_FUNCTION(git_odb_num_backends);
 /* {{{ proto resource git_odb_get_backend(odb, pos)
 */
 PHP_FUNCTION(git_odb_get_backend);
+
+PHP_FUNCTION(git_odb_backend_new);
 
 #endif

@@ -287,7 +287,7 @@ PHP_FUNCTION(git_repository_wrap_odb)
 	if (php_git2_check_error(error, "git_repository_wrap_odb" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REPOSITORY, result, 1 TSRMLS_CC)) {
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REPOSITORY, out, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
@@ -343,7 +343,7 @@ PHP_FUNCTION(git_repository_open_ext)
 	if (php_git2_check_error(error, "git_repository_open_ext" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REPOSITORY, result, 1 TSRMLS_CC)) {
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REPOSITORY, out, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
@@ -392,7 +392,7 @@ PHP_FUNCTION(git_repository_init_ext)
 	if (php_git2_check_error(error, "git_repository_init_ext" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REPOSITORY, result, 1 TSRMLS_CC)) {
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REPOSITORY, out, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
@@ -420,7 +420,7 @@ PHP_FUNCTION(git_repository_head)
 	if (php_git2_check_error(error, "git_repository_head" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, result, 1 TSRMLS_CC)) {
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFERENCE, out, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
@@ -573,7 +573,7 @@ PHP_FUNCTION(git_repository_config)
 	if (php_git2_check_error(error, "git_repository_config" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_CONFIG, result, 1 TSRMLS_CC)) {
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_CONFIG, out, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
@@ -601,7 +601,7 @@ PHP_FUNCTION(git_repository_odb)
 	if (php_git2_check_error(error, "git_repository_odb" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_ODB, result, 1 TSRMLS_CC)) {
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_ODB, out, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
@@ -629,7 +629,7 @@ PHP_FUNCTION(git_repository_refdb)
 	if (php_git2_check_error(error, "git_repository_refdb" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFDB, result, 1 TSRMLS_CC)) {
+	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_REFDB, out, 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	ZVAL_RESOURCE(return_value, GIT2_RVAL_P(result));
