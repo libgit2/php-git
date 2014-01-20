@@ -156,13 +156,14 @@ PHP_FUNCTION(git_odb_read_header)
 {
 	php_git2_t *result = NULL, *_db = NULL;
 	size_t len_out = NULL;
-	zval *type_out = NULL, *db = NULL;
+	zval *db = NULL, *_result = NULL;
+	git_otype type_out;
 	char *id = NULL;
 	int id_len = 0, error = 0;
 	git_oid __id = {0};
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"<git_otype>rs", &type_out, &db, &id, &id_len) == FAILURE) {
+		"rs", &db, &id, &id_len) == FAILURE) {
 		return;
 	}
 	
@@ -170,11 +171,15 @@ PHP_FUNCTION(git_odb_read_header)
 	if (git_oid_fromstrn(&__id, id, id_len)) {
 		RETURN_FALSE;
 	}
-	error = git_odb_read_header(&len_out, type_out, PHP_GIT2_V(_db, odb), &__id);
+	error = git_odb_read_header(&len_out, &type_out, PHP_GIT2_V(_db, odb), &__id);
 	if (php_git2_check_error(error, "git_odb_read_header" TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG(len_out);
+	MAKE_STD_ZVAL(_result);
+	array_init(_result);
+	add_next_index_long(_result, len_out);
+	add_next_index_long(_result, type_out);
+	RETURN_ZVAL(_result, 0, 1);
 }
 /* }}} */
 
@@ -791,6 +796,39 @@ static int php_git2_odb_backend_read_prefix(git_oid *out_oid,
 
 static int php_git2_odb_backend_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *backend, const git_oid *oid)
 {
+	php_git2_t *result;
+	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)backend;
+	zval *param_oid = NULL, *retval_ptr = NULL;
+	php_git2_multi_cb_t *p = php_backend->multi;
+	int i = 0, retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls);
+	char buf[41] = {0};
+
+	git_oid_fmt(buf, oid);
+	MAKE_STD_ZVAL(param_oid);
+	ZVAL_STRING(param_oid, buf, 1);
+
+	if (php_git2_call_function_v(&p->callbacks[3].fci, &p->callbacks[3].fcc TSRMLS_CC, &retval_ptr, 1, &param_oid)) {
+		return GIT_EUSER;
+	}
+	if (Z_TYPE_P(retval_ptr) == IS_ARRAY) {
+		zval **value, **otype;
+
+		if (zend_hash_num_elements(Z_ARRVAL_P(retval_ptr)) != 2) {
+			return GIT_ENOTFOUND;
+		}
+
+		zend_hash_get_current_data(Z_ARRVAL_P(retval_ptr), (void **)&value);
+		*len_p = Z_LVAL_PP(value);
+		zend_hash_move_forward(Z_ARRVAL_P(retval_ptr));
+		zend_hash_get_current_data(Z_ARRVAL_P(retval_ptr), (void **)&otype);
+		*type_p = Z_LVAL_PP(otype);
+	} else {
+		retval = GIT_ENOTFOUND;
+	}
+
+	zval_ptr_dtor(&retval_ptr);
+	return retval;
 }
 static int php_git2_odb_backend_writestream(git_odb_stream **stream_out, git_odb_backend *_backend, size_t length, git_otype type)
 {
@@ -868,6 +906,10 @@ PHP_FUNCTION(git_odb_backend_new)
 		php_git2_fcall_info_wrapper2(tmp, &write_fci, &write_fcc TSRMLS_CC);
 	}
 
+	tmp = php_git2_read_arrval(callbacks, ZEND_STRS("read_header") TSRMLS_CC);
+	if (tmp) {
+		php_git2_fcall_info_wrapper2(tmp, &read_header_fci, &read_header_fcc TSRMLS_CC);
+	}
 	tmp = php_git2_read_arrval(callbacks, ZEND_STRS("exists") TSRMLS_CC);
 	if (tmp) {
 		php_git2_fcall_info_wrapper2(tmp, &exists_fci, &exists_fcc TSRMLS_CC);

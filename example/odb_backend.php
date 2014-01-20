@@ -13,13 +13,20 @@ $a = array(
             Pool::$pool[$oid][1],
         );
     },
-    "read_prefix" => function(){
-            echo "Helo WOrld";
-
+    "read_prefix" => function($short_oid){
+            echo "Helo World";
+            return array(
+                "Buffer",
+                "type",
+                "actual_oid",
+            );
     },
-    "read_header" => function() {
-            echo "Helo WOrld";
-
+    "read_header" => function($oid) {
+            echo "\e[32m# read header$oid\e[m\n";
+            return array(
+                strlen(Pool::$pool[$oid][0]),
+                Pool::$pool[$oid][1],
+            );
     },
     "write" => function($oid, $buffer, $otype) {
             echo "\e[32m# write $oid\e[m\n";
@@ -63,4 +70,8 @@ $oid = git_odb_write($odb, "Helo World(php memory backend)", GIT_OBJ_BLOB);
 $obj = git_odb_read($odb, $oid);
 
 echo git_odb_object_data($obj);
+echo "\n";
+
+$header = git_odb_read_header($odb, $oid);
+var_dump($header); // size, otype
 exit;
