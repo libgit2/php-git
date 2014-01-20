@@ -14,11 +14,20 @@ $a = array(
         );
     },
     "read_prefix" => function($short_oid){
-            echo "Helo World";
+            echo "\e[32m# read_prefix $short_oid\e[m\n";
+
+            $actual_oid = null;
+            foreach (Pool::$pool as $key => $value) {
+                if (preg_match("/^{$short_oid}/", $key)) {
+                    $actual_oid = $key;
+                    break;
+                }
+            }
+
             return array(
-                "Buffer",
-                "type",
-                "actual_oid",
+                Pool::$pool[$actual_oid][0],
+                Pool::$pool[$actual_oid][1],
+                $actual_oid,
             );
     },
     "read_header" => function($oid) {
@@ -45,7 +54,6 @@ $a = array(
             }
 
             echo "\e[32m# exists $retval\e[m\n";
-
             return $retval;
     },
     "refresh" => function() {
@@ -74,4 +82,7 @@ echo "\n";
 
 $header = git_odb_read_header($odb, $oid);
 var_dump($header); // size, otype
+
+$obj = git_odb_read_prefix($odb, substr($oid, 0, 10));
+var_dump($obj);
 exit;
