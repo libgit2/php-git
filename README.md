@@ -19,7 +19,7 @@ you need to install libgit2 before make php-git.
 
 ````
 git clone https://github.com/libgit2/php-git.git --recursive
-cd libgit2
+cd php-git/libgit2
 mkdir build && cd build
 cmake ..
 cmake -DBUILD_SHARED_LIBS=OFF -build .
