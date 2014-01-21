@@ -933,8 +933,27 @@ static int php_git2_odb_backend_exists(git_odb_backend *backend, const git_oid *
 	return !retval;
 
 }
-static int php_git2_odb_backend_foreach(git_odb_backend *_backend, git_odb_foreach_cb cb, void *data)
+static int php_git2_odb_backend_foreach(git_odb_backend *backend, git_odb_foreach_cb cb, void *data)
 {
+	php_git2_t *result;
+	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)backend;
+	zval *param_callback = NULL, *retval_ptr = NULL, *param_payload = (zval*)data;
+	php_git2_multi_cb_t *p = php_backend->multi;
+	int i = 0, retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls);
+
+	MAKE_STD_ZVAL(param_callback);
+	// TODO(chobie): wrap git_odb_foreach_cb with closure
+	// see zend_create_closure
+
+	if (php_git2_call_function_v(&p->callbacks[6].fci, &p->callbacks[6].fcc TSRMLS_CC, &retval_ptr, 2,
+		&param_callback, &param_payload)) {
+		return GIT_EUSER;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	return retval;
 }
 static void php_git2_odb_backend_free(git_odb_backend *_backend)
 {

@@ -59,8 +59,13 @@ $a = array(
     "refresh" => function() {
 
     },
-    "foreach" => function() {
-
+    "foreach" => function($foreach_cb, &$payload) { // this payload was passed by git_odb_foreach callback.
+            foreach (Pool::$pool as $oid => $value) {
+                $retval = $foreach_cb($oid, $payload);
+                if ($retval == GIT_EUSER) {
+                    return $retval;
+                }
+            }
     },
     "writepack" => function() {
 
@@ -85,4 +90,10 @@ var_dump($header); // size, otype
 
 $obj = git_odb_read_prefix($odb, substr($oid, 0, 10));
 var_dump($obj);
+
+
+$payload = array();
+git_odb_foreach($odb, function($oid, &$payload) {
+    echo $oid . PHP_EOL;
+}, $payload);
 exit;
