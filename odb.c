@@ -2,6 +2,31 @@
 #include "php_git2_priv.h"
 #include "odb.h"
 
+static int php_git2_git_odb_foreach_cb(const git_oid *id, void *payload)
+{
+	php_git2_t *result;
+	zval *param_oid, *retval_ptr = NULL;
+	php_git2_cb_t *p = (php_git2_cb_t*)payload;
+	int i = 0;
+	long retval = 0;
+	char buf[41] = {0};
+	GIT2_TSRMLS_SET(p->tsrm_ls)
+
+	Z_ADDREF_P(p->payload);
+	MAKE_STD_ZVAL(param_oid);
+
+	git_oid_fmt(buf, id);
+	ZVAL_STRING(param_oid, buf, 1);
+
+	if (php_git2_call_function_v(p->fci, p->fcc TSRMLS_CC, &retval_ptr, 2, &param_oid, &p->payload)) {
+		return GIT_EUSER;
+	}
+
+	retval = Z_LVAL_P(retval_ptr);
+	zval_ptr_dtor(&retval_ptr);
+	return retval;
+}
+
 /* {{{ proto resource git_odb_new()
  */
 PHP_FUNCTION(git_odb_new)
@@ -246,8 +271,7 @@ PHP_FUNCTION(git_odb_foreach)
 	if (php_git2_cb_init(&cb, &fci, &fcc, payload TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	// TODO(chobie): implment callback */
-	//result = git_odb_foreach(PHP_GIT2_V(_db, odb), <CHANGEME>, cb);
+	result = git_odb_foreach(PHP_GIT2_V(_db, odb), php_git2_git_odb_foreach_cb, cb);
 	php_git2_cb_free(cb);
 	RETURN_LONG(result);
 }
@@ -963,6 +987,10 @@ PHP_FUNCTION(git_odb_backend_new)
 	tmp = php_git2_read_arrval(callbacks, ZEND_STRS("exists") TSRMLS_CC);
 	if (tmp) {
 		php_git2_fcall_info_wrapper2(tmp, &exists_fci, &exists_fcc TSRMLS_CC);
+	}
+	tmp = php_git2_read_arrval(callbacks, ZEND_STRS("foreach") TSRMLS_CC);
+	if (tmp) {
+		php_git2_fcall_info_wrapper2(tmp, &foreach_fci, &foreach_fcc TSRMLS_CC);
 	}
 
 
