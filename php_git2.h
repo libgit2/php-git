@@ -229,4 +229,12 @@ typedef struct php_git2_odb_backend {
 	php_git2_multi_cb_t *multi;
 } php_git2_odb_backend;
 
+typedef struct php_git2_odb_backend_foreach_callback {
+	zend_object zo;
+	git_odb_foreach_cb callback;
+	php_git2_cb_t *payload;
+} php_git2_odb_backend_foreach_callback;
+
+extern zend_class_entry *php_git2_odb_backend_foreach_callback_class_entry;
+
 #endif /* PHP_GIT2_H */

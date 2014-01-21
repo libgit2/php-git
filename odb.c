@@ -933,21 +933,76 @@ static int php_git2_odb_backend_exists(git_odb_backend *backend, const git_oid *
 	return !retval;
 
 }
+
+static const zend_arg_info arginfo_git_odb_backend_foreach_callback[] = {
+	ZEND_ARG_INFO(0, oid)
+	ZEND_ARG_INFO(1, payload)
+};
+
+static void git_ex_cb(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval *payload, *this = getThis();
+	php_git2_odb_backend_foreach_callback *_callback;
+	char *oid;
+	int oid_len, retval = 0;
+	git_oid _oid;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"sz", &oid, &oid_len, &payload) == FAILURE) {
+		return;
+	}
+
+	if (git_oid_fromstrn(&_oid, oid, oid_len) != GIT_OK) {
+		return;
+	}
+
+	_callback = (php_git2_odb_backend_foreach_callback*)zend_object_store_get_object(this TSRMLS_CC);
+	_callback->payload->payload = payload;
+	retval = _callback->callback(&_oid, _callback->payload);
+	RETURN_LONG(retval);
+}
+
 static int php_git2_odb_backend_foreach(git_odb_backend *backend, git_odb_foreach_cb cb, void *data)
 {
 	php_git2_t *result;
 	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)backend;
-	zval *param_callback = NULL, *retval_ptr = NULL, *param_payload = (zval*)data;
+	zval *param_callback = NULL, *callback = NULL, *retval_ptr = NULL, *param_payload = (zval*)data;
 	php_git2_multi_cb_t *p = php_backend->multi;
+	zend_function function = {0};
+	php_git2_odb_backend_foreach_callback *_callback;
+	php_git2_cb_t *__cb = (php_git2_cb_t*)data;
 	int i = 0, retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
 
+	MAKE_STD_ZVAL(callback);
+	object_init_ex(callback, php_git2_odb_backend_foreach_callback_class_entry);
+	_callback = (php_git2_odb_backend_foreach_callback*)zend_object_store_get_object(callback TSRMLS_CC);
+	_callback->callback = cb;
+	_callback->payload = __cb;
+	Z_ADDREF_P(callback);
+
+	function.type = ZEND_INTERNAL_FUNCTION;
+	function.common.function_name = "callback";
+	function.common.fn_flags = ZEND_ACC_CLOSURE;
+	function.common.num_args = 2;
+	function.common.required_num_args = 2;
+	function.common.arg_info = &arginfo_git_odb_backend_foreach_callback;
+	function.common.scope = php_git2_odb_backend_foreach_callback_class_entry;
+	function.internal_function.type = ZEND_INTERNAL_FUNCTION;
+	function.internal_function.scope = php_git2_odb_backend_foreach_callback_class_entry;
+	function.internal_function.fn_flags = ZEND_ACC_CLOSURE;
+	function.internal_function.handler = git_ex_cb;
+	function.internal_function.module = &git2_module_entry;
+	function.internal_function.num_args = 2;
+	function.internal_function.required_num_args = 2;
+	function.internal_function.arg_info = &arginfo_git_odb_backend_foreach_callback;
+
 	MAKE_STD_ZVAL(param_callback);
-	// TODO(chobie): wrap git_odb_foreach_cb with closure
-	// see zend_create_closure
+    zend_create_closure(param_callback, &function, php_git2_odb_backend_foreach_callback_class_entry, callback TSRMLS_CC);
+    Z_ADDREF_P(__cb->payload);
 
 	if (php_git2_call_function_v(&p->callbacks[6].fci, &p->callbacks[6].fcc TSRMLS_CC, &retval_ptr, 2,
-		&param_callback, &param_payload)) {
+		&param_callback, &__cb->payload)) {
 		return GIT_EUSER;
 	}
 
@@ -955,6 +1010,7 @@ static int php_git2_odb_backend_foreach(git_odb_backend *backend, git_odb_foreac
 	zval_ptr_dtor(&retval_ptr);
 	return retval;
 }
+
 static void php_git2_odb_backend_free(git_odb_backend *_backend)
 {
 }
@@ -1011,7 +1067,6 @@ PHP_FUNCTION(git_odb_backend_new)
 	if (tmp) {
 		php_git2_fcall_info_wrapper2(tmp, &foreach_fci, &foreach_fcc TSRMLS_CC);
 	}
-
 
 	Z_ADDREF_P(callbacks);
 	php_git2_multi_cb_init(&backend->multi, callbacks TSRMLS_CC, 8,

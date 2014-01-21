@@ -70,6 +70,8 @@
 
 int git2_resource_handle;
 
+zend_class_entry *php_git2_odb_backend_foreach_callback_class_entry;
+
 void static destruct_git2(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_git2_t *resource = (php_git2_t *)rsrc->ptr;
@@ -1016,9 +1018,30 @@ static PHP_GSHUTDOWN_FUNCTION(git2)
 {
 }
 
+
+static void php_git2_odb_backend_foreach_callback_free_storage(php_git2_odb_backend_foreach_callback *object TSRMLS_DC)
+{
+        zend_object_std_dtor(&object->zo TSRMLS_CC);
+        efree(object);
+}
+
+zend_object_value php_git2_odb_backend_foreach_callback_new(zend_class_entry *ce TSRMLS_DC)
+{
+        zend_object_value retval;
+        PHP_GIT2_STD_CREATE_OBJECT(php_git2_odb_backend_foreach_callback);
+        return retval;
+}
+
 PHP_MINIT_FUNCTION(git2)
 {
+	zend_class_entry ce;
 	REGISTER_INI_ENTRIES();
+
+
+	INIT_CLASS_ENTRY(ce, "Git2ODBBackendForeachCallback", 0);
+	php_git2_odb_backend_foreach_callback_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	zend_register_class_alias_ex(ZEND_NS_NAME("Git2\\ODB\\Backend", "ForeachCallback"), sizeof(ZEND_NS_NAME("Git2\\ODB\\Backend", "ForeachCallback"))-1, php_git2_odb_backend_foreach_callback_class_entry TSRMLS_CC);
+	php_git2_odb_backend_foreach_callback_class_entry->create_object = php_git2_odb_backend_foreach_callback_new;
 
 	git2_resource_handle = zend_register_list_destructors_ex(destruct_git2, NULL, PHP_GIT2_RESOURCE_NAME, module_number);
 
