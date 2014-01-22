@@ -931,7 +931,6 @@ static int php_git2_odb_backend_exists(git_odb_backend *backend, const git_oid *
 	}
 	zval_ptr_dtor(&retval_ptr);
 	return !retval;
-
 }
 
 static const zend_arg_info arginfo_git_odb_backend_foreach_callback[] = {
@@ -1013,17 +1012,44 @@ static int php_git2_odb_backend_foreach(git_odb_backend *backend, git_odb_foreac
 
 static void php_git2_odb_backend_free(git_odb_backend *_backend)
 {
+	php_git2_t *result;
+	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)_backend;
+	zval *retval_ptr = NULL;
+	php_git2_multi_cb_t *p = php_backend->multi;
+	int i = 0, retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls);
+	if (php_git2_call_function_v(&p->callbacks[7].fci, &p->callbacks[7].fcc TSRMLS_CC, &retval_ptr, 0)) {
+		return;
+	}
+
+	zval_ptr_dtor(&retval_ptr);
+	return;
 }
 
+static void php_git2_odb_refresh(git_odb_backend *_backend)
+{
+	php_git2_t *result;
+	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)_backend;
+	zval *retval_ptr = NULL;
+	php_git2_multi_cb_t *p = php_backend->multi;
+	int i = 0, retval = 0;
+	GIT2_TSRMLS_SET(p->tsrm_ls);
+	if (php_git2_call_function_v(&p->callbacks[8].fci, &p->callbacks[8].fcc TSRMLS_CC, &retval_ptr, 0)) {
+		return;
+	}
+
+	zval_ptr_dtor(&retval_ptr);
+	return;
+}
 PHP_FUNCTION(git_odb_backend_new)
 {
 	php_git2_odb_backend *backend;
 	php_git2_t *result;
 	zval *callbacks, *tmp;
 	zend_fcall_info read_fci, write_fci, read_prefix_fci, read_header_fci, writestream_fci,
-		exists_fci, foreach_fci, free_fci;
+		exists_fci, foreach_fci, free_fci, refresh_fci;
 	zend_fcall_info_cache read_fcc, write_fcc, read_prefix_fcc, read_header_fcc, writestream_fcc,
-		exists_fcc, foreach_fcc, free_fcc;
+		exists_fcc, foreach_fcc, free_fcc, refresh_fcc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"a", &callbacks) == FAILURE) {
@@ -1041,6 +1067,7 @@ PHP_FUNCTION(git_odb_backend_new)
 	backend->parent.exists = &php_git2_odb_backend_exists;
 	backend->parent.foreach = &php_git2_odb_backend_foreach;
 	backend->parent.free = &php_git2_odb_backend_free;
+	backend->parent.refresh = &php_git2_odb_refresh;
 
 	tmp = php_git2_read_arrval(callbacks, ZEND_STRS("read") TSRMLS_CC);
 	if (tmp) {
@@ -1067,9 +1094,17 @@ PHP_FUNCTION(git_odb_backend_new)
 	if (tmp) {
 		php_git2_fcall_info_wrapper2(tmp, &foreach_fci, &foreach_fcc TSRMLS_CC);
 	}
+	tmp = php_git2_read_arrval(callbacks, ZEND_STRS("free") TSRMLS_CC);
+	if (tmp) {
+		php_git2_fcall_info_wrapper2(tmp, &free_fci, &free_fcc TSRMLS_CC);
+	}
+	tmp = php_git2_read_arrval(callbacks, ZEND_STRS("refresh") TSRMLS_CC);
+	if (tmp) {
+		php_git2_fcall_info_wrapper2(tmp, &refresh_fci, &refresh_fcc TSRMLS_CC);
+	}
 
 	Z_ADDREF_P(callbacks);
-	php_git2_multi_cb_init(&backend->multi, callbacks TSRMLS_CC, 8,
+	php_git2_multi_cb_init(&backend->multi, callbacks TSRMLS_CC, 9,
 		&read_fci, &read_fcc,
 		&write_fci, &write_fcc,
 		&read_prefix_fci, &read_prefix_fcc,
@@ -1077,7 +1112,8 @@ PHP_FUNCTION(git_odb_backend_new)
 		&writestream_fci, &writestream_fcc,
 		&exists_fci, &exists_fcc,
 		&foreach_fci, &foreach_fcc,
-		&free_fci, &free_fcc
+		&free_fci, &free_fcc,
+		&refresh_fci, &refresh_fcc
 	);
 
 	if (php_git2_make_resource(&result, PHP_GIT2_TYPE_ODB_BACKEND, backend, 1 TSRMLS_CC)) {

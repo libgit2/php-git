@@ -57,7 +57,7 @@ $a = array(
             return $retval;
     },
     "refresh" => function() {
-
+            echo "\e[32m# refreshed!\e[m\n";
     },
     "foreach" => function($foreach_cb, &$payload) { // this payload was passed by git_odb_foreach callback.
             echo "\e[32m# foreach (iterate all backends)\e[m\n";
@@ -73,6 +73,7 @@ $a = array(
 
     },
     "free" => function() {
+            echo "\e[32m# free'd!\e[m\n";
     }
 );
 $memory_backend = git_odb_backend_new($a);
@@ -97,4 +98,6 @@ $payload = array();
 git_odb_foreach($odb, function($oid, &$payload) {
     echo ".";
 }, $payload);
+echo PHP_EOL;
+git_odb_refresh($odb);
 exit;
