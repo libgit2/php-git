@@ -6,7 +6,7 @@
  */
 PHP_FUNCTION(git_reset)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *repo = NULL, *target = NULL;
 	php_git2_t *_repo = NULL, *_target = NULL;
 	long reset_type = 0;
@@ -27,7 +27,7 @@ PHP_FUNCTION(git_reset)
  */
 PHP_FUNCTION(git_reset_default)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *repo = NULL, *target = NULL, *pathspecs = NULL, *array = NULL;
 	php_git2_t *_repo = NULL, *_target = NULL;
 	git_strarray _pathspecs = {0};
