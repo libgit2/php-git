@@ -1063,7 +1063,7 @@ PHP_FUNCTION(git_odb_backend_new)
 	backend->parent.write = &php_git2_odb_backend_write;
 	backend->parent.read_prefix = &php_git2_odb_backend_read_prefix;
 	backend->parent.read_header = &php_git2_odb_backend_read_header;
-	backend->parent.writestream = &php_git2_odb_backend_writestream;
+	//backend->parent.writestream = &php_git2_odb_backend_writestream;
 	backend->parent.exists = &php_git2_odb_backend_exists;
 	backend->parent.foreach = &php_git2_odb_backend_foreach;
 	backend->parent.free = &php_git2_odb_backend_free;

@@ -2,6 +2,9 @@
 
 php-git2 is a PHP bindings to the libgit2 linkable C Git library. 
 
+* API Documentation: http://libgit2.github.com/libgit2/#v0.20.0 (also see Signature conversions section)
+* IRC: #php-git on irc.freenode.net.
+
 ## Status
 
 0.3.0 Alpha (switching to functions)
@@ -54,8 +57,6 @@ resource|bool function git_repository_init(string $path, long $is_bare);
 
 public struct (e.g: git_config_entry) should consider return as an array.
 ````
-
-see libgit2.github.com/libgit2/#v0.20.0
 
 ##### file name rules.
 
