@@ -141,12 +141,13 @@ PHP_FUNCTION(git_refspec_dst_matches)
  */
 PHP_FUNCTION(git_refspec_transform)
 {
+	// TODO(chobie): fix this implementation
 	php_git2_t *_spec = NULL;
 	char out = NULL, *name = NULL;
 	long outlen = 0;
 	zval *spec = NULL;
 	int name_len = 0, error = 0;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"lrs", &outlen, &spec, &name, &name_len) == FAILURE) {
 		return;
@@ -165,6 +166,7 @@ PHP_FUNCTION(git_refspec_transform)
  */
 PHP_FUNCTION(git_refspec_rtransform)
 {
+	// TODO(chobie): fix this implementation
 	php_git2_t *_spec = NULL;
 	char out = NULL, *name = NULL;
 	long outlen = 0;
