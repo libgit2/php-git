@@ -69,10 +69,8 @@ static int php_git2_repository_fetchhead_foreach_cb(const char *ref_name,
                                                             unsigned int is_merge,
                                                             void *payload)
 {
-	php_git2_t *result;
 	zval *param_ref_name, *param_remote_url, *param_oid, *param_is_merge, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	char _oid[GIT2_OID_HEXSIZE] = {0};
 	GIT2_TSRMLS_SET(p->tsrm_ls)
@@ -106,10 +104,8 @@ static int php_git2_repository_fetchhead_foreach_cb(const char *ref_name,
 static int php_git2_repository_mergehead_foreach_cb(const git_oid *oid,
                                                             void *payload)
 {
-	php_git2_t *result;
 	zval *param_oid, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	char _oid[GIT2_OID_HEXSIZE] = {0};
 	GIT2_TSRMLS_SET(p->tsrm_ls)
@@ -435,7 +431,6 @@ PHP_FUNCTION(git_repository_head_detached)
 	int result = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &repo) == FAILURE) {
@@ -455,7 +450,6 @@ PHP_FUNCTION(git_repository_head_unborn)
 	int result = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &repo) == FAILURE) {
@@ -476,7 +470,6 @@ PHP_FUNCTION(git_repository_is_empty)
 	int result = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &repo) == FAILURE) {
@@ -520,7 +513,6 @@ PHP_FUNCTION(git_repository_set_workdir)
 	char *workdir = NULL;
 	int workdir_len = 0;
 	long update_gitlink = 0;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rsl", &repo, &workdir, &workdir_len, &update_gitlink) == FAILURE) {
@@ -540,7 +532,6 @@ PHP_FUNCTION(git_repository_is_bare)
 	int result = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &repo) == FAILURE) {
@@ -694,7 +685,6 @@ PHP_FUNCTION(git_repository_message_remove)
 	int result = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &repo) == FAILURE) {
@@ -714,7 +704,6 @@ PHP_FUNCTION(git_repository_merge_cleanup)
 	int result = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &repo) == FAILURE) {
@@ -731,8 +720,8 @@ PHP_FUNCTION(git_repository_merge_cleanup)
  */
 PHP_FUNCTION(git_repository_fetchhead_foreach)
 {
-	int result = 0, error = 0;
-	zval *repo = NULL, *callback = NULL, *payload = NULL;
+	int result = 0;
+	zval *repo = NULL, *payload = NULL;
 	php_git2_t *_repo = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -757,8 +746,8 @@ PHP_FUNCTION(git_repository_fetchhead_foreach)
  */
 PHP_FUNCTION(git_repository_mergehead_foreach)
 {
-	int result = 0, error = 0;
-	zval *repo = NULL, *callback = NULL, *payload = NULL;
+	int result = 0;
+	zval *repo = NULL, *payload = NULL;
 	php_git2_t *_repo = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -784,7 +773,7 @@ PHP_FUNCTION(git_repository_mergehead_foreach)
  */
 PHP_FUNCTION(git_repository_hashfile)
 {
-	php_git2_t *result = NULL, *_repo = NULL;
+	php_git2_t *_repo = NULL;
 	git_oid out = {0};
 	zval *repo = NULL;
 	char *path = NULL, *as_path = NULL, buf[41] = {0};
