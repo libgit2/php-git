@@ -44,7 +44,7 @@ PHP_FUNCTION(giterr_clear)
  */
 PHP_FUNCTION(giterr_detach)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	git_error cpy;
 	zval *array;
 

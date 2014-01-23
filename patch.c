@@ -157,7 +157,7 @@ PHP_FUNCTION(git_patch_num_hunks)
  */
 PHP_FUNCTION(git_patch_line_stats)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	size_t total_context = 0, total_additions = 0, total_deletions = 0;
 	zval *patch = NULL, *out = NULL;
 	php_git2_t *_patch = NULL;
@@ -209,7 +209,7 @@ PHP_FUNCTION(git_patch_get_hunk)
  */
 PHP_FUNCTION(git_patch_num_lines_in_hunk)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *patch = NULL;
 	php_git2_t *_patch = NULL;
 	long hunk_idx = 0;
@@ -276,8 +276,8 @@ PHP_FUNCTION(git_patch_size)
  */
 PHP_FUNCTION(git_patch_print)
 {
-	int result = 0, error = 0;
-	zval *patch = NULL, *print_cb = NULL, *payload = NULL;
+	int result = 0;
+	zval *patch = NULL, *payload = NULL;
 	php_git2_t *_patch = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -305,7 +305,7 @@ PHP_FUNCTION(git_patch_print)
  */
 PHP_FUNCTION(git_patch_to_str)
 {
-	int result = 0, string_len = 0, error = 0;
+	int result = 0;
 	char *string = NULL;
 	zval *patch = NULL;
 	php_git2_t *_patch = NULL;

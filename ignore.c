@@ -6,7 +6,7 @@
  */
 PHP_FUNCTION(git_ignore_add_rule)
 {
-	int result = 0, rules_len = 0, error = 0;
+	int result = 0, rules_len = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	char *rules = NULL;
@@ -26,7 +26,7 @@ PHP_FUNCTION(git_ignore_add_rule)
  */
 PHP_FUNCTION(git_ignore_clear_internal_rules)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	
@@ -45,7 +45,7 @@ PHP_FUNCTION(git_ignore_clear_internal_rules)
  */
 PHP_FUNCTION(git_ignore_path_is_ignored)
 {
-	int result = 0, path_len = 0, error = 0;
+	int result = 0, path_len = 0;
 	long ignored = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;

@@ -56,7 +56,7 @@ PHP_FUNCTION(git_pathspec_free)
  */
 PHP_FUNCTION(git_pathspec_matches_path)
 {
-	int result = 0, path_len = 0, error = 0;
+	int result = 0, path_len = 0;
 	zval *ps = NULL;
 	php_git2_t *_ps = NULL;
 	long flags = 0;

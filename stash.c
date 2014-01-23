@@ -7,10 +7,8 @@ static int php_git2_stash_cb(size_t index,
 	const git_oid *stash_id,
 	void *payload)
 {
-	php_git2_t *result;
 	zval *param_index, *param_message,*param_stash_id, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	char _oid[GIT2_OID_HEXSIZE] = {0};
 	GIT2_TSRMLS_SET(p->tsrm_ls)
@@ -38,7 +36,7 @@ static int php_git2_stash_cb(size_t index,
  */
 PHP_FUNCTION(git_stash_save)
 {
-	php_git2_t *result = NULL, *_repo = NULL;
+	php_git2_t *_repo = NULL;
 	git_oid out = {0};
 	zval *repo = NULL, *stasher = NULL;
 	char *message = NULL;
@@ -65,8 +63,8 @@ PHP_FUNCTION(git_stash_save)
  */
 PHP_FUNCTION(git_stash_foreach)
 {
-	int result = 0, error = 0;
-	zval *repo = NULL, *callback = NULL, *payload = NULL;
+	int result = 0;
+	zval *repo = NULL, *payload = NULL;
 	php_git2_t *_repo = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -91,7 +89,7 @@ PHP_FUNCTION(git_stash_foreach)
  */
 PHP_FUNCTION(git_stash_drop)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	long index = 0;

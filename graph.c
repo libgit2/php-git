@@ -6,7 +6,7 @@
  */
 PHP_FUNCTION(git_graph_ahead_behind)
 {
-	int result = 0, local_len = 0, upstream_len = 0, error = 0;
+	int result = 0, local_len = 0, upstream_len = 0;
 	zval *repo = NULL, *array = NULL;
 	php_git2_t *_repo = NULL;
 	char *local = NULL, *upstream = NULL;

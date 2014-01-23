@@ -4,10 +4,8 @@
 
 static int php_git2_index_matched_path_cb(const char *path, const char *matched_pathspec, void *payload)
 {
-	php_git2_t *result;
 	zval *param_path, *param_matched_pathspec, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -335,7 +333,6 @@ PHP_FUNCTION(git_index_write_tree_to)
 	zval *repo;
 	php_git2_t *_repo;
 	git_oid id;
-	char out[GIT2_OID_HEXSIZE]= {0};
 	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -570,8 +567,8 @@ PHP_FUNCTION(git_index_remove_bypath)
  */
 PHP_FUNCTION(git_index_add_all)
 {
-	int result = 0, error = 0;
-	zval *index = NULL, *pathspec = NULL, *callback = NULL, *payload = NULL;
+	int result = 0;
+	zval *index = NULL, *pathspec = NULL, *payload = NULL;
 	php_git2_t *_index = NULL;
 	git_strarray _pathspec = {0};
 	long flags = 0;
@@ -601,8 +598,8 @@ PHP_FUNCTION(git_index_add_all)
  */
 PHP_FUNCTION(git_index_remove_all)
 {
-	int result = 0, error = 0;
-	zval *index = NULL, *pathspec = NULL, *callback = NULL, *payload = NULL;
+	int result = 0;
+	zval *index = NULL, *pathspec = NULL, *payload = NULL;
 	php_git2_t *_index = NULL;
 	git_strarray _pathspec = {0};
 	zend_fcall_info fci = empty_fcall_info;
@@ -631,8 +628,8 @@ PHP_FUNCTION(git_index_remove_all)
  */
 PHP_FUNCTION(git_index_update_all)
 {
-	int result = 0, error = 0;
-	zval *index = NULL, *pathspec = NULL, *callback = NULL, *payload = NULL;
+	int result = 0;
+	zval *index = NULL, *pathspec = NULL, *payload = NULL;
 	php_git2_t *_index = NULL;
 	git_strarray _pathspec = {0};
 	zend_fcall_info fci = empty_fcall_info;
@@ -681,7 +678,7 @@ PHP_FUNCTION(git_index_find)
  */
 PHP_FUNCTION(git_index_conflict_add)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *index = NULL, *ancestor_entry = NULL, *our_entry = NULL, *their_entry = NULL;
 	php_git2_t *_index = NULL;
 	git_index_entry ancestor = {0}, our = {0}, their = {0};
@@ -705,7 +702,7 @@ PHP_FUNCTION(git_index_conflict_add)
  */
 PHP_FUNCTION(git_index_conflict_get)
 {
-	php_git2_t *result = NULL, *_index = NULL;
+	php_git2_t *_index = NULL;
 	git_index_entry *ancestor_out = NULL, *our_out = NULL, *their_out = NULL;
 	zval *index = NULL, *ancestor, *our, *their, *container;
 	char *path = NULL;
@@ -738,7 +735,7 @@ PHP_FUNCTION(git_index_conflict_get)
  */
 PHP_FUNCTION(git_index_conflict_remove)
 {
-	int result = 0, path_len = 0, error = 0;
+	int result = 0, path_len = 0;
 	zval *index = NULL;
 	php_git2_t *_index = NULL;
 	char *path = NULL;
@@ -818,7 +815,7 @@ PHP_FUNCTION(git_index_conflict_iterator_new)
  */
 PHP_FUNCTION(git_index_conflict_next)
 {
-	php_git2_t *result = NULL, *_iterator = NULL;
+	php_git2_t *_iterator = NULL;
 	git_index_entry *ancestor_out = NULL, *our_out = NULL, *their_out = NULL;
 	zval *iterator = NULL, *ancestor, *our, *their, *container;
 	int error = 0;

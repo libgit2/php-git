@@ -7,7 +7,6 @@ static int php_git2_treebuilder_filter_cb(const git_tree_entry *entry, void *pay
 	php_git2_t *result;
 	zval *param_tree_entry, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -203,7 +202,7 @@ PHP_FUNCTION(git_treebuilder_remove)
  */
 PHP_FUNCTION(git_treebuilder_filter)
 {
-	zval *bld = NULL, *filter = NULL;
+	zval *bld = NULL;
 	php_git2_t *_bld = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;

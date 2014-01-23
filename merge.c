@@ -6,7 +6,7 @@
  */
 PHP_FUNCTION(git_merge_base)
 {
-	php_git2_t *result = NULL, *_repo = NULL;
+	php_git2_t *_repo = NULL;
 	git_oid out = {0}, __one = {0}, __two = {0};
 	zval *repo = NULL;
 	char *one = NULL, *two = NULL, oid[41] = {0};
@@ -210,9 +210,7 @@ PHP_FUNCTION(git_merge)
 	php_git2_t *result = NULL, *_repo = NULL, *_their_head = NULL;
 	git_merge_result *out = NULL;
 	zval *repo = NULL, *opts = NULL, *theirhead = NULL;
-	git_merge_head *their_heads = NULL;
 	git_merge_head *heads[1];
-	long their_heads_len = 0;
 	int error = 0;
 	git_merge_opts options = GIT_MERGE_OPTS_INIT;
 	
@@ -241,7 +239,7 @@ PHP_FUNCTION(git_merge)
  */
 PHP_FUNCTION(git_merge_result_is_uptodate)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *merge_result = NULL;
 	php_git2_t *_merge_result = NULL;
 	
@@ -260,7 +258,7 @@ PHP_FUNCTION(git_merge_result_is_uptodate)
  */
 PHP_FUNCTION(git_merge_result_is_fastforward)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *merge_result = NULL;
 	php_git2_t *_merge_result = NULL;
 	
@@ -279,7 +277,7 @@ PHP_FUNCTION(git_merge_result_is_fastforward)
  */
 PHP_FUNCTION(git_merge_result_fastforward_oid)
 {
-	php_git2_t *result = NULL, *_merge_result = NULL;
+	php_git2_t *_merge_result = NULL;
 	git_oid out = {0};
 	zval *merge_result = NULL;
 	int error = 0;

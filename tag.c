@@ -7,7 +7,6 @@ static int php_git2_tag_foreach_cb(const char *name, git_oid *oid, void *payload
 	php_git2_t *result;
 	zval *param_name, *param_oid, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	char buffer[GIT2_OID_HEXSIZE] = {0};
 	GIT2_TSRMLS_SET(p->tsrm_ls)
@@ -297,7 +296,7 @@ PHP_FUNCTION(git_tag_create)
 	int result = 0;
 	git_oid __oid;
 	zval *repo = NULL;
-	php_git2_t *_repo = NULL, *out = NULL;
+	php_git2_t *_repo = NULL;
 	char *tag_name = NULL;
 	int tag_name_len = 0;
 	zval *target = NULL;
@@ -306,7 +305,6 @@ PHP_FUNCTION(git_tag_create)
 	char *message = NULL;
 	int message_len = 0;
 	long force = 0;
-	int error = 0;
 	char buffer[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -342,7 +340,6 @@ PHP_FUNCTION(git_tag_annotation_create)
 	zval *tagger = NULL;
 	char *message = NULL;
 	int message_len = 0;
-	int error = 0;
 	char buffer[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -373,7 +370,6 @@ PHP_FUNCTION(git_tag_create_frombuffer)
 	char *buffer = NULL;
 	int buffer_len = 0;
 	long force = 0;
-	int error = 0;
 	char oid[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -405,7 +401,6 @@ PHP_FUNCTION(git_tag_create_lightweight)
 	zval *target = NULL;
 	php_git2_t *_target = NULL;
 	long force = 0;
-	int error = 0;
 	char oid[GIT2_OID_HEXSIZE] = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -433,7 +428,6 @@ PHP_FUNCTION(git_tag_delete)
 	php_git2_t *_repo = NULL;
 	char *tag_name = NULL;
 	int tag_name_len = 0;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &repo, &tag_name, &tag_name_len) == FAILURE) {
@@ -508,8 +502,8 @@ PHP_FUNCTION(git_tag_list_match)
  */
 PHP_FUNCTION(git_tag_foreach)
 {
-	int result = 0, error = 0;
-	zval *repo = NULL, *callback = NULL;
+	int result = 0;
+	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;

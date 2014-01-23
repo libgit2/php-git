@@ -39,7 +39,6 @@ PHP_FUNCTION(git_branch_delete)
 	int result = 0;
 	zval *branch = NULL;
 	php_git2_t *_branch = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &branch) == FAILURE) {
@@ -190,7 +189,6 @@ PHP_FUNCTION(git_branch_lookup)
  */
 PHP_FUNCTION(git_branch_name)
 {
-	php_git2_t *result = NULL;
 	char out[GIT2_BUFFER_SIZE] = {0};
 	zval *ref = NULL;
 	php_git2_t *_ref = NULL;
@@ -241,7 +239,6 @@ PHP_FUNCTION(git_branch_upstream)
  */
 PHP_FUNCTION(git_branch_upstream_name)
 {
-	php_git2_t *result = NULL;
 	char tracking_branch_name_out[GIT2_BUFFER_SIZE] = {0};
 	long buffer_size = GIT2_BUFFER_SIZE;
 	zval *repo = NULL;
@@ -271,7 +268,6 @@ PHP_FUNCTION(git_branch_is_head)
 	int result = 0;
 	zval *branch = NULL;
 	php_git2_t *_branch = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &branch) == FAILURE) {
@@ -288,7 +284,6 @@ PHP_FUNCTION(git_branch_is_head)
  */
 PHP_FUNCTION(git_branch_remote_name)
 {
-	php_git2_t *result = NULL;
 	char remote_name_out[GIT2_BUFFER_SIZE] = {0};
 	long buffer_size = GIT2_BUFFER_SIZE;
 	zval *repo = NULL;

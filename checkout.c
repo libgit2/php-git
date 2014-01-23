@@ -8,7 +8,7 @@ PHP_FUNCTION(git_checkout_head)
 {
 	zval *opts = NULL, *repo = NULL;
 	php_git2_t *_repo = NULL;
-	int result = 0, error = 0, shoud_free = 0;
+	int result = 0, shoud_free = 0;
 	git_checkout_opts *options;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -39,7 +39,7 @@ PHP_FUNCTION(git_checkout_head)
  */
 PHP_FUNCTION(git_checkout_index)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *repo = NULL, *index = NULL, *opts = NULL;
 	php_git2_t *_repo = NULL, *_index = NULL;
 
@@ -60,7 +60,7 @@ PHP_FUNCTION(git_checkout_index)
  */
 PHP_FUNCTION(git_checkout_tree)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *repo = NULL, *treeish = NULL, *opts = NULL;
 	php_git2_t *_repo = NULL, *_treeish = NULL;
 	git_checkout_opts options = {0};

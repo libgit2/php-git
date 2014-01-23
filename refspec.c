@@ -63,7 +63,7 @@ PHP_FUNCTION(git_refspec_string)
  */
 PHP_FUNCTION(git_refspec_force)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *refspec = NULL;
 	php_git2_t *_refspec = NULL;
 	
@@ -101,7 +101,7 @@ PHP_FUNCTION(git_refspec_direction)
  */
 PHP_FUNCTION(git_refspec_src_matches)
 {
-	int result = 0, refname_len = 0, error = 0;
+	int result = 0, refname_len = 0;
 	zval *refspec = NULL;
 	php_git2_t *_refspec = NULL;
 	char *refname = NULL;
@@ -121,7 +121,7 @@ PHP_FUNCTION(git_refspec_src_matches)
  */
 PHP_FUNCTION(git_refspec_dst_matches)
 {
-	int result = 0, refname_len = 0, error = 0;
+	int result = 0, refname_len = 0;
 	zval *refspec = NULL;
 	php_git2_t *_refspec = NULL;
 	char *refname = NULL;
@@ -141,7 +141,7 @@ PHP_FUNCTION(git_refspec_dst_matches)
  */
 PHP_FUNCTION(git_refspec_transform)
 {
-	php_git2_t *result = NULL, *_spec = NULL;
+	php_git2_t *_spec = NULL;
 	char out = NULL, *name = NULL;
 	long outlen = 0;
 	zval *spec = NULL;
@@ -165,7 +165,7 @@ PHP_FUNCTION(git_refspec_transform)
  */
 PHP_FUNCTION(git_refspec_rtransform)
 {
-	php_git2_t *result = NULL, *_spec = NULL;
+	php_git2_t *_spec = NULL;
 	char out = NULL, *name = NULL;
 	long outlen = 0;
 	zval *spec = NULL;

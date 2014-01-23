@@ -6,7 +6,7 @@
  */
 PHP_FUNCTION(git_commit_lookup)
 {
-	int result = 0, id_len = 0, error = 0;
+	int result = 0, id_len = 0;
 	git_commit *commit = NULL;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL, *_result = NULL;
@@ -34,7 +34,6 @@ PHP_FUNCTION(git_commit_lookup)
 */
 PHP_FUNCTION(git_commit_author)
 {
-	zval *repository;
 	php_git2_t *git2;
 	zval *commit;
 	git_signature *author;
@@ -83,7 +82,7 @@ PHP_FUNCTION(git_commit_tree)
  */
 PHP_FUNCTION(git_commit_lookup_prefix)
 {
-	int result = 0, id_len = 0, error = 0;
+	int result = 0, id_len = 0;
 	git_commit *commit = NULL;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL, *_result = NULL;
@@ -418,7 +417,7 @@ PHP_FUNCTION(git_commit_create)
 	zval *repo, *tree, *parents, *committer, *author, **element;
 	char *update_ref = {0}, *message_encoding = {0}, *message = {0};
 	int update_ref_len, message_encoding_len, message_len, parent_count = 0, error = 0, i;
-	php_git2_t *_repo, *_author, *_committer, *_tree;
+	php_git2_t *_repo, *_tree;
 	git_signature __author, __committer;
 	char out[GIT2_OID_HEXSIZE] = {0};
 	git_oid oid;
@@ -452,7 +451,6 @@ PHP_FUNCTION(git_commit_create)
 		zend_hash_move_forward_ex(Z_ARRVAL_P(parents), &pos)
 	) {
 		git_commit *p = NULL;
-		git_oid parent_oid;
 
 		if (Z_TYPE_PP(element) == IS_STRING) {
 			error = git_oid_fromstr(&oid, Z_STRVAL_PP(element));

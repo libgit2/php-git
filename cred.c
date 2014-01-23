@@ -9,7 +9,6 @@ PHP_FUNCTION(git_cred_has_username)
 	int result = 0;
 	zval *cred = NULL;
 	php_git2_t *_cred = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &cred) == FAILURE) {
@@ -79,12 +78,6 @@ PHP_FUNCTION(git_cred_ssh_key_new)
 */
 PHP_FUNCTION(git_cred_ssh_custom_new)
 {
-	char *username = {0};
-	int username_len;
-	char *publickey = {0};
-	int publickey_len;
-	zval *sign_fn;
-	php_git2_t *_sign_fn;
 
 	/* TODO(chobie): implement this */
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_cred_ssh_custom_new not implemented yet");
@@ -122,11 +115,6 @@ PHP_FUNCTION(git_cred_default_new)
 */
 PHP_FUNCTION(git_cred_userpass)
 {
-	char *url = {0};
-	int url_len;
-	char *user_from_url = {0};
-	int user_from_url_len;
-	long allowed_types;
 
 	/* TODO(chobie): implement this */
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_cred_userpass not implemented yet");

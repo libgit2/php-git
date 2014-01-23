@@ -6,7 +6,7 @@
  */
 PHP_FUNCTION(git_object_lookup)
 {
-	int result = 0, id_len = 0, error = 0;
+	int result = 0, id_len = 0;
 	git_object *object = NULL;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
@@ -208,7 +208,7 @@ PHP_FUNCTION(git_object_string2type)
  */
 PHP_FUNCTION(git_object_typeisloose)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	long type = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -240,7 +240,7 @@ PHP_FUNCTION(git_object__size)
  */
 PHP_FUNCTION(git_object_peel)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	git_object *peeled = NULL;
 	zval *object = NULL;
 	php_git2_t *_object = NULL, *_result;
@@ -264,7 +264,7 @@ PHP_FUNCTION(git_object_peel)
  */
 PHP_FUNCTION(git_object_dup)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	git_object *dest = NULL;
 	zval *source = NULL;
 	php_git2_t *_source = NULL, *_result = NULL;

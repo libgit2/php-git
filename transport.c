@@ -4,11 +4,9 @@
 
 static int php_git2_transport_cb(git_transport **out, git_remote *owner, void *param)
 {
-	php_git2_t *result;
 	zval *param_owner, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)param;
 	php_git2_t *_param_owner;
-	int i = 0;
 	long retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -62,7 +60,7 @@ PHP_FUNCTION(git_transport_new)
  */
 PHP_FUNCTION(git_transport_register)
 {
-	int result = 0, prefix_len = 0, error = 0;
+	int result = 0, prefix_len = 0;
 	char *prefix = NULL;
 	long priority = NULL;
 	zval *param = NULL;
@@ -89,7 +87,7 @@ PHP_FUNCTION(git_transport_register)
  */
 PHP_FUNCTION(git_transport_unregister)
 {
-	int result = 0, prefix_len = 0, error = 0;
+	int result = 0, prefix_len = 0;
 	char *prefix = NULL;
 	long priority = 0;
 

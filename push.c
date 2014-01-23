@@ -7,7 +7,6 @@ static int php_git2_push_status_foreach_cb(const char *ref, const char *msg, voi
 	php_git2_t *result;
 	zval *param_ref, *param_msg, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)data;
-	int i = 0;
 	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -64,7 +63,7 @@ PHP_FUNCTION(git_push_new)
  */
 PHP_FUNCTION(git_push_set_options)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *push = NULL, *opts = NULL;
 	php_git2_t *_push = NULL;
 	
@@ -83,8 +82,8 @@ PHP_FUNCTION(git_push_set_options)
  */
 PHP_FUNCTION(git_push_set_callbacks)
 {
-	int result = 0, error = 0;
-	zval *push = NULL, *pack_progress_cb = NULL, *pack_progress_cb_payload = NULL, *transfer_progress_cb = NULL, *transfer_progress_cb_payload = NULL;
+	int result = 0;
+	zval *push = NULL, *pack_progress_cb_payload = NULL, *transfer_progress_cb_payload = NULL;
 	php_git2_t *_push = NULL;
 	zend_fcall_info pack_fci = empty_fcall_info;
 	zend_fcall_info_cache pack_fcc = empty_fcall_info_cache;
@@ -118,7 +117,7 @@ PHP_FUNCTION(git_push_set_callbacks)
  */
 PHP_FUNCTION(git_push_add_refspec)
 {
-	int result = 0, refspec_len = 0, error = 0;
+	int result = 0, refspec_len = 0;
 	zval *push = NULL;
 	php_git2_t *_push = NULL;
 	char *refspec = NULL;
@@ -138,7 +137,7 @@ PHP_FUNCTION(git_push_add_refspec)
  */
 PHP_FUNCTION(git_push_update_tips)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *push = NULL;
 	php_git2_t *_push = NULL;
 	
@@ -157,7 +156,7 @@ PHP_FUNCTION(git_push_update_tips)
  */
 PHP_FUNCTION(git_push_finish)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *push = NULL;
 	php_git2_t *_push = NULL;
 	
@@ -176,7 +175,7 @@ PHP_FUNCTION(git_push_finish)
  */
 PHP_FUNCTION(git_push_unpack_ok)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *push = NULL;
 	php_git2_t *_push = NULL;
 	

@@ -314,7 +314,6 @@ ZEND_END_ARG_INFO()
  */
 PHP_FUNCTION(git_resource_type)
 {
-	int result = 0;
 	zval *resource = NULL;
 	php_git2_t *_resource= NULL;
 

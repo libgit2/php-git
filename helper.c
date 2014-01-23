@@ -379,7 +379,6 @@ void php_git2_git_checkout_progress_cb(const char *path,
         size_t total_steps,
         void *payload)
 {
-	php_git2_t *result;
 	zval *param_path, *param_completed_steps, *param_total_steps, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
@@ -457,7 +456,6 @@ int php_git2_array_to_git_checkout_opts(git_checkout_opts **out, zval *array TSR
 	git_checkout_opts *opts = NULL, def = GIT_CHECKOUT_OPTS_INIT;
 	php_git2_cb_t *notify_payload = NULL, *progress_payload= NULL;
 	zval *notify_cb = NULL, *progress_cb = NULL;
-	char *tmp;
 
 	opts = (git_checkout_opts*)emalloc(sizeof(struct git_checkout_opts));
 	memcpy(opts, &def, sizeof(git_checkout_opts));
@@ -704,10 +702,9 @@ int php_git2_git_diff_file_cb(
 	float progress,
 	void *payload)
 {
-	php_git2_t *result;
 	zval *param_delta = NULL, *param_progress = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = (php_git2_multi_cb_t*)payload;
-	int i = 0, retval = 0;
+	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	Z_ADDREF_P(p->payload);
@@ -728,10 +725,9 @@ int php_git2_git_diff_hunk_cb(
 	const git_diff_hunk *hunk,
 	void *payload)
 {
-	php_git2_t *result;
 	zval *param_delta = NULL, *param_hunk = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = (php_git2_multi_cb_t*)payload;
-	int i = 0, retval = 0;
+	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	Z_ADDREF_P(p->payload);
@@ -752,10 +748,9 @@ int php_git2_git_diff_line_cb(
 	const git_diff_hunk *hunk,
 	const git_diff_line *line,
 	void *payload) {
-	php_git2_t *result;
 	zval *param_delta = NULL, *param_hunk = NULL, *param_line = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = (php_git2_multi_cb_t*)payload;
-	int i = 0, retval = 0;
+	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	Z_ADDREF_P(p->payload);

@@ -6,7 +6,6 @@
  */
 PHP_FUNCTION(git_signature_new)
 {
-	php_git2_t *result = NULL;
 	git_signature *out = NULL;
 	char *name = NULL, *email = NULL;
 	int name_len = 0, email_len = 0, error = 0;
@@ -32,7 +31,6 @@ PHP_FUNCTION(git_signature_new)
  */
 PHP_FUNCTION(git_signature_now)
 {
-	php_git2_t *result = NULL;
 	git_signature *out = NULL;
 	char *name = NULL, *email = NULL;
 	int name_len = 0, email_len = 0, error = 0;
@@ -57,7 +55,7 @@ PHP_FUNCTION(git_signature_now)
  */
 PHP_FUNCTION(git_signature_default)
 {
-	php_git2_t *result = NULL, *_repo = NULL;
+	php_git2_t *_repo = NULL;
 	git_signature *out = NULL;
 	zval *repo = NULL, *signature = NULL;
 	int error = 0;

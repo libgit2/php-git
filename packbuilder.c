@@ -8,10 +8,8 @@ static int php_git2_git_packbuilder_progress(
 	unsigned int total,
 	void *payload)
 {
-	php_git2_t *result;
 	zval *param_stage = NULL, *param_current = NULL, *param_total = NULL, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -37,10 +35,8 @@ static int php_git2_git_packbuilder_progress(
 
 static int php_git2_git_packbuilder_foreach_cb(void *buf, size_t size, void *payload)
 {
-	php_git2_t *result;
 	zval *param_buf= NULL, *param_size = NULL, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -65,10 +61,8 @@ static int php_git2_git_packbuilder_foreach_cb(void *buf, size_t size, void *pay
 
 static int php_git2_git_transfer_progress_callback(const git_transfer_progress *stats, void *payload)
 {
-	php_git2_t *result;
 	zval *param_stats = NULL, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -138,7 +132,7 @@ PHP_FUNCTION(git_packbuilder_set_threads)
  */
 PHP_FUNCTION(git_packbuilder_insert)
 {
-	int result = 0, id_len = 0, name_len = 0, error = 0;
+	int result = 0, id_len = 0, name_len = 0;
 	zval *pb = NULL;
 	php_git2_t *_pb = NULL;
 	char *id = NULL, *name = NULL;
@@ -162,7 +156,7 @@ PHP_FUNCTION(git_packbuilder_insert)
  */
 PHP_FUNCTION(git_packbuilder_insert_tree)
 {
-	int result = 0, id_len = 0, error = 0;
+	int result = 0, id_len = 0;
 	zval *pb = NULL;
 	php_git2_t *_pb = NULL;
 	char *id = NULL;
@@ -186,7 +180,7 @@ PHP_FUNCTION(git_packbuilder_insert_tree)
  */
 PHP_FUNCTION(git_packbuilder_insert_commit)
 {
-	int result = 0, id_len = 0, error = 0;
+	int result = 0, id_len = 0;
 	zval *pb = NULL;
 	php_git2_t *_pb = NULL;
 	char *id = NULL;
@@ -210,8 +204,8 @@ PHP_FUNCTION(git_packbuilder_insert_commit)
  */
 PHP_FUNCTION(git_packbuilder_write)
 {
-	int result = 0, path_len = 0, error = 0;
-	zval *pb = NULL, *progress_cb = NULL, *progress_cb_payload = NULL;
+	int result = 0, path_len = 0;
+	zval *pb = NULL, *progress_cb_payload = NULL;
 	php_git2_t *_pb = NULL;
 	char *path = NULL;
 	long mode = 0;
@@ -260,7 +254,7 @@ PHP_FUNCTION(git_packbuilder_hash)
  */
 PHP_FUNCTION(git_packbuilder_foreach)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *pb = NULL, *payload = NULL;
 	php_git2_t *_pb = NULL;
 	zend_fcall_info fci = empty_fcall_info;
@@ -324,8 +318,8 @@ PHP_FUNCTION(git_packbuilder_written)
  */
 PHP_FUNCTION(git_packbuilder_set_callbacks)
 {
-	int result = 0, error = 0;
-	zval *pb = NULL, *progress_cb = NULL, *progress_cb_payload = NULL;
+	int result = 0;
+	zval *pb = NULL, *progress_cb_payload = NULL;
 	php_git2_t *_pb = NULL;
 	zend_fcall_info fci = empty_fcall_info, *_fci;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache, *_fcc;

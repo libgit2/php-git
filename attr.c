@@ -24,7 +24,7 @@ PHP_FUNCTION(git_attr_value)
  */
 PHP_FUNCTION(git_attr_get)
 {
-	php_git2_t *result = NULL, *_repo = NULL;
+	php_git2_t *_repo = NULL;
 	char *value_out = NULL, *path = NULL, *name = NULL;
 	zval *repo = NULL;
 	long flags = 0;
@@ -48,7 +48,7 @@ PHP_FUNCTION(git_attr_get)
  */
 PHP_FUNCTION(git_attr_get_many)
 {
-	php_git2_t *result = NULL, *_repo = NULL;
+	php_git2_t *_repo = NULL;
 	char *values_out = NULL, *path = NULL;
 	zval *repo = NULL, *names = NULL;
 	long flags = 0, num_attr = 0;
@@ -74,8 +74,8 @@ PHP_FUNCTION(git_attr_get_many)
  */
 PHP_FUNCTION(git_attr_foreach)
 {
-	int result = 0, path_len = 0, error = 0;
-	zval *repo = NULL, *callback = NULL, *payload = NULL;
+	int result = 0, path_len = 0;
+	zval *repo = NULL, *payload = NULL;
 	php_git2_t *_repo = NULL;
 	long flags = 0;
 	char *path = NULL;
@@ -120,7 +120,7 @@ PHP_FUNCTION(git_attr_cache_flush)
  */
 PHP_FUNCTION(git_attr_add_macro)
 {
-	int result = 0, name_len = 0, values_len = 0, error = 0;
+	int result = 0, name_len = 0, values_len = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	char *name = NULL, *values = NULL;

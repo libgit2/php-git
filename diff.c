@@ -36,7 +36,6 @@ PHP_FUNCTION(git_diff_tree_to_tree)
 	zval *new_tree = NULL;
 	php_git2_t *_new_tree = NULL;
 	zval *opts = NULL;
-	int error = 0;
 	git_diff_options options = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -59,7 +58,7 @@ PHP_FUNCTION(git_diff_tree_to_tree)
  */
 PHP_FUNCTION(git_diff_tree_to_index)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	git_diff *diff = NULL;
 	zval *repo = NULL, *old_tree = NULL, *index = NULL, *opts = NULL;
 	php_git2_t *_repo = NULL, *_old_tree = NULL, *_index = NULL, *_diff = NULL;
@@ -88,7 +87,7 @@ PHP_FUNCTION(git_diff_tree_to_index)
  */
 PHP_FUNCTION(git_diff_index_to_workdir)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	git_diff *diff = NULL;
 	zval *repo = NULL, *index = NULL, *opts = NULL;
 	php_git2_t *_repo = NULL, *_index = NULL, *_diff = NULL;
@@ -115,7 +114,7 @@ PHP_FUNCTION(git_diff_index_to_workdir)
  */
 PHP_FUNCTION(git_diff_tree_to_workdir)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	git_diff *diff = NULL;
 	zval *repo = NULL, *old_tree = NULL, *opts = NULL;
 	php_git2_t *_repo = NULL, *_old_tree = NULL, *_result;
@@ -148,7 +147,7 @@ PHP_FUNCTION(git_diff_tree_to_workdir)
  */
 PHP_FUNCTION(git_diff_tree_to_workdir_with_index)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	git_diff *diff = NULL;
 	zval *repo = NULL, *old_tree = NULL, *opts = NULL;
 	php_git2_t *_repo = NULL, *_old_tree = NULL, *_diff = NULL;
@@ -175,7 +174,7 @@ PHP_FUNCTION(git_diff_tree_to_workdir_with_index)
  */
 PHP_FUNCTION(git_diff_merge)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *onto = NULL, *from = NULL;
 	php_git2_t *_onto = NULL, *_from = NULL;
 
@@ -199,7 +198,6 @@ PHP_FUNCTION(git_diff_find_similar)
 	zval *diff = NULL;
 	php_git2_t *_diff = NULL;
 	zval *options = NULL;
-	int error = 0;
 	git_diff_options _options = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
@@ -223,7 +221,6 @@ PHP_FUNCTION(git_diff_options_init)
 	git_diff_options options = {0};
 	long version = GIT_DIFF_OPTIONS_VERSION;
 	zval *out;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"|l", &version) == FAILURE) {
@@ -303,7 +300,6 @@ PHP_FUNCTION(git_diff_is_sorted_icase)
 	int result = 0;
 	zval *diff = NULL;
 	php_git2_t *_diff = NULL;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &diff) == FAILURE) {
@@ -321,8 +317,8 @@ PHP_FUNCTION(git_diff_is_sorted_icase)
  */
 PHP_FUNCTION(git_diff_foreach)
 {
-	int result = 0, error = 0;
-	zval *diff = NULL, *file_cb = NULL, *hunk_cb = NULL, *line_cb = NULL, *payload = NULL;
+	int result = 0;
+	zval *diff = NULL, *payload = NULL;
 	php_git2_t *_diff = NULL;
 	zend_fcall_info file_fci = empty_fcall_info;
 	zend_fcall_info_cache file_fcc = empty_fcall_info_cache;
@@ -371,8 +367,8 @@ PHP_FUNCTION(git_diff_status_char)
  */
 PHP_FUNCTION(git_diff_print)
 {
-	int result = 0, error = 0;
-	zval *diff = NULL, *print_cb = NULL, *payload = NULL;
+	int result = 0;
+	zval *diff = NULL, *payload = NULL;
 	php_git2_t *_diff = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -398,8 +394,8 @@ PHP_FUNCTION(git_diff_print)
  */
 PHP_FUNCTION(git_diff_blobs)
 {
-	int result = 0, old_as_path_len = 0, new_as_path_len = 0, error = 0;
-	zval *old_blob = NULL, *new_blob = NULL, *options = NULL, *file_cb = NULL, *hunk_cb = NULL, *line_cb = NULL, *payload = NULL;
+	int result = 0, old_as_path_len = 0, new_as_path_len = 0;
+	zval *old_blob = NULL, *new_blob = NULL, *options = NULL, *payload = NULL;
 	php_git2_t *_old_blob = NULL, *_new_blob = NULL;
 	char *old_as_path = NULL, *new_as_path = NULL;
 	zend_fcall_info file_fci = empty_fcall_info;
@@ -436,8 +432,8 @@ PHP_FUNCTION(git_diff_blobs)
  */
 PHP_FUNCTION(git_diff_blob_to_buffer)
 {
-	int result = 0, old_as_path_len = 0, buffer_len = 0, buffer_as_path_len = 0, error = 0;
-	zval *old_blob = NULL, *options = NULL, *file_cb = NULL, *hunk_cb = NULL, *line_cb = NULL, *payload = NULL;
+	int result = 0, old_as_path_len = 0, buffer_len = 0, buffer_as_path_len = 0;
+	zval *old_blob = NULL, *options = NULL, *payload = NULL;
 	php_git2_t *_old_blob = NULL;
 	char *old_as_path = NULL, *buffer = NULL, *buffer_as_path = NULL;
 	zend_fcall_info file_fci = empty_fcall_info;

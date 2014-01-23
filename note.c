@@ -54,7 +54,7 @@ PHP_FUNCTION(git_note_iterator_free)
  */
 PHP_FUNCTION(git_note_next)
 {
-	int result = 0, note_id_len = 0, annotated_id_len = 0, error = 0;
+	int result = 0, note_id_len = 0, annotated_id_len = 0;
 	char *note_id = NULL, *annotated_id = NULL;
 	zval *it = NULL;
 	php_git2_t *_it = NULL;
@@ -145,7 +145,7 @@ PHP_FUNCTION(git_note_oid)
  */
 PHP_FUNCTION(git_note_create)
 {
-	php_git2_t *result = NULL, *_repo = NULL;
+	php_git2_t *_repo = NULL;
 	git_oid out = {0}, __oid = {0};
 	zval *repo = NULL, *author = NULL, *committer = NULL;
 	char *notes_ref = NULL, *oid = NULL, *note = NULL;
@@ -175,7 +175,7 @@ PHP_FUNCTION(git_note_create)
  */
 PHP_FUNCTION(git_note_remove)
 {
-	int result = 0, notes_ref_len = 0, oid_len = 0, error = 0;
+	int result = 0, notes_ref_len = 0, oid_len = 0;
 	zval *repo = NULL, *author = NULL, *committer = NULL;
 	php_git2_t *_repo = NULL;
 	char *notes_ref = NULL, *oid = NULL;
@@ -220,7 +220,7 @@ PHP_FUNCTION(git_note_free)
  */
 PHP_FUNCTION(git_note_default_ref)
 {
-	php_git2_t *result = NULL, *_repo = NULL;
+	php_git2_t *_repo = NULL;
 	char *out = NULL;
 	zval *repo = NULL;
 	int error = 0;
@@ -243,8 +243,8 @@ PHP_FUNCTION(git_note_default_ref)
  */
 PHP_FUNCTION(git_note_foreach)
 {
-	int result = 0, notes_ref_len = 0, error = 0;
-	zval *repo = NULL, *note_cb = NULL, *payload = NULL;
+	int result = 0, notes_ref_len = 0;
+	zval *repo = NULL, *payload = NULL;
 	php_git2_t *_repo = NULL;
 	char *notes_ref = NULL;
 	zend_fcall_info fci = empty_fcall_info;

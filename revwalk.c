@@ -73,7 +73,7 @@ PHP_FUNCTION(git_revwalk_push)
  */
 PHP_FUNCTION(git_revwalk_push_glob)
 {
-	int result = 0, glob_len = 0, error = 0;
+	int result = 0, glob_len = 0;
 	zval *walk = NULL;
 	php_git2_t *_walk = NULL;
 	char *glob = NULL;
@@ -146,7 +146,7 @@ PHP_FUNCTION(git_revwalk_hide)
  */
 PHP_FUNCTION(git_revwalk_hide_glob)
 {
-	int result = 0, glob_len = 0, error = 0;
+	int result = 0, glob_len = 0;
 	zval *walk = NULL;
 	php_git2_t *_walk = NULL;
 	char *glob = NULL;
@@ -189,7 +189,7 @@ PHP_FUNCTION(git_revwalk_hide_head)
  */
 PHP_FUNCTION(git_revwalk_push_ref)
 {
-	int result = 0, refname_len = 0, error = 0;
+	int result = 0, refname_len = 0;
 	zval *walk = NULL;
 	php_git2_t *_walk = NULL;
 	char *refname = NULL;
@@ -210,7 +210,7 @@ PHP_FUNCTION(git_revwalk_push_ref)
  */
 PHP_FUNCTION(git_revwalk_hide_ref)
 {
-	int result = 0, refname_len = 0, error = 0;
+	int result = 0, refname_len = 0;
 	zval *walk = NULL;
 	php_git2_t *_walk = NULL;
 	char *refname = NULL;
@@ -274,7 +274,7 @@ PHP_FUNCTION(git_revwalk_sorting)
  */
 PHP_FUNCTION(git_revwalk_push_range)
 {
-	int result = 0, range_len = 0, error = 0;
+	int result = 0, range_len = 0;
 	zval *walk = NULL;
 	php_git2_t *_walk = NULL;
 	char *range = NULL;

@@ -4,10 +4,8 @@
 
 static int php_git2_git_odb_foreach_cb(const git_oid *id, void *payload)
 {
-	php_git2_t *result;
 	zval *param_oid, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	char buf[41] = {0};
 	GIT2_TSRMLS_SET(p->tsrm_ls)
@@ -75,7 +73,7 @@ PHP_FUNCTION(git_odb_open)
  */
 PHP_FUNCTION(git_odb_add_disk_alternate)
 {
-	int result = 0, path_len = 0, error = 0;
+	int result = 0, path_len = 0;
 	zval *odb = NULL;
 	php_git2_t *_odb = NULL;
 	char *path = NULL;
@@ -153,7 +151,6 @@ PHP_FUNCTION(git_odb_read_prefix)
 	char *short_id = NULL;
 	int short_id_len = 0, error = 0;
 	git_oid __short_id = {0};
-	long len = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"rs", &db, &short_id, &short_id_len) == FAILURE) {
@@ -179,7 +176,7 @@ PHP_FUNCTION(git_odb_read_prefix)
  */
 PHP_FUNCTION(git_odb_read_header)
 {
-	php_git2_t *result = NULL, *_db = NULL;
+	php_git2_t *_db = NULL;
 	size_t len_out = NULL;
 	zval *db = NULL, *_result = NULL;
 	git_otype type_out;
@@ -212,7 +209,7 @@ PHP_FUNCTION(git_odb_read_header)
  */
 PHP_FUNCTION(git_odb_exists)
 {
-	int result = 0, id_len = 0, error = 0;
+	int result = 0, id_len = 0;
 	zval *db = NULL;
 	php_git2_t *_db = NULL;
 	char *id = NULL;
@@ -236,7 +233,7 @@ PHP_FUNCTION(git_odb_exists)
  */
 PHP_FUNCTION(git_odb_refresh)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *db = NULL;
 	php_git2_t *_db = NULL;
 	
@@ -255,7 +252,7 @@ PHP_FUNCTION(git_odb_refresh)
  */
 PHP_FUNCTION(git_odb_foreach)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *db = NULL, *payload = NULL;
 	php_git2_t *_db = NULL;
 	zend_fcall_info fci = empty_fcall_info;
@@ -281,7 +278,7 @@ PHP_FUNCTION(git_odb_foreach)
  */
 PHP_FUNCTION(git_odb_write)
 {
-	php_git2_t *result = NULL, *_odb = NULL;
+	php_git2_t *_odb = NULL;
 	git_oid out = {0};
 	zval *odb = NULL;
 	zval *data = NULL;
@@ -335,7 +332,7 @@ PHP_FUNCTION(git_odb_open_wstream)
  */
 PHP_FUNCTION(git_odb_stream_write)
 {
-	int result = 0, buffer_len = 0, error = 0;
+	int result = 0, buffer_len = 0;
 	zval *stream = NULL;
 	php_git2_t *_stream = NULL;
 	char *buffer = NULL;
@@ -355,7 +352,7 @@ PHP_FUNCTION(git_odb_stream_write)
  */
 PHP_FUNCTION(git_odb_stream_finalize_write)
 {
-	php_git2_t *result = NULL, *_stream = NULL;
+	php_git2_t *_stream = NULL;
 	git_oid out = {0};
 	zval *stream = NULL;
 	int error = 0;
@@ -380,7 +377,7 @@ PHP_FUNCTION(git_odb_stream_finalize_write)
  */
 PHP_FUNCTION(git_odb_stream_read)
 {
-	int result = 0, buffer_len = 0, error = 0;
+	int result = 0, buffer_len = 0;
 	zval *stream = NULL;
 	php_git2_t *_stream = NULL;
 	char *buffer = NULL;
@@ -485,7 +482,6 @@ PHP_FUNCTION(git_odb_write_pack)
  */
 PHP_FUNCTION(git_odb_hash)
 {
-	php_git2_t *result = NULL;
 	git_oid out = {0};
 	zval *data = NULL;
 	int error = 0, data_len = 0;
@@ -509,7 +505,6 @@ PHP_FUNCTION(git_odb_hash)
  */
 PHP_FUNCTION(git_odb_hashfile)
 {
-	php_git2_t *result = NULL;
 	git_oid out = {0};
 	char *path = NULL;
 	int path_len = 0, error = 0;
@@ -533,7 +528,7 @@ PHP_FUNCTION(git_odb_hashfile)
  */
 PHP_FUNCTION(git_odb_object_dup)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	git_odb_object *dest = NULL;
 	zval *source = NULL;
 	php_git2_t *_source = NULL;
@@ -652,7 +647,7 @@ PHP_FUNCTION(git_odb_object_type)
  */
 PHP_FUNCTION(git_odb_add_backend)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *odb = NULL, *backend = NULL;
 	php_git2_t *_odb = NULL, *_backend = NULL;
 	long priority = 0;
@@ -673,7 +668,7 @@ PHP_FUNCTION(git_odb_add_backend)
  */
 PHP_FUNCTION(git_odb_add_alternate)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *odb = NULL, *backend = NULL;
 	php_git2_t *_odb = NULL, *_backend = NULL;
 	long priority = 0;
@@ -738,11 +733,10 @@ PHP_FUNCTION(git_odb_get_backend)
 
 static int php_git2_odb_backend_read(void **buffer, size_t *size, git_otype *type, git_odb_backend *backend, const git_oid *oid)
 {
-	php_git2_t *result;
 	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)backend;
 	zval *param_oid = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = php_backend->multi;
-	int i = 0, retval = 0;
+	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
 	char buf[41] = {0};
 
@@ -781,11 +775,10 @@ static int php_git2_odb_backend_read(void **buffer, size_t *size, git_otype *typ
 }
 static int php_git2_odb_backend_write(git_odb_backend *backend, const git_oid *oid, const void *buffer, size_t size, git_otype type)
 {
-	php_git2_t *result;
 	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)backend;
 	zval *param_oid = NULL, *param_buffer = NULL, *param_otype = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = php_backend->multi;
-	int i = 0, retval = 0;
+	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
 	char buf[41] = {0};
 
@@ -815,11 +808,10 @@ static int php_git2_odb_backend_read_prefix(git_oid *out_oid,
 	const git_oid *short_oid,
 	size_t len)
 {
-	php_git2_t *result;
 	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)backend;
 	zval *param_short_oid = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = php_backend->multi;
-	int i = 0, retval = 0;
+	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
 	char buf[41] = {0};
 
@@ -866,11 +858,10 @@ static int php_git2_odb_backend_read_prefix(git_oid *out_oid,
 
 static int php_git2_odb_backend_read_header(size_t *len_p, git_otype *type_p, git_odb_backend *backend, const git_oid *oid)
 {
-	php_git2_t *result;
 	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)backend;
 	zval *param_oid = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = php_backend->multi;
-	int i = 0, retval = 0;
+	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
 	char buf[41] = {0};
 
@@ -906,11 +897,10 @@ static int php_git2_odb_backend_writestream(git_odb_stream **stream_out, git_odb
 }
 static int php_git2_odb_backend_exists(git_odb_backend *backend, const git_oid *oid)
 {
-	php_git2_t *result;
 	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)backend;
 	zval *param_oid = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = php_backend->multi;
-	int i = 0, retval = 0;
+	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
 	char buf[41] = {0};
 
@@ -963,14 +953,13 @@ static void git_ex_cb(INTERNAL_FUNCTION_PARAMETERS)
 
 static int php_git2_odb_backend_foreach(git_odb_backend *backend, git_odb_foreach_cb cb, void *data)
 {
-	php_git2_t *result;
 	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)backend;
-	zval *param_callback = NULL, *callback = NULL, *retval_ptr = NULL, *param_payload = (zval*)data;
+	zval *param_callback = NULL, *callback = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = php_backend->multi;
 	zend_function function = {0};
 	php_git2_odb_backend_foreach_callback *_callback;
 	php_git2_cb_t *__cb = (php_git2_cb_t*)data;
-	int i = 0, retval = 0;
+	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
 
 	MAKE_STD_ZVAL(callback);
@@ -1012,11 +1001,9 @@ static int php_git2_odb_backend_foreach(git_odb_backend *backend, git_odb_foreac
 
 static void php_git2_odb_backend_free(git_odb_backend *_backend)
 {
-	php_git2_t *result;
 	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)_backend;
 	zval *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = php_backend->multi;
-	int i = 0, retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
 	if (php_git2_call_function_v(&p->callbacks[7].fci, &p->callbacks[7].fcc TSRMLS_CC, &retval_ptr, 0)) {
 		return;
@@ -1028,11 +1015,9 @@ static void php_git2_odb_backend_free(git_odb_backend *_backend)
 
 static void php_git2_odb_refresh(git_odb_backend *_backend)
 {
-	php_git2_t *result;
 	php_git2_odb_backend *php_backend = (php_git2_odb_backend*)_backend;
 	zval *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = php_backend->multi;
-	int i = 0, retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls);
 	if (php_git2_call_function_v(&p->callbacks[8].fci, &p->callbacks[8].fcc TSRMLS_CC, &retval_ptr, 0)) {
 		return;

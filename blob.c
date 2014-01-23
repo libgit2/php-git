@@ -34,10 +34,10 @@ PHP_FUNCTION(git_blob_create_frombuffer)
  */
 PHP_FUNCTION(git_blob_create_fromchunks)
 {
-	int result = 0, id_len = 0, hintpath_len = 0, error = 0;
+	int result = 0, id_len = 0, hintpath_len = 0;
 	char *id = NULL, *hintpath = NULL;
 	git_oid __id = {0};
-	zval *repo = NULL, *callback = NULL, *payload = NULL;
+	zval *repo = NULL, *payload = NULL;
 	php_git2_t *_repo = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -215,7 +215,7 @@ PHP_FUNCTION(git_blob_is_binary)
  */
 PHP_FUNCTION(git_blob_lookup)
 {
-	int result = 0, id_len = 0, error = 0;
+	int result = 0, id_len = 0;
 	git_blob *blob = NULL;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL, *_result = NULL;
@@ -244,7 +244,7 @@ PHP_FUNCTION(git_blob_lookup)
  */
 PHP_FUNCTION(git_blob_lookup_prefix)
 {
-	int result = 0, id_len = 0, error = 0;
+	int result = 0, id_len = 0;
 	git_blob *blob = NULL;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL, *_result = NULL;

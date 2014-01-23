@@ -16,7 +16,6 @@ static int php_git2_config_foreach_cb(const git_config_entry *entry, void *paylo
 	php_git2_t *result;
 	zval *param_config_entry, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -159,7 +158,6 @@ static void php_git2_config_parse_with(INTERNAL_FUNCTION_PARAMETERS, enum php_gi
 {
 	char *value = {0};
 	int value_len;
-	int error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"s", &value, &value_len) == FAILURE) {
@@ -496,8 +494,8 @@ PHP_FUNCTION(git_config_get_string)
  */
 PHP_FUNCTION(git_config_get_multivar_foreach)
 {
-	int result = 0, name_len = 0, regexp_len = 0, error = 0;
-	zval *cfg = NULL, *callback = NULL, *payload = NULL;
+	int result = 0, name_len = 0, regexp_len = 0;
+	zval *cfg = NULL, *payload = NULL;
 	php_git2_t *_cfg = NULL;
 	char *name = NULL, *regexp = NULL;
 	zend_fcall_info fci = empty_fcall_info;
@@ -551,7 +549,7 @@ PHP_FUNCTION(git_config_multivar_iterator_new)
  */
 PHP_FUNCTION(git_config_next)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	git_config_entry *entry = NULL;
 	zval *iter = NULL;
 	php_git2_t *_iter = NULL;
@@ -625,7 +623,7 @@ PHP_FUNCTION(git_config_set_string)
  */
 PHP_FUNCTION(git_config_set_multivar)
 {
-	int result = 0, name_len = 0, regexp_len = 0, value_len = 0, error = 0;
+	int result = 0, name_len = 0, regexp_len = 0, value_len = 0;
 	zval *cfg = NULL;
 	php_git2_t *_cfg = NULL;
 	char *name = NULL, *regexp = NULL, *value = NULL;
@@ -669,7 +667,7 @@ PHP_FUNCTION(git_config_delete_entry)
  */
 PHP_FUNCTION(git_config_delete_multivar)
 {
-	int result = 0, name_len = 0, regexp_len = 0, error = 0;
+	int result = 0, name_len = 0, regexp_len = 0;
 	zval *cfg = NULL;
 	php_git2_t *_cfg = NULL;
 	char *name = NULL, *regexp = NULL;
@@ -689,8 +687,8 @@ PHP_FUNCTION(git_config_delete_multivar)
  */
 PHP_FUNCTION(git_config_foreach)
 {
-	int result = 0, error = 0;
-	zval *cfg = NULL, *callback = NULL;
+	int result = 0;
+	zval *cfg = NULL;
 	php_git2_t *_cfg = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -770,8 +768,8 @@ PHP_FUNCTION(git_config_iterator_glob_new)
  */
 PHP_FUNCTION(git_config_foreach_match)
 {
-	int result = 0, regexp_len = 0, error = 0;
-	zval *cfg = NULL, *callback = NULL, *payload = NULL;
+	int result = 0, regexp_len = 0;
+	zval *cfg = NULL, *payload = NULL;
 	php_git2_t *_cfg = NULL;
 	char *regexp = NULL;
 	zend_fcall_info fci = empty_fcall_info;
@@ -798,12 +796,6 @@ PHP_FUNCTION(git_config_foreach_match)
 */
 PHP_FUNCTION(git_config_get_mapped)
 {
-	zval *cfg;
-	php_git2_t *_cfg;
-	char *name = {0};
-	int name_len;
-	zval *maps;
-	php_git2_t *_maps;
 
 	/* TODO(chobie): implement this */
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_get_mapped not implemented yet");
@@ -822,8 +814,6 @@ PHP_FUNCTION(git_config_lookup_map_value)
 {
 	zval *maps;
 	php_git2_t *_maps;
-	char *value = {0};
-	int value_len;
 
 	/* TODO(chobie): implement this */
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "git_config_lookup_map_value not implemented yet");
@@ -863,8 +853,6 @@ PHP_FUNCTION(git_config_backend_foreach_match)
 {
 	zval *backend;
 	php_git2_t *_backend;
-	char *regexp = {0};
-	int regexp_len;
 	long ;
 
 	/* TODO(chobie): implement this */

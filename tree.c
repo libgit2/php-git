@@ -14,7 +14,6 @@ static int tree_walk_cb(const char *root, const git_tree_entry *entry, void *pay
 	php_git2_t *result;
 	zval *param_root, *param_rsrc, *retval_ptr = NULL;
 	struct tree_walk_cb_t *p = (struct tree_walk_cb_t*)payload;
-	int i = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	Z_ADDREF_P(p->payload);
@@ -463,7 +462,7 @@ PHP_FUNCTION(git_tree_owner)
 PHP_FUNCTION(git_tree_walk)
 {
 	zval *tree, *payload;
-	php_git2_t *git2, *result;
+	php_git2_t *git2;
 	zend_fcall_info fci       = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	long mode = GIT_TREEWALK_PRE;

@@ -13,7 +13,6 @@ static int php_git2_git_filter_check_fn(
 	php_git2_t *result, *filter_source;
 	zval *param_payload = NULL, *param_source = NULL, *param_attr = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = filter->multi;
-	int i = 0, retval = 0;
 	const unsigned char *ptr = self->attributes;
 	int last_is_space = 0;
 	int attribute_count = 0, len = 0;
@@ -87,11 +86,9 @@ static int php_git2_git_filter_check_fn(
 
 static void php_git2_git_filter_shutdown_fn(git_filter *self)
 {
-	php_git2_t *result;
 	zval *param_self = NULL, *param_payload = NULL, *retval_ptr = NULL;
 	php_git2_filter *filter = (php_git2_filter*)self;
 	php_git2_multi_cb_t *p = filter->multi;
-	int i = 0, retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	MAKE_STD_ZVAL(param_self);
@@ -106,11 +103,9 @@ static void php_git2_git_filter_shutdown_fn(git_filter *self)
 
 static int php_git2_git_filter_init_fn(git_filter *self)
 {
-	php_git2_t *result;
 	zval *param_self = NULL, *param_payload = NULL, *retval_ptr = NULL;
 	php_git2_filter *filter = (php_git2_filter*)self;
 	php_git2_multi_cb_t *p = filter->multi;
-	int i = 0, retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	MAKE_STD_ZVAL(param_self);
@@ -131,10 +126,10 @@ static int php_git2_git_filter_apply_fn(
                const git_filter_source *src)
 {
 	php_git2_filter *filter = (php_git2_filter*)self;
-	php_git2_t *result, *filter_source;
+	php_git2_t *filter_source;
 	zval *param_payload = NULL, *param_from = NULL, *param_src = NULL, *retval_ptr = NULL;
 	php_git2_multi_cb_t *p = filter->multi;
-	int i = 0, retval = 0;
+	int retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	MAKE_STD_ZVAL(param_payload);
@@ -171,11 +166,9 @@ static void php_git2_git_filter_cleanup_fn(
         git_filter *self,
         void       *payload)
 {
-	php_git2_t *result;
 	zval *param_self = NULL, *param_payload = NULL, *retval_ptr = NULL;
 	php_git2_filter *filter = (php_git2_filter*)self;
 	php_git2_multi_cb_t *p = filter->multi;
-	int i = 0, retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
 	MAKE_STD_ZVAL(param_self);
@@ -191,7 +184,7 @@ static void php_git2_git_filter_cleanup_fn(
  */
 PHP_FUNCTION(git_filter_list_load)
 {
-	int result = 0, path_len = 0, error = 0;
+	int result = 0, path_len = 0;
 	git_filter_list *filters = NULL;
 	zval *repo = NULL, *blob = NULL;
 	php_git2_t *_repo = NULL, *_blob = NULL, *_result;
@@ -226,7 +219,7 @@ PHP_FUNCTION(git_filter_list_load)
  */
 PHP_FUNCTION(git_filter_list_apply_to_data)
 {
-	php_git2_t *result = NULL, *_filters = NULL, *_in = NULL;
+	php_git2_t *_filters = NULL, *_in = NULL;
 	git_buf out = {0};
 	zval *filters = NULL, *in = NULL;
 	int error = 0;
@@ -251,7 +244,7 @@ PHP_FUNCTION(git_filter_list_apply_to_data)
  */
 PHP_FUNCTION(git_filter_list_apply_to_file)
 {
-	php_git2_t *result = NULL, *_filters = NULL, *_repo = NULL;
+	php_git2_t *_filters = NULL, *_repo = NULL;
 	git_buf out = {0};
 	zval *filters = NULL, *repo = NULL;
 	char *path = NULL;
@@ -383,7 +376,7 @@ PHP_FUNCTION(git_filter_list_new)
  */
 PHP_FUNCTION(git_filter_list_push)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *fl = NULL, *filter = NULL, *payload = NULL;
 	php_git2_t *_fl = NULL, *_filter = NULL;
 
@@ -522,7 +515,7 @@ PHP_FUNCTION(git_filter_source_mode)
  */
 PHP_FUNCTION(git_filter_register)
 {
-	int result = 0, name_len = 0, error = 0;
+	int result = 0, name_len = 0;
 	char *name = NULL;
 	zval *filter = NULL;
 	php_git2_t *_filter = NULL;
@@ -543,7 +536,7 @@ PHP_FUNCTION(git_filter_register)
  */
 PHP_FUNCTION(git_filter_unregister)
 {
-	int result = 0, name_len = 0, error = 0;
+	int result = 0, name_len = 0;
 	char *name = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,

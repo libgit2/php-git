@@ -6,7 +6,6 @@
  */
 PHP_FUNCTION(git_message_prettify)
 {
-	php_git2_t *result = NULL;
 	char *out = NULL, *message = NULL;
 	long out_size = 0, strip_comments = 0;
 	int message_len = 0, error = 0;

@@ -7,7 +7,6 @@ static int php_git2_reference_foreach_cb(git_reference *reference, void *payload
 	php_git2_t *result;
 	zval *param_reference, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -34,7 +33,6 @@ static int php_git2_reference_foreach_name_cb(const char *name, void *payload)
 	php_git2_t *result;
 	zval *param_name, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -406,7 +404,7 @@ PHP_FUNCTION(git_reference_set_target)
  */
 PHP_FUNCTION(git_reference_rename)
 {
-	int result = 0, new_name_len = 0, error = 0;
+	int result = 0, new_name_len = 0;
 	git_reference *new_ref = NULL;
 	zval *ref = NULL;
 	php_git2_t *_ref = NULL;
@@ -428,7 +426,7 @@ PHP_FUNCTION(git_reference_rename)
  */
 PHP_FUNCTION(git_reference_delete)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *ref = NULL;
 	php_git2_t *_ref = NULL;
 
@@ -452,7 +450,7 @@ PHP_FUNCTION(git_reference_list)
 	php_git2_t *_repo;
 	git_strarray list;
 	zval *result;
-	int error, i;
+	int error;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"r", &repo) == FAILURE) {
@@ -476,8 +474,8 @@ PHP_FUNCTION(git_reference_list)
  */
 PHP_FUNCTION(git_reference_foreach)
 {
-	int result = 0, error = 0;
-	zval *repo = NULL, *callback = NULL;
+	int result = 0;
+	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -503,8 +501,8 @@ PHP_FUNCTION(git_reference_foreach)
  */
 PHP_FUNCTION(git_reference_foreach_name)
 {
-	int result = 0, error = 0;
-	zval *repo = NULL, *callback = NULL;
+	int result = 0;
+	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -653,7 +651,7 @@ PHP_FUNCTION(git_reference_next)
  */
 PHP_FUNCTION(git_reference_next_name)
 {
-	php_git2_t *result = NULL, *_iter = NULL;
+	php_git2_t *_iter = NULL;
 	const char *out = NULL;
 	zval *iter = NULL;
 	int error = 0;
@@ -698,8 +696,8 @@ PHP_FUNCTION(git_reference_iterator_free)
  */
 PHP_FUNCTION(git_reference_foreach_glob)
 {
-	int result = 0, glob_len = 0, error = 0;
-	zval *repo = NULL, *callback = NULL;
+	int result = 0, glob_len = 0;
+	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	char *glob = NULL;
 	zend_fcall_info fci = empty_fcall_info;

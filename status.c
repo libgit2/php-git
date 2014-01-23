@@ -20,7 +20,6 @@ static void php_git2_git_status_options_to_array(git_status_options *options, zv
 
 static void php_git2_array_to_git_status_options(git_status_options *options, zval *array TSRMLS_DC)
 {
-	zval *tmp;
 	options->version = php_git2_read_arrval_long2(array, ZEND_STRS("version"), 1 TSRMLS_CC);
 	options->show = php_git2_read_arrval_long2(array, ZEND_STRS("version"), 0 TSRMLS_CC);
 	options->flags = php_git2_read_arrval_long2(array, ZEND_STRS("version"), 0 TSRMLS_CC);
@@ -59,10 +58,8 @@ static void php_git2_git_status_entry_to_array(git_status_entry *entry, zval **o
 static int php_git2_git_status_cb(
 	const char *path, unsigned int status_flags, void *payload)
 {
-	php_git2_t *result;
 	zval *param_path, *param_status_flags, *retval_ptr = NULL;
 	php_git2_cb_t *p = (php_git2_cb_t*)payload;
-	int i = 0;
 	long retval = 0;
 	GIT2_TSRMLS_SET(p->tsrm_ls)
 
@@ -86,8 +83,8 @@ static int php_git2_git_status_cb(
  */
 PHP_FUNCTION(git_status_foreach)
 {
-	int result = 0, error = 0;
-	zval *repo = NULL, *callback = NULL, *payload = NULL;
+	int result = 0;
+	zval *repo = NULL, *payload = NULL;
 	php_git2_t *_repo = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -112,8 +109,8 @@ PHP_FUNCTION(git_status_foreach)
  */
 PHP_FUNCTION(git_status_foreach_ext)
 {
-	int result = 0, error = 0;
-	zval *repo = NULL, *opts = NULL, *callback = NULL, *payload = NULL;
+	int result = 0;
+	zval *repo = NULL, *opts = NULL, *payload = NULL;
 	php_git2_t *_repo = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -143,7 +140,7 @@ PHP_FUNCTION(git_status_foreach_ext)
  */
 PHP_FUNCTION(git_status_file)
 {
-	int result = 0, path_len = 0, error = 0;
+	int result = 0, path_len = 0;
 	long status_flags = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
@@ -259,7 +256,7 @@ PHP_FUNCTION(git_status_list_free)
  */
 PHP_FUNCTION(git_status_should_ignore)
 {
-	int result = 0, path_len = 0, error = 0;
+	int result = 0, path_len = 0;
 	long ignored = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;

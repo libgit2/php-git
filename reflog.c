@@ -33,7 +33,7 @@ PHP_FUNCTION(git_reflog_read)
  */
 PHP_FUNCTION(git_reflog_write)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *reflog = NULL;
 	php_git2_t *_reflog = NULL;
 	
@@ -52,7 +52,7 @@ PHP_FUNCTION(git_reflog_write)
  */
 PHP_FUNCTION(git_reflog_append)
 {
-	int result = 0, id_len = 0, msg_len = 0, error = 0;
+	int result = 0, id_len = 0, msg_len = 0;
 	zval *reflog = NULL, *committer = NULL;
 	php_git2_t *_reflog = NULL;
 	char *id = NULL, *msg = NULL;
@@ -76,7 +76,7 @@ PHP_FUNCTION(git_reflog_append)
  */
 PHP_FUNCTION(git_reflog_append_to)
 {
-	int result = 0, name_len = 0, id_len = 0, msg_len = 0, error = 0;
+	int result = 0, name_len = 0, id_len = 0, msg_len = 0;
 	zval *repo = NULL, *committer = NULL;
 	php_git2_t *_repo = NULL;
 	char *name = NULL, *id = NULL, *msg = NULL;
@@ -100,7 +100,7 @@ PHP_FUNCTION(git_reflog_append_to)
  */
 PHP_FUNCTION(git_reflog_rename)
 {
-	int result = 0, old_name_len = 0, name_len = 0, error = 0;
+	int result = 0, old_name_len = 0, name_len = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	char *old_name = NULL, *name = NULL;
@@ -120,7 +120,7 @@ PHP_FUNCTION(git_reflog_rename)
  */
 PHP_FUNCTION(git_reflog_delete)
 {
-	int result = 0, name_len = 0, error = 0;
+	int result = 0, name_len = 0;
 	zval *repo = NULL;
 	php_git2_t *_repo = NULL;
 	char *name = NULL;
@@ -182,7 +182,7 @@ PHP_FUNCTION(git_reflog_entry_byindex)
  */
 PHP_FUNCTION(git_reflog_drop)
 {
-	int result = 0, error = 0;
+	int result = 0;
 	zval *reflog = NULL;
 	php_git2_t *_reflog = NULL;
 	long idx = 0, rewrite_previous_entry = 0;

@@ -11,7 +11,7 @@ PHP_FUNCTION(git_indexer_new)
 	char *path = NULL;
 	int path_len = 0, error = 0;
 	long mode = 0;
-	zval *odb = NULL, *progress_cb = NULL, *progress_cb_payload = NULL;
+	zval *odb = NULL, *progress_cb_payload = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	php_git2_cb_t *cb = NULL;
@@ -40,11 +40,6 @@ PHP_FUNCTION(git_indexer_new)
  */
 PHP_FUNCTION(git_indexer_append)
 {
-	int result = 0, error = 0;
-	zval *idx = NULL, *stats = NULL;
-	php_git2_t *_idx = NULL;
-	zval *data = NULL;
-	long size = 0;
 
 //	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 //		"r<void>l<git_transfer_progress>", &idx, &data, &size, &stats) == FAILURE) {
@@ -61,9 +56,6 @@ PHP_FUNCTION(git_indexer_append)
  */
 PHP_FUNCTION(git_indexer_commit)
 {
-	int result = 0, error = 0;
-	zval *idx = NULL, *stats = NULL;
-	php_git2_t *_idx = NULL;
 
 //	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 //		"r<git_transfer_progress>", &idx, &stats) == FAILURE) {
