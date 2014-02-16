@@ -496,7 +496,7 @@ PHP_FUNCTION(git_filter_source_id)
  */
 PHP_FUNCTION(git_filter_source_mode)
 {
-	git_filter_mode_t *result = NULL;
+	git_filter_mode_t result;
 	zval *src = NULL;
 	php_git2_t *_src = NULL;
 

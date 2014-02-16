@@ -82,7 +82,7 @@ PHP_FUNCTION(git_refspec_force)
  */
 PHP_FUNCTION(git_refspec_direction)
 {
-	git_direction *result = NULL;
+	git_direction result;
 	zval *spec = NULL;
 	php_git2_t *_spec = NULL;
 	

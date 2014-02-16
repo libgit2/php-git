@@ -112,7 +112,7 @@ PHP_FUNCTION(git_object_id)
  */
 PHP_FUNCTION(git_object_type)
 {
-	git_otype *result = NULL;
+	git_otype result;
 	zval *obj = NULL;
 	php_git2_t *_obj = NULL;
 

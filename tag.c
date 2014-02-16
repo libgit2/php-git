@@ -215,7 +215,7 @@ PHP_FUNCTION(git_tag_target_id)
  */
 PHP_FUNCTION(git_tag_target_type)
 {
-	git_otype *result = NULL;
+	git_otype result;
 	zval *tag = NULL;
 	php_git2_t *_tag = NULL;
 

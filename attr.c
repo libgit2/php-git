@@ -6,7 +6,7 @@
  */
 PHP_FUNCTION(git_attr_value)
 {
-	git_attr_t *result = NULL;
+	git_attr_t result;
 	char *attr = NULL;
 	int attr_len = 0;
 	

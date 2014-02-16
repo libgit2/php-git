@@ -880,7 +880,7 @@ PHP_FUNCTION(git_remote_stats)
  */
 PHP_FUNCTION(git_remote_autotag)
 {
-	git_remote_autotag_option_t *result = NULL;
+	git_remote_autotag_option_t result;
 	zval *remote = NULL;
 	php_git2_t *_remote = NULL;
 
@@ -908,7 +908,7 @@ PHP_FUNCTION(git_remote_set_autotag)
 	}
 
 	ZEND_FETCH_RESOURCE(_remote, php_git2_t*, &remote, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	git_remote_set_autotag(PHP_GIT2_V(_remote, remote), value);
+	git_remote_set_autotag(PHP_GIT2_V(_remote, remote), Z_LVAL_P(value));
 }
 /* }}} */
 

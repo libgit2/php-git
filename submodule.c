@@ -328,7 +328,7 @@ PHP_FUNCTION(git_submodule_wd_id)
  */
 PHP_FUNCTION(git_submodule_ignore)
 {
-	git_submodule_ignore_t *result = NULL;
+	git_submodule_ignore_t result;
 	zval *submodule = NULL;
 	php_git2_t *_submodule = NULL;
 	
@@ -347,7 +347,7 @@ PHP_FUNCTION(git_submodule_ignore)
  */
 PHP_FUNCTION(git_submodule_set_ignore)
 {
-	git_submodule_ignore_t *result = NULL;
+	git_submodule_ignore_t result;
 	zval *submodule = NULL;
 	php_git2_t *_submodule = NULL;
 	long ignore = 0;
@@ -367,7 +367,7 @@ PHP_FUNCTION(git_submodule_set_ignore)
  */
 PHP_FUNCTION(git_submodule_update)
 {
-	git_submodule_update_t *result = NULL;
+	git_submodule_update_t result;
 	zval *submodule = NULL;
 	php_git2_t *_submodule = NULL;
 	
@@ -386,7 +386,7 @@ PHP_FUNCTION(git_submodule_update)
  */
 PHP_FUNCTION(git_submodule_set_update)
 {
-	git_submodule_update_t *result = NULL;
+	git_submodule_update_t result;
 	zval *submodule = NULL;
 	php_git2_t *_submodule = NULL;
 	long update = 0;

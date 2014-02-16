@@ -628,7 +628,7 @@ PHP_FUNCTION(git_odb_object_size)
  */
 PHP_FUNCTION(git_odb_object_type)
 {
-	git_otype *result = NULL;
+	git_otype result;
 	zval *object = NULL;
 	php_git2_t *_object = NULL;
 	

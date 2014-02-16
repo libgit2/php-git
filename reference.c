@@ -259,7 +259,7 @@ PHP_FUNCTION(git_reference_symbolic_target)
  */
 PHP_FUNCTION(git_reference_type)
 {
-	git_ref_t *result = NULL;
+	git_ref_t result;
 	zval *ref = NULL;
 	php_git2_t *_ref = NULL;
 
