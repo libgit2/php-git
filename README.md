@@ -1,198 +1,113 @@
 # PHP-Git2 - libgit2 bindings in PHP
 
-php-git2 is a PHP bindings to the libgit2 linkable C Git library.
-this extension are re-writing php-git as that code too dirty.
+php-git2 is a PHP bindings to the libgit2 linkable C Git library. 
 
-# Latest Branch
+* API Documentation: http://libgit2.github.com/libgit2/#v0.20.0 (also see Signature conversions section)
+* IRC: #php-git on irc.freenode.net.
 
-v0.3.0 (switching to functions)
-https://github.com/libgit2/php-git/tree/functions
+## Status
 
-# Important Notice
+0.3.0 Alpha (switching to functions)
 
-php-git changed it's API drastically. this changes doesn't care about compatibility between old one.
-please check tests cases.
+https://docs.google.com/spreadsheet/ccc?key=0AjvShWAWqvfHdDRneEtIUF9GRUZMNVVVR1hpdURiUWc&usp=sharing
 
-# Installing And Running
+## How to build
 
-you need to install libgit2 before make php-git.
+```
+# build libgit2.a
+git submodule init && git submodule update
+mkdir libgit2/build
+cd libgit2/build
+cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF ..
+cmake --build .
 
-````
-git clone https://github.com/libgit2/php-git.git --recursive
-cd php-git/libgit2
-mkdir build && cd build
-cmake ..
-cmake -DBUILD_SHARED_LIBS=OFF -build .
-make
+# build php-git2
 cd ../../
 phpize
-./configure
+./configure --enable-git2-debug
 make
 make install
-sudo make install
-# add `extension=git2.so` to your php.ini
-````
+# add extension=git2.so to your php.ini
+```
 
-new php-git features almost tested.
+## For Contributors
 
-# API
+##### Issue first.
 
-## Repository Access
+please make a issue first. don't work before creating it.
 
-````php
-$repo = new Git2\Repository($path);
-/*
-  bool = $repo->exists(string sha1)
-  Git2\Object = $repo->lookup(string sha1)
-  string sha1 = $repo->hash(string content, long type)
-  string sha1 = $repo->write(string content, long type)
-  bool = $repo->isBare()
-  bool = $repo->isEmpty()
-  bool = $repo->headDetached()
-  bool = $repo->headOrphan()
-  string path = Git2\Repository::discover("/Users/chobie/projects/work/repo/lib/subdir");
-  // => /Users/chobie/projects/work/repo/.git
+##### Coding Styles
 
-  Git2\Repository = Git2\Repository::init(string $path, bool isBare)
-*/
-````
+follow pecl coding standards (except 8 at this moment).
 
-## Object Access
+* http://git.php.net/?p=php-src.git;a=blob_plain;f=CODING_STANDARDS;hb=HEAD
 
-### create new blob
+##### Signature conversions
 
 ````
-$oid = Git2\Blob::create($repo, "Hello World");
-/*
-  $blob = $repo->lookup($oid);
-  int $blob->getSize();
-  string $blob->getContent();
-*/
+GIT_EXTERN(int) git_repository_init(
+        git_repository **out,
+        const char *path,
+        unsigned is_bare);
+
+
+// error code should handle in extension.
+// resource creation or getting functions will return their resource or bool.
+resource|bool function git_repository_init(string $path, long $is_bare);
+
+public struct (e.g: git_config_entry) should consider return as an array.
 ````
 
-## Tree Access
+##### file name rules.
+
+basically, we rely libgit2 grouping at this time. (`branch` group functions should be in branch.c)
+some group (e.g config) will conflicts php header files. we choose `g_` prefix for now.
+
+check grouping here libgit2.github.com/libgit2/#v0.20.0
+
+##### generating files
+
+if you wanna try to work new file. please use gen.php and generate stubs. as declarations are bored task.
+(sometimes, this generator might output wrong headers. then just comment out or fix generator)
 
 ````
-$repo = new Git2\Repository($path);
-$tree = $repo->lookup(tree sha); // specify tree sha
-foreach ($tree as $oid => $entry) {
-/*
-  bool $entry->isTree();
-  bool $entry->isBlob();
-  bool $entry->isSubmodule();
-*/
-        var_dump($entry);
-}
+PRINT_HEADER=1 php ng.php libgit2/include/git2/branch.h > branch.h
+php ng.php libgit2/include/git2/branch.h > branch.c
 ````
 
-## Ref Management
+you can generate `PHP_FE` with this. past it to `php_git2.c`
 
 ````
-$ref = Git2\Reference::lookup($repo, "refs/heads/master");
-  sha = $ref->getTarget();
-  str = $ref->getName();
+php fe.php target.c
 ````
 
-````
-foreach (Git2\Reference::each($repo) as $ref) {
-  echo $ref->getName() . PHP_EOL;
-}
-````
+Note: usually, these generators might output needless variables. DON'T PR `prettify codes` at this moment.
+As we have more than 500 php functions. we like to use some fixer command than fix by hand.
 
+##### documents
 
-## Commit
+use prototype.
 
-````
-<?php
-date_default_timezone_set('Asia/Tokyo');
-$repo = Git2\Repository::init("/path/to/repo",true);
+```
+  /* {{{ proto int abs(int number)
+     Returns the absolute value of the number */
+  PHP_FUNCTION(abs)
+  {
+     ...
+  }
+  /* }}} */
+```
 
-$author = new Git2\Signature("Shuhei Tanuma","chobieee@gmail.com",new DateTime());
+document will generate later. please check source code before publish docs.
 
-$bld = new Git2\TreeBuilder();
-$bld->insert(new Git2\TreeEntry(array(
-	"name" => "README.txt",
-	"oid" => "63542fbea05732b78711479a31557bd1b0aa2116",
-	"attributes" => octdec('100644'),
-)));
-$tree = $bld->write($repo);
+##### testing
 
-$parent = "";
-$parents = array();
-$parent = Git2\Commit::create($repo, array(
-	"author"    => $author,
-	"committer" => $author,
-	"message"   => "Hello World",
-	"tree"      => $tree,
-	"parents"   => $parents,
-));
-````
+[group]/[function].phpt
 
-## Revision Walking
+##### policy
 
-````
-$repo = new Git2\Repository($path);
-$walker = new Git2\Walker($repo);
-/* specify HEAD oid */
-$walker->push("6e20138dc38f9f626107f1cd3ef0f9838c43defe");
-
-foreach ($walker as $oid => $commit) {
-        printf("oid: %s\n", $oid);
-        printf("message: %s\n", $commit->getMessage());
-}
-````
-
-## Config access
-
-````
-$config = new Git2\Config("path/to/git/config");
-$config->get("core.bare");
-$config->store("core.bare","1");
-
-// Git2\Config supports read / write dimension.
-$config['core.bare']
-$config['core.bare'] = 1;
-````
-
-## ODB operation
-
-````
-$repo = Git2\Repository::init("/path/to/repo",true);
-$odb = $repo->odb // read only property
-Git\OdbObject $odb->read(sha1) // returns uncompressed git raw data.
-string $odb->hash(string contents, int type)// same as Git2\Repository::hash
-string $odb->write(string contents, int type)// same as Git2\Repository::write
-bool $odb->exists(sha1)// same as Git2\Repository::exists
-````
-
-## Reflog
-will be add.
-
-## Remote access (Experimental)
-
-this API will be change.
-
-````
-$repo = new Git2\Repository("/path/to/.git");
-$remote = new Git2\Remote($repo,"http://github.com/libgit2/php-git.git");
-// for now, remote can fetch files only. that does not update references.
-$remote->fetch();
-````
-
-## Author
-* Shuhei Tanuma
-
-## Contributors
-
-* Anthony Van de Gejuchte
-* Cameron Eagans
-* Graham Weldon
-* James Titcumb
-* Matthieu Moquet
-* Ryusuke SEKIYAMA
-* Shuhei Tanuma
-* Vasileios Georgitzikis
-* tsteiner
+* don't create OOP interface in extension for ease of maintenance.
+* follow latest libgit2 api. don't consider BC at this time.
 
 ## LICENSE
 

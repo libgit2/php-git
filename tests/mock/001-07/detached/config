@@ -1,7 +1,0 @@
-[core]
-	repositoryformatversion = 0
-	filemode = true
-	bare = true
-	ignorecase = true
-[remote "origin"]
-	url = /Users/chobie/src/php-git2/tests/mock/001-07/a
