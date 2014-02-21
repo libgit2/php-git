@@ -119,7 +119,7 @@ static void php_git2_config_set_with(INTERNAL_FUNCTION_PARAMETERS, enum php_git2
 		}
 		case PHP_GIT2_CONFIG_BOOL: {
 			if (Z_TYPE_P(value) != IS_BOOL) {
-				convert_to_bool(value);
+				convert_to_boolean(value);
 			}
 			error = git_config_set_bool(PHP_GIT2_V(_cfg, config), name, Z_LVAL_P(value));
 			if (php_git2_check_error(error, "git_config_set_bool" TSRMLS_CC)) {
