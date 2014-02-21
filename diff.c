@@ -288,7 +288,7 @@ PHP_FUNCTION(git_diff_get_delta)
 
 	ZEND_FETCH_RESOURCE(_diff, php_git2_t*, &diff, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	result = git_diff_get_delta(PHP_GIT2_V(_diff, diff), idx);
-	php_git2_git_diff_delta_to_array(result, &_result TSRMLS_CC);
+	php_git2_diff_delta_to_array(result, &_result TSRMLS_CC);
 	RETURN_ZVAL(_result, 0, 1);
 }
 /* }}} */
