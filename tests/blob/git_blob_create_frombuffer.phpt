@@ -9,7 +9,7 @@ echo git_blob_create_frombuffer($repositroy, "Helo World");
 
 $repositroy = git_repository_new();
 $result = @git_blob_create_frombuffer($repositroy, "Helo World");
-if (is_null($result)) {
+if ($result===FALSE) {
 	echo "OK" . PHP_EOL;
 }
 --EXPECT--
