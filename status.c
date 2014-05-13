@@ -152,7 +152,7 @@ PHP_FUNCTION(git_status_file)
 	}
 	
 	ZEND_FETCH_RESOURCE(_repo, php_git2_t*, &repo, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
-	result = git_status_file(status_flags, PHP_GIT2_V(_repo, repository), path);
+	result = git_status_file(&status_flags, PHP_GIT2_V(_repo, repository), path);
 	RETURN_LONG(result);
 }
 /* }}} */
