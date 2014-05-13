@@ -19,11 +19,21 @@ https://docs.google.com/spreadsheet/ccc?key=0AjvShWAWqvfHdDRneEtIUF9GRUZMNVVVR1h
 
 ```
 # build libgit2.a
+## For 32bit systems
 git submodule init && git submodule update
 mkdir libgit2/build
 cd libgit2/build
 cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF ..
 cmake --build .
+
+# For 64bit systems
+git submodule init && git submodule update
+mkdir libgit2/build
+cd libgit2/build
+cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DBUILD_CLAR=OFF 
+-DCMAKE_C_FLAGS=-fPIC ..
+cmake --build .
+
 
 # build php-git2
 cd ../../
