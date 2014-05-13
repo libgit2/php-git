@@ -5,7 +5,7 @@ Check for git_blob_create_frombuffer presence
 --FILE--
 <?php
 $repositroy = git_repository_init("/tmp/a");
-echo git_blob_create_frombuffer($repositroy, "Helo World");
+echo git_blob_create_frombuffer($repositroy, "Helo World") . PHP_EOL;
 
 $repositroy = git_repository_new();
 $result = @git_blob_create_frombuffer($repositroy, "Helo World");
