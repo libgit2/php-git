@@ -4,6 +4,10 @@ PHP_ARG_ENABLE(git2, Whether to enable the "git2" extension,
 PHP_ARG_ENABLE(git2-debug, for git2 debug support,
   [  --enable-git2-debug       Enable git2 debug support], no, no)
 
+if test "yes" != "no"; then
+	AC_CONFIG_FILES([run-tests.php], [chmod +x run-tests.php])	
+fi
+
 if test $PHP_GIT2 != "no"; then
 	PHP_SUBST(GIT2_SHARED_LIBADD)
 
