@@ -1,0 +1,26 @@
+language: php
+
+php:
+ - 5.3
+ - 5.4
+ - 5.5
+
+install:
+ - sudo apt-get -qq update
+ - sudo apt-get -qq install cmake libssh2-1-dev openssh-client openssh-server
+
+script:
+ - script/cibuild.sh
+
+notifications:
+ irc:
+  channels:
+    - irc.freenode.net#php-git
+  on_success: change
+  on_failure: always
+  use_notice: true
+  skip_join: true
+ slack:
+  on_success: always
+  on_failure: always
+  secure: KH9+7GLccFrGWe+E6RhSqHxh+w5DIdsVxn41Iqb2C8rfm5rrnK0KVDTWJXk2BDHc2B1ab28o6m/Vcd8C/lgURd7yx4QfUASQRrHEn4FfpsB7UgES+/aENb59ma3DVz5PqVDUSVSvABU9OCqEkLmN/9w2mL/q3rW4slUq4LzMweI=
