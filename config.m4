@@ -4,8 +4,12 @@ PHP_ARG_ENABLE(git2, Whether to enable the "git2" extension,
 PHP_ARG_ENABLE(git2-debug, for git2 debug support,
   [  --enable-git2-debug       Enable git2 debug support], no, no)
 
-if test "yes" != "no"; then
-	AC_CONFIG_FILES([run-tests.php], [chmod +x run-tests.php])	
+PHP_ARG_ENABLE(git2feedback, Whether to submit feedback to php-git,
+	[  --disable-git2feedback      Disable "php-git2" feedback])
+
+if test $PHP_GIT2FEEDBACK != "yes";; then
+	AC_CONFIG_FILES([run-tests.php], [chmod +x run-tests.php])
+	AC_CONFIG_FILES([Makefile.global.in])
 fi
 
 if test $PHP_GIT2 != "no"; then
