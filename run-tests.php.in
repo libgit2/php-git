@@ -310,6 +310,10 @@ VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
 ";
 	}
 
+	define('QA_PROJECT', 'libgit2/php-git');
+	define('QA_API_PAGE', 'https://api.github.com/repos/');
+	define('QA_SUBMISSION_PAGE', 'http://report.phpgit.org/buildtest/process');
+	define('QA_REPORTS_PAGE', 'https://github.com/'.QA_PROJECT . '/issues');
 	define('TRAVIS_CI' , (bool) getenv('TRAVIS_PHP_VERSION'));
 
 	function save_or_mail_results()
@@ -321,14 +325,16 @@ VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
 		if (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
 			$fp = fopen("php://stdin", "r+");
 			if ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED'] || $sum_results['XFAILED']) {
-				echo "\nYou may have found a problem in php-git.";
+				echo "\nYou may have found a problem in PHP.";
 			}
-			echo "\nThis report can be automatically sent to the php-git QA team via IRC\n";
-			echo "This gives us a better understanding of PHP's behavior.\n";
+			echo "\nThis report can be automatically sent to the php-Git issue tracker at\n";
+			echo QA_REPORTS_PAGE . "\n";
+			echo "This gives us a better understanding of php-git behavior.\n";
 			echo "If you don't want to send the report immediately you can choose\n";
-			echo "option \"s\" to save it.	You can then email it to php-git@groups.gmail.com later.\n";
+			echo "option \"s\" to save it.	You can then submit it to ". QA_REPORTS_PAGE . " later.\n";
 			echo "Do you want to send this report now? [Yns]: ";
 			flush();
+
 
 			$user_input = fgets($fp, 10);
 			$just_save_results = (strtolower($user_input[0]) == 's');
@@ -347,9 +353,6 @@ VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
 				}
 
 				/* Ask the user to provide an email address, so that QA team can contact the user */
-				if (TRAVIS_CI) {
-					$user_email = 'travis at php dot net';
-				}
 				$failed_tests_data = '';
 				$sep = "\n" . str_repeat('=', 80) . "\n";
 				$failed_tests_data .= $failed_test_summary . "\n";
@@ -422,9 +425,9 @@ VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
 						echo "\nThe test script was unable to automatically send the report to PHP's QA Team\n";
 					}
 
-					echo "Please send " . $output_file . " to php-git manually, thank you.\n";
+				echo "Please submit " . $output_file . " to " . QA_REPORTS_PAGE . " manually, thank you.\n";
 				} elseif (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
-					fwrite($fp, "\nThank you for helping to make PHP better.\n");
+					fwrite($fp, "\nThank you for helping to make php-git better.\n");
 					fclose($fp);
 				}
 			}
@@ -965,44 +968,33 @@ HELP;
 
 	function send_qa_team($data, $compression, $status = false)
 	{
-		echo "Not currently implemented";
-		return 0;
-		$url_bits = parse_url(QA_SUBMISSION_PAGE);
-
-		if (($proxy = getenv('http_proxy'))) {
-			$proxy = parse_url($proxy);
-			$path = $url_bits['host'].$url_bits['path'];
-			$host = $proxy['host'];
-			if (empty($proxy['port'])) {
-				$proxy['port'] = 80;
-			}
-			$port = $proxy['port'];
-		} else {
-			$path = $url_bits['path'];
-			$host = $url_bits['host'];
-			$port = empty($url_bits['port']) ? 80 : $port = $url_bits['port'];
-		}
-
-		$data = "php_test_data=" . urlencode(base64_encode(str_replace("\00", '[0x0]', $data)));
-		$data_length = strlen($data);
-
-		$fs = fsockopen($host, $port, $errno, $errstr, 10);
-
-		if (!$fs) {
-			return false;
-		}
-
 		$php_version = urlencode(TESTED_PHP_VERSION);
+		$dataArray = array(
+			'status' => $status,
+			'version' => $php_version,
+			'php_test_data' => base64_encode(str_replace("\00", '[0x0]', $data))
+		);
 
-		echo "\nPosting to ". QA_SUBMISSION_PAGE . "\n";
-		fwrite($fs, "POST " . $path . "?status=$status&version=$php_version HTTP/1.1\r\n");
-		fwrite($fs, "Host: " . $host . "\r\n");
-		fwrite($fs, "User-Agent: QA Browser 0.1\r\n");
-		fwrite($fs, "Content-Type: application/x-www-form-urlencoded\r\n");
-		fwrite($fs, "Content-Length: " . $data_length . "\r\n\r\n");
-		fwrite($fs, $data);
-		fwrite($fs, "\r\n\r\n");
-		fclose($fs);
+
+		$url = QA_SUBMISSION_PAGE;
+		echo "\nPosting to ". $url . "\n";
+
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL,$url);
+		curl_setopt($ch, CURLOPT_POST, count($dataArray));
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($dataArray));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT,4);
+		curl_setopt($ch, CURLOPT_USERAGENT, "report.phpgit.org/buildtest/process");
+
+		//execute post
+		$result = curl_exec($ch);
+
+		$info = curl_getinfo($ch);
+		//close connection
+		curl_close($ch);
+
 
 		return 1;
 	}
