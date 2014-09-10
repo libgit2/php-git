@@ -192,7 +192,7 @@ PHP_FUNCTION(git_commit_parent_id);
 PHP_FUNCTION(git_commit_nth_gen_ancestor);
 
 /* {{{ proto resource git_commit_create(
-	resource $repo, string $update_ref, array $author, array $committer,
+	resource $repo, mixed $update_ref, array $author, array $committer,
 	string $message_encoding, string $message, resource $tree, array $parents)
 */
 PHP_FUNCTION(git_commit_create);
