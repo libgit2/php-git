@@ -409,14 +409,14 @@ PHP_FUNCTION(git_commit_nth_gen_ancestor)
 /* }}} */
 
 /* {{{ proto resource git_commit_create(
-	resource $repo, string $update_ref, array $author, array $committer,
+	resource $repo, mixed $update_ref, array $author, array $committer,
 	string $message_encoding, string $message, resource $tree, array $parents)
 */
 PHP_FUNCTION(git_commit_create)
 {
-	zval *repo, *tree, *parents, *committer, *author, **element;
-	char *update_ref = {0}, *message_encoding = {0}, *message = {0};
-	int update_ref_len, message_encoding_len, message_len, parent_count = 0, error = 0, i;
+	zval *repo, *tree, *parents, *committer, *author, *update_ref, **element;
+	char *message_encoding = {0}, *message = {0};
+	int message_encoding_len, message_len, parent_count = 0, error = 0, i;
 	php_git2_t *_repo, *_tree;
 	git_signature __author, __committer;
 	char out[GIT2_OID_HEXSIZE] = {0};
@@ -425,9 +425,16 @@ PHP_FUNCTION(git_commit_create)
 	HashPosition pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-			"rsaassra", &repo, &update_ref, &update_ref_len, &author,
+			"rzaassra", &repo, &update_ref, &author,
 			&committer, &message_encoding, &message_encoding_len, &message,
 			&message_len, &tree, &parents) == FAILURE) {
+		return;
+	}
+
+	/**
+	 * Check update_ref type
+	 */
+	if(Z_TYPE_P(update_ref) != IS_STRING && Z_TYPE_P(update_ref) != IS_NULL) {
 		return;
 	}
 
@@ -468,7 +475,7 @@ PHP_FUNCTION(git_commit_create)
 	error = git_commit_create(
 		&oid,
 		PHP_GIT2_V(_repo, repository),
-		update_ref,
+		Z_TYPE_P(update_ref) == IS_STRING ? Z_STRVAL_P(update_ref) : NULL,
 		&__author,
 		&__committer,
 		message_encoding,
