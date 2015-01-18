@@ -16,7 +16,7 @@ cd php-git
 phpize
 ./configure
 make
-sudo make Install
+sudo make install
 ````
 
 # API
