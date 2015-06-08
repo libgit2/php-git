@@ -49,10 +49,10 @@ PHP_FUNCTION(git_treebuilder_create)
 		return;
 	}
 	if (source != NULL) {
+        ZEND_FETCH_RESOURCE(_source, php_git2_t*, &source, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 		tree = PHP_GIT2_V(_source, tree);
 	}
 
-	ZEND_FETCH_RESOURCE(_source, php_git2_t*, &source, -1, PHP_GIT2_RESOURCE_NAME, git2_resource_handle);
 	error = git_treebuilder_create(&out, tree);
 	if (php_git2_check_error(error, "git_treebuilder_create" TSRMLS_CC)) {
 		RETURN_FALSE;
