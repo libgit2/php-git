@@ -203,6 +203,7 @@ typedef struct php_git2_cb_t {
 	zval *payload;
 	zend_fcall_info *fci;
 	zend_fcall_info_cache *fcc;
+	int is_copy;
 	GIT2_TSRMLS_DECL
 } php_git2_cb_t;
 

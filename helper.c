@@ -217,6 +217,35 @@ int php_git2_cb_init(php_git2_cb_t **out, zend_fcall_info *fci, zend_fcall_info_
 	cb->payload = payload;
 	cb->fci = fci;
 	cb->fcc = fcc;
+	cb->is_copy = 0;
+	GIT2_TSRMLS_SET2(cb, TSRMLS_C);
+
+	*out = cb;
+	return 0;
+}
+
+int php_git2_cb_init_copy(php_git2_cb_t **out, zend_fcall_info *fci, zend_fcall_info_cache *fcc, void *payload TSRMLS_DC)
+{
+	php_git2_cb_t *cb;
+
+	cb = (struct php_git2_cb_t*)emalloc(sizeof(php_git2_cb_t));
+	if (cb == NULL) {
+		return 1;
+	}
+
+	cb->payload = payload;
+	// use fci->size instead of sizeof?
+	cb->fci = (zend_fcall_info*)emalloc(sizeof(zend_fcall_info));
+	cb->fcc = (zend_fcall_info_cache*)emalloc(sizeof(zend_fcall_info_cache));
+	memcpy(cb->fci, fci, sizeof(zend_fcall_info));
+	memcpy(cb->fcc, fcc, sizeof(zend_fcall_info_cache));
+	Z_ADDREF_P(cb->fci->function_name);
+#if PHP_VERSION_ID >= 50300
+	if (cb->fci->object_ptr) {
+		Z_ADDREF_P(cb->fci->object_ptr);
+	}
+#endif
+	cb->is_copy = 1;
 	GIT2_TSRMLS_SET2(cb, TSRMLS_C);
 
 	*out = cb;
@@ -225,6 +254,14 @@ int php_git2_cb_init(php_git2_cb_t **out, zend_fcall_info *fci, zend_fcall_info_
 
 void php_git2_cb_free(php_git2_cb_t *target)
 {
+	if (target->is_copy) {
+		Z_DELREF_P(target->fci->function_name);
+#if PHP_VERSION_ID >= 50300
+		if (target->fci->object_ptr) {
+			Z_DELREF_P(target->fci->object_ptr);
+		}
+#endif
+	}
 	efree(target);
 }
 
