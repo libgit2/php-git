@@ -77,7 +77,6 @@ PHP_FUNCTION(git_transport_register)
 		RETURN_FALSE;
 	}
 	result = git_transport_register(prefix, priority, php_git2_transport_cb, cb);
-	php_git2_cb_free(cb);
 	RETURN_LONG(result);
 }
 /* }}} */
