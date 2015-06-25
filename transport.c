@@ -73,7 +73,7 @@ PHP_FUNCTION(git_transport_register)
 		return;
 	}
 
-	if (php_git2_cb_init(&cb, &fci, &fcc, param TSRMLS_CC)) {
+	if (php_git2_cb_init_copy(&cb, &fci, &fcc, param TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	result = git_transport_register(prefix, priority, php_git2_transport_cb, cb);
